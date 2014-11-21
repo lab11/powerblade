@@ -50,6 +50,8 @@ uint16_t blf;
 // Globals used for query (from inventory round)
 uint16_t query_bitcount;
 uint16_t query_bittime;
+char miller_prev;
+uint16_t miller_inBitCount;
 char query_buf[QUERY_LEN];
 char halfBit;
 
@@ -79,13 +81,30 @@ int main(void) {
     P1DIR |= BIT3;
 
     // Set up timer capture
-    TB0CCTL0 = CM_1 + CCIS_0 + CAP;  	// Capture on rising edge for preamble
-    TB0CCTL0 &= ~CCIFG;
+//    TB0CCTL0 = CM_1 + CCIS_0 + CAP;  	// Capture on rising edge for preamble
+//    TB0CCTL0 &= ~CCIFG;
     TB0CTL = TBSSEL_2 + MC_2 + TBCLR + ID_2;
-    TB0CCTL0 |= CCIE;
+//    TB0CCTL0 |= CCIE;
 
     // Initialize mode
     rf_mode = rf_idle;
+
+	rf_mode = rf_inInv_queryReply;
+
+	blf = 125;
+
+	// Switch to replying mode:
+	TB0CTL |= TBCLR;
+	TB0CCR0 = 1500;
+	TB0CCTL0 = CCIE;	// Set to compare mode
+	TB0CCTL0 &= ~CCIFG;
+	TB0CCTL0 &= ~CCIFG;
+	//TB0CCR0 = rt_len;	// Set to tx time
+	miller_prev = 0;
+
+	memcpy(query_buf, "1111111111111111110101", QUERY_LEN);
+	//query_bitcount = QUERY_LEN;
+	query_bitcount = 6;
 
     __enable_interrupt();
 
@@ -149,12 +168,16 @@ __interrupt void TIMER_B (void) {
 
 					// Switch to replying mode:
 					TB0CTL |= TBCLR;
-					TB0CCTL0 = CCIE;	// Set to compare mode
-					//TB0CCR0 = rt_len;	// Set to tx time
 					TB0CCR0 = 1500;
+					TB0CCTL0 = CCIE;	// Set to compare mode
+					TB0CCTL0 &= ~CCIFG;
+					TB0CCTL0 &= ~CCIFG;
+					//TB0CCR0 = rt_len;	// Set to tx time
+					miller_prev = 0;
 
 					memcpy(query_buf, "1111111111111111110101", QUERY_LEN);
-					query_bitcount = QUERY_LEN;
+					//query_bitcount = QUERY_LEN;
+					query_bitcount = 6;
 					halfBit = 0;
 
 					P1OUT ^= BIT3;
@@ -177,15 +200,25 @@ __interrupt void TIMER_B (void) {
 			break;
 		}
 
-		if(query_bitcount != 18) {
-			P2OUT ^= TX_PIN;
-		}
 		TB0CCR0 = blf;
 
-		if(query_buf[--query_bitcount] == '0') {
-			TB0CCR1 = (blf >> 1);
-			TB0CCTL1 = CCIE;
+		// FM0 Encoding
+//		if(query_bitcount != 18) {
+//			P2OUT ^= TX_PIN;
+//		}
+//		if(query_buf[--query_bitcount] == '0') {
+//			TB0CCR1 = (blf >> 1);
+//			TB0CCTL1 = CCIE;
+//		}
+
+		// Miller 2 Encoding
+		if(!(miller_prev == 0 & query_buf[--query_bitcount] == 0)) {
+			P2OUT ^= TX_PIN;	// Toggle at bit transition unless 0->0
 		}
+		TB0CCR1 = (blf >> 3);
+		TB0CCTL1 = CCIE;
+		miller_prev = query_buf[query_bitcount];
+		miller_inBitCount = 0;
 
 		TB0CTL |= TBCLR;
 		break;
@@ -194,8 +227,22 @@ __interrupt void TIMER_B (void) {
 
 #pragma vector=TIMERB1_VECTOR
 __interrupt void TIMER_B1 (void) {
-	TB0CCTL1 = 0;
-	P2OUT ^= TX_PIN;
+
+	TB0CCTL1 &= ~CCIFG;
+
+	if(miller_inBitCount < 3 | (miller_inBitCount > 3 && miller_inBitCount < 6)) {
+		P2OUT ^= TX_PIN;
+	}
+	else if(miller_inBitCount == 3) {
+		if(query_buf[query_bitcount] == 0) {
+			P2OUT ^= TX_PIN;
+		}
+	}
+	else if(miller_inBitCount == 6) {
+		P2OUT ^= TX_PIN;
+		TB0CCTL1 = 0;
+	}
+	miller_inBitCount++;
 }
 
 
