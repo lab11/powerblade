@@ -4,6 +4,8 @@
 #define RX_PIN		BIT1
 #define TX_PIN		BIT0
 
+#define I_PIN		BIT3
+
 #define LED1_PIN	BIT7
 #define LED2_PIN	BIT2
 #define LED3_PIN	BIT6
@@ -46,6 +48,7 @@ uint16_t rt_len;
 uint16_t rt_pivot;
 uint16_t tr_len;
 uint16_t blf;
+uint16_t blf_3;
 
 // Globals used for query (from inventory round)
 uint16_t query_bitcount;
@@ -59,9 +62,15 @@ int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
     CSCTL0_H = 0xA5;
-    CSCTL1 |= DCORSEL + DCOFSEL0 + DCOFSEL1;   // Set max. DCO setting
+    //CSCTL1 |= DCORSEL + DCOFSEL0 + DCOFSEL1;   // Set max. DCO setting
+    CSCTL1 |= 0x86;
     CSCTL2 = SELA_3 + SELS_3 + SELM_3;        // set ACLK = MCLK = DCO
     CSCTL3 = DIVA_0 + DIVS_0 + DIVM_0;        // set all dividers to 0
+
+//    P2OUT = 0;                                // output ACLK
+//    P2DIR |= BIT0;
+//    P2SEL1 |= BIT0;
+//    P2SEL0 |= BIT0;
 
     // Set up LEDs as outputs
     LED1_DIR |= LED1_PIN;
@@ -78,7 +87,8 @@ int main(void) {
     P2OUT &= ~TX_PIN;
 
     // Set up debug output (I_SENSE)
-    P1DIR |= BIT3;
+    P1DIR |= I_PIN;
+    P1OUT &= ~I_PIN;
 
     // Set up timer capture
 //    TB0CCTL0 = CM_1 + CCIS_0 + CAP;  	// Capture on rising edge for preamble
@@ -91,7 +101,8 @@ int main(void) {
 
 	rf_mode = rf_inInv_queryReply;
 
-	blf = 125;
+	blf = 1000;
+	blf_3 = blf >> 3;
 
 	// Switch to replying mode:
 	TB0CTL |= TBCLR;
@@ -100,11 +111,12 @@ int main(void) {
 	TB0CCTL0 &= ~CCIFG;
 	TB0CCTL0 &= ~CCIFG;
 	//TB0CCR0 = rt_len;	// Set to tx time
-	miller_prev = 0;
+	miller_prev = 1;
 
-	memcpy(query_buf, "1111111111111111110101", QUERY_LEN);
+	query_buf[0] = 0;
+	//memcpy(query_buf, "1111111111111111110101", QUERY_LEN);
 	//query_bitcount = QUERY_LEN;
-	query_bitcount = 6;
+	query_bitcount = 1;
 
     __enable_interrupt();
 
@@ -121,11 +133,11 @@ int main(void) {
 __interrupt void TIMER_B (void) {
 
 	// Clear interrupt
-	TB0CCTL0 &= ~CCIFG;
+	//TB0CCTL0 &= ~CCIFG;
 
 	// Indicate RX
-	LED2_OUT ^= LED2_PIN;
-	P1OUT ^= BIT3;
+	//LED2_OUT ^= LED2_PIN;
+	//P1OUT ^= BIT3;
 
 	switch(rf_mode) {
 	case rf_idle:
@@ -180,8 +192,8 @@ __interrupt void TIMER_B (void) {
 					query_bitcount = 6;
 					halfBit = 0;
 
-					P1OUT ^= BIT3;
-					P1OUT ^= BIT3;
+//					P1OUT ^= BIT3;
+//					P1OUT ^= BIT3;
 					break;
 				//}
 			//}
@@ -197,10 +209,13 @@ __interrupt void TIMER_B (void) {
 			P2OUT &= ~TX_PIN;
 			P2OUT &= ~TX_PIN;
 			rf_mode = rf_idle;
+			while(1);
 			break;
 		}
 
-		TB0CCR0 = blf;
+		uint16_t capture = TB0CCR0;
+		TB0CCR1 = capture + blf_3;
+		TB0CCR0 = capture + blf;
 
 		// FM0 Encoding
 //		if(query_bitcount != 18) {
@@ -211,16 +226,18 @@ __interrupt void TIMER_B (void) {
 //			TB0CCTL1 = CCIE;
 //		}
 
+		char txChar = query_buf[--query_bitcount];
+
 		// Miller 2 Encoding
-		if(!(miller_prev == 0 & query_buf[--query_bitcount] == 0)) {
+		if(!(miller_prev == 0 & txChar == 0)) {
 			P2OUT ^= TX_PIN;	// Toggle at bit transition unless 0->0
 		}
-		TB0CCR1 = (blf >> 3);
+
 		TB0CCTL1 = CCIE;
-		miller_prev = query_buf[query_bitcount];
+		miller_prev = txChar;
 		miller_inBitCount = 0;
 
-		TB0CTL |= TBCLR;
+		//TB0CTL |= TBCLR;
 		break;
 	}
 }
@@ -229,6 +246,7 @@ __interrupt void TIMER_B (void) {
 __interrupt void TIMER_B1 (void) {
 
 	TB0CCTL1 &= ~CCIFG;
+	TB0CCR1 += (blf >> 3);
 
 	if(miller_inBitCount < 3 | (miller_inBitCount > 3 && miller_inBitCount < 6)) {
 		P2OUT ^= TX_PIN;
