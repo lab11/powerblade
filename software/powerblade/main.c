@@ -114,9 +114,11 @@ int main(void) {
 	miller_prev = 1;
 
 	query_buf[0] = 0;
+	query_buf[1] = 1;
+	query_buf[2] = 1;
 	//memcpy(query_buf, "1111111111111111110101", QUERY_LEN);
 	//query_bitcount = QUERY_LEN;
-	query_bitcount = 1;
+	query_bitcount = 3;
 
     __enable_interrupt();
 
