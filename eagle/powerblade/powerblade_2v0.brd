@@ -1382,7 +1382,7 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-1.5" y1="1.5" x2="-1.5" y2="2.5" width="0.127" layer="21"/>
 <wire x1="-1.5" y1="2.5" x2="-2.5" y2="1.5" width="0.127" layer="21"/>
 </package>
-<package name="AC_SLOT_OUT">
+<package name="AC3_SLOT_OUT">
 <wire x1="-12.7" y1="-15.875" x2="-12.7" y2="9.525" width="0" layer="20"/>
 <wire x1="-12.7" y1="9.525" x2="12.7" y2="9.525" width="0" layer="20"/>
 <wire x1="12.7" y1="9.525" x2="12.7" y2="-15.875" width="0" layer="20"/>
@@ -1396,6 +1396,7 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="5.1435" y1="3.6195" x2="7.5565" y2="3.6195" width="0" layer="20"/>
 <smd name="N" x="-9.017" y="0" dx="7.62" dy="1.651" layer="1" rot="R90"/>
 <smd name="P" x="9.017" y="0" dx="7.62" dy="1.651" layer="1" rot="R90"/>
+<hole x="0" y="-12.5222" drill="6.35"/>
 </package>
 <package name="SOT-23-5">
 <smd name="P1" x="-1.35" y="0.95" dx="1.35" dy="0.55" layer="1"/>
@@ -1892,7 +1893,7 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="TAG-CONNECT" value="TC2050-IDC-NL-430" x="-10.16" y="-73.66" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="DIGIKEY" value="NP" x="-6.35" y="-27.94" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
-<element name="J23" library="powerfilm" package="AC_SLOT_OUT" value="AC_INSLOT_OUT" x="0" y="0">
+<element name="J23" library="powerfilm" package="AC3_SLOT_OUT" value="AC_IN3SLOT_OUT" x="0" y="0">
 <attribute name="DIGIKEY" value="3M11307-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
 </element>
 <element name="SV1" library="con-lstb" package="MA03-1" value="" x="10.63625" y="-30.48" rot="R90">
@@ -2244,6 +2245,10 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <via x="-8.5725" y="-15.001875" extent="1-16" drill="0.6"/>
 <wire x1="-8.5725" y1="-15.001875" x2="-6.429375" y2="-17.145" width="0.4064" layer="16"/>
 <wire x1="-6.429375" y1="-17.145" x2="-6.270625" y2="-17.145" width="0.4064" layer="16"/>
+<wire x1="-0.6858" y1="-14.66125" x2="-1.905" y2="-14.66125" width="0" layer="19" extent="1-1"/>
+<wire x1="-2.921" y1="-15.5575" x2="-1.905" y2="-14.66125" width="0" layer="19" extent="1-1"/>
+<wire x1="2.90125" y1="-11.2275" x2="2.90125" y2="-10.4775" width="0" layer="19" extent="1-1"/>
+<wire x1="-2.59625" y1="-7.9375" x2="-0.714375" y2="-6.746875" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$9">
 <contactref element="R13" pad="2"/>
@@ -2533,6 +2538,8 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <vertex x="-1.349375" y="-11.668125"/>
 <vertex x="-2.301875" y="-12.620625"/>
 </polygon>
+<wire x1="-1.905" y1="-12.96125" x2="-0.6858" y2="-12.96125" width="0" layer="19" extent="1-1"/>
+<wire x1="-1.055" y1="-11.43" x2="-0.6858" y2="-12.96125" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="RX_BITLINE">
 <contactref element="C11" pad="2"/>

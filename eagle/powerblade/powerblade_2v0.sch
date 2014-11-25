@@ -7714,6 +7714,22 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <wire x1="1.27" y1="0" x2="3.81" y2="0" width="0.127" layer="21"/>
 <text x="-7.62" y="-1.27" size="1.27" layer="25" rot="R90">&gt;NAME</text>
 </package>
+<package name="AC3_SLOT_OUT">
+<wire x1="-12.7" y1="-15.875" x2="-12.7" y2="9.525" width="0" layer="20"/>
+<wire x1="-12.7" y1="9.525" x2="12.7" y2="9.525" width="0" layer="20"/>
+<wire x1="12.7" y1="9.525" x2="12.7" y2="-15.875" width="0" layer="20"/>
+<wire x1="-7.5565" y1="4.445" x2="-7.5565" y2="-4.445" width="0" layer="20"/>
+<wire x1="-7.5565" y1="-4.445" x2="-5.1435" y2="-4.445" width="0" layer="20"/>
+<wire x1="-5.1435" y1="-4.445" x2="-5.1435" y2="4.445" width="0" layer="20"/>
+<wire x1="-5.1435" y1="4.445" x2="-7.5565" y2="4.445" width="0" layer="20"/>
+<wire x1="7.5565" y1="3.6195" x2="7.5565" y2="-3.6195" width="0" layer="20"/>
+<wire x1="7.5565" y1="-3.6195" x2="5.1435" y2="-3.6195" width="0" layer="20"/>
+<wire x1="5.1435" y1="-3.6195" x2="5.1435" y2="3.6195" width="0" layer="20"/>
+<wire x1="5.1435" y1="3.6195" x2="7.5565" y2="3.6195" width="0" layer="20"/>
+<smd name="N" x="-9.017" y="0" dx="7.62" dy="1.651" layer="1" rot="R90"/>
+<smd name="P" x="9.017" y="0" dx="7.62" dy="1.651" layer="1" rot="R90"/>
+<hole x="0" y="-12.5222" drill="6.35"/>
+</package>
 </packages>
 <symbols>
 <symbol name="DIODE-ZENER">
@@ -8074,6 +8090,15 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 </technologies>
 </device>
 <device name="SLOT_OUT" package="AC_SLOT_OUT">
+<connects>
+<connect gate="G$1" pin="N" pad="N"/>
+<connect gate="G$1" pin="P" pad="P"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="3SLOT_OUT" package="AC3_SLOT_OUT">
 <connects>
 <connect gate="G$1" pin="N" pad="N"/>
 <connect gate="G$1" pin="P" pad="P"/>
@@ -9304,7 +9329,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 </part>
 <part name="+3V7" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND22" library="supply1" deviceset="GND" device=""/>
-<part name="J23" library="powerfilm" deviceset="AC_IN" device="SLOT_OUT" value="AC_INSLOT_OUT">
+<part name="J23" library="powerfilm" deviceset="AC_IN" device="3SLOT_OUT" value="AC_IN3SLOT_OUT">
 <attribute name="DIGIKEY" value="3M11307-ND"/>
 </part>
 <part name="SUPPLY1" library="supply2" deviceset="GND1" device=""/>
