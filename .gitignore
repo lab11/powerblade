@@ -50,3 +50,4 @@ install_manifest.txt
 
 *.pyc
 build/
+top_block.py
