@@ -468,3 +468,47 @@ Caused by: java.lang.NullPointerException
 
 !ENTRY org.eclipse.cdt.core 1 0 2014-11-29 11:57:11.942
 !MESSAGE Indexed 'RX-2-LED' (1 sources, 4 headers) in 0.88 sec: 529 declarations; 946 references; 0 unresolved inclusions; 0 syntax errors; 0 unresolved names (0.00%)
+
+!ENTRY com.ti.ccstudio.debug 1 0 2014-11-29 14:19:28.093
+!MESSAGE DS_ERROR: MSP430: JTAG Communication Error 
+
+!SESSION 2014-11-30 10:48:13.074 -----------------------------------------------
+eclipse.buildId=4.3.0.M20130911-1000
+java.version=1.6.0_13
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=en_US
+Framework arguments:  -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os linux -ws gtk -arch x86 -product com.ti.ccstudio.branding.product
+
+!ENTRY org.eclipse.core.resources 2 10035 2014-11-30 11:43:06.585
+!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
+
+!ENTRY com.ti.ccstudio.debug.server 4 214294189 2014-11-30 11:43:11.678
+!MESSAGE Unexpected CCS exit detected [11/29/14 11:56 AM]!!!
+
+!ENTRY org.eclipse.ui.workbench 4 2 2014-11-30 11:43:20.231
+!MESSAGE Problems occurred when invoking code from plug-in: "org.eclipse.ui.workbench".
+!STACK 0
+java.lang.NullPointerException
+	at com.ti.uia.sessionmgr.view.SmvPlugin.getSmvSession(SmvPlugin.java:96)
+	at com.ti.uia.sessionmgr.view.SmvPlugin.earlyStartup(SmvPlugin.java:90)
+	at org.eclipse.ui.internal.EarlyStartupRunnable.runEarlyStartup(EarlyStartupRunnable.java:87)
+	at org.eclipse.ui.internal.EarlyStartupRunnable.run(EarlyStartupRunnable.java:66)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
+	at org.eclipse.ui.internal.Workbench$55.run(Workbench.java:2551)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:53)
+
+!ENTRY org.eclipse.ui 4 4 2014-11-30 11:43:20.236
+!MESSAGE Unhandled Exception
+
+!ENTRY com.ti.uia.sessionmgr.view 4 0 2014-11-30 11:43:20.236
+!MESSAGE Unable to execute early startup code for an extension
+!STACK 0
+java.lang.NullPointerException
+	at com.ti.uia.sessionmgr.view.SmvPlugin.getSmvSession(SmvPlugin.java:96)
+	at com.ti.uia.sessionmgr.view.SmvPlugin.earlyStartup(SmvPlugin.java:90)
+	at org.eclipse.ui.internal.EarlyStartupRunnable.runEarlyStartup(EarlyStartupRunnable.java:87)
+	at org.eclipse.ui.internal.EarlyStartupRunnable.run(EarlyStartupRunnable.java:66)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
+	at org.eclipse.ui.internal.Workbench$55.run(Workbench.java:2551)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:53)

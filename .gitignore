@@ -38,3 +38,15 @@ nohup.out
 *.i*86
 *.x86_64
 *.hex
+
+# CMAKE 
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# GNURadio 
+
+*.pyc
+build/

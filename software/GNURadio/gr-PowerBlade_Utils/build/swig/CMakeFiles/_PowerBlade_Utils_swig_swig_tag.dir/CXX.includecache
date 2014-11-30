@@ -1,0 +1,10 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/build/swig/_PowerBlade_Utils_swig_swig_tag.cpp
+

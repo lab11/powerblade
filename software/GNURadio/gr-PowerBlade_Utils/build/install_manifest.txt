@@ -1,0 +1,14 @@
+/usr/local/lib/cmake/PowerBlade_Utils/PowerBlade_UtilsConfig.cmake
+/usr/local/include/PowerBlade_Utils/api.h
+/usr/local/include/PowerBlade_Utils/ByteToPseudoUARTi.h
+/usr/local/lib/libgnuradio-PowerBlade_Utils.so
+/usr/local/lib/python2.7/dist-packages/PowerBlade_Utils/_PowerBlade_Utils_swig.so
+/usr/local/lib/python2.7/dist-packages/PowerBlade_Utils/PowerBlade_Utils_swig.py
+/usr/local/lib/python2.7/dist-packages/PowerBlade_Utils/PowerBlade_Utils_swig.pyc
+/usr/local/lib/python2.7/dist-packages/PowerBlade_Utils/PowerBlade_Utils_swig.pyo
+/usr/local/include/PowerBlade_Utils/PowerBlade_Utils/swig/PowerBlade_Utils_swig.i
+/usr/local/include/PowerBlade_Utils/PowerBlade_Utils/swig/PowerBlade_Utils_swig_doc.i
+/usr/local/lib/python2.7/dist-packages/PowerBlade_Utils/__init__.py
+/usr/local/lib/python2.7/dist-packages/PowerBlade_Utils/__init__.pyc
+/usr/local/lib/python2.7/dist-packages/PowerBlade_Utils/__init__.pyo
+/usr/local/share/gnuradio/grc/blocks/PowerBlade_Utils_ByteToPseudoUARTi.xml

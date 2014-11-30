@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/PowerBlade_Utils/ByteToPseudoUARTi.h
+PowerBlade_Utils/api.h
+-
+gnuradio/sync_interpolator.h
+-
+
+../include/PowerBlade_Utils/api.h
+gnuradio/attributes.h
+-
+
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/ByteToPseudoUARTi_impl.cc
+config.h
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/config.h
+gnuradio/io_signature.h
+-
+ByteToPseudoUARTi_impl.h
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/ByteToPseudoUARTi_impl.h
+
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/ByteToPseudoUARTi_impl.h
+PowerBlade_Utils/ByteToPseudoUARTi.h
+-
+
