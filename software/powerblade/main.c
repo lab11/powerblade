@@ -18,7 +18,7 @@
 
 // Definitions for inventory phase
 #define QUERY_LEN		22
-#define RN16_LEN		1
+#define RN16_LEN		16
 #define ACK_LEN			RN16_LEN+2
 #define EPC_LEN			66
 #define QUERY_COMMAND	0x200000
@@ -33,10 +33,11 @@
 #define QUERY_CRCMASK	0x00001F
 
 // Definitions for miller encoding
+#define LEN_TONE		16
 #define LEN_PMBL		6
 #define LEN_EOS			1
 
-#define RN16			0b1
+#define RN16			"1010101010101010"
 
 typedef enum {
 	rf_idle,
@@ -64,10 +65,12 @@ uint16_t query_bitcount;
 uint16_t query_bittime;
 char miller_prev;
 uint16_t miller_inBitCount;
-char query_buf[EPC_LEN + LEN_PMBL + LEN_EOS];
+char query_buf[EPC_LEN + LEN_PMBL + LEN_EOS + LEN_TONE];
 char halfBit;
 uint16_t txBitLen;
 uint16_t txBitCount;
+
+void miller_encode(char* buf, char* data, uint16_t len);
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
@@ -102,34 +105,34 @@ int main(void) {
     P1OUT &= ~I_PIN;
 
     // Set up timer capture
-//    TB0CCTL0 = CM_1 + CCIS_0 + CAP;  	// Capture on rising edge for preamble
-//    TB0CCTL0 &= ~CCIFG;
+    TB0CCTL0 = CM_1 + CCIS_0 + CAP;  	// Capture on rising edge for preamble
+    TB0CCTL0 &= ~CCIFG;
     TB0CTL = TBSSEL_2 + MC_2 + TBCLR + ID_2;
-//    TB0CCTL0 |= CCIE;
+    TB0CCTL0 |= CCIE;
 
     // Initialize mode
     rf_mode = rf_idle;
 
-	rf_mode = rf_inInv_query;
+//	rf_mode = rf_inInv_query;
 
 	blf = 282;		// Bit time = 47us
 	blf_3 = blf >> 4;
 
 	// Switch to replying mode:
-	TB0CTL |= TBCLR;
-	TB0CCR0 = 1500;
-	TB0CCTL0 = CCIE;	// Set to compare mode
-	TB0CCTL0 &= ~CCIFG;
-	TB0CCTL0 &= ~CCIFG;
+//	TB0CTL |= TBCLR;
+//	TB0CCR0 = 1500;
+//	TB0CCTL0 = CCIE;	// Set to compare mode
+//	TB0CCTL0 &= ~CCIFG;
+//	TB0CCTL0 &= ~CCIFG;
 	//TB0CCR0 = rt_len;	// Set to tx time
-	miller_prev = 1;
+//	miller_prev = 1;
 
-	query_buf[0] = 0;
-	query_buf[1] = 1;
-	query_buf[2] = 1;
-	//memcpy(query_buf, "1111111111111111110101", QUERY_LEN);
-	//query_bitcount = QUERY_LEN;
-	query_bitcount = 0;
+//	query_buf[0] = 0;
+//	query_buf[1] = 1;
+//	query_buf[2] = 1;
+//	//memcpy(query_buf, "1111111111111111110101", QUERY_LEN);
+//	//query_bitcount = QUERY_LEN;
+//	query_bitcount = 0;
 
     __enable_interrupt();
 
@@ -140,6 +143,83 @@ int main(void) {
 
     	for(i = 1000000; i > 0; i--);
     }
+}
+
+void miller_encode(char* buf, char* data, uint16_t len) {
+	unsigned int i;
+	for(i = 0; i < (LEN_TONE * 2); i++) {
+		query_buf[i] = 0xAA;
+	}
+
+	query_buf[i++] = 0xAA;	// 0
+	query_buf[i++] = 0xAA;
+
+	query_buf[i++] = 0xAA;	// 1
+	query_buf[i++] = 0x55;
+
+	query_buf[i++] = 0x55;	// 0
+	query_buf[i++] = 0x55;
+
+	query_buf[i++] = 0x55;	// 1
+	query_buf[i++] = 0xAA;
+
+	query_buf[i++] = 0xAA;	// 1
+	query_buf[i++] = 0x55;
+
+	query_buf[i++] = 0x55;	// 1
+	query_buf[i++] = 0xAA;
+
+//	query_buf[i++] = 0xAA;	// 1 (RN16)
+//	query_buf[i++] = 0x55;
+
+	unsigned int j;
+	char prev = '1';
+	for(j = 0; j < len; j++) {
+		if(prev == '0' && data[j] == '0') {
+			query_buf[i] = (query_buf[i-1] >> 1);
+			if(!(query_buf[i] & 0x01)) {
+				query_buf[i] |= 0x80;
+			}
+			i++;
+			query_buf[i] = query_buf[i-1];
+			i++;
+		}
+		else if(prev == '0' && data[j] == '1') {
+			query_buf[i] = query_buf[i-1];
+			i++;
+			query_buf[i] = (query_buf[i-1] >> 1);
+			if(!(query_buf[i] & 0x01)) {
+				query_buf[i] |= 0x80;
+			}
+			i++;
+		}
+		else if(data[j] == '0') {	// prev == 1
+			query_buf[i] = query_buf[i-1];
+			i++;
+			query_buf[i] = query_buf[i-1];
+			i++;
+		}
+		else {
+			query_buf[i] = query_buf[i-1];
+			i++;
+			query_buf[i] = (query_buf[i-1] >> 1);
+			if(!(query_buf[i] & 0x01)) {
+				query_buf[i] |= 0x80;
+			}
+			i++;
+		}
+	}
+
+	query_buf[i] = query_buf[i-1];
+	i++;
+	query_buf[i] = (query_buf[i-1] >> 1);
+	if(!(query_buf[i] & 0x01)) {
+		query_buf[i] |= 0x80;
+	}
+	i++;
+
+//	query_buf[22] = 0x55;	// 1 (EOS)
+//	query_buf[23] = 0xAA;
 }
 
 #pragma vector=TIMERB0_VECTOR
@@ -193,36 +273,36 @@ __interrupt void TIMER_B (void) {
 
 					// Temporarily assuming TRext = 0
 
-					//miller_encode(query_buf, RN16, RN16_LEN);
-					unsigned int i;
-					for(i = 0; i < 8; i++) {
-						query_buf[i] = 0xAA;
-					}
-					query_buf[8] = 0xAA;	// 0
-					query_buf[9] = 0xAA;
+					miller_encode(query_buf, RN16, RN16_LEN);
+//					unsigned int i;
+//					for(i = 0; i < 8; i++) {
+//						query_buf[i] = 0xAA;
+//					}
+//					query_buf[8] = 0xAA;	// 0
+//					query_buf[9] = 0xAA;
+//
+//					query_buf[10] = 0xAA;	// 1
+//					query_buf[11] = 0x55;
+//
+//					query_buf[12] = 0x55;	// 0
+//					query_buf[13] = 0x55;
+//
+//					query_buf[14] = 0x55;	// 1
+//					query_buf[15] = 0xAA;
+//
+//					query_buf[16] = 0xAA;	// 1
+//					query_buf[17] = 0x55;
+//
+//					query_buf[18] = 0x55;	// 1
+//					query_buf[19] = 0xAA;
+//
+//					query_buf[20] = 0xAA;	// 1 (RN16)
+//					query_buf[21] = 0x55;
+//
+//					query_buf[22] = 0x55;	// 1 (EOS)
+//					query_buf[23] = 0xAA;
 
-					query_buf[10] = 0xAA;	// 1
-					query_buf[11] = 0x55;
-
-					query_buf[12] = 0x55;	// 0
-					query_buf[13] = 0x55;
-
-					query_buf[14] = 0x55;	// 1
-					query_buf[15] = 0xAA;
-
-					query_buf[16] = 0xAA;	// 1
-					query_buf[17] = 0x55;
-
-					query_buf[18] = 0x55;	// 1
-					query_buf[19] = 0xAA;
-
-					query_buf[20] = 0xAA;	// 1 (RN16)
-					query_buf[21] = 0x55;
-
-					query_buf[22] = 0x55;	// 1 (EOS)
-					query_buf[23] = 0xAA;
-
-					txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + 4) * 2 * 8;
+					txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
 					txBitCount = 0;
 
 					// Switch to replying mode:
@@ -294,6 +374,8 @@ __interrupt void TIMER_B1 (void) {
 
 	TB0CCTL1 &= ~CCIFG;
 
+	__disable_interrupt();
+
 	while(1) {
 		TB0CCR1 += blf_3;
 
@@ -319,6 +401,8 @@ __interrupt void TIMER_B1 (void) {
 			_nop();
 		}
 	}
+
+	__enable_interrupt();
 
 //
 //	if(miller_inBitCount < 3 | (miller_inBitCount > 3 && miller_inBitCount < 6)) {
