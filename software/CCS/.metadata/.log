@@ -512,3 +512,19 @@ java.lang.NullPointerException
 	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
 	at org.eclipse.ui.internal.Workbench$55.run(Workbench.java:2551)
 	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:53)
+!SESSION 2014-12-01 16:38:50.223 -----------------------------------------------
+eclipse.buildId=4.3.0.M20130911-1000
+java.version=1.6.0_13
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=en_US
+Framework arguments:  -product com.ti.ccstudio.branding.product
+Command-line arguments:  -os linux -ws gtk -arch x86 -product com.ti.ccstudio.branding.product
+
+!ENTRY org.eclipse.core.resources 2 10035 2014-12-01 16:38:52.811
+!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
+
+!ENTRY com.ti.ccstudio.debug.server 4 214294189 2014-12-01 16:38:57.987
+!MESSAGE Unexpected CCS exit detected [11/29/14 11:56 AM]!!!
+
+!ENTRY org.eclipse.cdt.core 1 0 2014-12-01 16:39:33.458
+!MESSAGE Indexed 'timer_test' (2 sources, 4 headers) in 0.64 sec: 537 declarations; 1,012 references; 0 unresolved inclusions; 4 syntax errors; 0 unresolved names (0.00%)
