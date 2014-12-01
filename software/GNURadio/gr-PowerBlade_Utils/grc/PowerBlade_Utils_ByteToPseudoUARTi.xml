@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<block>
+  <name>ByteToPseudoUARTi</name>
+  <key>PowerBlade_Utils_ByteToPseudoUARTi</key>
+  <category>PowerBlade_Utils</category>
+  <import>import PowerBlade_Utils</import>
+  <make>PowerBlade_Utils.ByteToPseudoUARTi(
+            $timingBit # timingBit
+           ,$rearPadding # rearPadding
+           ,$rearPause #rearPause
+           ,$symbolsPerBlock #symbolsPerBlock
+           ,$blockPause #blockPause
+           )</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>withTimingBit</name>
+    <key>timingBit</key>
+    <type>int</type>
+  </param>
+
+   <param>
+    <name>rearPaddingBits</name>
+    <key>rearPadding</key>
+    <type>int</type>
+  </param> 
+
+   <param>
+    <name>rearPauseBits</name>
+    <key>rearPause</key>
+    <type>int</type>
+  </param>
+
+   <param>
+    <name>symbolsPerBlock</name>
+    <key>symbolsPerBlock</key>
+    <type>int</type>
+  </param> 
+
+  <param>
+    <name>blockPause</name>
+    <key>blockPause</key>
+    <type>int</type>
+  </param> 
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>byte</type>
+  </source>
+</block>

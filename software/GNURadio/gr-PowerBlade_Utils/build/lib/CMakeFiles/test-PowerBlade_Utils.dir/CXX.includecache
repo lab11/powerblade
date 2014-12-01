@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/qa_PowerBlade_Utils.cc
+qa_PowerBlade_Utils.h
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/qa_PowerBlade_Utils.h
+
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/qa_PowerBlade_Utils.h
+gnuradio/attributes.h
+-
+cppunit/TestSuite.h
+-
+
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/test_PowerBlade_Utils.cc
+config.h
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/config.h
+cppunit/TextTestRunner.h
+-
+cppunit/XmlOutputter.h
+-
+gnuradio/unittests.h
+-
+qa_PowerBlade_Utils.h
+/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/lib/qa_PowerBlade_Utils.h
+iostream
+-
+

@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi" kind="class" prot="public">
+    <compoundname>gr::PowerBlade_Utils::ByteToPseudoUARTi</compoundname>
+    <basecompoundref prot="public" virt="virtual">sync_interpolator</basecompoundref>
+    <includes refid="ByteToPseudoUARTi_8h" local="no">ByteToPseudoUARTi.h</includes>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi_1ae42c81a7ac508b5868baea6f7687682a" prot="public" static="no">
+        <type>boost::shared_ptr&lt; <ref refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi" kindref="compound">ByteToPseudoUARTi</ref> &gt;</type>
+        <definition>typedef boost::shared_ptr&lt;ByteToPseudoUARTi&gt; gr::PowerBlade_Utils::ByteToPseudoUARTi::sptr</definition>
+        <argsstring></argsstring>
+        <name>sptr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/include/PowerBlade_Utils/ByteToPseudoUARTi.h" line="40" column="1" bodyfile="/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/include/PowerBlade_Utils/ByteToPseudoUARTi.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi_1a919e1740de58e0db1bd8f95854817dbc" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi_1ae42c81a7ac508b5868baea6f7687682a" kindref="member">sptr</ref></type>
+        <definition>static sptr gr::PowerBlade_Utils::ByteToPseudoUARTi::make</definition>
+        <argsstring>(uint8_t withTimingBit, uint8_t rearPaddingBits, uint8_t rearPauseBits, uint8_t symbolsPerBlock, uint32_t blockPause)</argsstring>
+        <name>make</name>
+        <param>
+          <type>uint8_t</type>
+          <declname>withTimingBit</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>rearPaddingBits</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>rearPauseBits</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>symbolsPerBlock</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>blockPause</declname>
+        </param>
+        <briefdescription>
+<para>Return a shared_ptr to a new instance of <ref refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi" kindref="compound">PowerBlade_Utils::ByteToPseudoUARTi</ref>. </para>        </briefdescription>
+        <detaileddescription>
+<para>To avoid accidental use of raw pointers, <ref refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi" kindref="compound">PowerBlade_Utils::ByteToPseudoUARTi</ref>&apos;s constructor is in a private implementation class. <ref refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi_1a919e1740de58e0db1bd8f95854817dbc" kindref="member">PowerBlade_Utils::ByteToPseudoUARTi::make</ref> is the public interface for creating new instances. </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/include/PowerBlade_Utils/ByteToPseudoUARTi.h" line="50" column="1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Takes bytes being sent in and converts them into a series of 0 and 1 samples that represent the UART encoding of the thing. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="0">
+        <label>gr::PowerBlade_Utils::ByteToPseudoUARTi</label>
+        <link refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>gr::sync_interpolator</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>gr::PowerBlade_Utils::ByteToPseudoUARTi</label>
+        <link refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>gr::sync_interpolator</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/include/PowerBlade_Utils/ByteToPseudoUARTi.h" line="38" column="1" bodyfile="/home/rohit507/Workspace/PowerBlade/software/GNURadio/gr-PowerBlade_Utils/include/PowerBlade_Utils/ByteToPseudoUARTi.h" bodystart="37" bodyend="55"/>
+    <listofallmembers>
+      <member refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi_1a919e1740de58e0db1bd8f95854817dbc" prot="public" virt="non-virtual"><scope>gr::PowerBlade_Utils::ByteToPseudoUARTi</scope><name>make</name></member>
+      <member refid="classgr_1_1PowerBlade__Utils_1_1ByteToPseudoUARTi_1ae42c81a7ac508b5868baea6f7687682a" prot="public" virt="non-virtual"><scope>gr::PowerBlade_Utils::ByteToPseudoUARTi</scope><name>sptr</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
