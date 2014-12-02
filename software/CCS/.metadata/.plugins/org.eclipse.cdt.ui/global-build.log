@@ -52,3 +52,504 @@ Finished building target: RX-2-LED.out
  
 
 **** Build Finished ****
+
+**** Clean-only build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k clean 
+gmake: *** No rule to make target `clean'.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+"../main.c", line 51: error #55-D: too few arguments in invocation of macro "GPIO_SET_DIR"
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+
+>> Compilation failure
+"../main.c", line 51: error #20: identifier "PTXDIR" is undefined
+"../main.c", line 51: error #20: identifier "GPIO_OUT" is undefined
+"../main.c", line 51: error #29: expected an expression
+"../main.c", line 52: error #55-D: too few arguments in invocation of macro "GPIO_SET_DIR"
+"../main.c", line 52: error #20: identifier "PRXDIR" is undefined
+"../main.c", line 52: error #20: identifier "GPIO_IN" is undefined
+"../main.c", line 52: error #29: expected an expression
+"../main.c", line 54: error #55-D: too few arguments in invocation of macro "GPIO_OFF"
+"../main.c", line 54: error #20: identifier "r" is undefined
+"../main.c", line 54: error #29: expected an expression
+"../main.c", line 55: error #55-D: too few arguments in invocation of macro "GPIO_OFF"
+"../main.c", line 55: error #29: expected an expression
+"../main.c", line 59: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+"../main.c", line 68: error #55-D: too few arguments in invocation of macro "GPIO_TOGGLE"
+"../main.c", line 68: error #20: identifier "r" is undefined
+"../main.c", line 68: error #29: expected an expression
+"../main.c", line 78: error #55-D: too few arguments in invocation of macro "GPIO_TOGGLE"
+"../main.c", line 78: error #20: identifier "r" is undefined
+"../main.c", line 78: error #29: expected an expression
+19 errors detected in the compilation of "../main.c".
+gmake: *** [main.obj] Error 1
+gmake: Target `all' not remade because of errors.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 51: error #55-D: too few arguments in invocation of macro "GPIO_SET_DIR"
+
+>> Compilation failure
+"../main.c", line 51: error #20: identifier "PTXDIR" is undefined
+"../main.c", line 51: error #29: expected an expression
+"../main.c", line 52: error #55-D: too few arguments in invocation of macro "GPIO_SET_DIR"
+"../main.c", line 52: error #20: identifier "PRXDIR" is undefined
+"../main.c", line 52: error #29: expected an expression
+"../main.c", line 54: error #55-D: too few arguments in invocation of macro "GPIO_OFF"
+"../main.c", line 54: error #20: identifier "r" is undefined
+"../main.c", line 54: error #29: expected an expression
+"../main.c", line 55: error #55-D: too few arguments in invocation of macro "GPIO_OFF"
+"../main.c", line 55: error #29: expected an expression
+"../main.c", line 59: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+"../main.c", line 68: error #55-D: too few arguments in invocation of macro "GPIO_TOGGLE"
+"../main.c", line 68: error #20: identifier "r" is undefined
+"../main.c", line 68: error #29: expected an expression
+"../main.c", line 78: error #55-D: too few arguments in invocation of macro "GPIO_TOGGLE"
+"../main.c", line 78: error #20: identifier "r" is undefined
+"../main.c", line 78: error #29: expected an expression
+17 errors detected in the compilation of "../main.c".
+gmake: *** [main.obj] Error 1
+gmake: Target `all' not remade because of errors.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 44: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 50: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 50: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 50: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+
+"../main.c", line 98: error #66: expected a ";"
+"../main.c", line 85: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 90: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 113: remark #1538-D: (ULP 10.1) ISR TIMER_B0 calls function state_update. Recommend moving function call away from ISR, or inlining the function, or using pragmas
+1 error detected in the compilation of "../main.c".
+>> Compilation failure
+gmake: *** [main.obj] Error 1
+gmake: Target `all' not remade because of errors.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+"../main.c", line 85: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 90: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 113: remark #1538-D: (ULP 10.1) ISR TIMER_B0 calls function state_update. Recommend moving function call away from ISR, or inlining the function, or using pragmas
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+warning #10229-D: output section ".data" refers to load symbol "$C$SL1" and hence cannot be compressed; compression "rle" is ignored
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+"../main.c", line 85: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 90: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 113: remark #1538-D: (ULP 10.1) ISR TIMER_B0 calls function state_update. Recommend moving function call away from ISR, or inlining the function, or using pragmas
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+warning #10229-D: output section ".data" refers to load symbol "$C$SL1" and hence cannot be compressed; compression "rle" is ignored
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+"../main.c", line 85: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 90: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 113: remark #1538-D: (ULP 10.1) ISR TIMER_B0 calls function state_update. Recommend moving function call away from ISR, or inlining the function, or using pragmas
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+warning #10229-D: output section ".data" refers to load symbol "$C$SL1" and hence cannot be compressed; compression "rle" is ignored
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project timer_test ****
+
+/home/rohit507/ti/ccsv6/utils/bin/gmake -k all 
+Building file: ../main.c
+Invoking: MSP430 Compiler
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --include_path="/home/rohit507/ti/ccsv6/ccs_base/msp430/include" --include_path="/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal --preproc_with_compile --preproc_dependency="main.pp"  "../main.c"
+"../main.c", line 54: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+"../main.c", line 85: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 90: remark #2553-D: (ULP 14.1) Array index (involving "n") of type "int". Recommend using "unsigned int"
+"../main.c", line 113: remark #1538-D: (ULP 10.1) ISR TIMER_B0 calls function state_update. Recommend moving function call away from ISR, or inlining the function, or using pragmas
+Finished building: ../main.c
+ 
+Building target: timer_test.out
+Invoking: MSP430 Linker
+"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/bin/cl430" -vmspx --abi=eabi --advice:power=all -g --define=__MSP430FR5738__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"timer_test.map" --heap_size=160 --stack_size=160 --use_hw_mpy=F5 --cinit_hold_wdt=on -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/include" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/lib" -i"/home/rohit507/ti/ccsv6/tools/compiler/msp430_4.3.3/include" -i"/home/rohit507/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="timer_test_linkInfo.xml" --rom_model -o "timer_test.out"  "./main.obj" "../lnk_msp430fr5738.cmd" -l"libc.a" -l"libmath.a" 
+<Linking>
+warning #10229-D: output section ".data" refers to load symbol "$C$SL1" and hence cannot be compressed; compression "rle" is ignored
+remark #10371-D: (ULP 1.1) Detected no uses of low power mode state changes using LPMx or _bis_SR_register() or __low_power_mode_x() in this project.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+Finished building target: timer_test.out
+ 
+
+**** Build Finished ****
