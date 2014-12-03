@@ -37,7 +37,8 @@
 #define LEN_PMBL		6
 #define LEN_EOS			1
 
-#define RN16			"1010101010101010"
+//#define RN16			"1010101010101010"
+#define RN16			"1111111100000000"
 
 typedef enum {
 	rf_idle,
@@ -70,6 +71,8 @@ char halfBit;
 uint16_t txBitLen;
 uint16_t txBitCount;
 
+uint16_t responseCount;
+
 void miller_encode(char* buf, char* data, uint16_t len);
 
 int main(void) {
@@ -100,6 +103,8 @@ int main(void) {
     P2DIR |= TX_PIN;
     P2OUT &= ~TX_PIN;
 
+    responseCount = 0;
+
     // Set up debug output (I_SENSE)
     P1DIR |= I_PIN;
     P1OUT &= ~I_PIN;
@@ -115,7 +120,8 @@ int main(void) {
 
 //	rf_mode = rf_inInv_query;
 
-	blf = 282;		// Bit time = 47us
+	//blf = 282;		// Bit time = 47us
+    blf = 250;
 	blf_3 = blf >> 4;
 
 	// Switch to replying mode:
@@ -208,6 +214,7 @@ void miller_encode(char* buf, char* data, uint16_t len) {
 			}
 			i++;
 		}
+		prev = data[j];
 	}
 
 	query_buf[i] = query_buf[i-1];
@@ -308,7 +315,7 @@ __interrupt void TIMER_B (void) {
 					// Switch to replying mode:
 					//TB0CTL |= TBCLR;
 					TB0CCTL0 = 0;	// Turn off capture
-					TB0CCR1 = TB0CCR0 + 1500;
+					TB0CCR1 = TB0CCR0 + 800;
 					TB0CCTL1 = CCIE;
 
 					//TB0CCR0 = rt_len;	// Set to tx time
@@ -374,10 +381,12 @@ __interrupt void TIMER_B1 (void) {
 
 	TB0CCTL1 &= ~CCIFG;
 
+	uint16_t timerVal = TB0CCR1;
+
 	__disable_interrupt();
 
-	while(1) {
-		TB0CCR1 += blf_3;
+	while(txBitCount < txBitLen) {
+		timerVal += blf_3;
 
 		uint16_t txIndex = txBitCount / 8; 			// Which byte
 		char bitMask = 1 << (txBitCount % 8);		// Bit mask
@@ -385,21 +394,31 @@ __interrupt void TIMER_B1 (void) {
 
 		if(set) {
 			P2OUT |= TX_PIN;
+			P2OUT |= TX_PIN;
 		}
 		else {
+			P2OUT &= ~TX_PIN;
 			P2OUT &= ~TX_PIN;
 		}
 
 		txBitCount++;
 
-		if(txBitCount == txBitLen) {
-			TB0CCTL1 = 0;		// Disable interrupt
-			break;
-		}
-
-		while(TB0R < TB0CCR1) {
+		while(TB0R < timerVal) {
 			_nop();
 		}
+	}
+
+	TB0CCTL1 = 0;	// Disable interrupt
+	// Set up timer capture
+	TB0CCTL0 = CM_1 + CCIS_0 + CAP;  	// Capture on rising edge for preamble
+	TB0CCTL0 &= ~CCIFG;
+	TB0CTL = TBSSEL_2 + MC_2 + TBCLR + ID_2;
+	TB0CCTL0 |= CCIE;
+	rf_mode = rf_idle;
+
+	responseCount++;
+	if(responseCount == 2) {
+		responseCount = 0;
 	}
 
 	__enable_interrupt();
