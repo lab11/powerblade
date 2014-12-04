@@ -76,7 +76,7 @@ uint16_t query_bitcount;
 uint16_t query_bittime;
 char miller_prev;
 uint16_t miller_inBitCount;
-char query_buf[EPC_LEN + LEN_PMBL + LEN_EOS + LEN_TONE];
+char query_buf[(EPC_LEN + LEN_PMBL + LEN_EOS + LEN_TONE)*2];
 char halfBit;
 uint16_t txBitLen;
 uint16_t txBitCount;
@@ -224,7 +224,15 @@ __interrupt void TIMER_B (void) {
 		rt_len = TB0CCR0;
 		break;
 	case rf_inInv_RTCal:
-		rf_mode = rf_inInv_TRCal;
+		if(inv_mode == inv_query) {
+			rf_mode = rf_inInv_TRCal;
+			query_bitcount = QUERY_LEN - 1;
+		}
+		else {
+			rf_mode = rf_inInv_query;
+			query_bitcount = ACK_LEN - 1;
+			query_bittime = TB0CCR0;
+		}
 		rt_len = TB0CCR0 - rt_len;
 		rt_pivot = rt_len >> 1;
 		tr_len = TB0CCR0;
@@ -232,12 +240,6 @@ __interrupt void TIMER_B (void) {
 	case rf_inInv_TRCal:
 		rf_mode = rf_inInv_query;
 		tr_len = TB0CCR0 - tr_len;
-		if(inv_mode == inv_query) {
-			query_bitcount = QUERY_LEN - 1;
-		}
-		else {
-			query_bitcount = ACK_LEN - 1;
-		}
 		query_bittime = TB0CCR0;
 		break;
 	case rf_inInv_query:
@@ -255,12 +257,13 @@ __interrupt void TIMER_B (void) {
 
 				// Temporarily assuming TRext = 0
 
-				//P1OUT ^= I_PIN;
+//				P1OUT ^= I_PIN;
+//				P1OUT ^= I_PIN;
 
-				numQueries++;
-				if(numQueries == 2) {
+//				numQueries++;
+//				if(numQueries == 2) {
 					inv_mode = inv_ack;	// Prepare for next R->T
-				}
+//				}
 
 				// Encode RN16 in M-8
 				miller_encode(query_buf, RN16, RN16_LEN);
@@ -276,7 +279,10 @@ __interrupt void TIMER_B (void) {
 				TB0CCTL1 = CCIE;
 			}
 			else {
-				rf_mode = rf_inInv_reply;
+ 				rf_mode = rf_inInv_reply;
+
+				P1OUT ^= I_PIN;
+				P1OUT ^= I_PIN;
 
 				inv_mode = inv_query;
 
@@ -289,7 +295,7 @@ __interrupt void TIMER_B (void) {
 				//Switch to replying mode
 				TB0CCTL0 = 0;	// Turn off capture
 				TB0CCR1 = TB0CCR0 + 500;
-				TB0CCTL1 = CCIE;
+				TB0CCTL1 = CCIE + CCIFG;
 			}
 			break;
 		}
@@ -314,6 +320,8 @@ __interrupt void TIMER_B1 (void) {
 		TB0CCTL1 &= ~CCIFG;
 
 		uint16_t timerVal = TB0CCR1;
+		P1OUT ^= I_PIN;
+		P1OUT ^= I_PIN;
 
 		__disable_interrupt();
 
@@ -355,6 +363,7 @@ __interrupt void TIMER_B1 (void) {
 	}
 	else {		// Timeout
 		rf_mode = rf_idle;
+		numQueries = 0;
 		P1OUT ^= I_PIN;
 	}
 }
