@@ -39,6 +39,9 @@
 
 #define RF_TIMEOUT		1200
 
+#define POLY 			0x8408
+#define P_CCITT     	0x1021
+
 //#define RN16			"1010101010101010"
 #define RN16			"1111111100000000"
 //#define EPC 			PC + EPC + CRC
@@ -84,6 +87,31 @@ uint16_t txBitCount;
 
 void miller_encode(char* buf, char* data, uint16_t len);
 char string_cmp(char* buf1, char* buf2, uint16_t len);
+uint16_t calc_crc(char* dat, unsigned short len);
+
+static unsigned short   crc_tabccitt[256];
+static void init_crcccitt_tab( void ) {
+
+    int i, j;
+    unsigned short crc, c;
+
+    for (i=0; i<256; i++) {
+
+        crc = 0;
+        c   = ((unsigned short) i) << 8;
+
+        for (j=0; j<8; j++) {
+
+            if ( (crc ^ c) & 0x8000 ) crc = ( crc << 1 ) ^ P_CCITT;
+            else                      crc =   crc << 1;
+
+            c = c << 1;
+        }
+
+        crc_tabccitt[i] = crc;
+    }
+
+}
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
@@ -129,6 +157,10 @@ int main(void) {
 	//blf = 282;		// Bit time = 47us
     blf = 250;
 	blf_3 = blf >> 4;
+
+	init_crcccitt_tab();
+	//calc_crc("08001111", 8);
+	calc_crc("100011112222", 12);
 
     __enable_interrupt();
 
@@ -214,6 +246,46 @@ char string_cmp(char* buf1, char* buf2, uint16_t len) {
 		}
 	}
 	return 0;
+}
+
+uint16_t calc_crc(char* dat, unsigned short len) {
+	//unsigned char i;
+	//volatile unsigned int data;
+	unsigned short tmp, short_c;
+	volatile unsigned int crc;
+
+	crc = 0xffff;
+	len >>= 1;
+
+	do {
+		unsigned short c1 = (unsigned short)((*dat++ - '0') << 4);
+		unsigned short c2 = (unsigned short)(*dat++ - '0');
+		short_c = (unsigned short)(c1 | c2);//(0x00ff & (unsigned short)*dat) - '0';
+//		dat += temp;
+//		short_c = 0x0000;
+
+		tmp = (crc >> 8) ^ short_c;
+		crc = (crc << 8) ^ crc_tabccitt[tmp];
+
+//		data = (unsigned int)0xff & *dat++;
+//		crc ^= data;
+//		//data = 0x0000;
+//		for(i = 0; i < 8; i++, data >>= 1) {
+//			if(crc & 0x0001) {
+//				crc = (crc >> 1) ^ POLY;
+//			}
+//			else {
+//				crc = (crc >> 1);
+//			}
+//		}
+	} while(--len);
+
+	crc = ~crc;
+
+//	data = crc;
+//	crc = (crc << 8) | (data >> 8 & 0xFF);
+
+	return crc;
 }
 
 #pragma vector=TIMERB0_VECTOR
