@@ -64,7 +64,7 @@ inv_mode_t inv_mode;
 // Globals used in preamble timing capture
 uint16_t d0_len;
 uint16_t rt_len;
-uint16_t rt_pivot;
+volatile uint16_t rt_pivot;
 uint16_t tr_len;
 uint16_t blf;
 uint16_t blf_3;
@@ -73,6 +73,7 @@ uint8_t numQueries;
 
 // Globals used for query (from inventory round)
 uint16_t query_bitcount;
+uint16_t query_bitlen;
 uint16_t query_bittime;
 char miller_prev;
 uint16_t miller_inBitCount;
@@ -82,6 +83,7 @@ uint16_t txBitLen;
 uint16_t txBitCount;
 
 void miller_encode(char* buf, char* data, uint16_t len);
+char string_cmp(char* buf1, char* buf2, uint16_t len);
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
@@ -204,6 +206,16 @@ void miller_encode(char* buf, char* data, uint16_t len) {
 
 }
 
+char string_cmp(char* buf1, char* buf2, uint16_t len) {
+	unsigned int i;
+	for(i = 0; i < len; i++) {
+		if(buf1[i] != buf2[i]) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 #pragma vector=TIMERB0_VECTOR
 __interrupt void TIMER_B (void) {
 
@@ -226,12 +238,14 @@ __interrupt void TIMER_B (void) {
 	case rf_inInv_RTCal:
 		if(inv_mode == inv_query) {
 			rf_mode = rf_inInv_TRCal;
-			query_bitcount = QUERY_LEN - 1;
+			query_bitlen = QUERY_LEN;
+			query_bitcount = 0;
 		}
 		else {
 			rf_mode = rf_inInv_query;
-			query_bitcount = ACK_LEN - 1;
+			query_bitlen = ACK_LEN;
 			query_bittime = TB0CCR0;
+			query_bitcount = 0;
 		}
 		rt_len = TB0CCR0 - rt_len;
 		rt_pivot = rt_len >> 1;
@@ -245,13 +259,13 @@ __interrupt void TIMER_B (void) {
 	case rf_inInv_query:
 		query_bittime = TB0CCR0 - query_bittime;
 		if(query_bittime > rt_pivot) {	// Received a '1'
-			query_buf[query_bitcount] = 1;
+			query_buf[query_bitcount++] = '1';
 		}
 		else {
-			query_buf[query_bitcount] = 0;
+			query_buf[query_bitcount++] = '0';
 		}
 
-		if(query_bitcount == 0) { 	// Query command over
+		if(query_bitcount == query_bitlen) { 	// Query command over
 			if(inv_mode == inv_query) {
 				rf_mode = rf_inInv_reply;
 
@@ -273,34 +287,50 @@ __interrupt void TIMER_B (void) {
 				txBitCount = 0;
 
 				// Switch to replying mode:
-				//TB0CTL |= TBCLR;
+				TB0CTL |= TBCLR;
 				TB0CCTL0 = 0;	// Turn off capture
-				TB0CCR1 = TB0CCR0 + 500;
+				TB0CCR1 = 500;
 				TB0CCTL1 = CCIE;
 			}
 			else {
  				rf_mode = rf_inInv_reply;
 
-				P1OUT ^= I_PIN;
-				P1OUT ^= I_PIN;
+ 				if(string_cmp(query_buf+2, RN16, RN16_LEN) == 0) {		// Valid RN16
+					inv_mode = inv_query;
 
-				inv_mode = inv_query;
+					miller_encode(query_buf, EPC, EPC_LEN);
 
-				miller_encode(query_buf, EPC, EPC_LEN);
+					// Set up transmit length (two bytes for each bit, 8 bits per byte)
+					txBitLen = (EPC_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
+					txBitCount = 0;
 
-				// Set up transmit length (two bytes for each bit, 8 bits per byte)
-				txBitLen = (EPC_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
-				txBitCount = 0;
+					//Switch to replying mode
+					TB0CTL |= TBCLR;
+					TB0CCTL0 = 0;	// Turn off capture
+					TB0CCR1 = 500;
+					TB0CCTL1 = CCIE;
+ 				}
+ 				else if(string_cmp(query_buf, "1000", 4)) {				// Another query
+					inv_mode = inv_ack;	// Prepare for next R->T
 
-				//Switch to replying mode
-				TB0CCTL0 = 0;	// Turn off capture
-				TB0CCR1 = TB0CCR0 + 500;
-				TB0CCTL1 = CCIE + CCIFG;
+					// Encode RN16 in M-8
+					miller_encode(query_buf, RN16, RN16_LEN);
+
+					// Set up transmit length (two bytes for each bit, 8 bits per byte)
+					txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
+					txBitCount = 0;
+
+					// Switch to replying mode:
+					TB0CTL |= TBCLR;
+					TB0CCTL0 = 0;	// Turn off capture
+					TB0CCR1 = 1500;
+					TB0CCTL1 = CCIE;
+ 				}
 			}
 			break;
 		}
 		else {
-			query_bitcount--;
+			//query_bitcount--;
 			query_bittime = TB0CCR0;
 			break;
 		}
@@ -320,8 +350,6 @@ __interrupt void TIMER_B1 (void) {
 		TB0CCTL1 &= ~CCIFG;
 
 		uint16_t timerVal = TB0CCR1;
-		P1OUT ^= I_PIN;
-		P1OUT ^= I_PIN;
 
 		__disable_interrupt();
 
@@ -363,7 +391,6 @@ __interrupt void TIMER_B1 (void) {
 	}
 	else {		// Timeout
 		rf_mode = rf_idle;
-		numQueries = 0;
 		P1OUT ^= I_PIN;
 	}
 }
