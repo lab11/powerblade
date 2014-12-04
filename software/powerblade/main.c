@@ -160,7 +160,7 @@ int main(void) {
 
 	init_crcccitt_tab();
 	//calc_crc("08001111", 8);
-	calc_crc("100011112222", 12);
+	//calc_crc("100011112222", 12);
 
     __enable_interrupt();
 
