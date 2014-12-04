@@ -20,7 +20,7 @@
 #define QUERY_LEN		22
 #define RN16_LEN		16
 #define ACK_LEN			RN16_LEN+2
-#define EPC_LEN			66
+#define EPC_LEN			48
 #define QUERY_COMMAND	0x200000
 #define QUERY_COMMASK	0x3C0000
 #define QUERY_DRMASK	0x020000
@@ -41,6 +41,8 @@
 
 //#define RN16			"1010101010101010"
 #define RN16			"1111111100000000"
+//#define EPC 			PC + EPC + CRC
+#define EPC 			"000010000000000000010001000100011100110010101110"
 
 typedef enum {
 	rf_idle,
@@ -48,12 +50,16 @@ typedef enum {
 	rf_inInv_RTCal,
 	rf_inInv_TRCal,
 	rf_inInv_query,
-	rf_inInv_reply,
-	rf_inInv_queryArb,
-	rf_inMsg
+	rf_inInv_reply
 } rf_mode_t;
 
+typedef enum {
+	inv_query,
+	inv_ack
+} inv_mode_t;
+
 rf_mode_t rf_mode;
+inv_mode_t inv_mode;
 
 // Globals used in preamble timing capture
 uint16_t d0_len;
@@ -113,6 +119,7 @@ int main(void) {
 
     // Initialize mode
     rf_mode = rf_idle;
+    inv_mode = inv_query;
 
 	//blf = 282;		// Bit time = 47us
     blf = 250;
@@ -205,8 +212,8 @@ __interrupt void TIMER_B (void) {
 
 	switch(rf_mode) {
 	case rf_idle:
-		rf_mode = rf_inInv_d0;
 		TB0CTL |= TBCLR;
+		rf_mode = rf_inInv_d0;
 		break;
 	case rf_inInv_d0:
 		rf_mode = rf_inInv_RTCal;
@@ -222,7 +229,12 @@ __interrupt void TIMER_B (void) {
 	case rf_inInv_TRCal:
 		rf_mode = rf_inInv_query;
 		tr_len = TB0CCR0 - tr_len;
-		query_bitcount = QUERY_LEN - 1;
+		if(inv_mode == inv_query) {
+			query_bitcount = QUERY_LEN - 1;
+		}
+		else {
+			query_bitcount = ACK_LEN - 1;
+		}
 		query_bittime = TB0CCR0;
 		break;
 	case rf_inInv_query:
@@ -235,25 +247,44 @@ __interrupt void TIMER_B (void) {
 		}
 
 		if(query_bitcount == 0) { 	// Query command over
-			rf_mode = rf_inInv_reply;
+			if(inv_mode == inv_query) {
+				rf_mode = rf_inInv_reply;
 
-			// Temporarily assuming TRext = 0
+				// Temporarily assuming TRext = 0
 
-			//P1OUT ^= I_PIN;
+				//P1OUT ^= I_PIN;
 
-			// Encode RN16 in M-8
-			miller_encode(query_buf, RN16, RN16_LEN);
+				inv_mode = inv_ack;	// Prepare for next R->T
 
-			// Set up transmit length (two bytes for each bit, 8 bits per byte)
-			txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
-			txBitCount = 0;
+				// Encode RN16 in M-8
+				miller_encode(query_buf, RN16, RN16_LEN);
 
-			// Switch to replying mode:
-			//TB0CTL |= TBCLR;
-			TB0CCTL0 = 0;	// Turn off capture
-			TB0CCR1 = TB0CCR0 + 500;
-			TB0CCTL1 = CCIE;
+				// Set up transmit length (two bytes for each bit, 8 bits per byte)
+				txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
+				txBitCount = 0;
 
+				// Switch to replying mode:
+				//TB0CTL |= TBCLR;
+				TB0CCTL0 = 0;	// Turn off capture
+				TB0CCR1 = TB0CCR0 + 500;
+				TB0CCTL1 = CCIE;
+			}
+			else {
+				rf_mode = rf_inInv_reply;
+
+				inv_mode = inv_query;
+
+				miller_encode(query_buf, EPC, EPC_LEN);
+
+				// Set up transmit length (two bytes for each bit, 8 bits per byte)
+				txBitLen = (EPC_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
+				txBitCount = 0;
+
+				//Switch to replying mode
+				TB0CCTL0 = 0;	// Turn off capture
+				TB0CCR1 = TB0CCR0 + 500;
+				TB0CCTL1 = CCIE;
+			}
 			break;
 		}
 		else {
