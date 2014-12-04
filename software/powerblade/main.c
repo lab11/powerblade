@@ -69,6 +69,8 @@ uint16_t tr_len;
 uint16_t blf;
 uint16_t blf_3;
 
+uint8_t numQueries;
+
 // Globals used for query (from inventory round)
 uint16_t query_bitcount;
 uint16_t query_bittime;
@@ -120,6 +122,7 @@ int main(void) {
     // Initialize mode
     rf_mode = rf_idle;
     inv_mode = inv_query;
+    numQueries = 0;
 
 	//blf = 282;		// Bit time = 47us
     blf = 250;
@@ -254,7 +257,10 @@ __interrupt void TIMER_B (void) {
 
 				//P1OUT ^= I_PIN;
 
-				inv_mode = inv_ack;	// Prepare for next R->T
+				numQueries++;
+				if(numQueries == 2) {
+					inv_mode = inv_ack;	// Prepare for next R->T
+				}
 
 				// Encode RN16 in M-8
 				miller_encode(query_buf, RN16, RN16_LEN);
