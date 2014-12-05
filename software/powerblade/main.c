@@ -20,7 +20,8 @@
 #define QUERY_LEN		22
 #define RN16_LEN		16
 #define ACK_LEN			RN16_LEN+2
-#define EPC_LEN			48
+#define EPC_LEN			32
+#define CRC_LEN			16
 #define QUERY_COMMAND	0x200000
 #define QUERY_COMMASK	0x3C0000
 #define QUERY_DRMASK	0x020000
@@ -44,9 +45,11 @@
 
 //#define RN16			"1010101010101010"
 #define RN16_BITS		0xFACE
-#define RN16			"1111101011001110"
-#define EPC_BITS		0x08001111CCAE
-#define EPC 			"000010000000000000010001000100011100110010101110"
+//#define RN16			"1111101011001110"
+#define EPC_BITS		0x08001111
+#define CRC_BITS		0xCCAE
+uint16_t crc_bits;
+//#define EPC 			"00001000000000000001000100010001"
 
 typedef enum {
 	rf_idle,
@@ -81,12 +84,12 @@ uint16_t query_bitlen;
 uint16_t query_bittime;
 char miller_prev;
 uint16_t miller_inBitCount;
-char query_buf[(EPC_LEN + LEN_PMBL + LEN_EOS + LEN_TONE)*2];
+char query_buf[(EPC_LEN + CRC_LEN + LEN_PMBL + LEN_EOS + LEN_TONE)*2];
 char halfBit;
 uint16_t txBitLen;
 uint16_t txBitCount;
 
-void miller_encode(char* buf, char* data, uint16_t len);
+void miller_encode(unsigned int qOffset, char* data, uint16_t len);
 char string_cmp(char* buf1, char* buf2, uint16_t len);
 uint16_t calc_crc(char* dat, unsigned short len);
 
@@ -160,8 +163,10 @@ int main(void) {
 	blf_3 = blf >> 4;
 
 	init_crcccitt_tab();
-	//calc_crc("08001111", 8);
+	const uint32_t epc_temp_bits = 0x08001111;
+	//crc_bits = calc_crc("08001111", 4);
 	//calc_crc("100011112222", 12);
+	crc_bits = calc_crc((char*)&epc_temp_bits, EPC_LEN/8);
 
     __enable_interrupt();
 
@@ -174,29 +179,34 @@ int main(void) {
     }
 }
 
-void miller_encode(char* buf, char* data, uint16_t len) {
-	unsigned int i;
-	for(i = 0; i < (LEN_TONE * 2); i++) {
-		query_buf[i] = 0xAA;
+void miller_encode(unsigned int qOffset, char* data, uint16_t len) {
+	unsigned int i = qOffset*2;
+	if(len != 0 && i == 0) {
+		for(i = 0; i < (LEN_TONE * 2); i++) {
+			query_buf[i] = 0xAA;
+		}
+
+		query_buf[i++] = 0xAA;	// 0
+		query_buf[i++] = 0xAA;
+
+		query_buf[i++] = 0xAA;	// 1
+		query_buf[i++] = 0x55;
+
+		query_buf[i++] = 0x55;	// 0
+		query_buf[i++] = 0x55;
+
+		query_buf[i++] = 0x55;	// 1
+		query_buf[i++] = 0xAA;
+
+		query_buf[i++] = 0xAA;	// 1
+		query_buf[i++] = 0x55;
+
+		query_buf[i++] = 0x55;	// 1
+		query_buf[i++] = 0xAA;
 	}
-
-	query_buf[i++] = 0xAA;	// 0
-	query_buf[i++] = 0xAA;
-
-	query_buf[i++] = 0xAA;	// 1
-	query_buf[i++] = 0x55;
-
-	query_buf[i++] = 0x55;	// 0
-	query_buf[i++] = 0x55;
-
-	query_buf[i++] = 0x55;	// 1
-	query_buf[i++] = 0xAA;
-
-	query_buf[i++] = 0xAA;	// 1
-	query_buf[i++] = 0x55;
-
-	query_buf[i++] = 0x55;	// 1
-	query_buf[i++] = 0xAA;
+	else {
+		i = i + ((LEN_TONE + LEN_PMBL)*2);
+	}
 
 	int j, k;
 	char cur;
@@ -234,22 +244,33 @@ void miller_encode(char* buf, char* data, uint16_t len) {
 		}
 	}
 
-	// Add trailing 1
-	query_buf[i] = query_buf[i-1];
-	i++;
-	query_buf[i] = (query_buf[i-1] >> 1);
-	if(!(query_buf[i] & 0x01)) {
-		query_buf[i] |= 0x80;
+	if(len == 0) {
+		// Add trailing 1
+		query_buf[i] = query_buf[i-1];
+		i++;
+		query_buf[i] = (query_buf[i-1] >> 1);
+		if(!(query_buf[i] & 0x01)) {
+			query_buf[i] |= 0x80;
+		}
+		i++;
 	}
-	i++;
-
 }
 
 char string_cmp(char* buf1, char* buf2, uint16_t len) {
-	unsigned int i;
+	int i, j;
+	char cur;
+	numQueries++;
+	if(numQueries == 3) {
+		numQueries = 0;
+	}
 	for(i = 0; i < len; i++) {
-		if(buf1[i] != buf2[i]) {
-			return 1;
+		cur = buf2[len - 1 - i];
+		for(j = 7; j >= 0; j--) {
+			char temp1 = buf1[(i*8) + (7-j)];
+			char temp2 = (((cur >> j) & 0x01) + '0');
+			if(temp1 != temp2) {
+				return 1;
+			}
 		}
 	}
 	return 0;
@@ -262,12 +283,13 @@ uint16_t calc_crc(char* dat, unsigned short len) {
 	volatile unsigned int crc;
 
 	crc = 0xffff;
-	len >>= 1;
+	//len >>= 1;
 
 	do {
-		unsigned short c1 = (unsigned short)((*dat++ - '0') << 4);
-		unsigned short c2 = (unsigned short)(*dat++ - '0');
-		short_c = (unsigned short)(c1 | c2);//(0x00ff & (unsigned short)*dat) - '0';
+//		unsigned short c1 = (unsigned short)((*dat++ - '0') << 4);
+//		unsigned short c2 = (unsigned short)(*dat++ - '0');
+//		short_c = (unsigned short)(c1 | c2);//(0x00ff & (unsigned short)*dat) - '0';
+		short_c = (unsigned short)(*(dat + len - 1));
 //		dat += temp;
 //		short_c = 0x0000;
 
@@ -360,7 +382,8 @@ __interrupt void TIMER_B (void) {
 
 				// Encode RN16 in M-8
 				const uint16_t rn16_bits = RN16_BITS;
-				miller_encode(query_buf, (char*)&rn16_bits, RN16_LEN / 8);
+				miller_encode(0, (char*)&rn16_bits, RN16_LEN / 8);
+				miller_encode(RN16_LEN, 0x0, 0);
 
 				// Set up transmit length (two bytes for each bit, 8 bits per byte)
 				txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
@@ -375,15 +398,18 @@ __interrupt void TIMER_B (void) {
 			else {
  				rf_mode = rf_inInv_reply;
 
- 				if(string_cmp(query_buf+2, RN16, RN16_LEN) == 0) {		// Valid RN16
+ 				const uint16_t rn16_bits = RN16_BITS;
+ 				if(string_cmp(query_buf+2, (char*)&rn16_bits, RN16_LEN / 8) == 0) {		// Valid RN16
 					inv_mode = inv_query;
 
 					// Encode EPC in M-8
 					const uint64_t epc_bits = EPC_BITS;
-					miller_encode(query_buf, (char*)&epc_bits, EPC_LEN / 8);
+					miller_encode(0, (char*)&epc_bits, EPC_LEN / 8);
+					miller_encode(EPC_LEN, (char*)&crc_bits, CRC_LEN / 8);
+					miller_encode(EPC_LEN + CRC_LEN, 0x0, 0);
 
 					// Set up transmit length (two bytes for each bit, 8 bits per byte)
-					txBitLen = (EPC_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
+					txBitLen = (EPC_LEN + CRC_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
 					txBitCount = 0;
 
 					//Switch to replying mode
@@ -392,12 +418,13 @@ __interrupt void TIMER_B (void) {
 					TB0CCR1 = 500;
 					TB0CCTL1 = CCIE;
  				}
- 				else if(string_cmp(query_buf, "1000", 4)) {				// Another query
+ 				else if(string_cmp(query_buf, "8", 1)) {				// Another query
 					inv_mode = inv_ack;	// Prepare for next R->T
 
 					// Encode RN16 in M-8
 					const uint16_t rn16_bits = RN16_BITS;
-					miller_encode(query_buf, (char*)&rn16_bits, RN16_LEN / 8);
+					miller_encode(0, (char*)&rn16_bits, RN16_LEN / 8);
+					miller_encode(RN16_LEN, 0x0, 0);
 
 					// Set up transmit length (two bytes for each bit, 8 bits per byte)
 					txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
