@@ -20,18 +20,10 @@
 #define QUERY_LEN		22
 #define RN16_LEN		16
 #define ACK_LEN			RN16_LEN+2
-#define EPC_LEN			32
+#define EPC_LEN			80
+#define EPC_BASE_LEN	64
+#define EPC_ADD_LEN		16
 #define CRC_LEN			16
-#define QUERY_COMMAND	0x200000
-#define QUERY_COMMASK	0x3C0000
-#define QUERY_DRMASK	0x020000
-#define QUERY_MMASK		0x018000
-#define QUERY_TRMASK	0x004000
-#define QUERY_SELMASK	0x003000
-#define QUERY_SESMASK	0x000C00
-#define QUERY_TARMASK	0x000200
-#define QUERY_QMASK		0x0001E0
-#define QUERY_CRCMASK	0x00001F
 
 // Definitions for miller encoding
 #define LEN_TONE		16
@@ -46,8 +38,8 @@
 //#define RN16			"1010101010101010"
 #define RN16_BITS		0xFACE
 //#define RN16			"1111101011001110"
-#define EPC_BITS		0x08001111
-#define CRC_BITS		0xCCAE
+#define EPC1_BITS		0x2000111122223333
+uint16_t crc_base_bits;
 uint16_t crc_bits;
 //#define EPC 			"00001000000000000001000100010001"
 
@@ -76,22 +68,18 @@ uint16_t tr_len;
 uint16_t blf;
 uint16_t blf_3;
 
-uint8_t numQueries;
-
 // Globals used for query (from inventory round)
 uint16_t query_bitcount;
 uint16_t query_bitlen;
 uint16_t query_bittime;
-char miller_prev;
-uint16_t miller_inBitCount;
-char query_buf[(EPC_LEN + CRC_LEN + LEN_PMBL + LEN_EOS + LEN_TONE)*2];
-char halfBit;
+char query_buf[(RN16_LEN + LEN_PMBL + LEN_EOS + LEN_TONE)*2];
+char epc_buf[(EPC_LEN + CRC_LEN + LEN_PMBL + LEN_EOS + LEN_TONE)*2];
 uint16_t txBitLen;
 uint16_t txBitCount;
 
-void miller_encode(unsigned int qOffset, char* data, uint16_t len);
+void miller_encode(char buf[], unsigned int qOffset, char* data, uint16_t len);
 char string_cmp(char* buf1, char* buf2, uint16_t len);
-uint16_t calc_crc(char* dat, unsigned short len);
+uint16_t calc_crc(uint16_t crc_start, char* dat, unsigned short len);
 
 static unsigned short   crc_tabccitt[256];
 static void init_crcccitt_tab( void ) {
@@ -156,17 +144,20 @@ int main(void) {
     // Initialize mode
     rf_mode = rf_idle;
     inv_mode = inv_query;
-    numQueries = 0;
 
 	//blf = 282;		// Bit time = 47us
     blf = 250;
 	blf_3 = blf >> 4;
 
 	init_crcccitt_tab();
-	const uint32_t epc_temp_bits = 0x08001111;
+	const uint64_t epc_temp1_bits = EPC1_BITS;
+	//const uint64_t epc_temp2_bits = EPC2_BITS;
 	//crc_bits = calc_crc("08001111", 4);
 	//calc_crc("100011112222", 12);
-	crc_bits = calc_crc((char*)&epc_temp_bits, EPC_LEN/8);
+	miller_encode(epc_buf, 0, (char*)&epc_temp1_bits, EPC_BASE_LEN / 8);
+	//miller_encode(epc_buf, EPC_BASE1_LEN, (char*)&epc_temp2_bits, EPC_BASE2_LEN / 8);
+	crc_base_bits = calc_crc(0x0000, (char*)&epc_temp1_bits, EPC_BASE_LEN / 8);
+	//crc_bits = calc_crc(crc_bits, (char*)&epc_temp2_bits, EPC_BASE2_LEN / 8);
 
     __enable_interrupt();
 
@@ -179,30 +170,30 @@ int main(void) {
     }
 }
 
-void miller_encode(unsigned int qOffset, char* data, uint16_t len) {
+void miller_encode(char buf[], unsigned int qOffset, char* data, uint16_t len) {
 	unsigned int i = qOffset*2;
 	if(len != 0 && i == 0) {
 		for(i = 0; i < (LEN_TONE * 2); i++) {
-			query_buf[i] = 0xAA;
+			buf[i] = 0xAA;
 		}
 
-		query_buf[i++] = 0xAA;	// 0
-		query_buf[i++] = 0xAA;
+		buf[i++] = 0xAA;	// 0
+		buf[i++] = 0xAA;
 
-		query_buf[i++] = 0xAA;	// 1
-		query_buf[i++] = 0x55;
+		buf[i++] = 0xAA;	// 1
+		buf[i++] = 0x55;
 
-		query_buf[i++] = 0x55;	// 0
-		query_buf[i++] = 0x55;
+		buf[i++] = 0x55;	// 0
+		buf[i++] = 0x55;
 
-		query_buf[i++] = 0x55;	// 1
-		query_buf[i++] = 0xAA;
+		buf[i++] = 0x55;	// 1
+		buf[i++] = 0xAA;
 
-		query_buf[i++] = 0xAA;	// 1
-		query_buf[i++] = 0x55;
+		buf[i++] = 0xAA;	// 1
+		buf[i++] = 0x55;
 
-		query_buf[i++] = 0x55;	// 1
-		query_buf[i++] = 0xAA;
+		buf[i++] = 0x55;	// 1
+		buf[i++] = 0xAA;
 	}
 	else {
 		i = i + ((LEN_TONE + LEN_PMBL)*2);
@@ -217,26 +208,26 @@ void miller_encode(unsigned int qOffset, char* data, uint16_t len) {
 		for(k = 7; k >= 0; k--) {
 			bit = (cur >> k) & 0x01;
 			if(prev == 0 && bit == 0) {			// data == 0, prev == 0
-				query_buf[i] = (query_buf[i-1] >> 1);
-				if(!(query_buf[i] & 0x01)) {
-					query_buf[i] |= 0x80;
+				buf[i] = (buf[i-1] >> 1);
+				if(!(buf[i] & 0x01)) {
+					buf[i] |= 0x80;
 				}
 				i++;
-				query_buf[i] = query_buf[i-1];
+				buf[i] = buf[i-1];
 				i++;
 			}
 			else if(bit == 0) {					// data == 0, prev == 1
-				query_buf[i] = query_buf[i-1];
+				buf[i] = buf[i-1];
 				i++;
-				query_buf[i] = query_buf[i-1];
+				buf[i] = buf[i-1];
 				i++;
 			}
 			else {										// data == 1
-				query_buf[i] = query_buf[i-1];
+				buf[i] = buf[i-1];
 				i++;
-				query_buf[i] = (query_buf[i-1] >> 1);
-				if(!(query_buf[i] & 0x01)) {
-					query_buf[i] |= 0x80;
+				buf[i] = (buf[i-1] >> 1);
+				if(!(buf[i] & 0x01)) {
+					buf[i] |= 0x80;
 				}
 				i++;
 			}
@@ -246,11 +237,11 @@ void miller_encode(unsigned int qOffset, char* data, uint16_t len) {
 
 	if(len == 0) {
 		// Add trailing 1
-		query_buf[i] = query_buf[i-1];
+		buf[i] = buf[i-1];
 		i++;
-		query_buf[i] = (query_buf[i-1] >> 1);
-		if(!(query_buf[i] & 0x01)) {
-			query_buf[i] |= 0x80;
+		buf[i] = (buf[i-1] >> 1);
+		if(!(buf[i] & 0x01)) {
+			buf[i] |= 0x80;
 		}
 		i++;
 	}
@@ -259,10 +250,6 @@ void miller_encode(unsigned int qOffset, char* data, uint16_t len) {
 char string_cmp(char* buf1, char* buf2, uint16_t len) {
 	int i, j;
 	char cur;
-	numQueries++;
-	if(numQueries == 3) {
-		numQueries = 0;
-	}
 	for(i = 0; i < len; i++) {
 		cur = buf2[len - 1 - i];
 		for(j = 7; j >= 0; j--) {
@@ -276,13 +263,13 @@ char string_cmp(char* buf1, char* buf2, uint16_t len) {
 	return 0;
 }
 
-uint16_t calc_crc(char* dat, unsigned short len) {
+uint16_t calc_crc(uint16_t crc_start, char* dat, unsigned short len) {
 	//unsigned char i;
 	//volatile unsigned int data;
 	unsigned short tmp, short_c;
 	volatile unsigned int crc;
 
-	crc = 0xffff;
+	crc = ~crc_start;
 	//len >>= 1;
 
 	do {
@@ -372,18 +359,12 @@ __interrupt void TIMER_B (void) {
 
 				// Temporarily assuming TRext = 0
 
-//				P1OUT ^= I_PIN;
-//				P1OUT ^= I_PIN;
-
-//				numQueries++;
-//				if(numQueries == 2) {
-					inv_mode = inv_ack;	// Prepare for next R->T
-//				}
+				inv_mode = inv_ack;	// Prepare for next R->T
 
 				// Encode RN16 in M-8
 				const uint16_t rn16_bits = RN16_BITS;
-				miller_encode(0, (char*)&rn16_bits, RN16_LEN / 8);
-				miller_encode(RN16_LEN, 0x0, 0);
+				miller_encode(query_buf, 0, (char*)&rn16_bits, RN16_LEN / 8);
+				miller_encode(query_buf, RN16_LEN, 0x0, 0);
 
 				// Set up transmit length (two bytes for each bit, 8 bits per byte)
 				txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
@@ -403,14 +384,20 @@ __interrupt void TIMER_B (void) {
 					inv_mode = inv_query;
 
 					// Encode EPC in M-8
-					const uint64_t epc_bits = EPC_BITS;
-					miller_encode(0, (char*)&epc_bits, EPC_LEN / 8);
-					miller_encode(EPC_LEN, (char*)&crc_bits, CRC_LEN / 8);
-					miller_encode(EPC_LEN + CRC_LEN, 0x0, 0);
+					//const uint64_t epc_bits = EPC_BITS;
+//					miller_encode(query_buf, 0, (char*)&epc_bits, EPC_BASE_LEN / 8);
+					const uint16_t epc2_bits = 0x6666;
+					miller_encode(epc_buf, EPC_BASE_LEN, (char*)&epc2_bits, EPC_ADD_LEN / 8);
+					crc_bits = calc_crc(crc_base_bits, (char*)&epc2_bits, EPC_ADD_LEN / 8);
+					miller_encode(epc_buf, EPC_BASE_LEN + EPC_ADD_LEN, (char*)&crc_bits, CRC_LEN / 8);
+					miller_encode(epc_buf, EPC_BASE_LEN + EPC_ADD_LEN + CRC_LEN, 0x0, 0);
 
 					// Set up transmit length (two bytes for each bit, 8 bits per byte)
 					txBitLen = (EPC_LEN + CRC_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
 					txBitCount = 0;
+
+					P1OUT ^= I_PIN;
+					P1OUT ^= I_PIN;
 
 					//Switch to replying mode
 					TB0CTL |= TBCLR;
@@ -423,8 +410,8 @@ __interrupt void TIMER_B (void) {
 
 					// Encode RN16 in M-8
 					const uint16_t rn16_bits = RN16_BITS;
-					miller_encode(0, (char*)&rn16_bits, RN16_LEN / 8);
-					miller_encode(RN16_LEN, 0x0, 0);
+					miller_encode(query_buf, 0, (char*)&rn16_bits, RN16_LEN / 8);
+					miller_encode(query_buf, RN16_LEN, 0x0, 0);
 
 					// Set up transmit length (two bytes for each bit, 8 bits per byte)
 					txBitLen = (RN16_LEN + LEN_EOS + LEN_PMBL + LEN_TONE) * 2 * 8;
@@ -457,7 +444,15 @@ __interrupt void TIMER_B (void) {
 __interrupt void TIMER_B1 (void) {
 
 	if(rf_mode == rf_inInv_reply) {
+		char *buf;
 		TB0CCTL1 &= ~CCIFG;
+
+		if(inv_mode == inv_query) {
+			buf = epc_buf;
+		}
+		else {
+			buf = query_buf;
+		}
 
 		uint16_t timerVal = TB0CCR1;
 
@@ -468,7 +463,7 @@ __interrupt void TIMER_B1 (void) {
 
 			uint16_t txIndex = txBitCount / 8; 			// Which byte
 			char bitMask = 1 << (txBitCount % 8);		// Bit mask
-			char set = query_buf[txIndex] & bitMask;
+			char set = buf[txIndex] & bitMask;
 
 			if(set) {
 				P2OUT |= TX_PIN;
