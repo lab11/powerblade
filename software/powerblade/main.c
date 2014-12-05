@@ -38,7 +38,8 @@
 //#define RN16			"1010101010101010"
 #define RN16_BITS		0xFACE
 //#define RN16			"1111101011001110"
-#define EPC1_BITS		0x2000111122223333
+//#define EPC1_BITS		0x2000111122223333
+#define EPC1_BITS		0x2000B00B00000000
 uint16_t crc_base_bits;
 uint16_t crc_bits;
 //#define EPC 			"00001000000000000001000100010001"
@@ -67,6 +68,8 @@ volatile uint16_t rt_pivot;
 uint16_t tr_len;
 uint16_t blf;
 uint16_t blf_3;
+
+uint16_t tx_count;
 
 // Globals used for query (from inventory round)
 uint16_t query_bitcount;
@@ -148,6 +151,8 @@ int main(void) {
 	//blf = 282;		// Bit time = 47us
     blf = 250;
 	blf_3 = blf >> 4;
+
+	tx_count = 0;
 
 	init_crcccitt_tab();
 	const uint64_t epc_temp1_bits = EPC1_BITS;
@@ -386,9 +391,10 @@ __interrupt void TIMER_B (void) {
 					// Encode EPC in M-8
 					//const uint64_t epc_bits = EPC_BITS;
 //					miller_encode(query_buf, 0, (char*)&epc_bits, EPC_BASE_LEN / 8);
-					const uint16_t epc2_bits = 0x6666;
-					miller_encode(epc_buf, EPC_BASE_LEN, (char*)&epc2_bits, EPC_ADD_LEN / 8);
-					crc_bits = calc_crc(crc_base_bits, (char*)&epc2_bits, EPC_ADD_LEN / 8);
+					//const uint16_t epc2_bits = 0x6666;
+					miller_encode(epc_buf, EPC_BASE_LEN, (char*)&tx_count, EPC_ADD_LEN / 8);
+					crc_bits = calc_crc(crc_base_bits, (char*)&tx_count, EPC_ADD_LEN / 8);
+					tx_count++;
 					miller_encode(epc_buf, EPC_BASE_LEN + EPC_ADD_LEN, (char*)&crc_bits, CRC_LEN / 8);
 					miller_encode(epc_buf, EPC_BASE_LEN + EPC_ADD_LEN + CRC_LEN, 0x0, 0);
 
