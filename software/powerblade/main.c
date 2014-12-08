@@ -58,7 +58,7 @@ typedef enum {
 	inv_ack
 } inv_mode_t;
 
-rf_mode_t rf_mode;
+volatile rf_mode_t rf_mode;
 inv_mode_t inv_mode;
 
 // Globals used in preamble timing capture
@@ -114,13 +114,28 @@ int main(void) {
     CSCTL0_H = 0xA5;
     //CSCTL1 = DCOFSEL0 + DCOFSEL1;   			// Set 8MHz. DCO setting
     CSCTL1 = DCORSEL + DCOFSEL0 + DCOFSEL1;   	// Set max. DCO setting
-    CSCTL2 = SELA_3 + SELS_3 + SELM_3;        	// set ACLK = MCLK = DCO
+    CSCTL2 = SELA_1 + SELS_3 + SELM_3;        	// set ACLK = MCLK = DCO
     CSCTL3 = DIVA_0 + DIVS_0 + DIVM_0;        	// set all dividers to 0
 
+    // Low power in port J
+    PJDIR = 0;
+    PJOUT = 0;
+    PJREN = 0xFF;
+
+    // Low power in port 1
+    P1DIR = 0;
+    P1OUT = 0;
+    P1REN = 0xFF;
+
+    // Low power in port 2
+    P2DIR = 0;
+    P2OUT = 0;
+    P2REN = 0xFF;
+
     // Set up LEDs as outputs
-    LED1_DIR |= LED1_PIN;
-    LED2_DIR |= LED2_PIN;
-    LED3_DIR |= LED3_PIN;
+//    LED1_DIR |= LED1_PIN;
+//    LED2_DIR |= LED2_PIN;
+//    LED3_DIR |= LED3_PIN;
 
     // Set up RX input
     P2DIR &= ~RX_PIN;							// Set RX to input
@@ -132,8 +147,8 @@ int main(void) {
     P2OUT &= ~TX_PIN;
 
     // Set up debug output (I_SENSE)
-    P1DIR |= I_PIN;
-    P1OUT &= ~I_PIN;
+//    P1DIR |= I_PIN;
+//    P1OUT &= ~I_PIN;
 
     // Set up timer capture
     TB0CCTL0 = CM_1 + CCIS_0 + CAP;  			// Capture on rising edge for preamble
@@ -166,13 +181,15 @@ int main(void) {
 
     __enable_interrupt();
 
-    while(1) {
-    	volatile unsigned long i = 0;
+//    while(1) {
+//    	volatile unsigned long i = 0;
+//
+//    	LED1_OUT ^= LED1_PIN;
+//
+//    	for(i = 1000000; i > 0; i--);
+//    }
+    __bis_SR_register(LPM1_bits);
 
-    	LED1_OUT ^= LED1_PIN;
-
-    	for(i = 1000000; i > 0; i--);
-    }
 }
 
 void miller_encode(char buf[], unsigned int qOffset, char* data, uint16_t len) {
