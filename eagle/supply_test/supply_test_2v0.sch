@@ -7629,6 +7629,74 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <smd name="P" x="9.017" y="0" dx="7.62" dy="1.651" layer="1" rot="R90"/>
 <hole x="0" y="-12.5222" drill="6.35"/>
 </package>
+<package name="AC3_FILM">
+<wire x1="-12.7" y1="-15.875" x2="-12.7" y2="9.525" width="0" layer="20"/>
+<wire x1="-12.7" y1="9.525" x2="12.7" y2="9.525" width="0" layer="20"/>
+<wire x1="12.7" y1="9.525" x2="12.7" y2="-15.875" width="0" layer="20"/>
+<wire x1="-7.5565" y1="4.445" x2="-7.5565" y2="-4.445" width="0" layer="20"/>
+<wire x1="-7.5565" y1="-4.445" x2="-5.1435" y2="-4.445" width="0" layer="20"/>
+<wire x1="-5.1435" y1="-4.445" x2="-5.1435" y2="4.445" width="0" layer="20"/>
+<wire x1="-5.1435" y1="4.445" x2="-7.5565" y2="4.445" width="0" layer="20"/>
+<wire x1="7.5565" y1="3.6195" x2="7.5565" y2="-3.6195" width="0" layer="20"/>
+<wire x1="7.5565" y1="-3.6195" x2="5.1435" y2="-3.6195" width="0" layer="20"/>
+<wire x1="5.1435" y1="-3.6195" x2="5.1435" y2="3.6195" width="0" layer="20"/>
+<wire x1="5.1435" y1="3.6195" x2="7.5565" y2="3.6195" width="0" layer="20"/>
+<hole x="0" y="-12.5222" drill="6.35"/>
+<smd name="N" x="-8.255" y="0" dx="1.27" dy="0.254" layer="1" rot="R90"/>
+<smd name="P" x="8.255" y="0" dx="1.27" dy="0.254" layer="1" rot="R90"/>
+<polygon width="0.127" layer="1">
+<vertex x="-8.5725" y="3.81"/>
+<vertex x="-6.6675" y="3.81"/>
+<vertex x="-6.6675" y="-3.81"/>
+<vertex x="-8.5725" y="-3.81"/>
+</polygon>
+<polygon width="0.127" layer="1">
+<vertex x="-4.1275" y="3.81"/>
+<vertex x="-6.0325" y="3.81"/>
+<vertex x="-6.0325" y="-3.81"/>
+<vertex x="-4.1275" y="-3.81"/>
+</polygon>
+<polygon width="0.127" layer="1">
+<vertex x="-8.5725" y="3.81"/>
+<vertex x="-8.5725" y="4.7625"/>
+<vertex x="-8.255" y="5.08"/>
+<vertex x="-4.445" y="5.08"/>
+<vertex x="-4.1275" y="4.7625"/>
+<vertex x="-4.1275" y="3.81"/>
+<vertex x="-4.445" y="3.81"/>
+<vertex x="-4.445" y="4.445"/>
+<vertex x="-4.7625" y="4.7625"/>
+<vertex x="-7.9375" y="4.7625"/>
+<vertex x="-8.255" y="4.445"/>
+<vertex x="-8.255" y="3.81"/>
+</polygon>
+<polygon width="0.127" layer="1">
+<vertex x="8.5725" y="3.175"/>
+<vertex x="6.6675" y="3.175"/>
+<vertex x="6.6675" y="-3.175"/>
+<vertex x="8.5725" y="-3.175"/>
+</polygon>
+<polygon width="0.127" layer="1">
+<vertex x="6.0325" y="3.175"/>
+<vertex x="4.1275" y="3.175"/>
+<vertex x="4.1275" y="-3.175"/>
+<vertex x="6.0325" y="-3.175"/>
+</polygon>
+<polygon width="0.127" layer="1">
+<vertex x="4.1275" y="3.175"/>
+<vertex x="4.1275" y="3.81"/>
+<vertex x="4.7625" y="4.445"/>
+<vertex x="7.9375" y="4.445"/>
+<vertex x="8.5725" y="3.81"/>
+<vertex x="8.5725" y="3.175"/>
+<vertex x="7.9375" y="3.175"/>
+<vertex x="7.9375" y="3.81"/>
+<vertex x="7.62" y="4.1275"/>
+<vertex x="5.08" y="4.1275"/>
+<vertex x="4.7625" y="3.81"/>
+<vertex x="4.7625" y="3.175"/>
+</polygon>
+</package>
 </packages>
 <symbols>
 <symbol name="DIODE-ZENER">
@@ -7826,6 +7894,15 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 </technologies>
 </device>
 <device name="3SLOT_OUT" package="AC3_SLOT_OUT">
+<connects>
+<connect gate="G$1" pin="N" pad="N"/>
+<connect gate="G$1" pin="P" pad="P"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="FILM" package="AC3_FILM">
 <connects>
 <connect gate="G$1" pin="N" pad="N"/>
 <connect gate="G$1" pin="P" pad="P"/>
@@ -8119,7 +8196,7 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 </part>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="P+1" library="supply1" deviceset="VCC" device=""/>
-<part name="J21" library="powerfilm" deviceset="AC_IN" device="3SLOT_OUT" value="AC_IN3SLOT_OUT">
+<part name="J21" library="powerfilm" deviceset="AC_IN" device="FILM" value="AC_INFILM">
 <attribute name="DIGIKEY_2" value="AE9888-ND"/>
 </part>
 <part name="TP1" library="skyspecs" deviceset="TP" device="_STD">
