@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.05" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.025" altunitdist="inch" altunit="inch"/>
+<grid distance="0.05" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.0125" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="yes"/>
@@ -438,59 +438,44 @@
 <wire x1="5.1435" y1="-3.6195" x2="5.1435" y2="3.6195" width="0" layer="20"/>
 <wire x1="5.1435" y1="3.6195" x2="7.5565" y2="3.6195" width="0" layer="20"/>
 <hole x="0" y="-12.5222" drill="6.35"/>
-<smd name="N" x="-8.255" y="0" dx="1.27" dy="0.254" layer="1" rot="R90"/>
-<smd name="P" x="8.255" y="0" dx="1.27" dy="0.254" layer="1" rot="R90"/>
-<polygon width="0.127" layer="1">
-<vertex x="-8.5725" y="3.81"/>
-<vertex x="-6.6675" y="3.81"/>
-<vertex x="-6.6675" y="-3.81"/>
-<vertex x="-8.5725" y="-3.81"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="-4.1275" y="3.81"/>
-<vertex x="-6.0325" y="3.81"/>
-<vertex x="-6.0325" y="-3.81"/>
-<vertex x="-4.1275" y="-3.81"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="-8.5725" y="3.81"/>
-<vertex x="-8.5725" y="4.7625"/>
-<vertex x="-8.255" y="5.08"/>
-<vertex x="-4.445" y="5.08"/>
-<vertex x="-4.1275" y="4.7625"/>
-<vertex x="-4.1275" y="3.81"/>
-<vertex x="-4.445" y="3.81"/>
-<vertex x="-4.445" y="4.445"/>
-<vertex x="-4.7625" y="4.7625"/>
-<vertex x="-7.9375" y="4.7625"/>
-<vertex x="-8.255" y="4.445"/>
-<vertex x="-8.255" y="3.81"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="8.5725" y="3.175"/>
+<smd name="N" x="-8.255" y="0" dx="1.27" dy="0.254" layer="16" rot="R90"/>
+<smd name="P" x="8.255" y="0" dx="1.27" dy="0.254" layer="16" rot="R90"/>
+<polygon width="0.127" layer="16">
+<vertex x="4.1275" y="-3.175"/>
+<vertex x="6.0325" y="-3.175"/>
+<vertex x="6.0325" y="3.175"/>
+<vertex x="4.7625" y="3.175"/>
+<vertex x="4.7625" y="3.81"/>
+<vertex x="5.08" y="4.1275"/>
+<vertex x="7.62" y="4.1275"/>
+<vertex x="7.9375" y="3.81"/>
+<vertex x="7.9375" y="3.175"/>
 <vertex x="6.6675" y="3.175"/>
 <vertex x="6.6675" y="-3.175"/>
 <vertex x="8.5725" y="-3.175"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="6.0325" y="3.175"/>
-<vertex x="4.1275" y="3.175"/>
-<vertex x="4.1275" y="-3.175"/>
-<vertex x="6.0325" y="-3.175"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="4.1275" y="3.175"/>
-<vertex x="4.1275" y="3.81"/>
-<vertex x="4.7625" y="4.445"/>
-<vertex x="7.9375" y="4.445"/>
 <vertex x="8.5725" y="3.81"/>
-<vertex x="8.5725" y="3.175"/>
-<vertex x="7.9375" y="3.175"/>
-<vertex x="7.9375" y="3.81"/>
-<vertex x="7.62" y="4.1275"/>
-<vertex x="5.08" y="4.1275"/>
-<vertex x="4.7625" y="3.81"/>
-<vertex x="4.7625" y="3.175"/>
+<vertex x="7.9375" y="4.445"/>
+<vertex x="4.7625" y="4.445"/>
+<vertex x="4.1275" y="3.81"/>
+</polygon>
+<polygon width="0.127" layer="16">
+<vertex x="-8.5725" y="-3.81"/>
+<vertex x="-6.6675" y="-3.81"/>
+<vertex x="-6.6675" y="3.81"/>
+<vertex x="-7.9375" y="3.81"/>
+<vertex x="-8.255" y="3.81"/>
+<vertex x="-8.255" y="4.445"/>
+<vertex x="-7.9375" y="4.7625"/>
+<vertex x="-4.7625" y="4.7625"/>
+<vertex x="-4.445" y="4.445"/>
+<vertex x="-4.445" y="3.81"/>
+<vertex x="-6.0325" y="3.81"/>
+<vertex x="-6.0325" y="-3.81"/>
+<vertex x="-4.1275" y="-3.81"/>
+<vertex x="-4.1275" y="4.7625"/>
+<vertex x="-4.445" y="5.08"/>
+<vertex x="-8.255" y="5.08"/>
+<vertex x="-8.5725" y="4.7625"/>
 </polygon>
 </package>
 </packages>

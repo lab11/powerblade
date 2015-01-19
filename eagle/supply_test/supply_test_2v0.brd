@@ -32,10 +32,10 @@
 <layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
 <layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="28" name="bValues" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="no" active="yes"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
+<layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="yes"/>
@@ -1249,59 +1249,44 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="5.1435" y1="-3.6195" x2="5.1435" y2="3.6195" width="0" layer="20"/>
 <wire x1="5.1435" y1="3.6195" x2="7.5565" y2="3.6195" width="0" layer="20"/>
 <hole x="0" y="-12.5222" drill="6.35"/>
-<smd name="N" x="-8.255" y="0" dx="1.27" dy="0.254" layer="1" rot="R90"/>
-<smd name="P" x="8.255" y="0" dx="1.27" dy="0.254" layer="1" rot="R90"/>
-<polygon width="0.127" layer="1">
-<vertex x="-8.5725" y="3.81"/>
-<vertex x="-6.6675" y="3.81"/>
-<vertex x="-6.6675" y="-3.81"/>
-<vertex x="-8.5725" y="-3.81"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="-4.1275" y="3.81"/>
-<vertex x="-6.0325" y="3.81"/>
-<vertex x="-6.0325" y="-3.81"/>
-<vertex x="-4.1275" y="-3.81"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="-8.5725" y="3.81"/>
-<vertex x="-8.5725" y="4.7625"/>
-<vertex x="-8.255" y="5.08"/>
-<vertex x="-4.445" y="5.08"/>
-<vertex x="-4.1275" y="4.7625"/>
-<vertex x="-4.1275" y="3.81"/>
-<vertex x="-4.445" y="3.81"/>
-<vertex x="-4.445" y="4.445"/>
-<vertex x="-4.7625" y="4.7625"/>
-<vertex x="-7.9375" y="4.7625"/>
-<vertex x="-8.255" y="4.445"/>
-<vertex x="-8.255" y="3.81"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="8.5725" y="3.175"/>
+<smd name="N" x="-8.255" y="0" dx="1.27" dy="0.254" layer="16" rot="R90"/>
+<smd name="P" x="8.255" y="0" dx="1.27" dy="0.254" layer="16" rot="R90"/>
+<polygon width="0.127" layer="16">
+<vertex x="4.1275" y="-3.175"/>
+<vertex x="6.0325" y="-3.175"/>
+<vertex x="6.0325" y="3.175"/>
+<vertex x="4.7625" y="3.175"/>
+<vertex x="4.7625" y="3.81"/>
+<vertex x="5.08" y="4.1275"/>
+<vertex x="7.62" y="4.1275"/>
+<vertex x="7.9375" y="3.81"/>
+<vertex x="7.9375" y="3.175"/>
 <vertex x="6.6675" y="3.175"/>
 <vertex x="6.6675" y="-3.175"/>
 <vertex x="8.5725" y="-3.175"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="6.0325" y="3.175"/>
-<vertex x="4.1275" y="3.175"/>
-<vertex x="4.1275" y="-3.175"/>
-<vertex x="6.0325" y="-3.175"/>
-</polygon>
-<polygon width="0.127" layer="1">
-<vertex x="4.1275" y="3.175"/>
-<vertex x="4.1275" y="3.81"/>
-<vertex x="4.7625" y="4.445"/>
-<vertex x="7.9375" y="4.445"/>
 <vertex x="8.5725" y="3.81"/>
-<vertex x="8.5725" y="3.175"/>
-<vertex x="7.9375" y="3.175"/>
-<vertex x="7.9375" y="3.81"/>
-<vertex x="7.62" y="4.1275"/>
-<vertex x="5.08" y="4.1275"/>
-<vertex x="4.7625" y="3.81"/>
-<vertex x="4.7625" y="3.175"/>
+<vertex x="7.9375" y="4.445"/>
+<vertex x="4.7625" y="4.445"/>
+<vertex x="4.1275" y="3.81"/>
+</polygon>
+<polygon width="0.127" layer="16">
+<vertex x="-8.5725" y="-3.81"/>
+<vertex x="-6.6675" y="-3.81"/>
+<vertex x="-6.6675" y="3.81"/>
+<vertex x="-7.9375" y="3.81"/>
+<vertex x="-8.255" y="3.81"/>
+<vertex x="-8.255" y="4.445"/>
+<vertex x="-7.9375" y="4.7625"/>
+<vertex x="-4.7625" y="4.7625"/>
+<vertex x="-4.445" y="4.445"/>
+<vertex x="-4.445" y="3.81"/>
+<vertex x="-6.0325" y="3.81"/>
+<vertex x="-6.0325" y="-3.81"/>
+<vertex x="-4.1275" y="-3.81"/>
+<vertex x="-4.1275" y="4.7625"/>
+<vertex x="-4.445" y="5.08"/>
+<vertex x="-8.255" y="5.08"/>
+<vertex x="-8.5725" y="4.7625"/>
 </polygon>
 </package>
 <package name="TO-253-4">
@@ -1561,8 +1546,8 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <element name="D3" library="powerfilm" package="TO-253-4" value="BRIDGE_BGX" x="-20.32" y="27.94">
 <attribute name="DIGIKEY" value="BGX50AINCT-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
 </element>
-<element name="R8" library="rcl" package="R0603" value="1M" x="-15.24" y="45.72">
-<attribute name="DIGIKEY" value="MCT0603-1.00M-CFCT-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
+<element name="R8" library="rcl" package="R0603" value="1M" x="-1.27" y="2.54">
+<attribute name="DIGIKEY" value="MCT0603-1.00M-CFCT-ND" x="13.97" y="-43.18" size="1.778" layer="27" display="off"/>
 </element>
 <element name="U1" library="powerfilm" package="WDFN-6" value="TPS62122" x="-26.67" y="44.45">
 <attribute name="DIGIKEY" value="296-27695-1-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
@@ -1594,7 +1579,7 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="C1" pad="2"/>
 <contactref element="R8" pad="1"/>
 <wire x1="-7.405" y1="5.3975" x2="-3.5025" y2="6.0325" width="0" layer="19" extent="1-1"/>
-<wire x1="-16.09" y1="45.72" x2="-7.405" y2="5.3975" width="0" layer="19" extent="1-1"/>
+<wire x1="-2.12" y1="2.54" x2="-7.405" y2="5.3975" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$2">
 <contactref element="R1" pad="1"/>
@@ -1661,7 +1646,7 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="R2" pad="1"/>
 <wire x1="-36.41" y1="40.64" x2="1.5975" y2="6.0325" width="0" layer="19" extent="1-1"/>
 <wire x1="-19.9" y1="45.72" x2="-36.41" y2="40.64" width="0" layer="19" extent="1-1"/>
-<wire x1="-14.39" y1="45.72" x2="-19.9" y2="45.72" width="0" layer="19" extent="1-1"/>
+<wire x1="-0.42" y1="2.54" x2="-19.9" y2="45.72" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$5">
 <contactref element="R4" pad="2"/>
