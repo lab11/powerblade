@@ -8203,14 +8203,14 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
 <part name="C4" library="rcl" deviceset="C-EU" device="C0603" value="22pF"/>
-<part name="R10" library="rcl" deviceset="R-US_" device="R0603" value="4.99k"/>
+<part name="R10" library="rcl" deviceset="R-US_" device="R0402" value="4.99k"/>
 <part name="Q1" library="nav" deviceset="2N7002" device=""/>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
 <part name="R11" library="rcl" deviceset="R-US_" device="R0603" value="4.99k"/>
 <part name="+3V1" library="supply1" deviceset="+3V3" device=""/>
 <part name="P+2" library="supply1" deviceset="VCC" device=""/>
-<part name="C7" library="rcl" deviceset="C-EU" device="C0603" value="4.7uF"/>
-<part name="C8" library="rcl" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C7" library="rcl" deviceset="C-EU" device="C0402" value="4.7uF"/>
+<part name="C8" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="C9" library="rcl" deviceset="C-EU" device="C0603" value="0.1uF"/>
 <part name="C10" library="rcl" deviceset="C-EU" device="C0603" value="4.7uF"/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
@@ -8222,6 +8222,10 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <part name="R5" library="rcl" deviceset="R-US_" device="R0603" value="NP"/>
 <part name="P+3" library="supply1" deviceset="VCC" device=""/>
 <part name="R6" library="rcl" deviceset="R-US_" device="R0603" value="NP"/>
+<part name="TP3" library="skyspecs" deviceset="TP" device="_STD">
+<attribute name="DIGIKEY" value="5000K-ND "/>
+</part>
+<part name="TP4" library="skyspecs" deviceset="TP" device="_STD"/>
 </parts>
 <sheets>
 <sheet>
@@ -8273,6 +8277,9 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <instance part="R5" gate="G$1" x="66.04" y="-33.02"/>
 <instance part="P+3" gate="VCC" x="73.66" y="-25.4"/>
 <instance part="R6" gate="G$1" x="33.02" y="7.62"/>
+<instance part="TP3" gate="G$1" x="10.16" y="7.62">
+<attribute name="DIGIKEY" x="10.16" y="7.62" size="1.778" layer="96" display="off"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -8287,6 +8294,10 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <wire x1="5.08" y1="0" x2="2.54" y2="0" width="0.1524" layer="91"/>
 <wire x1="2.54" y1="0" x2="2.54" y2="-10.16" width="0.1524" layer="91"/>
 <junction x="2.54" y="-10.16"/>
+<pinref part="TP3" gate="G$1" pin="P$1"/>
+<wire x1="5.08" y1="7.62" x2="2.54" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="2.54" y1="7.62" x2="2.54" y2="0" width="0.1524" layer="91"/>
+<junction x="2.54" y="0"/>
 </segment>
 </net>
 <net name="N$2" class="0">
@@ -8433,6 +8444,7 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <instance part="C10" gate="G$1" x="63.5" y="0"/>
 <instance part="GND6" gate="1" x="-66.04" y="-30.48"/>
 <instance part="GND7" gate="1" x="63.5" y="-30.48"/>
+<instance part="TP4" gate="G$1" x="50.8" y="10.16"/>
 </instances>
 <busses>
 </busses>
@@ -8569,6 +8581,9 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <pinref part="C9" gate="G$1" pin="1"/>
 <wire x1="53.34" y1="5.08" x2="53.34" y2="2.54" width="0.1524" layer="91"/>
 <junction x="53.34" y="5.08"/>
+<pinref part="TP4" gate="G$1" pin="P$1"/>
+<wire x1="45.72" y1="10.16" x2="40.64" y2="10.16" width="0.1524" layer="91"/>
+<junction x="40.64" y="10.16"/>
 </segment>
 </net>
 </nets>
