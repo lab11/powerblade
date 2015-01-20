@@ -8231,6 +8231,7 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <attribute name="DIGIKEY" value="5000K-ND "/>
 </part>
 <part name="TP4" library="skyspecs" deviceset="TP" device="_STD"/>
+<part name="TP5" library="skyspecs" deviceset="TP" device="_STD"/>
 </parts>
 <sheets>
 <sheet>
@@ -8450,6 +8451,7 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <instance part="GND6" gate="1" x="-66.04" y="-30.48"/>
 <instance part="GND7" gate="1" x="63.5" y="-30.48"/>
 <instance part="TP4" gate="G$1" x="50.8" y="10.16"/>
+<instance part="TP5" gate="G$1" x="15.24" y="-40.64"/>
 </instances>
 <busses>
 </busses>
@@ -8534,6 +8536,11 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <wire x1="-43.18" y1="-17.78" x2="-40.64" y2="-17.78" width="0.1524" layer="91"/>
 <junction x="-40.64" y="-17.78"/>
 <label x="-43.18" y="-17.78" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="TP5" gate="G$1" pin="P$1"/>
+<wire x1="7.62" y1="-40.64" x2="10.16" y2="-40.64" width="0.1524" layer="91"/>
+<label x="7.62" y="-40.64" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="N$9" class="0">
