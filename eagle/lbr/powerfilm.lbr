@@ -1193,7 +1193,7 @@
 </device>
 </devices>
 </deviceset>
-<deviceset name="AD524">
+<deviceset name="AD524" prefix="U">
 <gates>
 <gate name="G$1" symbol="AD524" x="0" y="0"/>
 </gates>
