@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.3">
+<eagle version="6.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -1669,7 +1669,6 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <element name="C3" library="rcl" package="C0603" value="33uF" x="3.7338" y="4.445" smashed="yes" rot="R270">
 <attribute name="DIGIKEY" value="718-1672-1-ND" x="-40.7162" y="-38.735" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="4.0513" y="3.01625" size="0.762" layer="25" rot="R270"/>
-<attribute name="VALUE" x="1.8288" y="5.08" size="1.27" layer="27" rot="R270"/>
 </element>
 <element name="J21" library="powerfilm" package="AC3_FILM" value="AC_INFILM" x="0" y="0" smashed="yes">
 <attribute name="DIGIKEY" value="NP" x="0" y="0" size="1.778" layer="27" display="off"/>
