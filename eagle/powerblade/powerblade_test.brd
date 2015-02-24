@@ -1315,6 +1315,16 @@ Source: http://www.niccomp.com/Catalog/nis.pdf</description>
 <wire x1="-1.27" y1="1.905" x2="-1.27" y2="0.635" width="0.127" layer="21"/>
 <wire x1="-1.905" y1="1.27" x2="-0.635" y2="1.27" width="0.127" layer="21"/>
 </package>
+<package name="L0402">
+<wire x1="-0.245" y1="0.224" x2="0.245" y2="0.224" width="0.1524" layer="51"/>
+<wire x1="0.245" y1="-0.224" x2="-0.245" y2="-0.224" width="0.1524" layer="51"/>
+<smd name="1" x="-0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
+<smd name="2" x="0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
+<text x="-0.635" y="0.635" size="1.27" layer="25">&gt;NAME</text>
+<text x="-0.635" y="-1.905" size="1.27" layer="27">&gt;VALUE</text>
+<rectangle x1="-0.554" y1="-0.3048" x2="-0.254" y2="0.2951" layer="51"/>
+<rectangle x1="0.2588" y1="-0.3048" x2="0.5588" y2="0.2951" layer="51"/>
+</package>
 </packages>
 </library>
 <library name="powerfilm">
@@ -1599,6 +1609,13 @@ Source: http://www.niccomp.com/Catalog/nis.pdf</description>
 <wire x1="3.4925" y1="-4.064" x2="3.4925" y2="-5.08" width="0.127" layer="21"/>
 <wire x1="3.4925" y1="-5.08" x2="1.27" y2="-5.08" width="0.127" layer="21"/>
 <text x="-3.81" y="6.35" size="1.27" layer="25">&gt;NAME</text>
+</package>
+<package name="ANT-916">
+<smd name="P1" x="-8.001" y="0" dx="1.016" dy="3.302" layer="1"/>
+<smd name="M1" x="8.001" y="0" dx="1.016" dy="3.302" layer="1"/>
+<wire x1="-6.985" y1="1.524" x2="6.985" y2="1.524" width="0.127" layer="21"/>
+<wire x1="6.985" y1="-1.524" x2="-6.985" y2="-1.524" width="0.127" layer="21"/>
+<text x="-7.62" y="2.54" size="1.27" layer="25">&gt;NAME</text>
 </package>
 </packages>
 </library>
@@ -2125,6 +2142,11 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <element name="R25" library="rcl" package="R0603" value="NP" x="-50.8" y="-297.18"/>
 <element name="R26" library="rcl" package="R0603" value="100k" x="-50.8" y="-302.26"/>
 <element name="R27" library="rcl" package="R0603" value="0" x="-50.8" y="-307.34"/>
+<element name="L5" library="rcl" package="L0402" value="10nH" x="-50.8" y="-312.42"/>
+<element name="L6" library="rcl" package="L0402" value="100nH" x="-50.8" y="-316.23"/>
+<element name="Y2" library="powerfilm" package="ANT-916" value="ANT-916" x="-43.18" y="-322.58">
+<attribute name="DIGIKEY" value="ANT-916-CHP-TCT-ND" x="-43.18" y="-322.58" size="1.778" layer="27" display="off"/>
+</element>
 </elements>
 <signals>
 <signal name="N$1">
@@ -2302,6 +2324,7 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="R31" pad="1"/>
 <contactref element="R32" pad="1"/>
 <contactref element="R26" pad="2"/>
+<contactref element="L6" pad="2"/>
 <wire x1="-45.466" y1="-160.274" x2="-48.768" y2="-168.2115" width="0" layer="19" extent="1-1"/>
 <wire x1="-48.768" y1="-159.4485" x2="-45.466" y2="-160.274" width="0" layer="19" extent="1-1"/>
 <wire x1="-41.66" y1="-158.75" x2="-45.466" y2="-160.274" width="0" layer="19" extent="1-1"/>
@@ -2360,6 +2383,7 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="-51.65" y1="-281.94" x2="-51.65" y2="-271.78" width="0" layer="19" extent="1-1"/>
 <wire x1="-51.65" y1="-287.02" x2="-51.65" y2="-281.94" width="0" layer="19" extent="1-1"/>
 <wire x1="-49.95" y1="-302.26" x2="-51.65" y2="-287.02" width="0" layer="19" extent="1-1"/>
+<wire x1="-50.15" y1="-316.23" x2="-49.95" y2="-302.26" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="VCC">
 <contactref element="C3" pad="1"/>
@@ -3140,6 +3164,18 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="R34" pad="1"/>
 <contactref element="U3" pad="P14"/>
 <wire x1="-24.65" y1="-20.885" x2="-51.65" y2="-251.46" width="0" layer="19" extent="1-1"/>
+</signal>
+<signal name="N$62">
+<contactref element="U2" pad="P20"/>
+<contactref element="L5" pad="2"/>
+<wire x1="-50.15" y1="-312.42" x2="-47.752" y2="-159.4485" width="0" layer="19" extent="1-1"/>
+</signal>
+<signal name="N$63">
+<contactref element="L5" pad="1"/>
+<contactref element="Y2" pad="P1"/>
+<contactref element="L6" pad="1"/>
+<wire x1="-51.45" y1="-316.23" x2="-51.181" y2="-322.58" width="0" layer="19" extent="1-1"/>
+<wire x1="-51.45" y1="-312.42" x2="-51.45" y2="-316.23" width="0" layer="19" extent="1-1"/>
 </signal>
 </signals>
 </board>

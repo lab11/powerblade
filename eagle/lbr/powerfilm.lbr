@@ -633,6 +633,13 @@
 <wire x1="3.4925" y1="-5.08" x2="1.27" y2="-5.08" width="0.127" layer="21"/>
 <text x="-3.81" y="6.35" size="1.27" layer="25">&gt;NAME</text>
 </package>
+<package name="ANT-916">
+<smd name="P1" x="-8.001" y="0" dx="1.016" dy="3.302" layer="1"/>
+<smd name="M1" x="8.001" y="0" dx="1.016" dy="3.302" layer="1"/>
+<wire x1="-6.985" y1="1.524" x2="6.985" y2="1.524" width="0.127" layer="21"/>
+<wire x1="6.985" y1="-1.524" x2="-6.985" y2="-1.524" width="0.127" layer="21"/>
+<text x="-7.62" y="2.54" size="1.27" layer="25">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="SOCKET">
@@ -1682,6 +1689,23 @@
 <technologies>
 <technology name="">
 <attribute name="DIGIKEY" value="583-1088-1-ND" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="ANT-916" prefix="Y">
+<gates>
+<gate name="G$1" symbol="ANT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="ANT-916">
+<connects>
+<connect gate="G$1" pin="P1" pad="P1"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="ANT-916-CHP-TCT-ND" constant="no"/>
 </technology>
 </technologies>
 </device>
