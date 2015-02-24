@@ -603,6 +603,36 @@
 <wire x1="1.15" y1="-1" x2="-1.15" y2="-1" width="0.127" layer="21"/>
 <text x="-2.54" y="1.27" size="1.27" layer="25">&gt;NAME</text>
 </package>
+<package name="SM-20H">
+<smd name="P2" x="-2.794" y="3.556" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P3" x="-2.794" y="2.54" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P4" x="-2.794" y="1.524" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P5" x="-2.794" y="0.508" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P6" x="-2.794" y="-0.508" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P7" x="-2.794" y="-1.524" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P8" x="-2.794" y="-2.54" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P9" x="-2.794" y="-3.556" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P12" x="2.794" y="-3.556" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P13" x="2.794" y="-2.54" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P14" x="2.794" y="-1.524" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P15" x="2.794" y="-0.508" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P16" x="2.794" y="0.508" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P17" x="2.794" y="1.524" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P18" x="2.794" y="2.54" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P19" x="2.794" y="3.556" dx="2.286" dy="0.635" layer="1"/>
+<smd name="P10" x="-0.508" y="-4.3815" dx="2.286" dy="0.635" layer="1" rot="R90"/>
+<smd name="P11" x="0.508" y="-4.3815" dx="2.286" dy="0.635" layer="1" rot="R90"/>
+<smd name="P20" x="0.508" y="4.3815" dx="2.286" dy="0.635" layer="1" rot="R90"/>
+<smd name="P1" x="-0.508" y="4.3815" dx="2.286" dy="0.635" layer="1" rot="R90"/>
+<wire x1="-1.27" y1="5.08" x2="-3.4925" y2="4.064" width="0.127" layer="21"/>
+<wire x1="3.4925" y1="4.064" x2="3.4925" y2="5.08" width="0.127" layer="21"/>
+<wire x1="3.4925" y1="5.08" x2="1.27" y2="5.08" width="0.127" layer="21"/>
+<wire x1="-3.4925" y1="-5.08" x2="-1.27" y2="-5.08" width="0.127" layer="21"/>
+<wire x1="-3.4925" y1="-5.08" x2="-3.4925" y2="-4.064" width="0.127" layer="21"/>
+<wire x1="3.4925" y1="-4.064" x2="3.4925" y2="-5.08" width="0.127" layer="21"/>
+<wire x1="3.4925" y1="-5.08" x2="1.27" y2="-5.08" width="0.127" layer="21"/>
+<text x="-3.81" y="6.35" size="1.27" layer="25">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="SOCKET">
@@ -1007,6 +1037,34 @@
 <wire x1="0" y1="7.62" x2="0" y2="0" width="0.254" layer="94"/>
 <wire x1="0" y1="0" x2="5.08" y2="0" width="0.254" layer="94"/>
 <text x="2.54" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
+</symbol>
+<symbol name="TR1000">
+<pin name="RFIO" x="17.78" y="17.78" length="middle" rot="R180"/>
+<pin name="CNT1" x="-17.78" y="-10.16" length="middle"/>
+<pin name="CNT0" x="-17.78" y="-7.62" length="middle"/>
+<pin name="RXDATA" x="-17.78" y="-5.08" length="middle"/>
+<pin name="TXMOD" x="-17.78" y="-2.54" length="middle"/>
+<pin name="AGCCAP" x="-17.78" y="17.78" length="middle"/>
+<pin name="GND" x="0" y="-20.32" visible="pad" length="middle" rot="R90"/>
+<pin name="VCC1" x="-2.54" y="27.94" visible="pad" length="middle" rot="R270"/>
+<pin name="VCC2" x="2.54" y="27.94" visible="pad" length="middle" rot="R270"/>
+<pin name="PKDET" x="17.78" y="12.7" length="middle" rot="R180"/>
+<pin name="REF" x="17.78" y="7.62" length="middle" rot="R180"/>
+<pin name="THLD1" x="17.78" y="5.08" length="middle" rot="R180"/>
+<pin name="THLD2" x="17.78" y="2.54" length="middle" rot="R180"/>
+<pin name="BBOUT" x="17.78" y="-5.08" length="middle" rot="R180"/>
+<pin name="CMPIN" x="17.78" y="-10.16" length="middle" rot="R180"/>
+<pin name="PWIDTH" x="-17.78" y="10.16" length="middle"/>
+<pin name="PRATE" x="-17.78" y="7.62" length="middle"/>
+<pin name="LPFADJ" x="-17.78" y="2.54" length="middle"/>
+<text x="-5.842" y="20.574" size="1.524" layer="95">VCC1</text>
+<text x="1.27" y="20.574" size="1.524" layer="95">VCC2</text>
+<text x="-2.54" y="-13.97" size="1.524" layer="95">GND</text>
+<wire x1="-12.7" y1="-15.24" x2="12.7" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="12.7" y1="-15.24" x2="12.7" y2="22.86" width="0.254" layer="94"/>
+<wire x1="12.7" y1="22.86" x2="-12.7" y2="22.86" width="0.254" layer="94"/>
+<wire x1="-12.7" y1="22.86" x2="-12.7" y2="-15.24" width="0.254" layer="94"/>
+<text x="-12.7" y="22.86" size="1.778" layer="95">&gt;NAME</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -1590,6 +1648,40 @@
 <technologies>
 <technology name="">
 <attribute name="FRACTUS" value="FR05-S1-N-0-110" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="TR1000" prefix="U">
+<gates>
+<gate name="G$1" symbol="TR1000" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="SM-20H">
+<connects>
+<connect gate="G$1" pin="AGCCAP" pad="P3"/>
+<connect gate="G$1" pin="BBOUT" pad="P5"/>
+<connect gate="G$1" pin="CMPIN" pad="P6"/>
+<connect gate="G$1" pin="CNT0" pad="P18"/>
+<connect gate="G$1" pin="CNT1" pad="P17"/>
+<connect gate="G$1" pin="GND" pad="P1 P10 P19"/>
+<connect gate="G$1" pin="LPFADJ" pad="P9"/>
+<connect gate="G$1" pin="PKDET" pad="P4"/>
+<connect gate="G$1" pin="PRATE" pad="P14"/>
+<connect gate="G$1" pin="PWIDTH" pad="P15"/>
+<connect gate="G$1" pin="REF" pad="P11"/>
+<connect gate="G$1" pin="RFIO" pad="P20"/>
+<connect gate="G$1" pin="RXDATA" pad="P7"/>
+<connect gate="G$1" pin="THLD1" pad="P13"/>
+<connect gate="G$1" pin="THLD2" pad="P12"/>
+<connect gate="G$1" pin="TXMOD" pad="P8"/>
+<connect gate="G$1" pin="VCC1" pad="P2"/>
+<connect gate="G$1" pin="VCC2" pad="P16"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="583-1088-1-ND" constant="no"/>
 </technology>
 </technologies>
 </device>
