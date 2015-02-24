@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -7850,6 +7850,13 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <wire x1="0.6" y1="-0.75" x2="-0.6" y2="-0.75" width="0.127" layer="21"/>
 <text x="-1.27" y="1.27" size="0.762" layer="25">&gt;NAME</text>
 </package>
+<package name="UREACH_XTEND">
+<smd name="P1" x="-1.7" y="0" dx="0.8" dy="2.4" layer="1"/>
+<smd name="NC" x="1.7" y="0" dx="0.8" dy="2.4" layer="1"/>
+<wire x1="-1.15" y1="1" x2="1.15" y2="1" width="0.127" layer="21"/>
+<wire x1="1.15" y1="-1" x2="-1.15" y2="-1" width="0.127" layer="21"/>
+<text x="-2.54" y="1.27" size="1.27" layer="25">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="DIODE-ZENER">
@@ -8131,6 +8138,15 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <pin name="P1" x="-5.08" y="0" visible="pad" length="short"/>
 <pin name="P2" x="5.08" y="0" visible="pad" length="short" rot="R180"/>
 <text x="-3.81" y="3.175" size="1.778" layer="95">&gt;NAME</text>
+</symbol>
+<symbol name="ANT">
+<pin name="P1" x="10.16" y="0" visible="pad" length="middle" rot="R180"/>
+<wire x1="0" y1="7.62" x2="2.54" y2="13.97" width="0.254" layer="94"/>
+<wire x1="2.54" y1="13.97" x2="-2.54" y2="13.97" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="13.97" x2="0" y2="7.62" width="0.254" layer="94"/>
+<wire x1="0" y1="7.62" x2="0" y2="0" width="0.254" layer="94"/>
+<wire x1="0" y1="0" x2="5.08" y2="0" width="0.254" layer="94"/>
+<text x="2.54" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -8497,6 +8513,23 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <technologies>
 <technology name="">
 <attribute name="DIGIKEY" value="535-12058-1-ND" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="UREACH_XTEND" prefix="Y">
+<gates>
+<gate name="G$1" symbol="ANT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="UREACH_XTEND">
+<connects>
+<connect gate="G$1" pin="P1" pad="P1"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="FRACTUS" value="FR05-S1-N-0-110" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -9388,12 +9421,14 @@ W = angled&lt;p&gt;
 <part name="X1" library="powerfilm" deviceset="ABM8G" device=""/>
 <part name="GND33" library="supply1" deviceset="GND" device=""/>
 <part name="X2" library="powerfilm" deviceset="ABS07" device=""/>
-<part name="L4" library="rcl" deviceset="L-US" device="L0201" value="3.3nH"/>
-<part name="C29" library="rcl" deviceset="C-EU" device="C0201" value="1pF"/>
-<part name="C30" library="rcl" deviceset="C-EU" device="C0201" value="1pF"/>
-<part name="C31" library="rcl" deviceset="C-EU" device="C0201" value="100pF"/>
+<part name="L4" library="rcl" deviceset="L-US" device="L0201" value="7.5nH"/>
+<part name="C29" library="rcl" deviceset="C-EU" device="C0201" value="1.2pF"/>
+<part name="C30" library="rcl" deviceset="C-EU" device="C0201" value="NP"/>
+<part name="C31" library="rcl" deviceset="C-EU" device="C0201" value="0ohm"/>
 <part name="GND34" library="supply1" deviceset="GND" device=""/>
 <part name="GND35" library="supply1" deviceset="GND" device=""/>
+<part name="Y1" library="powerfilm" deviceset="UREACH_XTEND" device=""/>
+<part name="+3V10" library="supply1" deviceset="+3V3" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -10136,6 +10171,8 @@ W = angled&lt;p&gt;
 <instance part="C31" gate="G$1" x="71.12" y="27.94" rot="R90"/>
 <instance part="GND34" gate="1" x="63.5" y="12.7"/>
 <instance part="GND35" gate="1" x="43.18" y="12.7"/>
+<instance part="Y1" gate="G$1" x="88.9" y="27.94" rot="MR0"/>
+<instance part="+3V10" gate="G$1" x="-45.72" y="-66.04"/>
 </instances>
 <busses>
 </busses>
@@ -10422,6 +10459,11 @@ W = angled&lt;p&gt;
 <wire x1="-20.32" y1="-12.7" x2="-17.78" y2="-12.7" width="0.1524" layer="91"/>
 <label x="-20.32" y="-12.7" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
+<segment>
+<pinref part="SV1" gate="G$1" pin="6"/>
+<wire x1="-12.7" y1="-78.74" x2="-15.24" y2="-78.74" width="0.1524" layer="91"/>
+<label x="-12.7" y="-78.74" size="1.27" layer="95" xref="yes"/>
+</segment>
 </net>
 <net name="TCK" class="0">
 <segment>
@@ -10457,6 +10499,12 @@ W = angled&lt;p&gt;
 <pinref part="+3V9" gate="G$1" pin="+3V3"/>
 <wire x1="-147.32" y1="15.24" x2="-149.86" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="-149.86" y1="15.24" x2="-149.86" y2="22.86" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="+3V10" gate="G$1" pin="+3V3"/>
+<wire x1="-45.72" y1="-68.58" x2="-45.72" y2="-81.28" width="0.1524" layer="91"/>
+<pinref part="SV1" gate="G$1" pin="7"/>
+<wire x1="-45.72" y1="-81.28" x2="-30.48" y2="-81.28" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$42" class="0">
@@ -10517,6 +10565,97 @@ W = angled&lt;p&gt;
 <wire x1="63.5" y1="27.94" x2="68.58" y2="27.94" width="0.1524" layer="91"/>
 <wire x1="63.5" y1="25.4" x2="63.5" y2="27.94" width="0.1524" layer="91"/>
 <junction x="63.5" y="27.94"/>
+</segment>
+</net>
+<net name="N$48" class="0">
+<segment>
+<pinref part="C31" gate="G$1" pin="2"/>
+<pinref part="Y1" gate="G$1" pin="P1"/>
+<wire x1="76.2" y1="27.94" x2="78.74" y2="27.94" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="IPC_SS" class="0">
+<segment>
+<pinref part="SV1" gate="G$1" pin="1"/>
+<wire x1="-33.02" y1="-73.66" x2="-30.48" y2="-73.66" width="0.1524" layer="91"/>
+<label x="-33.02" y="-73.66" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U4" gate="G$3" pin="IPCSS"/>
+<wire x1="-96.52" y1="76.2" x2="-93.98" y2="76.2" width="0.1524" layer="91"/>
+<label x="-96.52" y="76.2" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="IPC_SCK" class="0">
+<segment>
+<pinref part="SV1" gate="G$1" pin="3"/>
+<wire x1="-33.02" y1="-76.2" x2="-30.48" y2="-76.2" width="0.1524" layer="91"/>
+<label x="-33.02" y="-76.2" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U4" gate="G$3" pin="IPCSCK"/>
+<wire x1="-96.52" y1="78.74" x2="-93.98" y2="78.74" width="0.1524" layer="91"/>
+<label x="-96.52" y="78.74" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="IPC_MISO" class="0">
+<segment>
+<pinref part="SV1" gate="G$1" pin="5"/>
+<wire x1="-33.02" y1="-78.74" x2="-30.48" y2="-78.74" width="0.1524" layer="91"/>
+<label x="-33.02" y="-78.74" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U4" gate="G$3" pin="IPCMISO"/>
+<wire x1="-96.52" y1="81.28" x2="-93.98" y2="81.28" width="0.1524" layer="91"/>
+<label x="-96.52" y="81.28" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="UC_TX" class="0">
+<segment>
+<pinref part="SV1" gate="G$1" pin="9"/>
+<wire x1="-33.02" y1="-83.82" x2="-30.48" y2="-83.82" width="0.1524" layer="91"/>
+<label x="-33.02" y="-83.82" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U4" gate="G$3" pin="UCTX"/>
+<wire x1="-55.88" y1="50.8" x2="-58.42" y2="50.8" width="0.1524" layer="91"/>
+<label x="-55.88" y="50.8" size="1.27" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="FLASH_EN" class="0">
+<segment>
+<pinref part="SV1" gate="G$1" pin="2"/>
+<wire x1="-12.7" y1="-73.66" x2="-15.24" y2="-73.66" width="0.1524" layer="91"/>
+<label x="-12.7" y="-73.66" size="1.27" layer="95" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U4" gate="G$2" pin="FLASH_EN"/>
+<wire x1="-20.32" y1="-20.32" x2="-17.78" y2="-20.32" width="0.1524" layer="91"/>
+<label x="-20.32" y="-20.32" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="IPC_MOSI" class="0">
+<segment>
+<pinref part="SV1" gate="G$1" pin="4"/>
+<wire x1="-12.7" y1="-76.2" x2="-15.24" y2="-76.2" width="0.1524" layer="91"/>
+<label x="-12.7" y="-76.2" size="1.27" layer="95" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U4" gate="G$3" pin="IPCMOSI"/>
+<wire x1="-96.52" y1="83.82" x2="-93.98" y2="83.82" width="0.1524" layer="91"/>
+<label x="-96.52" y="83.82" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="UC_RX" class="0">
+<segment>
+<pinref part="SV1" gate="G$1" pin="10"/>
+<wire x1="-12.7" y1="-83.82" x2="-15.24" y2="-83.82" width="0.1524" layer="91"/>
+<label x="-12.7" y="-83.82" size="1.27" layer="95" xref="yes"/>
+</segment>
+<segment>
+<pinref part="U4" gate="G$3" pin="UCRX"/>
+<wire x1="-55.88" y1="48.26" x2="-58.42" y2="48.26" width="0.1524" layer="91"/>
+<label x="-55.88" y="48.26" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>
