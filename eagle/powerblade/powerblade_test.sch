@@ -10315,6 +10315,16 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <text x="2.159" y="-1.778" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
 <rectangle x1="0.254" y1="-1.016" x2="0.762" y2="1.016" layer="51"/>
 </package>
+<package name="L0402">
+<wire x1="-0.245" y1="0.224" x2="0.245" y2="0.224" width="0.1524" layer="51"/>
+<wire x1="0.245" y1="-0.224" x2="-0.245" y2="-0.224" width="0.1524" layer="51"/>
+<smd name="1" x="-0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
+<smd name="2" x="0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
+<text x="-0.635" y="0.635" size="1.27" layer="25">&gt;NAME</text>
+<text x="-0.635" y="-1.905" size="1.27" layer="27">&gt;VALUE</text>
+<rectangle x1="-0.554" y1="-0.3048" x2="-0.254" y2="0.2951" layer="51"/>
+<rectangle x1="0.2588" y1="-0.3048" x2="0.5588" y2="0.2951" layer="51"/>
+</package>
 </packages>
 <symbols>
 <symbol name="R-US">
@@ -12471,6 +12481,15 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <technology name=""/>
 </technologies>
 </device>
+<device name="L0402" package="L0402">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
 </devices>
 </deviceset>
 <deviceset name="CPOL-US" prefix="C" uservalue="yes">
@@ -14477,6 +14496,13 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="3.4925" y1="-5.08" x2="1.27" y2="-5.08" width="0.127" layer="21"/>
 <text x="-3.81" y="6.35" size="1.27" layer="25">&gt;NAME</text>
 </package>
+<package name="ANT-916">
+<smd name="P1" x="-8.001" y="0" dx="1.016" dy="3.302" layer="1"/>
+<smd name="M1" x="8.001" y="0" dx="1.016" dy="3.302" layer="1"/>
+<wire x1="-6.985" y1="1.524" x2="6.985" y2="1.524" width="0.127" layer="21"/>
+<wire x1="6.985" y1="-1.524" x2="-6.985" y2="-1.524" width="0.127" layer="21"/>
+<text x="-7.62" y="2.54" size="1.27" layer="25">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="DIODE-ZENER">
@@ -15171,6 +15197,23 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <technologies>
 <technology name="">
 <attribute name="DIGIKEY" value="583-1088-1-ND" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="ANT-916" prefix="Y">
+<gates>
+<gate name="G$1" symbol="ANT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="ANT-916">
+<connects>
+<connect gate="G$1" pin="P1" pad="P1"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DIGIKEY" value="ANT-916-CHP-TCT-ND" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -16090,6 +16133,10 @@ W = angled&lt;p&gt;
 <part name="R25" library="rcl" deviceset="R-US_" device="R0603" value="NP"/>
 <part name="R26" library="rcl" deviceset="R-US_" device="R0603" value="100k"/>
 <part name="R27" library="rcl" deviceset="R-US_" device="R0603" value="0"/>
+<part name="L5" library="rcl" deviceset="L-US" device="L0402" value="10nH"/>
+<part name="L6" library="rcl" deviceset="L-US" device="L0402" value="100nH"/>
+<part name="Y2" library="powerfilm" deviceset="ANT-916" device=""/>
+<part name="GND42" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -16631,6 +16678,10 @@ W = angled&lt;p&gt;
 <attribute name="NAME" x="91.694" y="-15.0114" size="1.778" layer="95"/>
 <attribute name="VALUE" x="102.108" y="-14.986" size="1.778" layer="96"/>
 </instance>
+<instance part="L5" gate="G$1" x="139.7" y="7.62" rot="R270"/>
+<instance part="L6" gate="G$1" x="152.4" y="-5.08"/>
+<instance part="Y2" gate="G$1" x="165.1" y="7.62" rot="MR0"/>
+<instance part="GND42" gate="1" x="152.4" y="-43.18"/>
 </instances>
 <busses>
 </busses>
@@ -16734,6 +16785,11 @@ W = angled&lt;p&gt;
 <junction x="45.72" y="-38.1"/>
 <pinref part="R31" gate="G$1" pin="1"/>
 <pinref part="R32" gate="G$1" pin="1"/>
+</segment>
+<segment>
+<pinref part="L6" gate="G$1" pin="2"/>
+<pinref part="GND42" gate="1" pin="GND"/>
+<wire x1="152.4" y1="-12.7" x2="152.4" y2="-40.64" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -17071,6 +17127,24 @@ W = angled&lt;p&gt;
 <pinref part="R34" gate="G$1" pin="1"/>
 <pinref part="U3" gate="G$1" pin="P2.1/TB0.0/UCARX/MISO"/>
 <wire x1="-17.78" y1="-10.16" x2="-20.32" y2="-10.16" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$62" class="0">
+<segment>
+<pinref part="U2" gate="G$1" pin="RFIO"/>
+<pinref part="L5" gate="G$1" pin="2"/>
+<wire x1="91.44" y1="7.62" x2="132.08" y2="7.62" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$63" class="0">
+<segment>
+<pinref part="L5" gate="G$1" pin="1"/>
+<pinref part="Y2" gate="G$1" pin="P1"/>
+<wire x1="147.32" y1="7.62" x2="152.4" y2="7.62" width="0.1524" layer="91"/>
+<pinref part="L6" gate="G$1" pin="1"/>
+<wire x1="152.4" y1="7.62" x2="154.94" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="152.4" y1="2.54" x2="152.4" y2="7.62" width="0.1524" layer="91"/>
+<junction x="152.4" y="7.62"/>
 </segment>
 </net>
 </nets>
