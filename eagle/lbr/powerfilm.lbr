@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -596,6 +596,13 @@
 <wire x1="0.6" y1="-0.75" x2="-0.6" y2="-0.75" width="0.127" layer="21"/>
 <text x="-1.27" y="1.27" size="0.762" layer="25">&gt;NAME</text>
 </package>
+<package name="UREACH_XTEND">
+<smd name="P1" x="-1.7" y="0" dx="0.8" dy="2.4" layer="1"/>
+<smd name="NC" x="1.7" y="0" dx="0.8" dy="2.4" layer="1"/>
+<wire x1="-1.15" y1="1" x2="1.15" y2="1" width="0.127" layer="21"/>
+<wire x1="1.15" y1="-1" x2="-1.15" y2="-1" width="0.127" layer="21"/>
+<text x="-2.54" y="1.27" size="1.27" layer="25">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="SOCKET">
@@ -835,7 +842,7 @@
 <vertex x="-0.508" y="-0.635"/>
 </polygon>
 </symbol>
-<symbol name="ANT">
+<symbol name="ANT_GND">
 <pin name="P1" x="10.16" y="0" visible="pad" length="middle" rot="R180"/>
 <wire x1="0" y1="7.62" x2="2.54" y2="13.97" width="0.254" layer="94"/>
 <wire x1="2.54" y1="13.97" x2="-2.54" y2="13.97" width="0.254" layer="94"/>
@@ -991,6 +998,15 @@
 <pin name="P1" x="-5.08" y="0" visible="pad" length="short"/>
 <pin name="P2" x="5.08" y="0" visible="pad" length="short" rot="R180"/>
 <text x="-3.81" y="3.175" size="1.778" layer="95">&gt;NAME</text>
+</symbol>
+<symbol name="ANT">
+<pin name="P1" x="10.16" y="0" visible="pad" length="middle" rot="R180"/>
+<wire x1="0" y1="7.62" x2="2.54" y2="13.97" width="0.254" layer="94"/>
+<wire x1="2.54" y1="13.97" x2="-2.54" y2="13.97" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="13.97" x2="0" y2="7.62" width="0.254" layer="94"/>
+<wire x1="0" y1="7.62" x2="0" y2="0" width="0.254" layer="94"/>
+<wire x1="0" y1="0" x2="5.08" y2="0" width="0.254" layer="94"/>
+<text x="2.54" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -1371,7 +1387,7 @@
 </deviceset>
 <deviceset name="ANT-USP" prefix="Y">
 <gates>
-<gate name="G$1" symbol="ANT" x="0" y="0"/>
+<gate name="G$1" symbol="ANT_GND" x="0" y="0"/>
 </gates>
 <devices>
 <device name="" package="ANT-USP">
@@ -1557,6 +1573,23 @@
 <technologies>
 <technology name="">
 <attribute name="DIGIKEY" value="535-12058-1-ND" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="UREACH_XTEND" prefix="Y">
+<gates>
+<gate name="G$1" symbol="ANT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="UREACH_XTEND">
+<connects>
+<connect gate="G$1" pin="P1" pad="P1"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="FRACTUS" value="FR05-S1-N-0-110" constant="no"/>
 </technology>
 </technologies>
 </device>
