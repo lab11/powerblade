@@ -4,6 +4,9 @@
 
 unsigned char active;
 
+unsigned char sampleBuf[SAM_BUFSIZE];
+unsigned int sampleOffset;
+
 /*
  * main.c
  */
@@ -37,18 +40,23 @@ int main(void) {
     P2OUT = 0;
     P2REN = 0xFF;
 
+    // Set SEN_EN to output and enable (~200uA)
+    SEN_EN_DIR |= SEN_EN_PIN;
+    SEN_EN_OUT |= SEN_EN_PIN;
+    sampleOffset = 0;
+
     // Set SYS_EN to output and disable
     SYS_EN_DIR |= SYS_EN_PIN;
     SYS_EN_OUT &= ~SYS_EN_PIN;
     active = 0;
 
-    // Enable ADC for VCC_SENSE
-    P1SEL1 |= BIT3;
-    P1SEL0 |= BIT3;
+    // Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
+    P1SEL1 |= BIT3 + BIT4 + BIT5;
+    P1SEL0 |= BIT3 + BIT4 + BIT5;
 	ADC10CTL0 |= ADC10ON + ADC10MSC;          	// ADC10ON
-  	ADC10CTL1 |= ADC10SHS_1 + ADC10CONSEQ_2;  	// rpt single ch; TA0.1 trig sample start
-  	ADC10CTL2 |= ADC10RES;                    	// 10-bit conversion results
-  	ADC10MCTL0 |= ADC10INCH_3 + ADC10SREF_0;  	// A3 ADC input select; Vref=AVCC
+  	ADC10CTL1 |= ADC10SHS_1 + ADC10CONSEQ_3;  	// rpt series of ch; TA0.1 trig sample start
+  	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
+  	ADC10MCTL0 |= ADC10INCH_5 + ADC10SREF_0;  	// A3,4,5 ADC input select; Vref=AVCC
 
   	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
   	ADC10IE |= ADC10IE0;                       	// Enable ADC conv complete interrupt
@@ -69,6 +77,7 @@ int main(void) {
 __interrupt void ADC10_ISR(void) {
 
 	unsigned int ADC_Result;
+	unsigned char ADC_Channel;
 
 	switch(__even_in_range(ADC10IV,12))
   	{
@@ -79,23 +88,35 @@ __interrupt void ADC10_ISR(void) {
     	case  8: break;                          // ADC10LO
     	case 10: break;                          // ADC10IN
     	case 12: ADC_Result = ADC10MEM0;
-    		if(ADC_Result > ADC_VMAX) {
-    			// Bad news bears
-    		}
-    		else {
-    			if(active == 1) {				// Active mode
-    				if(ADC_Result < ADC_VMIN) {	// Fully discharged
-    					SYS_EN_OUT &= ~SYS_EN_PIN;
-    					active = 0;
-    				}
-    			}
-    			else {							// Recharge phase
-    				if(ADC_Result > ADC_VCHG) {	// Fully recharged
-    					SYS_EN_OUT |= SYS_EN_PIN;
-    					active = 1;
-    				}
-    			}
-    		}                                              
+    		ADC_Channel = ADC10MCTL0 & ADC10INCH_5;
+    		switch(ADC_Channel)
+    		{
+    		case 5:	// I_SENSE
+    			break;
+    		case 4:	// V_SENSE
+    			break;
+    		case 3;	// VCC_SENSE
+    			sampleBuf[sampleOffset++] = ADC_Result;
+	    		if(ADC_Result > ADC_VMAX) {
+	    			SYS_EN_OUT |= SYS_EN_PIN;
+	    			active = 1;
+	    		}
+	    		else {
+	    			if(active == 1) {				// Active mode
+	    				if(ADC_Result < ADC_VMIN) {	// Fully discharged
+	    					SYS_EN_OUT &= ~SYS_EN_PIN;
+	    					active = 0;
+	    				}
+	    			}
+	    			else {							// Recharge phase
+	    				if(ADC_Result > ADC_VCHG) {	// Fully recharged
+	    					SYS_EN_OUT |= SYS_EN_PIN;
+	    					active = 1;
+	    				}
+	    			}
+	    		} 
+	    		break;
+	    	}                                             
         	break;                          // Clear CPUOFF bit from 0(SR)                         
     	default: break; 
   	}
