@@ -31,4 +31,8 @@
 #define ADC_VMIN	0x188
 #define ADC_VMAX	0x397
 
+#define ADC_PERMS	8
+#define ADC_PERCT	ADC_PERMS*(32768/1000)	
+
 #endif
+	

@@ -10,11 +10,17 @@ unsigned char active;
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-    // Configure 1MHz SMCLK, MCLK, ACLK
-    CSCTL0_H = 0xA5;
-    CSCTL1 = DCOFSEL0 + DCOFSEL1;   			// Set 8MHz. DCO setting
-    CSCTL2 = SELA_3 + SELS_3 + SELM_3;        	// set ACLK = MCLK = DCO
-    CSCTL3 = DIVA_3 + DIVS_3 + DIVM_3;        	// set all dividers to /8
+  	CSCTL1 = DCOFSEL0 + DCOFSEL1;             // Set max. DCO setting
+  	CSCTL2 = SELA_0 + SELS_3 + SELM_3;        // set ACLK = XT1; MCLK = DCO
+  	CSCTL3 = DIVA_0 + DIVS_3 + DIVM_3;        // set all dividers 
+  	CSCTL4 |= XT1DRIVE_0; 
+  	CSCTL4 &= ~XT1OFF;
+
+  	do
+  	{
+    	CSCTL5 &= ~XT1OFFG;					  // Clear XT1 fault flag
+    	SFRIFG1 &= ~OFIFG; 
+  	}while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
 
     // Low power in port J
     PJDIR = 0;
@@ -39,15 +45,22 @@ int main(void) {
     // Enable ADC for VCC_SENSE
     P1SEL1 |= BIT3;
     P1SEL0 |= BIT3;
-    ADC10CTL0 |= ADC10SHT_2 + ADC10ON;        // ADC10ON, S&H=16 ADC clks
-	ADC10CTL1 |= ADC10SHP;                    // ADCCLK = MODOSC; sampling timer
-	ADC10CTL2 |= ADC10RES;                    // 10-bit conversion results
-	ADC10MCTL0 |= ADC10INCH_3;                // A3 ADC input select; Vref=AVCC
-	ADC10IE |= ADC10IE0;                      // Enable ADC conv complete interrupt
+	ADC10CTL0 |= ADC10ON + ADC10MSC;          	// ADC10ON
+  	ADC10CTL1 |= ADC10SHS_1 + ADC10CONSEQ_2;  	// rpt single ch; TA0.1 trig sample start
+  	ADC10CTL2 |= ADC10RES;                    	// 10-bit conversion results
+  	ADC10MCTL0 |= ADC10INCH_3 + ADC10SREF_0;  	// A3 ADC input select; Vref=AVCC
 
-	ADC10CTL0 |= ADC10ENC + ADC10SC;        // Sampling and conversion start
-	__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit
-	
+  	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
+  	ADC10IE |= ADC10IE0;                       	// Enable ADC conv complete interrupt
+  
+  	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
+  	TA0CCR0 = ADC_PERCT;						// PWM Period
+  	TA0CCR1 = TA0CCR0 / 2;                     	// TA0.1 ADC trigger
+  	TA0CCTL1 = OUTMOD_7;                       	// TA0CCR0 toggle
+  	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
+
+  	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
+
 	return 0;
 }
 
