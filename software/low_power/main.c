@@ -81,44 +81,44 @@ __interrupt void ADC10_ISR(void) {
 
 	switch(__even_in_range(ADC10IV,12))
   	{
-    	case  0: break;                          // No interrupt
-    	case  2: break;                          // conversion result overflow
-    	case  4: break;                          // conversion time overflow
-    	case  6: break;                          // ADC10HI
-    	case  8: break;                          // ADC10LO
-    	case 10: break;                          // ADC10IN
-    	case 12: ADC_Result = ADC10MEM0;
-    		ADC_Channel = ADC10MCTL0 & ADC10INCH_5;
-    		switch(ADC_Channel)
-    		{
-    		case 5:	// I_SENSE
-    			break;
-    		case 4:	// V_SENSE
-    			break;
-    		case 3:	// VCC_SENSE
-    			sampleBuf[sampleOffset++] = ADC_Result;
-	    		if(ADC_Result > ADC_VMAX) {
-	    			SYS_EN_OUT |= SYS_EN_PIN;
-	    			active = 1;
+    case  0: break;                          // No interrupt
+    case  2: break;                          // conversion result overflow
+    case  4: break;                          // conversion time overflow
+    case  6: break;                          // ADC10HI
+    case  8: break;                          // ADC10LO
+    case 10: break;                          // ADC10IN
+    case 12: ADC_Result = ADC10MEM0;
+    	ADC_Channel = ADC10MCTL0 & ADC10INCH_5;
+    	switch(ADC_Channel)
+    	{
+    	case 5:	// I_SENSE
+    		break;
+    	case 4:	// V_SENSE
+    		break;
+    	case 3:	// VCC_SENSE
+    		sampleBuf[sampleOffset++] = ADC_Result;
+	    	if(ADC_Result > ADC_VMAX) {
+	    		SYS_EN_OUT |= SYS_EN_PIN;
+	    		active = 1;
+	    	}
+	    	else {
+	    		if(active == 1) {				// Active mode
+	    			if(ADC_Result < ADC_VMIN) {	// Fully discharged
+	    				SYS_EN_OUT &= ~SYS_EN_PIN;
+	    				active = 0;
+	    			}
 	    		}
-	    		else {
-	    			if(active == 1) {				// Active mode
-	    				if(ADC_Result < ADC_VMIN) {	// Fully discharged
-	    					SYS_EN_OUT &= ~SYS_EN_PIN;
-	    					active = 0;
-	    				}
+	    		else {							// Recharge phase
+	    			if(ADC_Result > ADC_VCHG) {	// Fully recharged
+	    				SYS_EN_OUT |= SYS_EN_PIN;
+	    				active = 1;
 	    			}
-	    			else {							// Recharge phase
-	    				if(ADC_Result > ADC_VCHG) {	// Fully recharged
-	    					SYS_EN_OUT |= SYS_EN_PIN;
-	    					active = 1;
-	    				}
-	    			}
-	    		} 
-	    		break;
-	    	}                                             
-        	break;                          // Clear CPUOFF bit from 0(SR)                         
-    	default: break; 
+	    		}
+	    	}
+	    	break;
+	    }
+        break;                          // Clear CPUOFF bit from 0(SR)
+    default: break;
   	}
 
   	// Start next sample/conversion
