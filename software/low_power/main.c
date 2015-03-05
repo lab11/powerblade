@@ -79,8 +79,7 @@ __interrupt void ADC10_ISR(void) {
 	unsigned int ADC_Result;
 	unsigned char ADC_Channel;
 
-	switch(__even_in_range(ADC10IV,12))
-  	{
+	switch(__even_in_range(ADC10IV,12)) {
     case  0: break;                          // No interrupt
     case  2: break;                          // conversion result overflow
     case  4: break;                          // conversion time overflow
@@ -89,8 +88,7 @@ __interrupt void ADC10_ISR(void) {
     case 10: break;                          // ADC10IN
     case 12: ADC_Result = ADC10MEM0;
     	ADC_Channel = ADC10MCTL0 & ADC10INCH_5;
-    	switch(ADC_Channel)
-    	{
+    	switch(ADC_Channel) {
     	case 5:	// I_SENSE
     		break;
     	case 4:	// V_SENSE
@@ -116,6 +114,12 @@ __interrupt void ADC10_ISR(void) {
 	    		}
 	    	}
 	    	break;
+    	default: // ADC Reset condition
+    		ADC10CTL1 &= ~ADC10CONSEQ_3;
+    		ADC10CTL0 &= ~ADC10ENC;
+    		ADC10CTL1 |= ADC10CONSEQ_3;
+    		ADC10CTL0 |= ADC10ENC;
+    		break;
 	    }
         break;                          // Clear CPUOFF bit from 0(SR)
     default: break;
