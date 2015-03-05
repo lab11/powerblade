@@ -95,7 +95,7 @@ __interrupt void ADC10_ISR(void) {
     			break;
     		case 4:	// V_SENSE
     			break;
-    		case 3;	// VCC_SENSE
+    		case 3:	// VCC_SENSE
     			sampleBuf[sampleOffset++] = ADC_Result;
 	    		if(ADC_Result > ADC_VMAX) {
 	    			SYS_EN_OUT |= SYS_EN_PIN;
@@ -122,7 +122,7 @@ __interrupt void ADC10_ISR(void) {
   	}
 
   	// Start next sample/conversion
-  	ADC10CTL0 |= ADC10ENC + ADC10SC;
+  	//ADC10CTL0 |= ADC10ENC + ADC10SC;
 }
 
 
