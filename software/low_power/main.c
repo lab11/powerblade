@@ -13,16 +13,20 @@ unsigned int sampleOffset;
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
+    // XT1 Setup
+    PJSEL0 |= BIT4 + BIT5;
+
+    CSCTL0_H = 0xA5;
   	CSCTL1 = DCOFSEL0 + DCOFSEL1;             // Set max. DCO setting
   	CSCTL2 = SELA_0 + SELS_3 + SELM_3;        // set ACLK = XT1; MCLK = DCO
-  	CSCTL3 = DIVA_0 + DIVS_3 + DIVM_3;        // set all dividers 
-  	CSCTL4 |= XT1DRIVE_0; 
+  	CSCTL3 = DIVA_0 + DIVS_3 + DIVM_3;        // set all dividers
+  	CSCTL4 |= XT1DRIVE_0;
   	CSCTL4 &= ~XT1OFF;
 
   	do
   	{
     	CSCTL5 &= ~XT1OFFG;					  // Clear XT1 fault flag
-    	SFRIFG1 &= ~OFIFG; 
+    	SFRIFG1 &= ~OFIFG;
   	}while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
 
     // Low power in port J
@@ -87,14 +91,17 @@ __interrupt void ADC10_ISR(void) {
     case  8: break;                          // ADC10LO
     case 10: break;                          // ADC10IN
     case 12: ADC_Result = ADC10MEM0;
-    	ADC_Channel = ADC10MCTL0 & ADC10INCH_5;
+    	ADC_Channel = ADC10MCTL0 & ADC10INCH_7;
     	switch(ADC_Channel) {
-    	case 5:	// I_SENSE
+    	case 4:	// I_SENSE
     		break;
-    	case 4:	// V_SENSE
+    	case 3:	// V_SENSE
     		break;
-    	case 3:	// VCC_SENSE
+    	case 2:	// VCC_SENSE
     		sampleBuf[sampleOffset++] = ADC_Result;
+    		if(sampleOffset == 100) {
+    			sampleOffset = 0;
+    		}
 	    	if(ADC_Result > ADC_VMAX) {
 	    		SYS_EN_OUT |= SYS_EN_PIN;
 	    		active = 1;

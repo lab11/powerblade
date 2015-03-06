@@ -8,15 +8,15 @@
 /**************************************************************************
    SAMPLE BUFFER SECTION
  **************************************************************************/
-#define SAM_BUFSIZE	1000
+#define SAM_BUFSIZE	100
 
 /**************************************************************************
    SYSTEN ENABLE SECTION
  **************************************************************************/
 // SYS_EN = TCK Pins
-#define SYS_EN_DIR	PJDIR
-#define SYS_EN_OUT	PJOUT
-#define SYS_EN_PIN	BIT3
+#define SYS_EN_DIR	P1DIR
+#define SYS_EN_OUT	P1OUT
+#define SYS_EN_PIN	BIT6
 
 /**************************************************************************
    SENSE ENABLE SECTION
