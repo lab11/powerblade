@@ -59,7 +59,8 @@ MEMORY
     RAM                     : origin = 0x1C00, length = 0x0400
     INFOA                   : origin = 0x1880, length = 0x0080
     INFOB                   : origin = 0x1800, length = 0x0080
-    FRAM                    : origin = 0xC200, length = 0x3D80
+    FRAM_VARS				: origin = 0xC200, length = 0x013C
+    FRAM                    : origin = 0xC33C, length = 0x3C44
     JTAGSIGNATURE           : origin = 0xFF80, length = 0x0004, fill = 0xFFFF
     BSLSIGNATURE            : origin = 0xFF84, length = 0x0004, fill = 0xFFFF
     IPESIGNATURE            : origin = 0xFF88, length = 0x0008, fill = 0xFFFF
@@ -151,6 +152,8 @@ SECTIONS
           .text       : {}                   /* CODE                              */
        } ALIGN(0x0200), RUN_START(fram_rx_start)
     } > FRAM
+
+    .fram_vars : {} > FRAM_VARS type=NOINIT
 
     .jtagsignature : {} > JTAGSIGNATURE   /* JTAG SIGNATURE                    */
     .bslsignature  : {} > BSLSIGNATURE    /* BSL SIGNATURE                     */
