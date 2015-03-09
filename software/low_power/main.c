@@ -19,6 +19,7 @@ uint8_t sampleCount;
 uint8_t measCount;
 
 uint8_t current;
+uint8_t voltage;
 uint16_t acc_p_ave;
 uint16_t acc_i_rms;
 uint16_t acc_v_rms;
@@ -26,6 +27,11 @@ uint16_t acc_v_rms;
 uint32_t tot_power;
 
 #pragma SET_DATA_SECTION()
+
+void uart_send(char* buf, unsigned int len);
+char *txBuf;
+unsigned int txLen;
+unsigned int txCt;
 
 /*
  * main.c
@@ -73,7 +79,8 @@ int main(void) {
 
     // Set SEN_EN to output and disable (~200uA)
     SEN_EN_DIR |= SEN_EN_PIN;
-    SEN_EN_OUT &= ~SEN_EN_PIN;
+    SEN_EN_OUT |= SEN_EN_PIN;
+    while(1);
 
     // Zero all sensing values
     sampleCount = 0;
@@ -87,6 +94,17 @@ int main(void) {
     SYS_EN_DIR |= SYS_EN_PIN;
     SYS_EN_OUT &= ~SYS_EN_PIN;
     ready = 0;
+
+    // Set up UART
+    P2SEL0 &= ~(BIT0 + BIT1);
+    P2SEL1 |= BIT0 + BIT1;
+    UCA0CTL1 |= UCSWRST;
+    UCA0CTL1 |= UCSSEL_2;
+    UCA0BR0 = 8;
+    UCA0BR1 = 0;
+    UCA0MCTLW = 0xD600;
+    UCA0CTL1 &= ~UCSWRST;
+    UCA0IE |= UCRXIE;
 
     // Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
     P1SEL1 |= BIT3 + BIT4 + BIT5;
@@ -110,8 +128,16 @@ int main(void) {
 	return 0;
 }
 
+void uart_send(char* buf, unsigned int len) {
+	txBuf = buf;
+	txLen = len;
+	txCt = 0;
 
-
+	UCA0IE |= UCTXIE;
+	if(txCt < txLen) {
+		UCA0TXBUF = buf[txCt++];
+	}
+}
 
 #pragma vector=ADC10_VECTOR
 __interrupt void ADC10_ISR(void) {
@@ -133,42 +159,15 @@ __interrupt void ADC10_ISR(void) {
     		TA0CCR0 = 2;
     		P1OUT |= BIT2;
     		current = ADC_Result;
-    		acc_i_rms += 1;//pow(current, 2);
-    		//ADC10CTL0 |= ADC10SC;
+    		//acc_i_rms += 1;//pow(current, 2);
     		break;
     	case 3:	// V_SENSE
-    	{
     		P1OUT |= BIT2;
-    		uint8_t voltage = ADC_Result;
-    		acc_p_ave += voltage * current;
-    		acc_v_rms += 1;//pow(voltage, 2);
+    		voltage = ADC_Result;
+    		//acc_p_ave += voltage * current;
+    		//acc_v_rms += 1;//pow(voltage, 2);
     		break;
-    	}
     	case 2:	// VCC_SENSE
-//    		vccread[sampleOffset++] = ADC_Result;
-//    		if(sampleOffset == 100) {
-//    			sampleOffset = 0;
-//    		}
-//	    	if(ADC_Result > ADC_VMAX) {
-//	    		SYS_EN_OUT |= SYS_EN_PIN;
-//	    		SEN_EN_OUT |= SEN_EN_PIN;
-//	    		active = 1;
-//	    	}
-//	    	else {
-//	    		if(active == 1) {				// Active mode
-//	    			if(ADC_Result < ADC_VMIN) {	// Fully discharged
-//	    				SYS_EN_OUT &= ~SYS_EN_PIN;
-//	    				active = 0;
-//	    			}
-//	    		}
-//	    		else {							// Recharge phase
-//	    			if(ADC_Result > ADC_VCHG) {	// Fully recharged
-//	    				SYS_EN_OUT |= SYS_EN_PIN;
-//	    				SEN_EN_OUT |= SEN_EN_PIN;
-//	    				active = 1;
-//	    			}
-//	    		}
-//	    	}
     		P1OUT |= BIT2;
     		if(ADC_Result < ADC_VMIN) {
     			SYS_EN_OUT &= ~SYS_EN_PIN;
@@ -181,18 +180,21 @@ __interrupt void ADC10_ISR(void) {
     		}
     		else {
     			ready = 0;
-    			//P1OUT &= ~BIT2;
     		}
 	    	break;
     	default: // ADC Reset condition
     	{
-    		TA0CCR0 = 18;
+    		TA0CCR0 = 16;
     		ADC10CTL1 &= ~ADC10CONSEQ_3;
     		ADC10CTL0 &= ~ADC10ENC;
     		ADC10CTL1 |= ADC10CONSEQ_3;
     		ADC10CTL0 |= ADC10ENC;
 
     		P1OUT |= BIT6;
+
+    		acc_i_rms += 1;//pow(current, 2);
+    		acc_p_ave += voltage * current;
+    		acc_v_rms += 1;//pow(voltage, 2);
 
     		sampleCount++;
     		if(sampleCount == 21) { // Entire AC wave sampled
@@ -208,8 +210,10 @@ __interrupt void ADC10_ISR(void) {
 					uint16_t Vrms = 1;//sqrt(acc_v_rms / 21);
 					uint32_t apparentPower = 1;//Irms * Vrms;
 
+					//ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
+						uart_send((char*)&tot_power, sizeof(tot_power));
 						ready = 0;
 						tot_power = 0;
 					}
@@ -226,6 +230,26 @@ __interrupt void ADC10_ISR(void) {
     default: break;
   	}
 	P1OUT &= ~(BIT2 + BIT6);
+}
+
+#pragma vector=USCI_A0_VECTOR
+__interrupt void USCI_A0_ISR(void) {
+	switch(__even_in_range(UCA0IV,8)) {
+	case 0: break;							// No interrupt
+	case 2: 								// RX interrupt
+		break;
+	case 4:									// TX interrupt
+		if(txCt < txLen) {
+			UCA0TXBUF = txBuf[txCt++];
+		}
+		else {
+			UCA0IE &= ~UCTXIE;
+		}
+		break;
+	case 6: break;							// Start bit received
+	case 8: break;							// Transmit complete
+	default: break;
+	}
 }
 
 
