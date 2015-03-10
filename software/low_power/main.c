@@ -14,6 +14,7 @@
 //unsigned int lock;
 
 bool ready;
+bool data;
 
 uint8_t sampleCount;
 uint8_t measCount;
@@ -25,6 +26,7 @@ uint16_t acc_i_rms;
 uint16_t acc_v_rms;
 
 uint32_t tot_power;
+uint32_t apparentPower;
 
 #pragma SET_DATA_SECTION()
 
@@ -32,6 +34,32 @@ void uart_send(char* buf, unsigned int len);
 char *txBuf;
 unsigned int txLen;
 unsigned int txCt;
+
+uint32_t SquareRoot(uint32_t a_nInput)
+{
+    uint32_t op  = a_nInput;
+    uint32_t res = 0;
+    uint32_t one = 1uL << 30; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
+
+
+    // "one" starts at the highest power of four <= than the argument.
+    while (one > op)
+    {
+        one >>= 2;
+    }
+
+    while (one != 0)
+    {
+        if (op >= res + one)
+        {
+            op = op - (res + one);
+            res = res +  2 * one;
+        }
+        res >>= 1;
+        one >>= 2;
+    }
+    return res;
+}
 
 /*
  * main.c
@@ -50,7 +78,7 @@ int main(void) {
     CSCTL0_H = 0xA5;
   	CSCTL1 = DCOFSEL0 + DCOFSEL1;             // Set max. DCO setting
   	CSCTL2 = SELA_0 + SELS_3 + SELM_3;        // set ACLK = XT1; MCLK = DCO
-  	CSCTL3 = DIVA_0 + DIVS_3 + DIVM_3;        // set all dividers
+  	CSCTL3 = DIVA_0 + DIVS_2 + DIVM_2;        // set all dividers
   	CSCTL4 |= XT1DRIVE_0;
   	CSCTL4 &= ~XT1OFF;
 
@@ -79,8 +107,7 @@ int main(void) {
 
     // Set SEN_EN to output and disable (~200uA)
     SEN_EN_DIR |= SEN_EN_PIN;
-    SEN_EN_OUT |= SEN_EN_PIN;
-    while(1);
+    SEN_EN_OUT &= ~SEN_EN_PIN;
 
     // Zero all sensing values
     sampleCount = 0;
@@ -100,11 +127,11 @@ int main(void) {
     P2SEL1 |= BIT0 + BIT1;
     UCA0CTL1 |= UCSWRST;
     UCA0CTL1 |= UCSSEL_2;
-    UCA0BR0 = 8;
+    UCA0BR0 = 17;
     UCA0BR1 = 0;
-    UCA0MCTLW = 0xD600;
+    UCA0MCTLW = 0x4A;
     UCA0CTL1 &= ~UCSWRST;
-    UCA0IE |= UCRXIE;
+    UCA0IE |= UCRXIE + UCTXCPTIE;
 
     // Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
     P1SEL1 |= BIT3 + BIT4 + BIT5;
@@ -159,13 +186,13 @@ __interrupt void ADC10_ISR(void) {
     		TA0CCR0 = 2;
     		P1OUT |= BIT2;
     		current = ADC_Result;
-    		//acc_i_rms += 1;//pow(current, 2);
+    		acc_i_rms += current * current;
     		break;
     	case 3:	// V_SENSE
     		P1OUT |= BIT2;
     		voltage = ADC_Result;
-    		//acc_p_ave += voltage * current;
-    		//acc_v_rms += 1;//pow(voltage, 2);
+    		acc_p_ave += voltage * current;
+    		acc_v_rms += voltage * voltage;
     		break;
     	case 2:	// VCC_SENSE
     		P1OUT |= BIT2;
@@ -192,9 +219,9 @@ __interrupt void ADC10_ISR(void) {
 
     		P1OUT |= BIT6;
 
-    		acc_i_rms += 1;//pow(current, 2);
-    		acc_p_ave += voltage * current;
-    		acc_v_rms += 1;//pow(voltage, 2);
+//    		acc_i_rms += current * current;
+//    		acc_p_ave += voltage * current;
+//    		acc_v_rms += voltage * voltage;
 
     		sampleCount++;
     		if(sampleCount == 21) { // Entire AC wave sampled
@@ -206,14 +233,18 @@ __interrupt void ADC10_ISR(void) {
 //    			P1OUT |= BIT2;
     			if(measCount == 60) { // Another second has passed
     				measCount = 0;
-					uint16_t Irms = 1;//sqrt(acc_i_rms / 21);
-					uint16_t Vrms = 1;//sqrt(acc_v_rms / 21);
-					uint32_t apparentPower = 1;//Irms * Vrms;
+    				acc_i_rms = 1701;
+    				acc_v_rms = 1344;
+					uint32_t Irms = SquareRoot((uint32_t)acc_i_rms / 21);
+					uint32_t Vrms = SquareRoot((uint32_t)acc_v_rms / 21);
+					apparentPower = Irms * Vrms;
 
-					//ready = 1;
+					ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
 						uart_send((char*)&tot_power, sizeof(tot_power));
+						//uart_send((char*)&apparentPower, sizeof(apparentPower));
+						data = 1;
 						ready = 0;
 						tot_power = 0;
 					}
@@ -244,10 +275,17 @@ __interrupt void USCI_A0_ISR(void) {
 		}
 		else {
 			UCA0IE &= ~UCTXIE;
+			UCA0IE |= UCTXCPTIE;
 		}
 		break;
 	case 6: break;							// Start bit received
-	case 8: break;							// Transmit complete
+	case 8: 								// Transmit complete
+		UCA0IE &= ~UCTXCPTIE;
+		if(data == 1) {
+			uart_send((char*)&apparentPower, sizeof(apparentPower));
+			data = 0;
+		}
+		break;
 	default: break;
 	}
 }
