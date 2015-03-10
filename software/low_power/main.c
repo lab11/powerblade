@@ -239,7 +239,7 @@ __interrupt void ADC10_ISR(void) {
 					uint32_t Vrms = SquareRoot((uint32_t)acc_v_rms / 21);
 					apparentPower = Irms * Vrms;
 
-					ready = 1;
+					//ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
 						uart_send((char*)&tot_power, sizeof(tot_power));
