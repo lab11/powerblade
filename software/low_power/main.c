@@ -6,7 +6,7 @@
 
 #include "powerblade_test.h"
 
-#pragma SET_DATA_SECTION(".fram_vars")
+//#pragma SET_DATA_SECTION(".fram_vars")
 //volatile unsigned char vread[SAM_BUFSIZE];
 //volatile unsigned char iread[SAM_BUFSIZE];
 //volatile unsigned char vccread[SAM_BUFSIZE];
@@ -19,16 +19,19 @@ bool data;
 uint8_t sampleCount;
 uint8_t measCount;
 
-uint8_t current;
-uint8_t voltage;
-uint16_t acc_p_ave;
-uint16_t acc_i_rms;
-uint16_t acc_v_rms;
+uint32_t current;
+uint32_t voltage;
+uint32_t acc_p_ave;
+uint32_t acc_i_rms;
+uint32_t acc_v_rms;
+
+uint32_t vmax;
+uint32_t vmin;
 
 uint32_t tot_power;
 uint32_t apparentPower;
 
-#pragma SET_DATA_SECTION()
+//#pragma SET_DATA_SECTION()
 
 void uart_send(char* buf, unsigned int len);
 char *txBuf;
@@ -116,6 +119,8 @@ int main(void) {
     acc_i_rms = 0;
     acc_v_rms = 0;
     tot_power = 0;
+    vmax = 0;
+    vmin = 40000000;
 
     // Set SYS_EN to output and disable
     SYS_EN_DIR |= SYS_EN_PIN;
@@ -127,9 +132,9 @@ int main(void) {
     P2SEL1 |= BIT0 + BIT1;
     UCA0CTL1 |= UCSWRST;
     UCA0CTL1 |= UCSSEL_2;
-    UCA0BR0 = 17;
+    UCA0BR0 = 52;
     UCA0BR1 = 0;
-    UCA0MCTLW = 0x4A;
+    UCA0MCTLW = 0x02;
     UCA0CTL1 &= ~UCSWRST;
     UCA0IE |= UCRXIE + UCTXCPTIE;
 
@@ -185,15 +190,29 @@ __interrupt void ADC10_ISR(void) {
     	case 4:	// I_SENSE
     		TA0CCR0 = 2;
     		P1OUT |= BIT2;
-    		current = ADC_Result;
+    		current = (uint32_t)ADC_Result;
     		acc_i_rms += current * current;
     		break;
     	case 3:	// V_SENSE
+    	{
     		P1OUT |= BIT2;
-    		voltage = ADC_Result;
+    		if(ADC_Result > ADC_VCC2) {
+    			voltage = (uint32_t)(147*(ADC_Result - ADC_VCC2));
+    		}
+    		else {
+    			voltage = (uint32_t)(147*(ADC_VCC2 - ADC_Result));
+    		}
+    		//voltage = (uint32_t)ADC_Result;
+    		if(voltage > vmax) {
+    			vmax = voltage;
+    		}
+    		if(voltage < vmin) {
+    			vmin = voltage;
+    		}
     		acc_p_ave += voltage * current;
     		acc_v_rms += voltage * voltage;
     		break;
+    	}
     	case 2:	// VCC_SENSE
     		P1OUT |= BIT2;
     		if(ADC_Result < ADC_VMIN) {
@@ -217,7 +236,7 @@ __interrupt void ADC10_ISR(void) {
     		ADC10CTL1 |= ADC10CONSEQ_3;
     		ADC10CTL0 |= ADC10ENC;
 
-    		P1OUT |= BIT6;
+    		//P1OUT |= BIT6;
 
 //    		acc_i_rms += current * current;
 //    		acc_p_ave += voltage * current;
@@ -226,25 +245,31 @@ __interrupt void ADC10_ISR(void) {
     		sampleCount++;
     		if(sampleCount == 21) { // Entire AC wave sampled
     			sampleCount = 0;
-    			uint32_t realPower = acc_p_ave / 21;
+    			uint32_t realPower = 1;//acc_p_ave / 21;
+    			acc_p_ave = 0;
     			tot_power += realPower;
+
+    			uint32_t Irms = SquareRoot(acc_i_rms / 21);
+				uint32_t Vrms = SquareRoot(acc_v_rms / 21);
+				acc_i_rms = 0;
+				acc_v_rms = 0;
+				apparentPower = Irms * Vrms;
 
     			measCount++;
 //    			P1OUT |= BIT2;
     			if(measCount == 60) { // Another second has passed
     				measCount = 0;
-    				acc_i_rms = 1701;
-    				acc_v_rms = 1344;
-					uint32_t Irms = SquareRoot((uint32_t)acc_i_rms / 21);
-					uint32_t Vrms = SquareRoot((uint32_t)acc_v_rms / 21);
-					apparentPower = Irms * Vrms;
+    				//acc_i_rms = 1701;
+    				//acc_v_rms = 1344;
 
 					//ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
-						uart_send((char*)&tot_power, sizeof(tot_power));
+						__delay_cycles(40000);
+						uart_send((char*)&Vrms, sizeof(Vrms));
+						//uart_send((char*)&tot_power, sizeof(tot_power));
 						//uart_send((char*)&apparentPower, sizeof(apparentPower));
-						data = 1;
+						//data = 1;
 						ready = 0;
 						tot_power = 0;
 					}
@@ -260,7 +285,7 @@ __interrupt void ADC10_ISR(void) {
         break;                          // Clear CPUOFF bit from 0(SR)
     default: break;
   	}
-	P1OUT &= ~(BIT2 + BIT6);
+	//P1OUT &= ~(BIT2 + BIT6);
 }
 
 #pragma vector=USCI_A0_VECTOR

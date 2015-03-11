@@ -14,9 +14,9 @@
    SYSTEN ENABLE SECTION
  **************************************************************************/
 // SYS_EN = TCK Pins
-#define SYS_EN_DIR	PJDIR
-#define SYS_EN_OUT	PJOUT
-#define SYS_EN_PIN	BIT1
+#define SYS_EN_DIR	P1DIR
+#define SYS_EN_OUT	P1OUT
+#define SYS_EN_PIN	BIT6
 
 /**************************************************************************
    SENSE ENABLE SECTION
@@ -48,6 +48,8 @@
 #define ADC_VMIN	0x70
 #define ADC_VCHG	0xDB
 #define ADC_VMAX	0xF5
+
+#define ADC_VCC2	0x80
 
 //#define ADC_PERUS	500
 //#define ADC_PERCT	ADC_PERUS*(32768/1E6)
