@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -1304,10 +1304,6 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <description>&lt;b&gt;CAPACITOR&lt;/b&gt;</description>
 <wire x1="-0.245" y1="0.224" x2="0.245" y2="0.224" width="0.1524" layer="51"/>
 <wire x1="0.245" y1="-0.224" x2="-0.245" y2="-0.224" width="0.1524" layer="51"/>
-<wire x1="-1.473" y1="0.483" x2="1.473" y2="0.483" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="0.483" x2="1.473" y2="-0.483" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="-0.483" x2="-1.473" y2="-0.483" width="0.0508" layer="39"/>
-<wire x1="-1.473" y1="-0.483" x2="-1.473" y2="0.483" width="0.0508" layer="39"/>
 <smd name="1" x="-0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
 <smd name="2" x="0.65" y="0" dx="0.7" dy="0.9" layer="1"/>
 <text x="-0.635" y="0.635" size="1.27" layer="25">&gt;NAME</text>
@@ -1318,10 +1314,6 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 </package>
 <package name="C0603">
 <description>&lt;b&gt;CAPACITOR&lt;/b&gt;</description>
-<wire x1="-1.473" y1="0.983" x2="1.473" y2="0.983" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="0.983" x2="1.473" y2="-0.983" width="0.0508" layer="39"/>
-<wire x1="1.473" y1="-0.983" x2="-1.473" y2="-0.983" width="0.0508" layer="39"/>
-<wire x1="-1.473" y1="-0.983" x2="-1.473" y2="0.983" width="0.0508" layer="39"/>
 <wire x1="-0.356" y1="0.432" x2="0.356" y2="0.432" width="0.1016" layer="51"/>
 <wire x1="-0.356" y1="-0.419" x2="0.356" y2="-0.419" width="0.1016" layer="51"/>
 <smd name="1" x="-0.85" y="0" dx="1.1" dy="1" layer="1"/>
@@ -4365,56 +4357,6 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="67.389375" y1="82.629375" x2="68.58" y2="83.82" width="0.2032" layer="1"/>
 </signal>
 </signals>
-<errors>
-<approved hash="4,16,867a641c2cfa7695"/>
-<approved hash="4,16,e664bdfc89196a88"/>
-<approved hash="4,16,096a99eb8ebfc850"/>
-<approved hash="4,16,cb538d64967030c5"/>
-<approved hash="4,16,8a68935ee7145199"/>
-<approved hash="4,16,6a3edf11077a8fe9"/>
-<approved hash="4,16,495bda50a038b950"/>
-<approved hash="4,16,bf2a3a42c476597a"/>
-<approved hash="6,16,9926b5d9c89859e9"/>
-<approved hash="6,16,fd50feb6fdb6fe50"/>
-<approved hash="6,16,bb6b08bddce06ea9"/>
-<approved hash="6,16,c1a98db74ef8d67d"/>
-<approved hash="1,20,648c087806b66a42"/>
-<approved hash="1,20,7c8e087a06ba724e"/>
-<approved hash="1,20,7cf6080277820376"/>
-<approved hash="1,20,64f40800778e1b7a"/>
-<approved hash="1,20,8bf404007b80f474"/>
-<approved hash="1,20,8b8c04780ab8854c"/>
-<approved hash="1,20,63f80f0c0f0763f3"/>
-<approved hash="1,20,7bfa0f0e0f0b7bff"/>
-<approved hash="1,20,8cf8030c03098cfd"/>
-<approved hash="4,16,f60f4d9659763ae5"/>
-<approved hash="4,16,d610b477dc9766fa"/>
-<approved hash="4,16,cb51ad66b67130c7"/>
-<approved hash="4,16,0968b9e9aebdc851"/>
-<approved hash="4,16,495b7a50803b5952"/>
-<approved hash="4,16,bf37da40c474797a"/>
-<approved hash="4,16,6a68b35e4716519a"/>
-<approved hash="4,16,4a3cdf0ce77a8feb"/>
-<approved hash="5,16,6634a9727ec18fcd"/>
-<approved hash="5,16,ad3450390bacc8eb"/>
-<approved hash="19,16,d4544e7c480fd227"/>
-<approved hash="19,16,ccd856f048b9d291"/>
-<approved hash="19,16,ca541c7c1a13cc3b"/>
-<approved hash="19,16,d2d804f01aa5cc8d"/>
-<approved hash="5,16,eaa1962d5f9f1d59"/>
-<approved hash="5,16,33877d4038d44859"/>
-<approved hash="6,16,aff11bb91158c93c"/>
-<approved hash="6,16,65f2661469946a72"/>
-<approved hash="6,16,e1b9ef12d4024285"/>
-<approved hash="6,16,44ebcf9de4bdb706"/>
-<approved hash="6,16,a4134b394f67edce"/>
-<approved hash="6,16,6532947a7fb9472f"/>
-<approved hash="6,16,0a210a27436b436d"/>
-<approved hash="6,16,0ab10a33437f43fd"/>
-<approved hash="6,16,a34ca56c2fa02980"/>
-<approved hash="6,16,fb2baa13f0c3e84d"/>
-<approved hash="6,16,34b1411863076a02"/>
-</errors>
 </board>
 </drawing>
 </eagle>
