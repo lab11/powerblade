@@ -28,6 +28,9 @@ uint32_t acc_v_rms;
 uint32_t tot_power;
 uint32_t apparentPower;
 
+uint8_t isense_vmax;
+uint8_t isense_vmin;
+
 uint8_t vsense_vmax;
 uint8_t vsense_vmin;
 
@@ -127,6 +130,9 @@ int main(void) {
     vsense_vmax = 0;
     vsense_vmin = 256;
     vsense_vmid = ADC_VCC2;
+    isense_vmax = 0;
+    isense_vmin  = 256;
+    isense_vmid = ADC_VCC2;
 
     // Set SYS_EN to output and disable
     SYS_EN_DIR |= SYS_EN_PIN;
@@ -194,9 +200,27 @@ __interrupt void ADC10_ISR(void) {
     	ADC_Channel = ADC10MCTL0 & ADC10INCH_7;
     	switch(ADC_Channel) {
     	case 4:	// I_SENSE
+    		// Reset timer to sample these three quickly
     		TA0CCR0 = 2;
+
+    		// Set debug pin
     		P1OUT |= BIT2;
-    		current = (uint32_t)ADC_Result;
+
+    		// Grab peak values
+    		if(ADC_Result > isense_vmax) {
+    			isense_vmax = ADC_Result;
+    		}
+    		else if(ADC_Result < isense_vmin) {
+    			isense_vmin = ADC_Result;
+    		}
+
+    		// Vi * G = Vo - Vcc/2
+    		if(ADC_Result > isense_vmid) {
+    			current = (uint32_t)(ADC_Result - isense_vmid);
+    		}
+    		else {
+    			current = (uint32_t)(isense_vmid - ADC_Result);
+    		}
     		acc_i_rms += current * current;
     		break;
     	case 3:	// V_SENSE
@@ -208,7 +232,7 @@ __interrupt void ADC10_ISR(void) {
     		if(ADC_Result > vsense_vmax) {
 				vsense_vmax = ADC_Result;
 			}
-			if(ADC_Result < vsense_vmin) {
+    		else if(ADC_Result < vsense_vmin) {
 				vsense_vmin = ADC_Result;
 			}
 
@@ -266,9 +290,14 @@ __interrupt void ADC10_ISR(void) {
 				apparentPower = Irms * Vrms;
 
 				// Calculate V_SENSE & I_SENSE mid values
+				// TODO: maybe dont reset vmin and vmax all the way
+				// TODO: maybe just pull them in slightly
 				vsense_vmid = (vsense_vmax - vsense_vmin) >> 1;
 				vsense_vmax = 0;
 				vsense_vmin = 256;
+				isense_vmid = (isense_vmax - isense_vmin) >> 1;
+				isense_vmax = 0;
+				isense_vmin = 256;
 
     			measCount++;
     			if(measCount == 60) { // Another second has passed
