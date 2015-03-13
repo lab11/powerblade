@@ -25,11 +25,14 @@ uint32_t acc_p_ave;
 uint32_t acc_i_rms;
 uint32_t acc_v_rms;
 
-uint32_t vmax;
-uint32_t vmin;
-
 uint32_t tot_power;
 uint32_t apparentPower;
+
+uint8_t vsense_vmax;
+uint8_t vsense_vmin;
+
+uint8_t isense_vmid;
+uint8_t vsense_vmid;
 
 //#pragma SET_DATA_SECTION()
 
@@ -119,8 +122,11 @@ int main(void) {
     acc_i_rms = 0;
     acc_v_rms = 0;
     tot_power = 0;
-    vmax = 0;
-    vmin = 40000000;
+
+    // Vmid values are initally set to defaults, adjusted during run
+    vsense_vmax = 0;
+    vsense_vmin = 256;
+    vsense_vmid = ADC_VCC2;
 
     // Set SYS_EN to output and disable
     SYS_EN_DIR |= SYS_EN_PIN;
@@ -174,7 +180,7 @@ void uart_send(char* buf, unsigned int len) {
 #pragma vector=ADC10_VECTOR
 __interrupt void ADC10_ISR(void) {
 
-	unsigned int ADC_Result;
+	uint8_t ADC_Result;
 	unsigned char ADC_Channel;
 
 	switch(__even_in_range(ADC10IV,12)) {
@@ -195,21 +201,25 @@ __interrupt void ADC10_ISR(void) {
     		break;
     	case 3:	// V_SENSE
     	{
+    		// Set debug pin
     		P1OUT |= BIT2;
+
+    		// Grab peak values
+    		if(ADC_Result > vsense_vmax) {
+				vsense_vmax = ADC_Result;
+			}
+			if(ADC_Result < vsense_vmin) {
+				vsense_vmin = ADC_Result;
+			}
+
     		// Vi = (RI/RF)(Vcc/2 - Vo)
-    		if(ADC_Result > ADC_VCC2) {
-    			voltage = (uint32_t)(RI/RF)*(ADC_Result - ADC_VCC2));
+    		if(ADC_Result > vsense_vmid) {
+    			voltage = (uint32_t)(RI/RF)*(ADC_Result - vsense_vmid));
     		}
     		else {
-    			voltage = (uint32_t)(RI/RF)*(ADC_VCC2 - ADC_Result));
+    			voltage = (uint32_t)(RI/RF)*(vsense_vmid - ADC_Result));
     		}
-    		//voltage = (uint32_t)ADC_Result;
-    		if(voltage > vmax) {
-    			vmax = voltage;
-    		}
-    		if(voltage < vmin) {
-    			vmin = voltage;
-    		}
+
     		acc_p_ave += voltage * current;
     		acc_v_rms += voltage * voltage;
     		break;
@@ -218,7 +228,6 @@ __interrupt void ADC10_ISR(void) {
     		P1OUT |= BIT2;
     		if(ADC_Result < ADC_VMIN) {
     			SYS_EN_OUT &= ~SYS_EN_PIN;
-    			//P1OUT &= ~BIT2;
     			ready = 0;
     		}
     		else if(ADC_Result > ADC_VCHG) {
@@ -239,29 +248,31 @@ __interrupt void ADC10_ISR(void) {
 
     		//P1OUT |= BIT6;
 
-//    		acc_i_rms += current * current;
-//    		acc_p_ave += voltage * current;
-//    		acc_v_rms += voltage * voltage;
-
     		sampleCount++;
     		if(sampleCount == 21) { // Entire AC wave sampled
+    			// Reset sampleCount once per wave
     			sampleCount = 0;
+
+    			// Increment energy calc and reset accumulator
     			uint32_t realPower = 1;//acc_p_ave / 21;
     			acc_p_ave = 0;
     			tot_power += realPower;
 
+    			// Calculate Irms, Vrms, and apparent power
     			uint32_t Irms = SquareRoot(acc_i_rms / 21);
 				uint32_t Vrms = SquareRoot(acc_v_rms / 21);
 				acc_i_rms = 0;
 				acc_v_rms = 0;
 				apparentPower = Irms * Vrms;
 
+				// Calculate V_SENSE & I_SENSE mid values
+				vsense_vmid = (vsense_vmax - vsense_vmin) >> 1;
+				vsense_vmax = 0;
+				vsense_vmin = 256;
+
     			measCount++;
-//    			P1OUT |= BIT2;
     			if(measCount == 60) { // Another second has passed
     				measCount = 0;
-    				//acc_i_rms = 1701;
-    				//acc_v_rms = 1344;
 
 					//ready = 1;
 					if(ready == 1) {
@@ -276,10 +287,6 @@ __interrupt void ADC10_ISR(void) {
 					}
     			}
     		}
-//    		else {
-//    			P1OUT &= ~BIT2;
-//    		}
-
     		break;
     	}
 	    }

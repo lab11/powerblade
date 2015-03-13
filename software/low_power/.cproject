@@ -127,7 +127,6 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.ABI.1015692924" name="Application binary interface [See 'General' page to edit] (--abi)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.ABI" value="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.ABI.eabi" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.INCLUDE_PATH.119506521" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\Users\sdebruin\repo\powerblade\software\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;Z:\repo\powerblade\software\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/include&quot;"/>
 								</option>
