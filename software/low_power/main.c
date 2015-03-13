@@ -196,11 +196,12 @@ __interrupt void ADC10_ISR(void) {
     	case 3:	// V_SENSE
     	{
     		P1OUT |= BIT2;
+    		// Vi = (RI/RF)(Vcc/2 - Vo)
     		if(ADC_Result > ADC_VCC2) {
-    			voltage = (uint32_t)(147*(ADC_Result - ADC_VCC2));
+    			voltage = (uint32_t)(RI/RF)*(ADC_Result - ADC_VCC2));
     		}
     		else {
-    			voltage = (uint32_t)(147*(ADC_VCC2 - ADC_Result));
+    			voltage = (uint32_t)(RI/RF)*(ADC_VCC2 - ADC_Result));
     		}
     		//voltage = (uint32_t)ADC_Result;
     		if(voltage > vmax) {
