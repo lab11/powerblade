@@ -45,7 +45,7 @@
 	Vmax,div = 3.17V
 	Nadc,max = 255 * (3.17 / 3.3) = 245 (0xF5)
 */
-#define ADC_VMIN	0x70
+#define ADC_VMIN	0x73
 #define ADC_VCHG	0xDB
 #define ADC_VMAX	0xF5
 
