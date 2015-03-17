@@ -124,10 +124,10 @@ int main(void) {
 
     // Vmid values are initally set to defaults, adjusted during run
     vsense_vmax = 0;
-    vsense_vmin = 256;
+    vsense_vmin = 255;
     vsense_vmid = ADC_VCC2;
     isense_vmax = 0;
-    isense_vmin  = 256;
+    isense_vmin  = 255;
     isense_vmid = ADC_VCC2;
 
     // Set SYS_EN to output and disable
@@ -234,10 +234,10 @@ __interrupt void ADC10_ISR(void) {
 
     		// Vi = (RI/RF)(Vcc/2 - Vo)
     		if(ADC_Result > vsense_vmid) {
-    			voltage = (uint32_t)(ADC_Result - vsense_vmid));
+    			voltage = (uint32_t)(ADC_Result - vsense_vmid);
     		}
     		else {
-    			voltage = (uint32_t)(vsense_vmid - ADC_Result));
+    			voltage = (uint32_t)(vsense_vmid - ADC_Result);
     		}
 
     		acc_p_ave += voltage * current;
@@ -290,12 +290,12 @@ __interrupt void ADC10_ISR(void) {
 				// Calculate V_SENSE & I_SENSE mid values
 				// TODO: maybe dont reset vmin and vmax all the way
 				// TODO: maybe just pull them in slightly
-				vsense_vmid = (vsense_vmax - vsense_vmin) >> 1;
+//				vsense_vmid = (vsense_vmax - vsense_vmin) >> 1;
 				vsense_vmax = 0;
-				vsense_vmin = 256;
-				isense_vmid = (isense_vmax - isense_vmin) >> 1;
+				vsense_vmin = 255;
+//				isense_vmid = (isense_vmax - isense_vmin) >> 1;
 				isense_vmax = 0;
-				isense_vmin = 256;
+				isense_vmin = 255;
 
     			measCount++;
     			if(measCount == 60) { // Another second has passed
