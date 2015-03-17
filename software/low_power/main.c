@@ -6,38 +6,36 @@
 
 #include "powerblade_test.h"
 
-//#pragma SET_DATA_SECTION(".fram_vars")
-//volatile unsigned char vread[SAM_BUFSIZE];
-//volatile unsigned char iread[SAM_BUFSIZE];
-//volatile unsigned char vccread[SAM_BUFSIZE];
-//unsigned int sampleOffset;
-//unsigned int lock;
-
 bool ready;
-bool data;
+uint8_t data;
 
+// Count each sample and 60Hz measurement
 uint8_t sampleCount;
 uint8_t measCount;
 
-uint32_t current;
-uint32_t voltage;
+// Global variables used interrupt-to-interrupt
+uint8_t current;
+uint8_t voltage;
 uint32_t acc_p_ave;
 uint32_t acc_i_rms;
 uint32_t acc_v_rms;
+uint32_t wattHoursToAverage;
 
-uint32_t tot_power;
-uint32_t apparentPower;
+// Transmitted values
+uint32_t sequence;
+uint32_t time;
+uint8_t Vrms;
+uint16_t truePower;
+uint16_t apparentPower;
+uint32_t wattHours;
 
+// Variables used to center both waveforms at Vcc/2-ish
 uint8_t isense_vmax;
 uint8_t isense_vmin;
-
 uint8_t vsense_vmax;
 uint8_t vsense_vmin;
-
 uint8_t isense_vmid;
 uint8_t vsense_vmid;
-
-//#pragma SET_DATA_SECTION()
 
 void uart_send(char* buf, unsigned int len);
 char *txBuf;
@@ -75,11 +73,6 @@ uint32_t SquareRoot(uint32_t a_nInput)
  */
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
-
-//    if(lock == 1) {
-//    	while(1);
-//    }
-//    lock = 1;
 
     // XT1 Setup
     PJSEL0 |= BIT4 + BIT5;
@@ -124,7 +117,10 @@ int main(void) {
     acc_p_ave = 0;
     acc_i_rms = 0;
     acc_v_rms = 0;
-    tot_power = 0;
+    wattHours = 0;
+    wattHoursToAverage = 0;
+    sequence = 0;
+    time = 0;
 
     // Vmid values are initally set to defaults, adjusted during run
     vsense_vmax = 0;
@@ -238,10 +234,10 @@ __interrupt void ADC10_ISR(void) {
 
     		// Vi = (RI/RF)(Vcc/2 - Vo)
     		if(ADC_Result > vsense_vmid) {
-    			voltage = (uint32_t)(RI/RF)*(ADC_Result - vsense_vmid));
+    			voltage = (uint32_t)(ADC_Result - vsense_vmid));
     		}
     		else {
-    			voltage = (uint32_t)(RI/RF)*(vsense_vmid - ADC_Result));
+    			voltage = (uint32_t)(vsense_vmid - ADC_Result));
     		}
 
     		acc_p_ave += voltage * current;
@@ -273,21 +269,23 @@ __interrupt void ADC10_ISR(void) {
     		//P1OUT |= BIT6;
 
     		sampleCount++;
-    		if(sampleCount == 21) { // Entire AC wave sampled
+    		if(sampleCount == 21) { // Entire AC wave sampled (60 Hz)
     			// Reset sampleCount once per wave
     			sampleCount = 0;
 
     			// Increment energy calc and reset accumulator
-    			uint32_t realPower = 1;//acc_p_ave / 21;
+    			// TODO: do I need to divide by 60 to get actual watt hours?
+    			// Is watt hours the right unit of total energy?
+    			truePower = (uint16_t)(acc_p_ave / 21);
+    			wattHoursToAverage += (uint32_t)truePower;
     			acc_p_ave = 0;
-    			tot_power += realPower;
 
     			// Calculate Irms, Vrms, and apparent power
-    			uint32_t Irms = SquareRoot(acc_i_rms / 21);
-				uint32_t Vrms = SquareRoot(acc_v_rms / 21);
+    			uint8_t Irms = (uint8_t)SquareRoot(acc_i_rms / 21);
+				Vrms = (uint8_t)SquareRoot(acc_v_rms / 21);
 				acc_i_rms = 0;
 				acc_v_rms = 0;
-				apparentPower = Irms * Vrms;
+				apparentPower = (uint16_t)(Irms * Vrms);
 
 				// Calculate V_SENSE & I_SENSE mid values
 				// TODO: maybe dont reset vmin and vmax all the way
@@ -303,16 +301,19 @@ __interrupt void ADC10_ISR(void) {
     			if(measCount == 60) { // Another second has passed
     				measCount = 0;
 
+    				sequence++;
+    				time++;
+
+    				wattHours += wattHoursToAverage / 60;
+    				wattHoursToAverage = 0;
+
 					//ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
 						__delay_cycles(40000);
-						uart_send((char*)&Vrms, sizeof(Vrms));
-						//uart_send((char*)&tot_power, sizeof(tot_power));
-						//uart_send((char*)&apparentPower, sizeof(apparentPower));
-						//data = 1;
+						uart_send((char*)&sequence, sizeof(sequence));
+						data = 6;
 						ready = 0;
-						tot_power = 0;
 					}
     			}
     		}
@@ -330,6 +331,9 @@ __interrupt void USCI_A0_ISR(void) {
 	switch(__even_in_range(UCA0IV,8)) {
 	case 0: break;							// No interrupt
 	case 2: 								// RX interrupt
+		// Reset the incrementing variables if we've gotten a confirm
+		wattHours = 0;
+		time = 0;
 		break;
 	case 4:									// TX interrupt
 		if(txCt < txLen) {
@@ -343,9 +347,24 @@ __interrupt void USCI_A0_ISR(void) {
 	case 6: break;							// Start bit received
 	case 8: 								// Transmit complete
 		UCA0IE &= ~UCTXCPTIE;
-		if(data == 1) {
+		data--;
+		switch(data){
+		case 5:
+			uart_send((char*)&time, sizeof(time));
+			break;
+		case 4:
+			uart_send((char*)&Vrms, sizeof(Vrms));
+			break;
+		case 3:
+			uart_send((char*)&truePower, sizeof(truePower));
+			break;
+		case 2:
 			uart_send((char*)&apparentPower, sizeof(apparentPower));
-			data = 0;
+			break;
+		case 1:
+			uart_send((char*)&wattHours, sizeof(wattHours));
+			break;
+		default: break;
 		}
 		break;
 	default: break;
