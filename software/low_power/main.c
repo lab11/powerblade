@@ -290,10 +290,10 @@ __interrupt void ADC10_ISR(void) {
 				// Calculate V_SENSE & I_SENSE mid values
 				// TODO: maybe dont reset vmin and vmax all the way
 				// TODO: maybe just pull them in slightly
-//				vsense_vmid = (vsense_vmax - vsense_vmin) >> 1;
+//				vsense_vmid = (vsense_vmax >> 1) + (vsense_vmin >> 1);
 				vsense_vmax = 0;
 				vsense_vmin = 255;
-//				isense_vmid = (isense_vmax - isense_vmin) >> 1;
+//				isense_vmid = (isense_vmax >> 1) + (isense_vmin >> 1);
 				isense_vmax = 0;
 				isense_vmin = 255;
 
@@ -307,12 +307,14 @@ __interrupt void ADC10_ISR(void) {
     				wattHours += wattHoursToAverage / 60;
     				wattHoursToAverage = 0;
 
-					//ready = 1;
+//					ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
 						__delay_cycles(40000);
-						uart_send((char*)&sequence, sizeof(sequence));
-						data = 6;
+						//uart_send((char*)&sequence, sizeof(sequence));
+						uart_send((char*)&Vrms, sizeof(Vrms));
+						//data = 6;
+						data = 0;
 						ready = 0;
 					}
     			}
