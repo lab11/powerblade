@@ -9775,11 +9775,10 @@ In this library the device names are the same as the pin names of the symbols, t
 </part>
 <part name="D1" library="powerfilm" deviceset="ZENER" device="BZT52">
 <attribute name="DIGIKEY" value="BZT52C10T-7DICT-ND "/>
-<attribute name="DIGIKEY_2" value="BZT52C15T-7DICT-ND "/>
 </part>
 <part name="D2" library="powerfilm" deviceset="DIODE" device=""/>
-<part name="C3" library="rcl" deviceset="C-EU" device="C0603" value="33uF">
-<attribute name="DIGIKEY" value="718-1672-1-ND"/>
+<part name="C3" library="rcl" deviceset="C-EU" device="C0603" value="22uF">
+<attribute name="DIGIKEY" value="445-9077-1-ND"/>
 </part>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="P+1" library="supply1" deviceset="VCC" device=""/>
@@ -9808,7 +9807,9 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="C7" library="rcl" deviceset="C-EU" device="C0603" value="4.7uF"/>
 <part name="C8" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="C9" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
-<part name="C10" library="rcl" deviceset="C-EU" device="C0603" value="22uF"/>
+<part name="C10" library="rcl" deviceset="C-EU" device="C0603" value="22uF">
+<attribute name="DIGIKEY" value="445-9077-1-ND"/>
+</part>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="+3V1" library="supply1" deviceset="+3V3" device=""/>
@@ -9893,9 +9894,13 @@ In this library the device names are the same as the pin names of the symbols, t
 </part>
 <part name="C2" library="rcl" deviceset="C-EU" device="C0603"/>
 <part name="U2" library="powerfilm" deviceset="MCP6V3" device=""/>
-<part name="R3" library="rcl" deviceset="R-US_" device="R1210"/>
-<part name="C5" library="rcl" deviceset="C-EU" device="C0603" value="33uF">
-<attribute name="DIGIKEY" value="718-1672-1-ND"/>
+<part name="R3" library="rcl" deviceset="R-US_" device="R1210" value="80k">
+<attribute name="DIGIKEY" value="P80.6KAACT-ND"/>
+<attribute name="DIGIKEY_2" value="P69.8KAACT-ND"/>
+<attribute name="DIGIKEY_3" value="P40.2KAACT-ND"/>
+</part>
+<part name="C5" library="rcl" deviceset="C-EU" device="C0603" value="22uF">
+<attribute name="DIGIKEY" value="445-9077-1-ND"/>
 </part>
 <part name="U3" library="powerfilm" deviceset="MSP430FR5738" device=""/>
 <part name="C14" library="rcl" deviceset="C-EU" device="C0603" value="0.1uF">
@@ -10063,7 +10068,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </instance>
 <instance part="D1" gate="G$1" x="58.42" y="7.62" smashed="yes" rot="R90">
 <attribute name="NAME" x="57.9374" y="10.16" size="1.778" layer="95" rot="R90"/>
-<attribute name="DIGIKEY_2" x="58.42" y="7.62" size="1.778" layer="96" rot="R90" display="off"/>
 </instance>
 <instance part="D2" gate="G$1" x="73.66" y="-10.16" rot="MR0"/>
 <instance part="C3" gate="G$1" x="93.98" y="5.08">
@@ -10083,7 +10087,11 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="R8" gate="G$1" x="10.16" y="0">
 <attribute name="DIGIKEY" x="10.16" y="0" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R3" gate="G$1" x="10.16" y="-22.86"/>
+<instance part="R3" gate="G$1" x="10.16" y="-22.86">
+<attribute name="DIGIKEY" x="10.16" y="-22.86" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_2" x="10.16" y="-22.86" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_3" x="10.16" y="-22.86" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="C5" gate="G$1" x="104.14" y="5.08">
 <attribute name="DIGIKEY" x="104.14" y="5.08" size="1.778" layer="96" display="off"/>
 </instance>
@@ -10198,7 +10206,9 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="C7" gate="G$1" x="-27.94" y="0"/>
 <instance part="C8" gate="G$1" x="-40.64" y="0"/>
 <instance part="C9" gate="G$1" x="53.34" y="0"/>
-<instance part="C10" gate="G$1" x="63.5" y="0"/>
+<instance part="C10" gate="G$1" x="63.5" y="0">
+<attribute name="DIGIKEY" x="63.5" y="0" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND6" gate="1" x="-40.64" y="-30.48"/>
 <instance part="GND7" gate="1" x="63.5" y="-30.48"/>
 <instance part="+3V1" gate="G$1" x="63.5" y="17.78"/>
