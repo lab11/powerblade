@@ -3,6 +3,8 @@ var noble = require('../index');
 
 //XXX: Replace COLONS!
 //var peripheralUuid = process.argv[2];
+//peripheralUuid = peripheralUuid.replace(':', '');
+//peripheralUuid = peripheralUuid.toLowerCase();
 var peripheralUuid = 'e12b8ee3b640';
 
 
@@ -18,62 +20,36 @@ noble.on('stateChange', function(state) {
 noble.on('discover', function(peripheral) {
   //console.log("Peripheral found: UUID " + peripheral.uuid);
   if (peripheral.uuid === peripheralUuid) {
-    //noble.stopScanning();
 
-    //console.log('peripheral with UUID ' + peripheralUuid + ' found');
+    //console.log('Found peripheral: UUID ' + peripheralUuid + ' found');
     var advertisement = peripheral.advertisement;
     //console.log('  Advertising Data = ' + JSON.stringify(advertisement, null, 0));
 
-    /*
-    var localName = advertisement.localName;
-    var txPowerLevel = advertisement.txPowerLevel;
-    var manufacturerData = advertisement.manufacturerData;
-    var serviceData = advertisement.serviceData;
-    var serviceUuids = advertisement.serviceUuids;
-
-    if (localName) {
-      console.log('  Local Name        = ' + localName);
-    }
-
-    if (txPowerLevel) {
-      console.log('  TX Power Level    = ' + txPowerLevel);
-    }
-
-    if (manufacturerData) {
-      console.log('  Manufacturer Data = ' + manufacturerData.toString('hex'));
-      console.log('         (string)   = ' + manufacturerData.toString());
-    }
-
-    if (serviceData) {
-      console.log('  Service Data      = ' + serviceData);
-    }
-
-    if (localName) {
-      console.log('  Service UUIDs     = ' + serviceUuids);
-    }
-    */
-
+    // get data after the manufacturer ID
     var data = advertisement.manufacturerData.slice(2);
-    var data0 = data.slice(0,4);
-    var data1 = data.slice(4,8);
-    var data2 = data.slice(8,12);
-    var data3 = data.slice(12,16);
-    var data4 = data.slice(16,20);
-    console.log(' Data = ' +
-            data0.toString('hex') + ' ' +
-            data1.toString('hex') + ' ' +
-            data2.toString('hex') + ' ' +
-            data3.toString('hex') + ' ' +
-            data4.toString('hex'));
-    //console.log(' Data = ' + data.toString('hex'));
-    console.log('  str = ' + data.toString());
 
-    console.log();
+    // get data values from the powerblade
+    var sequence_num = data.slice(0,4);
+    var time = data.slice(4,8);
+    var v_rms = data.slice(8,9);
+    var true_power = data.slice(9,11);
+    var apparent_power = data.slice(11,13);
+    var watt_hours = data.slice(13,17);
 
-    //explore(peripheral);
+    // print to user
+    console.log('Data:');
+    console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString('hex') = ')');
+    console.log('                  Time: ' + time +           ' (0x' + time.toString('hex') = ')');
+    console.log('           RMS Voltage: ' + v_rms +          ' (0x' + v_rms.toString('hex') = ')');
+    console.log('    Current True Power: ' + true_power +     ' (0x' + true_power.toString('hex') = ')');
+    console.log('Current Apparent Power: ' + apparent_power + ' (0x' + apparent_power.toString('hex') = ')');
+    console.log(' Cumulative Watt Hours: ' + watt_hours +     ' (0x' + watt_hours.toString('hex') = ')');
+
+    console.log('');
   }
 });
 
+// lists all services, characteristics, and values when connected
 function explore(peripheral) {
   console.log('services and characteristics:');
 
