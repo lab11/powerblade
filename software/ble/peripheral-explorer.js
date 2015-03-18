@@ -1,12 +1,13 @@
 var async = require('async');
-var noble = require('../index');
+var noble = require('noble');
+var BitArray = require('node-bitarray');
 
-//XXX: Replace COLONS!
-//var peripheralUuid = process.argv[2];
-//peripheralUuid = peripheralUuid.replace(':', '');
-//peripheralUuid = peripheralUuid.toLowerCase();
+// default to the Squall we are testing with
 var peripheralUuid = 'e12b8ee3b640';
-
+if (process.argv.length >= 3) {
+    peripheralUuid = process.argv[2].replace(':', '').toLowerCase();
+}
+console.log('Looking for ' + peripheralUuid);
 
 noble.on('stateChange', function(state) {
   if (state === 'poweredOn') {
@@ -29,25 +30,26 @@ noble.on('discover', function(peripheral) {
     var data = advertisement.manufacturerData.slice(2);
 
     // get data values from the powerblade
-    var sequence_num = data.slice(0,4);
-    var time = data.slice(4,8);
-    var v_rms = data.slice(8,9);
-    var true_power = data.slice(9,11);
-    var apparent_power = data.slice(11,13);
-    var watt_hours = data.slice(13,17);
+    var sequence_num = BitArray.toNumber(BitArray.fromBuffer(data.slice(0,4)).reverse());
+    var time = BitArray.toNumber(BitArray.fromBuffer(data.slice(4,8)).reverse());
+    var v_rms = BitArray.toNumber(BitArray.fromBuffer(data.slice(8,9)).reverse());
+    var true_power = BitArray.toNumber(BitArray.fromBuffer(data.slice(9,11)).reverse());
+    var apparent_power = BitArray.toNumber(BitArray.fromBuffer(data.slice(11,13)).reverse());
+    var watt_hours = BitArray.toNumber(BitArray.fromBuffer(data.slice(13,17)).reverse());
 
     // print to user
     console.log('Data:');
-    console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString('hex') = ')');
-    console.log('                  Time: ' + time +           ' (0x' + time.toString('hex') = ')');
-    console.log('           RMS Voltage: ' + v_rms +          ' (0x' + v_rms.toString('hex') = ')');
-    console.log('    Current True Power: ' + true_power +     ' (0x' + true_power.toString('hex') = ')');
-    console.log('Current Apparent Power: ' + apparent_power + ' (0x' + apparent_power.toString('hex') = ')');
-    console.log(' Cumulative Watt Hours: ' + watt_hours +     ' (0x' + watt_hours.toString('hex') = ')');
+    console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString(16) + ')');
+    console.log('                  Time: ' + time +           ' (0x' + time.toString(16) + ')');
+    console.log('           RMS Voltage: ' + v_rms +          ' (0x' + v_rms.toString(16) + ')');
+    console.log('    Current True Power: ' + true_power +     ' (0x' + true_power.toString(16) + ')');
+    console.log('Current Apparent Power: ' + apparent_power + ' (0x' + apparent_power.toString(16) + ')');
+    console.log(' Cumulative Watt Hours: ' + watt_hours +     ' (0x' + watt_hours.toString(16) + ')');
 
     console.log('');
   }
 });
+
 
 // lists all services, characteristics, and values when connected
 function explore(peripheral) {
