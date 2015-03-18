@@ -1938,7 +1938,6 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="-7.106" y="10.5374" size="0.762" layer="25" rot="R180"/>
 </element>
 <element name="D1" library="powerfilm" package="BZT52" value="ZENERBZT52" x="3.33375" y="7.5565" smashed="yes">
-<attribute name="DIGIKEY_2" value="BZT52C15T-7DICT-ND " x="37.62375" y="-36.8935" size="1.778" layer="27" display="off"/>
 <attribute name="DIGIKEY" value="BZT52C10T-7DICT-ND " x="37.62375" y="-36.8935" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="2.69875" y="8.03275" size="0.762" layer="25"/>
 </element>
@@ -1946,8 +1945,8 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="BAS521-7DICT-ND" x="-34.76625" y="50.419" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="2.06375" y="4.85775" size="0.762" layer="25"/>
 </element>
-<element name="C3" library="rcl" package="C0603" value="33uF" x="5.16255" y="6.44525" smashed="yes" rot="R270">
-<attribute name="DIGIKEY" value="718-1672-1-ND" x="-39.28745" y="-36.73475" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="C3" library="rcl" package="C0603" value="22uF" x="5.16255" y="6.44525" smashed="yes" rot="R270">
+<attribute name="DIGIKEY" value="445-9077-1-ND" x="-39.28745" y="-36.73475" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="4.6863" y="5.17525" size="0.762" layer="25" rot="R270"/>
 </element>
 <element name="J21" library="powerfilm" package="AC3_TBFILM" value="AC_INTBFILM" x="0" y="0" smashed="yes">
@@ -1991,6 +1990,7 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 </element>
 <element name="C10" library="rcl" package="C0603" value="22uF" x="10.795" y="9.017" smashed="yes" rot="R180">
 <attribute name="NAME" x="10.00125" y="9.72185" size="0.762" layer="25"/>
+<attribute name="DIGIKEY" value="445-9077-1-ND" x="10.795" y="9.017" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="VS+" library="skyspecs" package="TP_LONG" value="TP_LONG" x="4.2545" y="-13.716" smashed="yes" rot="R90">
 <attribute name="DIGIKEY" value="NP" x="4.2545" y="-13.716" size="1.778" layer="27" rot="R90" display="off"/>
@@ -2098,9 +2098,13 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <element name="U2" library="powerfilm" package="SC70-5" value="MCP6V3" x="-12.192" y="-38.862">
 <attribute name="DIGIKEY" value="MCP6V31UT-E/LTCT-ND" x="-12.192" y="-38.862" size="1.778" layer="27" display="off"/>
 </element>
-<element name="R3" library="rcl" package="R1210" value="" x="-2.54" y="7.9375"/>
-<element name="C5" library="rcl" package="C0603" value="33uF" x="-12.192" y="-42.672">
-<attribute name="DIGIKEY" value="718-1672-1-ND" x="-12.192" y="-42.672" size="1.778" layer="27" display="off"/>
+<element name="R3" library="rcl" package="R1210" value="80k" x="-2.54" y="7.9375">
+<attribute name="DIGIKEY" value="P80.6KAACT-ND" x="-2.54" y="7.9375" size="1.778" layer="27" display="off"/>
+<attribute name="DIGIKEY_2" value="P69.8KAACT-ND" x="-2.54" y="7.9375" size="1.778" layer="27" display="off"/>
+<attribute name="DIGIKEY_3" value="P40.2KAACT-ND" x="-2.54" y="7.9375" size="1.778" layer="27" display="off"/>
+</element>
+<element name="C5" library="rcl" package="C0603" value="22uF" x="-12.192" y="-42.672">
+<attribute name="DIGIKEY" value="445-9077-1-ND" x="-12.192" y="-42.672" size="1.778" layer="27" display="off"/>
 </element>
 <element name="U3" library="powerfilm" package="VQFN-24" value="MSP430FR5738" x="2.286" y="-49.53">
 <attribute name="DIGIKEY" value="296-29232-1-ND" x="-10.668" y="-49.53" size="1.778" layer="27" display="off"/>
