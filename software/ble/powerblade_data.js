@@ -3,9 +3,9 @@ var noble = require('noble');
 var BitArray = require('node-bitarray');
 
 // default to the Squall we are testing with
-var peripheralUuid = 'e12b8ee3b640';
+var peripheralUuid = 'e602dc1bdbfa';
 if (process.argv.length >= 3) {
-    peripheralUuid = process.argv[2].replace(':', '').toLowerCase();
+    peripheralUuid = process.argv[2].replace(/:/g, '').toLowerCase();
 }
 console.log('Looking for ' + peripheralUuid);
 
