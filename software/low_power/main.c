@@ -37,6 +37,12 @@ uint8_t vsense_vmin;
 uint8_t isense_vmid;
 uint8_t vsense_vmid;
 
+// Buffer to hold old voltage measurements
+// This is used to account for a phase delay between current and voltage
+uint8_t vbuff[SAMCOUNT];
+uint8_t vbuff_head;
+uint8_t getVoltageForPhase(uint8_t head);
+
 void uart_send(char* buf, unsigned int len);
 char *txBuf;
 unsigned int txLen;
@@ -80,7 +86,7 @@ int main(void) {
     CSCTL0_H = 0xA5;
   	CSCTL1 = DCOFSEL0 + DCOFSEL1;             // Set max. DCO setting
   	CSCTL2 = SELA_0 + SELS_3 + SELM_3;        // set ACLK = XT1; MCLK = DCO
-  	CSCTL3 = DIVA_0 + DIVS_2 + DIVM_2;        // set all dividers
+  	CSCTL3 = DIVA_0 + DIVS_1 + DIVM_1;        // set all dividers
   	CSCTL4 |= XT1DRIVE_0;
   	CSCTL4 &= ~XT1OFF;
 
@@ -91,9 +97,14 @@ int main(void) {
   	}while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
 
     // Low power in port J
-    PJDIR = 0;
-    PJOUT = 0;
-    PJREN = 0xFF;
+//    PJDIR = 0;
+//    PJOUT = 0;
+//    PJREN = 0xFF;
+
+    PJOUT = 0;                                // output ACLK
+    PJDIR |= BIT0;
+    PJSEL1 &= ~BIT0;
+    PJSEL0 |= BIT0;
 
     // Low power in port 1
     P1DIR = BIT2 + BIT6;
@@ -129,6 +140,7 @@ int main(void) {
     isense_vmax = 0;
     isense_vmin  = 255;
     isense_vmid = ADC_VCC2;
+    vbuff_head = 0;
 
     // Set SYS_EN to output and disable
     SYS_EN_DIR |= SYS_EN_PIN;
@@ -140,9 +152,12 @@ int main(void) {
     P2SEL1 |= BIT0 + BIT1;
     UCA0CTL1 |= UCSWRST;
     UCA0CTL1 |= UCSSEL_2;
-    UCA0BR0 = 52;
+//    UCA0BR0 = 52;
+//    UCA0BR1 = 0;
+//    UCA0MCTLW = 0x0200;
+    UCA0BR0 = 104;
     UCA0BR1 = 0;
-    UCA0MCTLW = 0x02;
+    UCA0MCTLW = 0x1100;
     UCA0CTL1 &= ~UCSWRST;
     UCA0IE |= UCRXIE + UCTXCPTIE;
 
@@ -240,6 +255,13 @@ __interrupt void ADC10_ISR(void) {
     			voltage = (uint32_t)(vsense_vmid - ADC_Result);
     		}
 
+    		// Store and account for phase offset
+    		vbuff[vbuff_head++] = voltage;
+    		voltage = vbuff[getVoltageForPhase(vbuff_head)];
+    		if(vbuff_head == 21) {
+    			vbuff_head = 0;
+    		}
+
     		acc_p_ave += voltage * current;
     		acc_v_rms += voltage * voltage;
     		break;
@@ -266,26 +288,29 @@ __interrupt void ADC10_ISR(void) {
     		ADC10CTL1 |= ADC10CONSEQ_3;
     		ADC10CTL0 |= ADC10ENC;
 
-    		//P1OUT |= BIT6;
+    		P1OUT |= BIT6;
 
     		sampleCount++;
-    		if(sampleCount == 21) { // Entire AC wave sampled (60 Hz)
+    		if(sampleCount == SAMCOUNT) { // Entire AC wave sampled (60 Hz)
     			// Reset sampleCount once per wave
     			sampleCount = 0;
 
     			// Increment energy calc and reset accumulator
     			// TODO: do I need to divide by 60 to get actual watt hours?
     			// Is watt hours the right unit of total energy?
-    			truePower = (uint16_t)(acc_p_ave / 21);
+    			truePower = (uint16_t)(acc_p_ave / SAMCOUNT);
+    			truePower = 1;
     			wattHoursToAverage += (uint32_t)truePower;
     			acc_p_ave = 0;
 
     			// Calculate Irms, Vrms, and apparent power
-    			uint8_t Irms = (uint8_t)SquareRoot(acc_i_rms / 21);
-				Vrms = (uint8_t)SquareRoot(acc_v_rms / 21);
+    			uint8_t Irms = (uint8_t)SquareRoot(acc_i_rms / SAMCOUNT);
+				Vrms = (uint8_t)SquareRoot(acc_v_rms / SAMCOUNT);
+				Vrms = 0xCF;
 				acc_i_rms = 0;
 				acc_v_rms = 0;
 				apparentPower = (uint16_t)(Irms * Vrms);
+				apparentPower = 2;
 
 				// Calculate V_SENSE & I_SENSE mid values
 				// TODO: maybe dont reset vmin and vmax all the way
@@ -298,7 +323,7 @@ __interrupt void ADC10_ISR(void) {
 				isense_vmin = 255;
 
     			measCount++;
-    			if(measCount == 60) { // Another second has passed
+    			if(measCount >= 60) { // Another second has passed
     				measCount = 0;
 
     				sequence++;
@@ -307,14 +332,14 @@ __interrupt void ADC10_ISR(void) {
     				wattHours += wattHoursToAverage / 60;
     				wattHoursToAverage = 0;
 
-//					ready = 1;
+					ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
 						__delay_cycles(40000);
-						//uart_send((char*)&sequence, sizeof(sequence));
-						uart_send((char*)&Vrms, sizeof(Vrms));
-						//data = 6;
-						data = 0;
+						uart_send((char*)&sequence, sizeof(sequence));
+						//uart_send((char*)&Vrms, sizeof(Vrms));
+						data = 6;
+						//data = 0;
 						ready = 0;
 					}
     			}
@@ -325,7 +350,7 @@ __interrupt void ADC10_ISR(void) {
         break;                          // Clear CPUOFF bit from 0(SR)
     default: break;
   	}
-	//P1OUT &= ~(BIT2 + BIT6);
+	P1OUT &= ~(BIT2 + BIT6);
 }
 
 #pragma vector=USCI_A0_VECTOR
@@ -373,6 +398,13 @@ __interrupt void USCI_A0_ISR(void) {
 	}
 }
 
-
+uint8_t getVoltageForPhase(uint8_t head) {
+	if(head > PHASEOFF) {
+		return head - PHASEOFF - 1;
+	}
+	else {
+		return SAMCOUNT + head - PHASEOFF - 1;
+	}
+}
 
 
