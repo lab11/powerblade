@@ -14,9 +14,9 @@
    SYSTEN ENABLE SECTION
  **************************************************************************/
 // SYS_EN = TCK Pins
-#define SYS_EN_DIR	P1DIR
-#define SYS_EN_OUT	P1OUT
-#define SYS_EN_PIN	BIT6
+#define SYS_EN_DIR	PJDIR
+#define SYS_EN_OUT	PJOUT
+#define SYS_EN_PIN	BIT3
 
 /**************************************************************************
    SENSE ENABLE SECTION
@@ -63,5 +63,10 @@
 #define RI			220
 #define RF			1.5
 
+/**************************************************************************
+   SENSING CONSTANTS SECTION
+ **************************************************************************/
+#define PHASEOFF	5	// zero for in-phase
+#define SAMCOUNT	21
 
 #endif
