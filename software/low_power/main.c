@@ -97,14 +97,14 @@ int main(void) {
   	}while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
 
     // Low power in port J
-//    PJDIR = 0;
-//    PJOUT = 0;
-//    PJREN = 0xFF;
+    PJDIR = 0;
+    PJOUT = 0;
+    PJREN = 0xFF;
 
-    PJOUT = 0;                                // output ACLK
-    PJDIR |= BIT0;
-    PJSEL1 &= ~BIT0;
-    PJSEL0 |= BIT0;
+//    PJOUT = 0;                                // output ACLK
+//    PJDIR |= BIT2;
+//    PJSEL1 &= ~BIT2;
+//    PJSEL0 |= BIT2;
 
     // Low power in port 1
     P1DIR = BIT2 + BIT6;
@@ -165,7 +165,7 @@ int main(void) {
     P1SEL1 |= BIT3 + BIT4 + BIT5;
     P1SEL0 |= BIT3 + BIT4 + BIT5;
 	ADC10CTL0 |= ADC10ON;// + ADC10MSC;          	// ADC10ON
-  	ADC10CTL1 |= ADC10SHS_1 + ADC10SHP + ADC10CONSEQ_3;  	// rpt series of ch; TA0.1 trig sample start
+  	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3;  	// rpt series of ch; TA0.1 trig sample start
   	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
   	ADC10MCTL0 |= ADC10INCH_5 + ADC10SREF_0;  	// A3,4,5 ADC input select; Vref=AVCC
 
@@ -173,14 +173,21 @@ int main(void) {
   	ADC10IE |= ADC10IE0;                       	// Enable ADC conv complete interrupt
   
   	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-  	TA0CCR0 = 2;						// PWM Period
+  	TA0CCR0 = 16;						// PWM Period
   	TA0CCR1 = 1;                     	// TA0.1 ADC trigger
-  	TA0CCTL1 = OUTMOD_7;// + CCIE;                       	// TA0CCR0 toggle
+  	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
   	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
 
   	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
 	return 0;
+}
+
+#pragma vector=TIMER0_A1_VECTOR
+__interrupt void TIMERA0_ISR(void) {
+	TA0CCTL1 &= ~CCIFG;
+	//P2OUT ^= BIT0;
+	ADC10CTL0 += ADC10SC;
 }
 
 void uart_send(char* buf, unsigned int len) {
@@ -299,26 +306,26 @@ __interrupt void ADC10_ISR(void) {
     			// TODO: do I need to divide by 60 to get actual watt hours?
     			// Is watt hours the right unit of total energy?
     			truePower = (uint16_t)(acc_p_ave / SAMCOUNT);
-    			truePower = 1;
+    			//truePower = 1;
     			wattHoursToAverage += (uint32_t)truePower;
     			acc_p_ave = 0;
 
     			// Calculate Irms, Vrms, and apparent power
     			uint8_t Irms = (uint8_t)SquareRoot(acc_i_rms / SAMCOUNT);
 				Vrms = (uint8_t)SquareRoot(acc_v_rms / SAMCOUNT);
-				Vrms = 0xCF;
+				//Vrms = 0xCF;
 				acc_i_rms = 0;
 				acc_v_rms = 0;
 				apparentPower = (uint16_t)(Irms * Vrms);
-				apparentPower = 2;
+				//apparentPower = 2;
 
 				// Calculate V_SENSE & I_SENSE mid values
 				// TODO: maybe dont reset vmin and vmax all the way
 				// TODO: maybe just pull them in slightly
-//				vsense_vmid = (vsense_vmax >> 1) + (vsense_vmin >> 1);
+				vsense_vmid = (vsense_vmax >> 1) + (vsense_vmin >> 1);
 				vsense_vmax = 0;
 				vsense_vmin = 255;
-//				isense_vmid = (isense_vmax >> 1) + (isense_vmin >> 1);
+				isense_vmid = (isense_vmax >> 1) + (isense_vmin >> 1);
 				isense_vmax = 0;
 				isense_vmin = 255;
 
