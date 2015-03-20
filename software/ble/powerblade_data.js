@@ -30,12 +30,12 @@ noble.on('discover', function(peripheral) {
     var data = advertisement.manufacturerData.slice(2);
 
     // get data values from the powerblade
-    var sequence_num = BitArray.toNumber(BitArray.fromBuffer(data.slice(0,4)));
-    var time = BitArray.toNumber(BitArray.fromBuffer(data.slice(4,8)));
-    var v_rms = BitArray.toNumber(BitArray.fromBuffer(data.slice(8,9)));
-    var true_power = BitArray.toNumber(BitArray.fromBuffer(data.slice(9,11)));
-    var apparent_power = BitArray.toNumber(BitArray.fromBuffer(data.slice(11,13)));
-    var watt_hours = BitArray.toNumber(BitArray.fromBuffer(data.slice(13,17)));
+    var sequence_num = BitArray.fromBuffer(data.slice(0,4)).toNumber();
+    var time = BitArray.fromBuffer(data.slice(4,8)).toNumber();
+    var v_rms = BitArray.fromBuffer(data.slice(8,9)).toNumber();
+    var true_power = BitArray.fromBuffer(data.slice(9,11)).toNumber();
+    var apparent_power = BitArray.fromBuffer(data.slice(11,13)).toNumber();
+    var watt_hours = BitArray.fromBuffer(data.slice(13,17)).toNumber();
 
     // print to user
     console.log('Data:');
