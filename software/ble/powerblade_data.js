@@ -30,6 +30,7 @@ noble.on('discover', function(peripheral) {
     var data = advertisement.manufacturerData.slice(2);
 
     // get data values from the powerblade
+    var recv_time = (new Date).getTime()/1000;
     var sequence_num = BitArray.fromBuffer(data.slice(0,4)).toNumber();
     var time = BitArray.fromBuffer(data.slice(4,8)).toNumber();
     var v_rms = BitArray.fromBuffer(data.slice(8,9)).toNumber();
@@ -38,7 +39,7 @@ noble.on('discover', function(peripheral) {
     var watt_hours = BitArray.fromBuffer(data.slice(13,17)).toNumber();
 
     // print to user
-    console.log('Data:');
+    console.log('Data: ' + recv_time);
     console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString(16) + ')');
     console.log('                  Time: ' + time +           ' (0x' + time.toString(16) + ')');
     console.log('           RMS Voltage: ' + v_rms +          ' (0x' + v_rms.toString(16) + ')');
