@@ -234,10 +234,10 @@ __interrupt void ADC10_ISR(void) {
 
     		// Vi * G = Vo - Vcc/2
     		if(ADC_Result > isense_vmid) {
-    			current = (uint32_t)(ADC_Result - isense_vmid - CUROFF);
+    			current = (uint32_t)(ADC_Result - isense_vmid);// - CUROFF);
     		}
     		else {
-    			current = (uint32_t)(isense_vmid - ADC_Result - CUROFF);
+    			current = (uint32_t)(isense_vmid - ADC_Result);// - CUROFF);
     		}
     		acc_i_rms += current * current;
     		break;
