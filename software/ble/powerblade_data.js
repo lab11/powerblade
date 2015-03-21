@@ -39,15 +39,20 @@ noble.on('discover', function(peripheral) {
     var watt_hours = BitArray.fromBuffer(data.slice(13,17)).toNumber();
 
     var v_rms_disp = v_rms*3.07;
+    var true_power_disp = true_power*0.22;
+    var app_power_disp = apparent_power*0.22;
+    var watt_hours_disp = watt_hours*0.0000587;
+    var pf_disp = true_power_disp / app_power_disp;
 
     // print to user
     console.log('Data: ' + recv_time);
     console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString(16) + ')');
     console.log('                  Time: ' + time +           ' (0x' + time.toString(16) + ')');
     console.log('           RMS Voltage: ' + v_rms_disp.toFixed(2) +          ' (0x' + v_rms.toString(16) + ')');
-    console.log('    Current True Power: ' + true_power +     ' (0x' + true_power.toString(16) + ')');
-    console.log('Current Apparent Power: ' + apparent_power + ' (0x' + apparent_power.toString(16) + ')');
-    console.log(' Cumulative Watt Hours: ' + watt_hours +     ' (0x' + watt_hours.toString(16) + ')');
+    console.log('    Current True Power: ' + true_power_disp.toFixed(2) +     ' (0x' + true_power.toString(16) + ')');
+    console.log('Current Apparent Power: ' + app_power_disp.toFixed(2) + ' (0x' + apparent_power.toString(16) + ')');
+    console.log(' Cumulative Watt Hours: ' + watt_hours_disp.toFixed(2) +     ' (0x' + watt_hours.toString(16) + ')');
+    console.log('          Power Factor: ' + pf_disp.toFixed(2));
 
     console.log('');
   }
