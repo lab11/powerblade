@@ -46,8 +46,8 @@ noble.on('discover', function(peripheral) {
     var watt_hours_disp = watt_hours*0.0000587;
     var pf_disp = true_power_disp / app_power_disp;
 
-    // print unique seq's to user  
-    if(sequence_num != last_seq) {
+    // print unique seq's to user
+    if (sequence_num != last_seq || sequence_num == 0) {
       last_seq = sequence_num;
       console.log('Data: ' + recv_time);
       console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString(16) + ')');
