@@ -14,9 +14,9 @@ uint8_t sampleCount;
 uint8_t measCount;
 
 // Global variables used interrupt-to-interrupt
-uint8_t current;
-uint8_t voltage;
-uint32_t acc_p_ave;
+int8_t current;
+int8_t voltage;
+int32_t acc_p_ave;
 uint32_t acc_i_rms;
 uint32_t acc_v_rms;
 uint32_t wattHoursToAverage;
@@ -39,7 +39,7 @@ uint8_t vsense_vmid;
 
 // Buffer to hold old voltage measurements
 // This is used to account for a phase delay between current and voltage
-uint8_t vbuff[SAMCOUNT];
+int8_t vbuff[SAMCOUNT];
 uint8_t vbuff_head;
 uint8_t getVoltageForPhase(uint8_t head);
 
@@ -178,8 +178,8 @@ int main(void) {
   	ADC10IE |= ADC10IE0;                       	// Enable ADC conv complete interrupt
   
   	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-  	TA0CCR0 = 16;						// PWM Period
-  	TA0CCR1 = 1;                     	// TA0.1 ADC trigger
+  	TA0CCR0 = 9;						// PWM Period
+  	TA0CCR1 = 2;                     	// TA0.1 ADC trigger
   	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
   	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
 
@@ -245,12 +245,13 @@ __interrupt void ADC10_ISR(void) {
     		}
 
     		// Vi * G = Vo - Vcc/2
-    		if(ADC_Result > isense_vmid) {
-    			current = (uint32_t)(ADC_Result - isense_vmid);// - CUROFF);
-    		}
-    		else {
-    			current = (uint32_t)(isense_vmid - ADC_Result);// - CUROFF);
-    		}
+//    		if(ADC_Result > isense_vmid) {
+//    			current = (int8_t)(ADC_Result - isense_vmid);// - CUROFF);
+//    		}
+//    		else {
+//    			current = (int8_t)(0 - isense_vmid - ADC_Result);// - CUROFF);
+//    		}
+    		current = (int8_t)(ADC_Result - isense_vmid);
     		acc_i_rms += current * current;
     		break;
     	case 3:	// V_SENSE
@@ -267,17 +268,18 @@ __interrupt void ADC10_ISR(void) {
 			}
 
     		// Vi = (RI/RF)(Vcc/2 - Vo)
-    		if(ADC_Result > vsense_vmid) {
-    			voltage = (uint32_t)(ADC_Result - vsense_vmid);
-    		}
-    		else {
-    			voltage = (uint32_t)(vsense_vmid - ADC_Result);
-    		}
+//    		if(ADC_Result > vsense_vmid) {
+//    			voltage = (uint32_t)(ADC_Result - vsense_vmid);
+//    		}
+//    		else {
+//    			voltage = (uint32_t)(vsense_vmid - ADC_Result);
+//    		}
+    		voltage = (int8_t)(ADC_Result - vsense_vmid);
 
     		// Store and account for phase offset
     		vbuff[vbuff_head++] = voltage;
     		voltage = vbuff[getVoltageForPhase(vbuff_head)];
-    		if(vbuff_head == 21) {
+    		if(vbuff_head == SAMCOUNT) {
     			vbuff_head = 0;
     		}
 
@@ -301,7 +303,7 @@ __interrupt void ADC10_ISR(void) {
 	    	break;
     	default: // ADC Reset condition
     	{
-    		TA0CCR0 = 16;
+    		TA0CCR0 = 9;
     		ADC10CTL1 &= ~ADC10CONSEQ_3;
     		ADC10CTL0 &= ~ADC10ENC;
     		ADC10CTL1 |= ADC10CONSEQ_3;
