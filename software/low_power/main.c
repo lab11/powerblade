@@ -354,10 +354,10 @@ __interrupt void ADC10_ISR(void) {
 					ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
-						P2IFG &= ~BIT1;
-						P2IE |= BIT1;
-						//__delay_cycles(40000);
-						//uart_send((char*)&sequence, sizeof(sequence));
+						//P2IFG &= ~BIT1;
+						//P2IE |= BIT1;
+						__delay_cycles(40000);
+						uart_send((char*)&sequence, sizeof(sequence));
 						//uart_send((char*)&Vrms, sizeof(Vrms));
 						data = 6;
 						//data = 0;
