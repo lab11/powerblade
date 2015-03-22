@@ -39,6 +39,7 @@ noble.on('discover', function(peripheral) {
     var true_power = BitArray.fromBuffer(data.slice(9,11)).toNumber();
     var apparent_power = BitArray.fromBuffer(data.slice(11,13)).toNumber();
     var watt_hours = BitArray.fromBuffer(data.slice(13,17)).toNumber();
+    var num_connections = BitArray.fromBuffer(data.slice(17,18)).toNumber();
 
     var v_rms_disp = v_rms*3.07;
     var true_power_disp = true_power*0.22;
@@ -57,6 +58,7 @@ noble.on('discover', function(peripheral) {
       console.log('Current Apparent Power: ' + app_power_disp.toFixed(2) + ' (0x' + apparent_power.toString(16) + ')');
       console.log(' Cumulative Watt Hours: ' + watt_hours_disp.toFixed(2) +     ' (0x' + watt_hours.toString(16) + ')');
       console.log('          Power Factor: ' + pf_disp.toFixed(2));
+      console.log(' Number of Connections: ' + num_connections);
 
       console.log('');
     }
