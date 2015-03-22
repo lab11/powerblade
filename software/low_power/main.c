@@ -148,8 +148,8 @@ int main(void) {
     ready = 0;
 
     // Set up UART
-    P2SEL0 &= ~(BIT0 + BIT1);
-    P2SEL1 |= BIT0 + BIT1;
+    P2SEL0 &= ~(BIT0);// + BIT1);
+    P2SEL1 |= BIT0;// + BIT1;
     UCA0CTL1 |= UCSWRST;
     UCA0CTL1 |= UCSSEL_2;
 //    UCA0BR0 = 52;
@@ -160,6 +160,11 @@ int main(void) {
     UCA0MCTLW = 0x1100;
     UCA0CTL1 &= ~UCSWRST;
     UCA0IE |= UCRXIE + UCTXCPTIE;
+
+    // Enable pin interrupt from nrf
+    P2DIR &= ~BIT1;
+    P2IES &= ~BIT1;	// Low-to-high
+
 
     // Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
     P1SEL1 |= BIT3 + BIT4 + BIT5;
@@ -188,6 +193,13 @@ __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL1 &= ~CCIFG;
 	//P2OUT ^= BIT0;
 	ADC10CTL0 += ADC10SC;
+}
+
+#pragma vector=PORT2_VECTOR
+__interrupt void Port_2(void) {
+	P2IFG &= ~BIT1;
+	P2IE &= ~BIT1;
+	uart_send((char*)&sequence, sizeof(sequence));
 }
 
 void uart_send(char* buf, unsigned int len) {
@@ -342,8 +354,10 @@ __interrupt void ADC10_ISR(void) {
 					ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
-						__delay_cycles(40000);
-						uart_send((char*)&sequence, sizeof(sequence));
+						P2IFG &= ~BIT1;
+						P2IE |= BIT1;
+						//__delay_cycles(40000);
+						//uart_send((char*)&sequence, sizeof(sequence));
 						//uart_send((char*)&Vrms, sizeof(Vrms));
 						data = 6;
 						//data = 0;
