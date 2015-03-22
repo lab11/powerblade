@@ -10,6 +10,7 @@ if (process.argv.length >= 3) {
 }
 console.log('Looking for ' + peripheralUuid);
 
+
 noble.on('stateChange', function(state) {
   if (state === 'poweredOn') {
     console.log("Starting scan...");
@@ -59,9 +60,25 @@ noble.on('discover', function(peripheral) {
 
       console.log('');
     }
+
+    //explore(peripheral);
+    //connect(peripheral);
   }
 });
 
+function connect(peripheral) {
+    peripheral.on('disconnect', function() {
+        //process.exit(0);
+        noble.startScanning([], true);
+    });
+
+    peripheral.connect(function(error) {
+        var conn_time = (new Date).getTime()/1000;
+        console.log("Connected! " + conn_time);
+
+        peripheral.disconnect();
+    });
+}
 
 // lists all services, characteristics, and values when connected
 function explore(peripheral) {
@@ -72,6 +89,9 @@ function explore(peripheral) {
   });
 
   peripheral.connect(function(error) {
+    var conn_time = (new Date).getTime()/1000;
+    console.log("Connected! " + conn_time);
+
     peripheral.discoverServices([], function(error, services) {
       var serviceIndex = 0;
 
@@ -86,7 +106,7 @@ function explore(peripheral) {
           if (service.name) {
             serviceInfo += ' (' + service.name + ')';
           }
-          console.log(serviceInfo);
+          console.log(serviceInfo + ((new Date).getTime()/1000));
 
           service.discoverCharacteristics([], function(error, characteristics) {
             var characteristicIndex = 0;
