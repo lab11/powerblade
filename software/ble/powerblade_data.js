@@ -1,6 +1,7 @@
 var async = require('async');
 var noble = require('noble');
 var BitArray = require('node-bitarray');
+var last_seq = 0;
 
 // default to the Squall we are testing with
 var peripheralUuid = 'e602dc1bdbfa';
@@ -44,17 +45,20 @@ noble.on('discover', function(peripheral) {
     var watt_hours_disp = watt_hours*0.0000587;
     var pf_disp = true_power_disp / app_power_disp;
 
-    // print to user
-    console.log('Data: ' + recv_time);
-    console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString(16) + ')');
-    console.log('                  Time: ' + time +           ' (0x' + time.toString(16) + ')');
-    console.log('           RMS Voltage: ' + v_rms_disp.toFixed(2) +          ' (0x' + v_rms.toString(16) + ')');
-    console.log('    Current True Power: ' + true_power_disp.toFixed(2) +     ' (0x' + true_power.toString(16) + ')');
-    console.log('Current Apparent Power: ' + app_power_disp.toFixed(2) + ' (0x' + apparent_power.toString(16) + ')');
-    console.log(' Cumulative Watt Hours: ' + watt_hours_disp.toFixed(2) +     ' (0x' + watt_hours.toString(16) + ')');
-    console.log('          Power Factor: ' + pf_disp.toFixed(2));
+    // print unique seq's to user  
+    if(sequence_num != last_seq) {
+      last_seq = sequence_num;
+      console.log('Data: ' + recv_time);
+      console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString(16) + ')');
+      console.log('                  Time: ' + time +           ' (0x' + time.toString(16) + ')');
+      console.log('           RMS Voltage: ' + v_rms_disp.toFixed(2) +          ' (0x' + v_rms.toString(16) + ')');
+      console.log('    Current True Power: ' + true_power_disp.toFixed(2) +     ' (0x' + true_power.toString(16) + ')');
+      console.log('Current Apparent Power: ' + app_power_disp.toFixed(2) + ' (0x' + apparent_power.toString(16) + ')');
+      console.log(' Cumulative Watt Hours: ' + watt_hours_disp.toFixed(2) +     ' (0x' + watt_hours.toString(16) + ')');
+      console.log('          Power Factor: ' + pf_disp.toFixed(2));
 
-    console.log('');
+      console.log('');
+    }
   }
 });
 
