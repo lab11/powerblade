@@ -7,7 +7,7 @@ var CompanyID = 37392;
 
 var peripherals = {};
 
-console.log('Looking for PowerBlades!');
+console.log('Current Transformer Calibration');
 
 noble.on('stateChange', function(state) {
   if (state === 'poweredOn') {
@@ -41,20 +41,10 @@ noble.on('discover', function(peripheral) {
     // get data values from the powerblade
     var recv_time = (new Date).getTime()/1000;
     var powerblade_id = BitArray.fromBuffer(data.slice(0,1)).toNumber();
-    var sequence_num = BitArray.fromBuffer(data.slice(1,5)).toNumber();
-    var time = BitArray.fromBuffer(data.slice(5,9)).toNumber();
-    var v_rms = BitArray.fromBuffer(data.slice(9,10)).toNumber();
-    var true_power = BitArray.fromBuffer(data.slice(10,12)).toNumber();
-    var apparent_power = BitArray.fromBuffer(data.slice(12,14)).toNumber();
-    var watt_hours = BitArray.fromBuffer(data.slice(14,18)).toNumber();
+    var ippk_10s = BitArray.fromBuffer(data.slice(1,5)).toNumber();
+    var ippk_1s  = BitArray.fromBuffer(data.slice(5,9)).toNumber();
     var flags = BitArray.fromBuffer(data.slice(18,19)).toNumber();
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
-
-    var v_rms_disp = v_rms*3.07;
-    var true_power_disp = true_power*0.22;
-    var app_power_disp = apparent_power*0.22;
-    var watt_hours_disp = watt_hours*0.0000587;
-    var pf_disp = true_power_disp / app_power_disp;
 
     // print unique seq's to user
     var last_seq = peripherals[peripheral_uuid];
@@ -62,16 +52,11 @@ noble.on('discover', function(peripheral) {
       peripherals[peripheral_uuid] = sequence_num;
       last_seq = sequence_num;
       console.log('Data: ' + recv_time);
-      console.log('           BLE Address: ' + peripheral_uuid);
-      console.log('         PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
-      console.log('       Sequence Number: ' + sequence_num + ' (0x' + sequence_num.toString(16) + ')');
-      console.log('                  Time: ' + time + ' (0x' + time.toString(16) + ')');
-      console.log('           RMS Voltage: ' + v_rms_disp.toFixed(2) + ' (0x' + v_rms.toString(16) + ')');
-      console.log('    Current True Power: ' + true_power_disp.toFixed(2) + ' (0x' + true_power.toString(16) + ')');
-      console.log('Current Apparent Power: ' + app_power_disp.toFixed(2) + ' (0x' + apparent_power.toString(16) + ')');
-      console.log(' Cumulative Watt Hours: ' + watt_hours_disp.toFixed(2) + ' (0x' + watt_hours.toString(16) + ')');
-      console.log('          Power Factor: ' + pf_disp.toFixed(2));
-      console.log('                 Flags: ' + '0x' + flags.toString(16));
+      console.log('         BLE Address: ' + peripheral_uuid);
+      console.log('       PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
+      console.log('I Peak-to-Peak (10s): ' + ippk_10s + ' (0x' + ippk_10s.toString(16) + ')');
+      console.log('I Peak-to-Peak  (1s): ' + ippk_1s + ' (0x' + ippk_1s.toString(16) + ')');
+      console.log('               Flags: ' + '0x' + flags.toString(16));
       //console.log(' Number of Connections: ' + num_connections);
 
       console.log('');
