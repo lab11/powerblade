@@ -33,13 +33,15 @@ noble.on('discover', function(peripheral) {
 
     // get data values from the powerblade
     var recv_time = (new Date).getTime()/1000;
-    var sequence_num = BitArray.fromBuffer(data.slice(0,4)).toNumber();
-    var time = BitArray.fromBuffer(data.slice(4,8)).toNumber();
-    var v_rms = BitArray.fromBuffer(data.slice(8,9)).toNumber();
-    var true_power = BitArray.fromBuffer(data.slice(9,11)).toNumber();
-    var apparent_power = BitArray.fromBuffer(data.slice(11,13)).toNumber();
-    var watt_hours = BitArray.fromBuffer(data.slice(13,17)).toNumber();
-    var num_connections = BitArray.fromBuffer(data.slice(17,18)).toNumber();
+    var powerblade_id = BitArray.fromBuffer(data.slice(0,1).toNumber();
+    var sequence_num = BitArray.fromBuffer(data.slice(1,5)).toNumber();
+    var time = BitArray.fromBuffer(data.slice(5,9)).toNumber();
+    var v_rms = BitArray.fromBuffer(data.slice(9,10)).toNumber();
+    var true_power = BitArray.fromBuffer(data.slice(10,12)).toNumber();
+    var apparent_power = BitArray.fromBuffer(data.slice(12,14)).toNumber();
+    var watt_hours = BitArray.fromBuffer(data.slice(14,18)).toNumber();
+    var flags = BitArray.fromBuffer(data.slice(18,19)).toNumber();
+    var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
     var v_rms_disp = v_rms*3.07;
     var true_power_disp = true_power*0.22;
@@ -51,6 +53,7 @@ noble.on('discover', function(peripheral) {
     if (sequence_num != last_seq || sequence_num == 0) {
       last_seq = sequence_num;
       console.log('Data: ' + recv_time);
+      console.log('         PowerBlade ID: ' + ' (0x' + powerblade_id.toString(16) + ')');
       console.log('       Sequence Number: ' + sequence_num +   ' (0x' + sequence_num.toString(16) + ')');
       console.log('                  Time: ' + time +           ' (0x' + time.toString(16) + ')');
       console.log('           RMS Voltage: ' + v_rms_disp.toFixed(2) +          ' (0x' + v_rms.toString(16) + ')');
@@ -58,7 +61,8 @@ noble.on('discover', function(peripheral) {
       console.log('Current Apparent Power: ' + app_power_disp.toFixed(2) + ' (0x' + apparent_power.toString(16) + ')');
       console.log(' Cumulative Watt Hours: ' + watt_hours_disp.toFixed(2) +     ' (0x' + watt_hours.toString(16) + ')');
       console.log('          Power Factor: ' + pf_disp.toFixed(2));
-      console.log(' Number of Connections: ' + num_connections);
+      console.log('                 Flags: ' + ' (0x' + flags.toString(16) + ')');
+      //console.log(' Number of Connections: ' + num_connections);
 
       console.log('');
     }
