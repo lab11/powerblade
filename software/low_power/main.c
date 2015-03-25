@@ -1,3 +1,18 @@
+/*
+ * powerblade
+ *
+ * The purpose of this app is to measure power
+ *
+ * Reported values at 1Hz:
+ * 	   PowerBlade ID:	1 byte
+ * 	        sequence:	4 bytes		(since power on)
+ * 	            time:	4 bytes		(since data confirmation)
+ * 	            Vrms:	1 byte		(over last 1s)
+ * 	      true_power: 	2 bytes		(over last 1s)
+ * 	  apparent_power:	2 bytes		(over last 1s)
+ * 	      watt_hours:	4 bytes		(since data confirmation)
+ */
+
 #include <msp430.h> 
 
 #include <stdint.h>
