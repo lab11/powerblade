@@ -115,7 +115,7 @@ int main(void) {
 
     // Set SYS_EN to output and enable
     SYS_EN_DIR |= SYS_EN_PIN;
-    SYS_EN_OUT |= SYS_EN_PIN;
+    SYS_EN_OUT &= ~SYS_EN_PIN;
 
     // Set up UART
     P2SEL0 &= ~(BIT0);
@@ -239,6 +239,11 @@ __interrupt void ADC10_ISR(void) {
     			sampleCount = 0;
 
     			measCount++;
+
+                if(measCount >= 10) { // About 150ms has passed, so disable the BLE
+                    SYS_EN_OUT &= ~SYS_EN_PIN;
+                }
+
     			if(measCount >= 60) { // Another second has passed
     				measCount = 0;
 
@@ -256,6 +261,7 @@ __interrupt void ADC10_ISR(void) {
     				v_max = (uint32_t)vsense_vmax;
     				vsense_vmax = 0;
 
+                    SYS_EN_OUT |= SYS_EN_PIN;
 					__delay_cycles(40000);
 					uart_send((char*)&i_ave, sizeof(i_ave));
 					data = 6;
