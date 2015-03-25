@@ -368,8 +368,8 @@ __interrupt void ADC10_ISR(void) {
     				sequence++;
     				time++;
 
-    				wattHours += wattHoursToAverage / 60;
                     truePower = wattHoursToAverage / 60;
+    				wattHours += truePower;
                     apparentPower = voltAmpsToAverage / 60;
     				wattHoursToAverage = 0;
                     voltAmpsToAverage = 0;
