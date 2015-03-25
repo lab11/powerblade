@@ -35,6 +35,7 @@ int32_t acc_p_ave;
 uint32_t acc_i_rms;
 uint32_t acc_v_rms;
 uint32_t wattHoursToAverage;
+uint32_t voltAmpsToAverage;
 
 // Transmitted values
 uint32_t sequence;
@@ -145,6 +146,7 @@ int main(void) {
     acc_v_rms = 0;
     wattHours = 0;
     wattHoursToAverage = 0;
+    voltAmpsToAverage = 0;
     sequence = 0;
     time = 0;
 
@@ -346,6 +348,7 @@ __interrupt void ADC10_ISR(void) {
 				acc_i_rms = 0;
 				acc_v_rms = 0;
 				apparentPower = (uint16_t)(Irms * Vrms);
+                voltAmpsToAverage += (uint32_t)apparentPower;
 				//apparentPower = 2;
 
 				// Calculate V_SENSE & I_SENSE mid values
@@ -366,7 +369,10 @@ __interrupt void ADC10_ISR(void) {
     				time++;
 
     				wattHours += wattHoursToAverage / 60;
+                    truePower = wattHoursToAverage / 60;
+                    apparentPower = voltAmpsToAverage / 60;
     				wattHoursToAverage = 0;
+                    voltAmpsToAverage = 0;
 
 					ready = 1;
 					if(ready == 1) {
