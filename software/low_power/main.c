@@ -11,6 +11,7 @@
  * 	      true_power: 	2 bytes		(over last 1s)
  * 	  apparent_power:	2 bytes		(over last 1s)
  * 	      watt_hours:	4 bytes		(since data confirmation)
+ * 	           flags:	1 byte
  */
 
 #include <msp430.h> 
@@ -38,12 +39,14 @@ uint32_t wattHoursToAverage;
 uint32_t voltAmpsToAverage;
 
 // Transmitted values
+uint8_t powerblade_id;
 uint32_t sequence;
 uint32_t time;
 uint8_t Vrms;
 uint16_t truePower;
 uint16_t apparentPower;
 uint32_t wattHours;
+uint8_t flags;
 
 // Variables used to center both waveforms at Vcc/2-ish
 uint8_t isense_vmax;
@@ -149,14 +152,16 @@ int main(void) {
     voltAmpsToAverage = 0;
     sequence = 0;
     time = 0;
+    powerblade_id = 0;
+    flags = 0;
 
     // Vmid values are initally set to defaults, adjusted during run
-    vsense_vmax = 0;
-    vsense_vmin = 255;
-    vsense_vmid = ADC_VCC2;
-    isense_vmax = 0;
-    isense_vmin  = 255;
-    isense_vmid = ADC_VCC2;
+//    vsense_vmax = 0;
+//    vsense_vmin = 255;
+    vsense_vmid = V_VCC2;
+//    isense_vmax = 0;
+//    isense_vmin  = 255;
+    isense_vmid = I_VCC2;
     vbuff_head = 0;
 
     // Set SYS_EN to output and disable
@@ -336,20 +341,17 @@ __interrupt void ADC10_ISR(void) {
     			// Increment energy calc and reset accumulator
     			// TODO: do I need to divide by 60 to get actual watt hours?
     			// Is watt hours the right unit of total energy?
-    			truePower = (uint16_t)(acc_p_ave / SAMCOUNT);
-    			//truePower = 1;
-    			wattHoursToAverage += (uint32_t)truePower;
+    			//truePower = (uint16_t)(acc_p_ave / SAMCOUNT);
+    			wattHoursToAverage += (uint32_t)(acc_p_ave / SAMCOUNT);
     			acc_p_ave = 0;
 
     			// Calculate Irms, Vrms, and apparent power
     			uint8_t Irms = (uint8_t)SquareRoot(acc_i_rms / SAMCOUNT);
 				Vrms = (uint8_t)SquareRoot(acc_v_rms / SAMCOUNT);
-				//Vrms = 0xCF;
 				acc_i_rms = 0;
 				acc_v_rms = 0;
-				apparentPower = (uint16_t)(Irms * Vrms);
-                voltAmpsToAverage += (uint32_t)apparentPower;
-				//apparentPower = 2;
+				//apparentPower = (uint16_t)(Irms * Vrms);
+                voltAmpsToAverage += (uint32_t)(Irms * Vrms);
 
 				// Calculate V_SENSE & I_SENSE mid values
 				// TODO: maybe dont reset vmin and vmax all the way
@@ -368,22 +370,18 @@ __interrupt void ADC10_ISR(void) {
     				sequence++;
     				time++;
 
-                    truePower = wattHoursToAverage / 60;
-    				wattHours += truePower;
-                    apparentPower = voltAmpsToAverage / 60;
+                    truePower = (uint16_t)(wattHoursToAverage / 60);
+    				wattHours += (uint32_t)truePower;
+                    apparentPower = (uint16_t)(voltAmpsToAverage / 60);
     				wattHoursToAverage = 0;
                     voltAmpsToAverage = 0;
 
 					ready = 1;
 					if(ready == 1) {
 						SYS_EN_OUT |= SYS_EN_PIN;
-						//P2IFG &= ~BIT1;
-						//P2IE |= BIT1;
 						__delay_cycles(40000);
-						uart_send((char*)&sequence, sizeof(sequence));
-						//uart_send((char*)&Vrms, sizeof(Vrms));
-						data = 6;
-						//data = 0;
+						uart_send((char*)&powerblade_id, sizeof(powerblade_id));
+						data = 8;
 						ready = 0;
 					}
     			}
@@ -420,21 +418,25 @@ __interrupt void USCI_A0_ISR(void) {
 		UCA0IE &= ~UCTXCPTIE;
 		data--;
 		switch(data){
-		case 5:
+		case 7:
+			uart_send((char*)&sequence, sizeof(sequence));
+		case 6:
 			uart_send((char*)&time, sizeof(time));
 			break;
-		case 4:
+		case 5:
 			uart_send((char*)&Vrms, sizeof(Vrms));
 			break;
-		case 3:
+		case 4:
 			uart_send((char*)&truePower, sizeof(truePower));
 			break;
-		case 2:
+		case 3:
 			uart_send((char*)&apparentPower, sizeof(apparentPower));
 			break;
-		case 1:
+		case 2:
 			uart_send((char*)&wattHours, sizeof(wattHours));
 			break;
+		case 1:
+			uart_send((char*)&flags, sizeof(flags));
 		default: break;
 		}
 		break;
