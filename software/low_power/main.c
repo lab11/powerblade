@@ -183,11 +183,6 @@ int main(void) {
     UCA0CTL1 &= ~UCSWRST;
     UCA0IE |= UCRXIE + UCTXCPTIE;
 
-    // Enable pin interrupt from nrf
-    P2DIR &= ~BIT1;
-    P2IES &= ~BIT1;	// Low-to-high
-
-
     // Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
     P1SEL1 |= BIT3 + BIT4 + BIT5;
     P1SEL0 |= BIT3 + BIT4 + BIT5;
@@ -200,7 +195,7 @@ int main(void) {
   	ADC10IE |= ADC10IE0;                       	// Enable ADC conv complete interrupt
   
   	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-  	TA0CCR0 = 9;						// PWM Period
+  	TA0CCR0 = 12;						// PWM Period
   	TA0CCR1 = 2;                     	// TA0.1 ADC trigger
   	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
   	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
@@ -215,13 +210,6 @@ __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL1 &= ~CCIFG;
 	//P2OUT ^= BIT0;
 	ADC10CTL0 += ADC10SC;
-}
-
-#pragma vector=PORT2_VECTOR
-__interrupt void Port_2(void) {
-	P2IFG &= ~BIT1;
-	P2IE &= ~BIT1;
-	uart_send((char*)&sequence, sizeof(sequence));
 }
 
 void uart_send(char* buf, unsigned int len) {
@@ -252,29 +240,38 @@ __interrupt void ADC10_ISR(void) {
     	ADC_Channel = ADC10MCTL0 & ADC10INCH_7;
     	switch(ADC_Channel) {
     	case 4:	// I_SENSE
-    		// Reset timer to sample these three quickly
-    		TA0CCR0 = 2;
-
     		// Set debug pin
     		P1OUT |= BIT2;
 
     		// Grab peak values
-    		if(ADC_Result > isense_vmax) {
-    			isense_vmax = ADC_Result;
+//    		if(ADC_Result > isense_vmax) {
+//    			isense_vmax = ADC_Result;
+//    		}
+//    		else if(ADC_Result < isense_vmin) {
+//    			isense_vmin = ADC_Result;
+//    		}
+
+    		// Store current value for future calculations
+    		current = (int8_t)(ADC_Result - isense_vmid);
+
+    		// Account for current offset
+    		if(current > 0) {
+    			if(current > CUROFF) {
+    				current = current - CUROFF;
+    			}
+    			else {
+    				current = 0;
+    			}
     		}
-    		else if(ADC_Result < isense_vmin) {
-    			isense_vmin = ADC_Result;
+    		else {
+    			current = current + CUROFF;
+    			if(current > 0) {
+    				current = 0;
+    			}
     		}
 
-    		// Vi * G = Vo - Vcc/2
-//    		if(ADC_Result > isense_vmid) {
-//    			current = (int8_t)(ADC_Result - isense_vmid);// - CUROFF);
-//    		}
-//    		else {
-//    			current = (int8_t)(0 - isense_vmid - ADC_Result);// - CUROFF);
-//    		}
-    		current = (int8_t)(ADC_Result - isense_vmid);
-    		acc_i_rms += current * current;
+    		// Enable next sample
+    		ADC10CTL0 += ADC10SC;
     		break;
     	case 3:	// V_SENSE
     	{
@@ -282,20 +279,14 @@ __interrupt void ADC10_ISR(void) {
     		P1OUT |= BIT2;
 
     		// Grab peak values
-    		if(ADC_Result > vsense_vmax) {
-				vsense_vmax = ADC_Result;
-			}
-    		else if(ADC_Result < vsense_vmin) {
-				vsense_vmin = ADC_Result;
-			}
+//    		if(ADC_Result > vsense_vmax) {
+//				vsense_vmax = ADC_Result;
+//			}
+//    		else if(ADC_Result < vsense_vmin) {
+//				vsense_vmin = ADC_Result;
+//			}
 
-    		// Vi = (RI/RF)(Vcc/2 - Vo)
-//    		if(ADC_Result > vsense_vmid) {
-//    			voltage = (uint32_t)(ADC_Result - vsense_vmid);
-//    		}
-//    		else {
-//    			voltage = (uint32_t)(vsense_vmid - ADC_Result);
-//    		}
+    		// Store voltage value
     		voltage = (int8_t)(ADC_Result - vsense_vmid);
 
     		// Store and account for phase offset
@@ -305,12 +296,21 @@ __interrupt void ADC10_ISR(void) {
     			vbuff_head = 0;
     		}
 
+    		// Perform calculations for I^2, V^2, and P
+    		// These are all done here to co-locate voltage and current sensing
+    		// as much as possible
+    		acc_i_rms += current * current;
     		acc_p_ave += voltage * current;
     		acc_v_rms += voltage * voltage;
+    		// Enable next sample
+    		ADC10CTL0 += ADC10SC;
     		break;
     	}
     	case 2:	// VCC_SENSE
+    		// Set debug pin
     		P1OUT |= BIT2;
+
+    		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
     			SYS_EN_OUT &= ~SYS_EN_PIN;
     			ready = 0;
@@ -322,15 +322,19 @@ __interrupt void ADC10_ISR(void) {
     		else {
     			ready = 0;
     		}
+
+    		// Enable next sample
+    		ADC10CTL0 += ADC10SC;
 	    	break;
     	default: // ADC Reset condition
     	{
-    		TA0CCR0 = 9;
+    		// Reset sequence
     		ADC10CTL1 &= ~ADC10CONSEQ_3;
     		ADC10CTL0 &= ~ADC10ENC;
     		ADC10CTL1 |= ADC10CONSEQ_3;
     		ADC10CTL0 |= ADC10ENC;
 
+    		// Set debug pin
     		P1OUT |= BIT6;
 
     		sampleCount++;
@@ -339,9 +343,9 @@ __interrupt void ADC10_ISR(void) {
     			sampleCount = 0;
 
     			// Increment energy calc and reset accumulator
-    			// TODO: do I need to divide by 60 to get actual watt hours?
-    			// Is watt hours the right unit of total energy?
-    			//truePower = (uint16_t)(acc_p_ave / SAMCOUNT);
+    			if(acc_p_ave < 0) {
+    				acc_p_ave = 0;
+    			}
     			wattHoursToAverage += (uint32_t)(acc_p_ave / SAMCOUNT);
     			acc_p_ave = 0;
 
@@ -350,18 +354,15 @@ __interrupt void ADC10_ISR(void) {
 				Vrms = (uint8_t)SquareRoot(acc_v_rms / SAMCOUNT);
 				acc_i_rms = 0;
 				acc_v_rms = 0;
-				//apparentPower = (uint16_t)(Irms * Vrms);
                 voltAmpsToAverage += (uint32_t)(Irms * Vrms);
 
 				// Calculate V_SENSE & I_SENSE mid values
-				// TODO: maybe dont reset vmin and vmax all the way
-				// TODO: maybe just pull them in slightly
-				vsense_vmid = (vsense_vmax >> 1) + (vsense_vmin >> 1);
-				vsense_vmax = 0;
-				vsense_vmin = 255;
-				isense_vmid = (isense_vmax >> 1) + (isense_vmin >> 1);
-				isense_vmax = 0;
-				isense_vmin = 255;
+//				vsense_vmid = (vsense_vmax >> 1) + (vsense_vmin >> 1);
+//				vsense_vmax = 0;
+//				vsense_vmin = 255;
+//				isense_vmid = (isense_vmax >> 1) + (isense_vmin >> 1);
+//				isense_vmax = 0;
+//				isense_vmin = 255;
 
     			measCount++;
     			if(measCount >= 60) { // Another second has passed
@@ -376,14 +377,14 @@ __interrupt void ADC10_ISR(void) {
     				wattHoursToAverage = 0;
                     voltAmpsToAverage = 0;
 
-					ready = 1;
-					if(ready == 1) {
-						SYS_EN_OUT |= SYS_EN_PIN;
-						__delay_cycles(40000);
-						uart_send((char*)&powerblade_id, sizeof(powerblade_id));
-						data = 8;
-						ready = 0;
-					}
+//					ready = 1;
+//					if(ready == 1) {
+					SYS_EN_OUT |= SYS_EN_PIN;
+					__delay_cycles(40000);
+					uart_send((char*)&powerblade_id, sizeof(powerblade_id));
+					data = 8;
+					ready = 0;
+//					}
     			}
     		}
     		break;
