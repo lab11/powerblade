@@ -256,6 +256,21 @@ __interrupt void ADC10_ISR(void) {
 
     		// Store current value for future calculations
     		current = (int8_t)(ADC_Result - isense_vmid);
+    		// Account for current offset
+    		if(current > 0) {
+    			if(current > CUROFF) {
+    				current = current - CUROFF;
+    			}
+    			else {
+    				current = 0;
+    			}
+    		}
+    		else {
+    			current = current + CUROFF;
+    			if(current > 0) {
+    				current = 0;
+    			}
+    		}
     		acc_i_ave += current;
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
