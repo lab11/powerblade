@@ -253,6 +253,23 @@ __interrupt void ADC10_ISR(void) {
 
     		// Store current value for future calculations
     		current = (int8_t)(ADC_Result - isense_vmid);
+
+    		// Account for current offset
+    		if(current > 0) {
+    			if(current > CUROFF) {
+    				current = current - CUROFF;
+    			}
+    			else {
+    				current = 0;
+    			}
+    		}
+    		else {
+    			current = current + CUROFF;
+    			if(current > 0) {
+    				current = 0;
+    			}
+    		}
+
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
     		break;
@@ -326,6 +343,9 @@ __interrupt void ADC10_ISR(void) {
     			sampleCount = 0;
 
     			// Increment energy calc and reset accumulator
+    			if(acc_p_ave < 0) {
+    				acc_p_ave = 0;
+    			}
     			wattHoursToAverage += (uint32_t)(acc_p_ave / SAMCOUNT);
     			acc_p_ave = 0;
 
