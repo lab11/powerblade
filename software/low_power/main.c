@@ -200,7 +200,7 @@ int main(void) {
   	ADC10IE |= ADC10IE0;                       	// Enable ADC conv complete interrupt
   
   	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-  	TA0CCR0 = 9;						// PWM Period
+  	TA0CCR0 = 12;						// PWM Period
   	TA0CCR1 = 2;                     	// TA0.1 ADC trigger
   	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
   	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
@@ -253,7 +253,7 @@ __interrupt void ADC10_ISR(void) {
     	switch(ADC_Channel) {
     	case 4:	// I_SENSE
     		// Reset timer to sample these three quickly
-    		TA0CCR0 = 2;
+    		//TA0CCR0 = 2;
 
     		// Set debug pin
     		P1OUT |= BIT2;
@@ -274,7 +274,8 @@ __interrupt void ADC10_ISR(void) {
 //    			current = (int8_t)(0 - isense_vmid - ADC_Result);// - CUROFF);
 //    		}
     		current = (int8_t)(ADC_Result - isense_vmid);
-    		acc_i_rms += current * current;
+    		//acc_i_rms += current * current;
+    		ADC10CTL0 += ADC10SC;
     		break;
     	case 3:	// V_SENSE
     	{
@@ -305,8 +306,10 @@ __interrupt void ADC10_ISR(void) {
     			vbuff_head = 0;
     		}
 
+    		acc_i_rms += current * current;
     		acc_p_ave += voltage * current;
     		acc_v_rms += voltage * voltage;
+    		ADC10CTL0 += ADC10SC;
     		break;
     	}
     	case 2:	// VCC_SENSE
@@ -322,10 +325,11 @@ __interrupt void ADC10_ISR(void) {
     		else {
     			ready = 0;
     		}
+    		ADC10CTL0 += ADC10SC;
 	    	break;
     	default: // ADC Reset condition
     	{
-    		TA0CCR0 = 9;
+    		//TA0CCR0 = 9;
     		ADC10CTL1 &= ~ADC10CONSEQ_3;
     		ADC10CTL0 &= ~ADC10ENC;
     		ADC10CTL1 |= ADC10CONSEQ_3;
