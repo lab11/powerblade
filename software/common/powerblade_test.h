@@ -50,8 +50,8 @@
 #define ADC_VMAX	0xF5
 
 #define ADC_VCC2	0x80
-#define V_VCC2		0xD6
-#define I_VCC2		0xCF
+#define V_VCC2		ADC_VCC2
+#define I_VCC2		ADC_VCC2
 
 //#define ADC_PERUS	500
 //#define ADC_PERCT	ADC_PERUS*(32768/1E6)
