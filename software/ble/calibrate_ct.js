@@ -46,21 +46,15 @@ noble.on('discover', function(peripheral) {
     var flags = BitArray.fromBuffer(data.slice(18,19)).toNumber();
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
-    // print unique seq's to user
-    var last_seq = peripherals[peripheral_uuid];
-    if (sequence_num != last_seq || sequence_num == 0) {
-      peripherals[peripheral_uuid] = sequence_num;
-      last_seq = sequence_num;
-      console.log('Data: ' + recv_time);
-      console.log('         BLE Address: ' + peripheral_uuid);
-      console.log('       PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
-      console.log('I Peak-to-Peak (10s): ' + ippk_10s + ' (0x' + ippk_10s.toString(16) + ')');
-      console.log('I Peak-to-Peak  (1s): ' + ippk_1s + ' (0x' + ippk_1s.toString(16) + ')');
-      console.log('               Flags: ' + '0x' + flags.toString(16));
-      //console.log(' Number of Connections: ' + num_connections);
+    console.log('Data: ' + recv_time);
+    console.log('         BLE Address: ' + peripheral_uuid);
+    console.log('       PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
+    console.log('I Peak-to-Peak (10s): ' + ippk_10s + ' (0x' + ippk_10s.toString(16) + ')');
+    console.log('I Peak-to-Peak  (1s): ' + ippk_1s + ' (0x' + ippk_1s.toString(16) + ')');
+    console.log('               Flags: ' + '0x' + flags.toString(16));
+    //console.log(' Number of Connections: ' + num_connections);
 
       console.log('');
-    }
 
     //explore(peripheral);
     //connect(peripheral);

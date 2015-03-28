@@ -51,24 +51,19 @@ noble.on('discover', function(peripheral) {
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
     // print unique seq's to user
-    var last_seq = peripherals[peripheral_uuid];
-    if (sequence_num != last_seq || sequence_num == 0) {
-      peripherals[peripheral_uuid] = sequence_num;
-      last_seq = sequence_num;
-      console.log('Data: ' + recv_time);
-      console.log('    BLE Address: ' + peripheral_uuid);
-      console.log('  PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
-      console.log('       I Offset: ' + i_offset + ' (0x' + i_offset.toString(16) + ')');
-      console.log('       V Offset: ' + v_offset + ' (0x' + v_offset.toString(16) + ')');
-      console.log('   I Offset Min: ' + i_offset_min + ' (0x' + i_offset_min.toString(16) + ')');
-      console.log('   I Offset Max: ' + i_offset_max + ' (0x' + i_offset_max.toString(16) + ')');
-      console.log('   V Offset Min: ' + v_offset_min + ' (0x' + v_offset_min.toString(16) + ')');
-      console.log('   V Offset Max: ' + v_offset_max + ' (0x' + v_offset_max.toString(16) + ')');
-      console.log('          Flags: ' + '0x' + flags.toString(16));
-      //console.log(' Number of Connections: ' + num_connections);
+    console.log('Data: ' + recv_time);
+    console.log('    BLE Address: ' + peripheral_uuid);
+    console.log('  PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
+    console.log('       I Offset: ' + i_offset + ' (0x' + i_offset.toString(16) + ')');
+    console.log('       V Offset: ' + v_offset + ' (0x' + v_offset.toString(16) + ')');
+    console.log('   I Offset Min: ' + i_offset_min + ' (0x' + i_offset_min.toString(16) + ')');
+    console.log('   I Offset Max: ' + i_offset_max + ' (0x' + i_offset_max.toString(16) + ')');
+    console.log('   V Offset Min: ' + v_offset_min + ' (0x' + v_offset_min.toString(16) + ')');
+    console.log('   V Offset Max: ' + v_offset_max + ' (0x' + v_offset_max.toString(16) + ')');
+    console.log('          Flags: ' + '0x' + flags.toString(16));
+    //console.log(' Number of Connections: ' + num_connections);
 
-      console.log('');
-    }
+    console.log('');
 
     //explore(peripheral);
     //connect(peripheral);
