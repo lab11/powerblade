@@ -313,14 +313,14 @@ __interrupt void ADC10_ISR(void) {
     		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
     			SYS_EN_OUT &= ~SYS_EN_PIN;
-    			ready = 0;
+    			//ready = 0;
     		}
     		else if(ADC_Result > ADC_VCHG) {
     			SEN_EN_OUT |= SEN_EN_PIN;
     			ready = 1;
     		}
     		else {
-    			ready = 0;
+    			//ready = 0;
     		}
 
     		// Enable next sample
@@ -378,13 +378,13 @@ __interrupt void ADC10_ISR(void) {
                     voltAmpsToAverage = 0;
 
 //					ready = 1;
-//					if(ready == 1) {
-					SYS_EN_OUT |= SYS_EN_PIN;
-					__delay_cycles(40000);
-					uart_send((char*)&powerblade_id, sizeof(powerblade_id));
-					data = 8;
-					ready = 0;
-//					}
+					if(ready == 1) {
+						SYS_EN_OUT |= SYS_EN_PIN;
+						__delay_cycles(40000);
+						uart_send((char*)&powerblade_id, sizeof(powerblade_id));
+						data = 8;
+						//ready = 0;
+					}
     			}
     		}
     		break;
