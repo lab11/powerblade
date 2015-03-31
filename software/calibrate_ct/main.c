@@ -51,8 +51,8 @@ uint32_t wattHours;
 uint8_t flags;
 
 // Variables used to center both waveforms at Vcc/2-ish
-uint8_t isense_vmax;
-uint8_t isense_vmin;
+int8_t isense_vmax;
+int8_t isense_vmin;
 uint8_t vsense_vmax;
 uint8_t vsense_vmin;
 uint8_t isense_vmid;
@@ -162,8 +162,8 @@ int main(void) {
 //    vsense_vmax = 0;
 //    vsense_vmin = 255;
     vsense_vmid = V_VCC2;
-//    isense_vmax = 0;
-//    isense_vmin  = 255;
+    isense_vmax = 0;
+    isense_vmin  = 0;
     isense_vmid = I_VCC2;
     vbuff_head = 0;
 
@@ -257,20 +257,13 @@ __interrupt void ADC10_ISR(void) {
     		// Store current value for future calculations
     		current = (int8_t)(ADC_Result - isense_vmid);
     		// Account for current offset
-    		if(current > 0) {
-    			if(current > CUROFF) {
-    				current = current - CUROFF;
-    			}
-    			else {
-    				current = 0;
-    			}
+    		if(current > isense_vmax) {
+    			isense_vmax = current;
     		}
-    		else {
-    			current = current + CUROFF;
-    			if(current > 0) {
-    				current = 0;
-    			}
+    		if(current < isense_vmin) {
+    			isense_vmin = current;
     		}
+
     		acc_i_ave += current;
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
@@ -370,9 +363,10 @@ __interrupt void ADC10_ISR(void) {
     				sequence++;
     				time++;
 
-    				tx_i_ave = acc_i_ave / 2520;
+    				tx_i_ave = (uint32_t)isense_vmax;//acc_i_ave / 2520;
     				acc_i_ave = 0;
-    				tx_i_rms = (uint32_t)Irms;
+    				tx_i_rms = (uint32_t)isense_vmax;
+    				isense_vmax = 0;
 
                     truePower = (uint16_t)(wattHoursToAverage / 60);
     				wattHours += (uint32_t)truePower;
