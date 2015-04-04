@@ -69,7 +69,7 @@
    SENSING CONSTANTS SECTION
  **************************************************************************/
 #define CUROFF		0
-#define PHASEOFF	15	// zero for in-phase
+#define PHASEOFF	3	// zero for in-phase
 #define SAMCOUNT	42
 
 #endif
