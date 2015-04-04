@@ -25,6 +25,12 @@
 bool ready;
 uint8_t data;
 
+// Variables for integration
+int32_t agg_current;
+int32_t offset;
+int32_t agg_average;
+uint32_t agg_count;
+
 // Count each sample and 60Hz measurement
 uint8_t sampleCount;
 uint8_t measCount;
@@ -126,7 +132,7 @@ int main(void) {
 //    PJSEL0 |= BIT2;
 
     // Low power in port 1
-    P1DIR = BIT2 + BIT6;
+    P1DIR = BIT6;// + BIT2;
     P1OUT = 0;
     P1REN = 0xFF;
 
@@ -154,6 +160,7 @@ int main(void) {
     time = 0;
     powerblade_id = 0;
     flags = 0;
+    agg_current = 0;
 
     // Vmid values are initally set to defaults, adjusted during run
 //    vsense_vmax = 0;
@@ -200,6 +207,14 @@ int main(void) {
   	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
   	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
 
+  	// Set up PWM for side channel data
+  	P1DIR |= BIT2;
+  	P1SEL0 |= BIT2;
+  	TA1CCR0 = 393;
+  	TA1CCR1 = 100;
+  	TA1CCTL1 = OUTMOD_7;
+  	TA1CTL = TASSEL_2 + MC_1 + TACLR;
+
   	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
 	return 0;
@@ -241,7 +256,7 @@ __interrupt void ADC10_ISR(void) {
     	switch(ADC_Channel) {
     	case 4:	// I_SENSE
     		// Set debug pin
-    		P1OUT |= BIT2;
+//    		P1OUT |= BIT2;
 
     		// Grab peak values
 //    		if(ADC_Result > isense_vmax) {
@@ -276,7 +291,7 @@ __interrupt void ADC10_ISR(void) {
     	case 3:	// V_SENSE
     	{
     		// Set debug pin
-    		P1OUT |= BIT2;
+//    		P1OUT |= BIT2;
 
     		// Grab peak values
 //    		if(ADC_Result > vsense_vmax) {
@@ -295,20 +310,37 @@ __interrupt void ADC10_ISR(void) {
     		if(vbuff_head == SAMCOUNT) {
     			vbuff_head = 0;
     		}
+    		agg_current += (int32_t)current;
 
     		// Perform calculations for I^2, V^2, and P
     		// These are all done here to co-locate voltage and current sensing
     		// as much as possible
-    		acc_i_rms += current * current;
-    		acc_p_ave += voltage * current;
+    		uint32_t new_current = (agg_current) >> 10;
+    		acc_i_rms += new_current * new_current;
+    		acc_p_ave += voltage * new_current;
     		acc_v_rms += voltage * voltage;
+
+    		// Set side channel output
+    		TA1CCR1 = agg_current >> 3;
+
+    		// Offset calculation
+    		agg_average += agg_current >> 10;
+    		agg_count += 1;
+    		if(agg_count >= (SAMCOUNT/2)){
+    			offset = agg_average/agg_count;
+    			flags = (uint8_t)offset;
+    			agg_average = 0;
+    			agg_count = 0;
+    			agg_current = 0;
+    		}
+
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
     		break;
     	}
     	case 2:	// VCC_SENSE
     		// Set debug pin
-    		P1OUT |= BIT2;
+//    		P1OUT |= BIT2;
 
     		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
@@ -393,7 +425,7 @@ __interrupt void ADC10_ISR(void) {
         break;                          // Clear CPUOFF bit from 0(SR)
     default: break;
   	}
-	P1OUT &= ~(BIT2 + BIT6);
+	P1OUT &= ~(BIT6);// + BIT2);
 }
 
 #pragma vector=USCI_A0_VECTOR
