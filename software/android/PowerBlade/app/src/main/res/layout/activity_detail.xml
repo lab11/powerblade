@@ -1,0 +1,240 @@
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".DetailActivity" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ccc"
+            android:weightSum="2"
+            android:padding="@dimen/activity_vertical_margin">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView"
+                android:src="@drawable/powerblade"
+                android:layout_alignParentStart="true"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|center_horizontal"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="@string/row0"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center_horizontal"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="sans-serif-light"
+                    android:maxLines="1"
+                    android:textColor="#666" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:id="@+id/powr"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:textSize="64dp"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="sans-serif-thin"
+                    android:maxLines="1"
+                    android:minWidth="144dp"
+                    android:textColor="#666" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:stretchColumns="*"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:background="#ddd">
+
+            <TableRow android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:text="@string/row2"
+                    android:layout_column="0"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/row2"
+                    android:layout_column="1"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:text="@string/row5"
+                    android:layout_column="0"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/row5"
+                    android:layout_column="1"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:text="@string/row6"
+                    android:layout_column="0"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/row6"
+                    android:layout_column="1"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:text="@string/row7"
+                    android:layout_column="0"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/row7"
+                    android:layout_column="1"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:text="@string/row8"
+                    android:layout_column="0"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/row8"
+                    android:layout_column="1"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:text="@string/row9"
+                    android:layout_column="0"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:id="@+id/row9"
+                    android:layout_column="1"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#666" />
+
+            </TableRow>
+
+        </TableLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/addr"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-thin" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/time"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:fontFamily="sans-serif-thin" />
+
+    </LinearLayout>
+
+</RelativeLayout>
