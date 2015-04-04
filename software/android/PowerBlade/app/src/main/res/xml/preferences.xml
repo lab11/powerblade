@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference android:key="address" android:defaultValue=" " />
+    <Preference android:key="id" android:defaultValue=" " />
+    <Preference android:key="v_rms" android:defaultValue=" " />
+    <Preference android:key="power" android:defaultValue=" " />
+    <Preference android:key="true_power" android:defaultValue=" " />
+    <Preference android:key="apparent_power" android:defaultValue=" " />
+    <Preference android:key="watt_hours" android:defaultValue=" " />
+    <Preference android:key="power_factor" android:defaultValue=" " />
+    <Preference android:key="time" android:defaultValue=" " />
+
+</PreferenceScreen>
