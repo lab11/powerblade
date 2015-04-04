@@ -27,9 +27,9 @@ uint8_t data;
 
 // Variables for integration
 int16_t agg_current;
-int32_t offset;
+int16_t offset;
 int32_t agg_average;
-uint32_t agg_count;
+int32_t agg_count;
 
 // Count each sample and 60Hz measurement
 uint8_t sampleCount;
@@ -305,11 +305,12 @@ __interrupt void ADC10_ISR(void) {
     		voltage = (int8_t)(ADC_Result - vsense_vmid);
 
     		// Store and account for phase offset
-//    		vbuff[vbuff_head++] = voltage;
-//    		voltage = vbuff[getVoltageForPhase(vbuff_head)];
-//    		if(vbuff_head == SAMCOUNT) {
-//    			vbuff_head = 0;
-//    		}
+    		vbuff[vbuff_head++] = voltage;
+    		voltage = vbuff[getVoltageForPhase(vbuff_head)];
+    		if(vbuff_head == SAMCOUNT) {
+    			vbuff_head = 0;
+    		}
+    		//current = 0xFF;
     		agg_current += (int16_t)current;
 
     		// Perform calculations for I^2, V^2, and P
@@ -321,15 +322,16 @@ __interrupt void ADC10_ISR(void) {
     		acc_v_rms += voltage * voltage;
 
     		// Set side channel output
-    		TA1CCR1 = (agg_current >> 6) + 196;
+    		TA1CCR1 = (agg_current >> 3) + 196;
 
     		// Offset calculation
     		agg_average += agg_current;
     		agg_count += 1;
     		if(agg_count >= (SAMCOUNT/2)){
     			offset = agg_average/agg_count;
-    			//agg_current -= offset;
-    			flags = (uint8_t)((offset>>5) & 0xFF);
+    			truePower = (uint16_t)offset;
+    			agg_current -= offset;
+    			flags = (uint8_t)((offset>>8) & 0xFF);
     			agg_average = 0;
     			agg_count = 0;
     		}
@@ -347,9 +349,15 @@ __interrupt void ADC10_ISR(void) {
     			SYS_EN_OUT &= ~SYS_EN_PIN;
     			//ready = 0;
     		}
-    		else if(ADC_Result > ADC_VCHG) {
-    			SEN_EN_OUT |= SEN_EN_PIN;
-    			ready = 1;
+    		else if(ready == 0) {
+    			if(	ADC_Result > ADC_VCHG) {
+					SEN_EN_OUT |= SEN_EN_PIN;
+					agg_current = 0;
+					offset = 0;
+					agg_average = 0;
+					agg_count = 0;
+					ready = 1;
+    			}
     		}
     		else {
     			//ready = 0;
@@ -403,7 +411,7 @@ __interrupt void ADC10_ISR(void) {
     				sequence++;
     				time++;
 
-                    truePower = (uint16_t)(wattHoursToAverage / 60);
+                    //truePower = (uint16_t)(wattHoursToAverage / 60);
     				wattHours += (uint32_t)truePower;
                     apparentPower = (uint16_t)(voltAmpsToAverage / 60);
     				wattHoursToAverage = 0;
