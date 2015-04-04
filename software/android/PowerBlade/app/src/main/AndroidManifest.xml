@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="edu.umich.eecs.lab11.powerblade" >
+
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="PowerBlade"
+        android:theme="@style/AppTheme" >
+
+        <service
+            android:name=".BleService" />
+
+        <activity
+            android:name=".DetailActivity"
+            android:label="\0  PowerBlade  " />
+
+        <activity
+            android:name=".ListingActivity"
+            android:label="\0  PowerBlade  " >
+
+            <intent-filter>
+
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+
+            </intent-filter>
+
+        </activity>
+
+    </application>
+
+</manifest>
