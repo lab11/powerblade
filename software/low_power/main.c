@@ -26,7 +26,7 @@ bool ready;
 uint8_t data;
 
 // Variables for integration
-int32_t agg_current;
+int16_t agg_current;
 int32_t offset;
 int32_t agg_average;
 uint32_t agg_count;
@@ -305,33 +305,33 @@ __interrupt void ADC10_ISR(void) {
     		voltage = (int8_t)(ADC_Result - vsense_vmid);
 
     		// Store and account for phase offset
-    		vbuff[vbuff_head++] = voltage;
-    		voltage = vbuff[getVoltageForPhase(vbuff_head)];
-    		if(vbuff_head == SAMCOUNT) {
-    			vbuff_head = 0;
-    		}
-    		agg_current += (int32_t)current;
+//    		vbuff[vbuff_head++] = voltage;
+//    		voltage = vbuff[getVoltageForPhase(vbuff_head)];
+//    		if(vbuff_head == SAMCOUNT) {
+//    			vbuff_head = 0;
+//    		}
+    		agg_current += (int16_t)current;
 
     		// Perform calculations for I^2, V^2, and P
     		// These are all done here to co-locate voltage and current sensing
     		// as much as possible
-    		uint32_t new_current = (agg_current) >> 10;
+    		int32_t new_current = agg_current;
     		acc_i_rms += new_current * new_current;
     		acc_p_ave += voltage * new_current;
     		acc_v_rms += voltage * voltage;
 
     		// Set side channel output
-    		TA1CCR1 = agg_current >> 3;
+    		TA1CCR1 = (agg_current >> 6) + 196;
 
     		// Offset calculation
-    		agg_average += agg_current >> 10;
+    		agg_average += agg_current;
     		agg_count += 1;
     		if(agg_count >= (SAMCOUNT/2)){
     			offset = agg_average/agg_count;
-    			flags = (uint8_t)offset;
+    			//agg_current -= offset;
+    			flags = (uint8_t)((offset>>5) & 0xFF);
     			agg_average = 0;
     			agg_count = 0;
-    			agg_current = 0;
     		}
 
     		// Enable next sample
@@ -382,7 +382,7 @@ __interrupt void ADC10_ISR(void) {
     			acc_p_ave = 0;
 
     			// Calculate Irms, Vrms, and apparent power
-    			uint8_t Irms = (uint8_t)SquareRoot(acc_i_rms / SAMCOUNT);
+    			uint16_t Irms = (uint16_t)SquareRoot(acc_i_rms / SAMCOUNT);
 				Vrms = (uint8_t)SquareRoot(acc_v_rms / SAMCOUNT);
 				acc_i_rms = 0;
 				acc_v_rms = 0;
