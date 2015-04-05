@@ -31,6 +31,10 @@ int16_t offset;
 int32_t agg_average;
 int32_t agg_count;
 
+// Used for data visualizer
+uint16_t pwm_duty;
+uint32_t tx_i_ave;
+
 // Count each sample and 60Hz measurement
 uint8_t sampleCount;
 uint8_t measCount;
@@ -55,7 +59,8 @@ uint32_t wattHours;
 uint8_t flags;
 
 // Variables used to center both waveforms at Vcc/2-ish
-uint8_t isense_vmax;
+int32_t isense_vmax;
+int32_t isense_count;
 uint8_t isense_vmin;
 uint8_t vsense_vmax;
 uint8_t vsense_vmin;
@@ -141,7 +146,7 @@ int main(void) {
     P2OUT = 0;
     P2REN = 0xFF;
 
-    __delay_cycles(4000);                      // ref delay
+    __delay_cycles(40000);                      // ref delay
 
     // Set SEN_EN to output and disable (~200uA)
     SEN_EN_DIR |= SEN_EN_PIN;
@@ -166,7 +171,8 @@ int main(void) {
 //    vsense_vmax = 0;
 //    vsense_vmin = 255;
     vsense_vmid = V_VCC2;
-//    isense_vmax = 0;
+    isense_vmax = 0;
+    isense_count = 0;
 //    isense_vmin  = 255;
     isense_vmid = I_VCC2;
     vbuff_head = 0;
@@ -212,7 +218,8 @@ int main(void) {
   	P1SEL0 |= BIT2;
   	TA1CCR0 = 393;
   	TA1CCR1 = 100;
-  	TA1CCTL1 = OUTMOD_7;
+  	pwm_duty = 100;
+  	TA1CCTL1 = OUTMOD_7;// + CCIE;
   	TA1CTL = TASSEL_2 + MC_1 + TACLR;
 
   	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
@@ -225,6 +232,12 @@ __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL1 &= ~CCIFG;
 	//P2OUT ^= BIT0;
 	ADC10CTL0 += ADC10SC;
+}
+
+#pragma vector=TIMER1_A1_VECTOR
+__interrupt void TIMERA1_ISR(void) {
+	TA1CCTL1 &= ~CCIFG;
+	TA1CCR1 = pwm_duty;
 }
 
 void uart_send(char* buf, unsigned int len) {
@@ -310,8 +323,15 @@ __interrupt void ADC10_ISR(void) {
     		if(vbuff_head == SAMCOUNT) {
     			vbuff_head = 0;
     		}
-    		//current = 0xFF;
+    		//current = 0x7F;
     		agg_current += (int16_t)current;
+    		agg_average = agg_current >> 6;
+    		agg_current -= agg_average;
+
+#ifdef CALIBRATE
+    		isense_vmax += agg_current;
+    		isense_count += 1;
+#endif
 
     		// Perform calculations for I^2, V^2, and P
     		// These are all done here to co-locate voltage and current sensing
@@ -322,19 +342,20 @@ __interrupt void ADC10_ISR(void) {
     		acc_v_rms += voltage * voltage;
 
     		// Set side channel output
-    		TA1CCR1 = (agg_current >> 3) + 196;
+    		TA1CCR1 = (agg_current >> 5) + 196;
+    		//pwm_duty = (agg_current >> 3) + 196;
 
     		// Offset calculation
-    		agg_average += agg_current;
-    		agg_count += 1;
-    		if(agg_count >= (SAMCOUNT/2)){
-    			offset = agg_average/agg_count;
-    			truePower = (uint16_t)offset;
-    			agg_current -= offset;
-    			flags = (uint8_t)((offset>>8) & 0xFF);
-    			agg_average = 0;
-    			agg_count = 0;
-    		}
+//    		agg_average += agg_current;
+//    		agg_count += 1;
+//    		if(agg_count >= (SAMCOUNT/2)){
+//    			offset = agg_average/agg_count;
+//    			truePower = (uint16_t)offset;
+//    			agg_current -= offset;
+//    			flags = (uint8_t)((offset>>8) & 0xFF);
+//    			agg_average = 0;
+//    			agg_count = 0;
+//    		}
 
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
@@ -411,6 +432,12 @@ __interrupt void ADC10_ISR(void) {
     				sequence++;
     				time++;
 
+#ifdef CALIBRATE
+    				tx_i_ave = (uint32_t)Irms;//(isense_vmax / isense_count);
+    				isense_vmax = 0;
+    				isense_count = 0;
+#endif
+
                     //truePower = (uint16_t)(wattHoursToAverage / 60);
     				wattHours += (uint32_t)truePower;
                     apparentPower = (uint16_t)(voltAmpsToAverage / 60);
@@ -460,7 +487,12 @@ __interrupt void USCI_A0_ISR(void) {
 		data--;
 		switch(data){
 		case 7:
+#ifdef CALIBRATE
+			uart_send((char*)&tx_i_ave, sizeof(tx_i_ave));
+#else
 			uart_send((char*)&sequence, sizeof(sequence));
+#endif
+			break;
 		case 6:
 			uart_send((char*)&time, sizeof(time));
 			break;
