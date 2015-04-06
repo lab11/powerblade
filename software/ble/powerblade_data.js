@@ -8,6 +8,7 @@ var CompanyID = 37392;
 var peripherals = {};
 
 var avePower = [10];
+var aveApp = [10];
 var aveIndex = 0;
 
 console.log('Looking for PowerBlades!');
@@ -54,9 +55,9 @@ noble.on('discover', function(peripheral) {
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
     var v_rms_disp = v_rms*2.46;
-    var true_power_disp = true_power*0.015;
-    var app_power_disp = apparent_power*0.015;
-    var watt_hours_disp = watt_hours*0.0000057;
+    var true_power_disp = true_power*0.0148;
+    var app_power_disp = apparent_power*0.0148;
+    var watt_hours_disp = watt_hours*0.000004;
     var pf_disp = true_power_disp / app_power_disp;
 
     // print unique seq's to user
@@ -64,15 +65,22 @@ noble.on('discover', function(peripheral) {
     if (sequence_num != last_seq || sequence_num == 0) {
 
       // Average power
-      avePower[aveIndex++] = true_power_disp;
-      if(aveIndex == 10) {
-        aveIndex = 0;
-      }
+      avePower[aveIndex] = true_power_disp;
       var averagePower = 0;
       for (var i = avePower.length - 1; i >= 0; i--) {
         averagePower += avePower[i];
       };
       averagePower = averagePower / 10;
+      // Average Apparent
+      aveApp[aveIndex++] = app_power_disp;
+      var appPower = 0;
+      for (var i = aveApp.length - 1; i >= 0; i--) {
+        appPower += aveApp[i];
+      }
+      appPower = appPower / 10;
+      if(aveIndex == 10) {
+        aveIndex = 0;
+      }
 
       peripherals[peripheral_uuid] = sequence_num;
       last_seq = sequence_num;
@@ -88,6 +96,7 @@ noble.on('discover', function(peripheral) {
       console.log('          Power Factor: ' + pf_disp.toFixed(2));
       console.log('                 Flags: ' + '0x' + flags.toString(16));
       console.log('    Average Power (10): ' + averagePower.toFixed(2));
+      console.log('   Apparent Power (10): ' + appPower.toFixed(2));
       //console.log(' Number of Connections: ' + num_connections);
 
       console.log('');

@@ -9,6 +9,9 @@ var peripherals = {};
 
 var prev_time = 0;
 
+var aveValue = [10];
+var aveIndex = 0;
+
 console.log('Current Transformer Calibration');
 
 noble.on('stateChange', function(state) {
@@ -50,12 +53,24 @@ noble.on('discover', function(peripheral) {
 
     if(ippk_1s != prev_time){
 
+      // Average value
+      aveValue[aveIndex++] = ippk_10s;
+      if(aveIndex == 10) {
+        aveIndex = 0;
+      }
+      var averageValue = 0;
+      for (var i = aveValue.length - 1; i >= 0; i--) {
+        averageValue += aveValue[i];
+      };
+      averageValue = averageValue / 10;
+
       console.log('Data: ' + recv_time);
       console.log('         BLE Address: ' + peripheral_uuid);
       console.log('       PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
       console.log('I Peak-to-Peak (10s): ' + ippk_10s + ' (0x' + ippk_10s.toString(16) + ')');
       console.log('I Peak-to-Peak  (1s): ' + ippk_1s + ' (0x' + ippk_1s.toString(16) + ')');
       console.log('               Flags: ' + '0x' + flags.toString(16));
+      console.log('       Average (10s): ' + averageValue.toFixed(2));
       //console.log(' Number of Connections: ' + num_connections);
 
         console.log('');
