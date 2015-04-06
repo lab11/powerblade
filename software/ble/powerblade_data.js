@@ -7,6 +7,9 @@ var CompanyID = 37392;
 
 var peripherals = {};
 
+var avePower = [10];
+var aveIndex = 0;
+
 console.log('Looking for PowerBlades!');
 
 noble.on('stateChange', function(state) {
@@ -59,6 +62,18 @@ noble.on('discover', function(peripheral) {
     // print unique seq's to user
     var last_seq = peripherals[peripheral_uuid];
     if (sequence_num != last_seq || sequence_num == 0) {
+
+      // Average power
+      avePower[aveIndex++] = true_power_disp;
+      if(aveIndex == 10) {
+        aveIndex = 0;
+      }
+      var averagePower = 0;
+      for (var i = avePower.length - 1; i >= 0; i--) {
+        averagePower += avePower[i];
+      };
+      averagePower = averagePower / 10;
+
       peripherals[peripheral_uuid] = sequence_num;
       last_seq = sequence_num;
       console.log('Data: ' + recv_time);
@@ -72,6 +87,7 @@ noble.on('discover', function(peripheral) {
       console.log(' Cumulative Watt Hours: ' + watt_hours_disp.toFixed(2) + ' (0x' + watt_hours.toString(16) + ')');
       console.log('          Power Factor: ' + pf_disp.toFixed(2));
       console.log('                 Flags: ' + '0x' + flags.toString(16));
+      console.log('    Average Power (10): ' + averagePower.toFixed(2));
       //console.log(' Number of Connections: ' + num_connections);
 
       console.log('');
