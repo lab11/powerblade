@@ -10,7 +10,7 @@
     <string name="row5">RMS Voltage</string>
     <string name="row6">True Power</string>
     <string name="row7">Apparent Power</string>
-    <string name="row8">Cum. Energy</string>
+    <string name="row8">Cumulative Energy</string>
     <string name="row9">Power Factor</string>
 
 </resources>
