@@ -22,6 +22,8 @@
 
 #include "powerblade_test.h"
 
+//#define CALIBRATE
+
 bool ready;
 uint8_t data;
 
@@ -216,10 +218,10 @@ int main(void) {
   	// Set up PWM for side channel data
   	P1DIR |= BIT2;
   	P1SEL0 |= BIT2;
-  	TA1CCR0 = 393;
+  	TA1CCR0 = 1572;
   	TA1CCR1 = 100;
   	pwm_duty = 100;
-  	TA1CCTL1 = OUTMOD_7;// + CCIE;
+  	TA1CCTL1 = OUTMOD_7 + CCIE;
   	TA1CTL = TASSEL_2 + MC_1 + TACLR;
 
   	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
@@ -318,14 +320,14 @@ __interrupt void ADC10_ISR(void) {
     		voltage = (int8_t)(ADC_Result - vsense_vmid);
 
     		// Store and account for phase offset
-    		vbuff[vbuff_head++] = voltage;
+    		vbuff[vbuff_head++] = -1*voltage;
     		voltage = vbuff[getVoltageForPhase(vbuff_head)];
     		if(vbuff_head == SAMCOUNT) {
     			vbuff_head = 0;
     		}
     		//current = 0x7F;
-    		agg_current += (int16_t)current;
-    		agg_average = agg_current >> 6;
+    		agg_current += (int16_t)(current + (current >> 1));
+    		agg_average = agg_current >> 5;
     		agg_current -= agg_average;
 
 #ifdef CALIBRATE
@@ -342,8 +344,9 @@ __interrupt void ADC10_ISR(void) {
     		acc_v_rms += voltage * voltage;
 
     		// Set side channel output
-    		TA1CCR1 = (agg_current >> 5) + 196;
-    		//pwm_duty = (agg_current >> 3) + 196;
+    		//TA1CCR1 = (agg_current >> 5) + 196;
+    		pwm_duty = (agg_current >> 3) + 786;
+    		//pwm_duty = voltage + 786;
 
     		// Offset calculation
 //    		agg_average += agg_current;
@@ -438,7 +441,7 @@ __interrupt void ADC10_ISR(void) {
     				isense_count = 0;
 #endif
 
-                    //truePower = (uint16_t)(wattHoursToAverage / 60);
+                    truePower = (uint16_t)(wattHoursToAverage / 60);
     				wattHours += (uint32_t)truePower;
                     apparentPower = (uint16_t)(voltAmpsToAverage / 60);
     				wattHoursToAverage = 0;
