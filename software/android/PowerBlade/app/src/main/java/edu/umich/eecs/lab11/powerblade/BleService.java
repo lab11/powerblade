@@ -136,9 +136,9 @@ public class BleService extends Service {
                 byte[] data = Arrays.copyOfRange(scanRecord, index + 3, index + length);
                 double pbid = 1.0000000 * (data[0] & 0xff);
                 double vrms = 2.4600000 * (data[9] & 0xff);
-                double trup = 0.1370000 * (ByteBuffer.wrap(Arrays.copyOfRange(data,10,12)).getShort() & 0xffff);
-                double appp = 0.1380000 * (ByteBuffer.wrap(Arrays.copyOfRange(data,12,14)).getShort() & 0xffff);
-                double wthr = 0.0000422 * (ByteBuffer.wrap(Arrays.copyOfRange(data,14,18)).getInt() & 0xffffffffL);
+                double trup = 0.0150000 * (ByteBuffer.wrap(Arrays.copyOfRange(data,10,12)).getShort() & 0xffff);
+                double appp = 0.0150000 * (ByteBuffer.wrap(Arrays.copyOfRange(data,12,14)).getShort() & 0xffff);
+                double wthr = 0.0000057 * (ByteBuffer.wrap(Arrays.copyOfRange(data,14,18)).getInt() & 0xffffffffL);
                 double pwfr = 1.0000000 * (trup / appp);
                 cur_settings.edit().putString("address",      device.getAddress()).apply();
                 cur_settings.edit().putString("id",             di.format( pbid )).apply();
