@@ -55,9 +55,9 @@ noble.on('discover', function(peripheral) {
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
     var v_rms_disp = v_rms*2.46;
-    var true_power_disp = true_power*0.0148;
-    var app_power_disp = apparent_power*0.0148;
-    var watt_hours_disp = watt_hours*0.000004;
+    var true_power_disp = true_power*0.0123;
+    var app_power_disp = apparent_power*0.0123;
+    var watt_hours_disp = watt_hours*0.00000308;
     var pf_disp = true_power_disp / app_power_disp;
 
     // print unique seq's to user

@@ -51,7 +51,7 @@ noble.on('discover', function(peripheral) {
     var flags = BitArray.fromBuffer(data.slice(18,19)).toNumber();
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
-    if(ippk_1s != prev_time){
+    if(true || ippk_1s != prev_time){
 
       // Average value
       aveValue[aveIndex++] = ippk_10s;
