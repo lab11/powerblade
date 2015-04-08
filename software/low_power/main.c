@@ -112,6 +112,8 @@ uint32_t SquareRoot(uint32_t a_nInput)
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
+    __delay_cycles(4000000);                      // ref delay
+
     // XT1 Setup
     PJSEL0 |= BIT4 + BIT5;
 
@@ -139,7 +141,7 @@ int main(void) {
 //    PJSEL0 |= BIT2;
 
     // Low power in port 1
-    P1DIR = BIT6;// + BIT2;
+    P1DIR = 0;// + BIT2;
     P1OUT = 0;
     P1REN = 0xFF;
 
@@ -147,8 +149,6 @@ int main(void) {
     P2DIR = 0;
     P2OUT = 0;
     P2REN = 0xFF;
-
-    __delay_cycles(40000);                      // ref delay
 
     // Set SEN_EN to output and disable (~200uA)
     SEN_EN_DIR |= SEN_EN_PIN;
@@ -187,6 +187,10 @@ int main(void) {
     // Set up UART
     P2SEL0 &= ~(BIT0);// + BIT1);
     P2SEL1 |= BIT0;// + BIT1;
+    P2DIR |= BIT1;
+    P2OUT |= BIT1;
+    P1DIR |= BIT6;
+    P1OUT |= BIT6;
     UCA0CTL1 |= UCSWRST;
     UCA0CTL1 |= UCSSEL_2;
 //    UCA0BR0 = 52;
@@ -201,6 +205,8 @@ int main(void) {
     // Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
     P1SEL1 |= BIT3 + BIT4 + BIT5;
     P1SEL0 |= BIT3 + BIT4 + BIT5;
+    P1DIR |= BIT4 + BIT5;
+    P1OUT |= BIT4 + BIT5;
 	ADC10CTL0 |= ADC10ON;// + ADC10MSC;          	// ADC10ON
   	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3;  	// rpt series of ch; TA0.1 trig sample start
   	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
@@ -216,13 +222,13 @@ int main(void) {
   	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
 
   	// Set up PWM for side channel data
-  	P1DIR |= BIT2;
-  	P1SEL0 |= BIT2;
-  	TA1CCR0 = 1572;
-  	TA1CCR1 = 100;
-  	pwm_duty = 100;
-  	TA1CCTL1 = OUTMOD_7 + CCIE;
-  	TA1CTL = TASSEL_2 + MC_1 + TACLR;
+//  	P1DIR |= BIT2;
+//  	P1SEL0 |= BIT2;
+//  	TA1CCR0 = 1572;
+//  	TA1CCR1 = 100;
+//  	pwm_duty = 100;
+//  	TA1CCTL1 = OUTMOD_7 + CCIE;
+//  	TA1CTL = TASSEL_2 + MC_1 + TACLR;
 
   	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
@@ -284,22 +290,6 @@ __interrupt void ADC10_ISR(void) {
     		// Store current value for future calculations
     		current = (int8_t)(ADC_Result - isense_vmid);
 
-    		// Account for current offset
-    		if(current > 0) {
-    			if(current > CUROFF) {
-    				current = current - CUROFF;
-    			}
-    			else {
-    				current = 0;
-    			}
-    		}
-    		else {
-    			current = current + CUROFF;
-    			if(current > 0) {
-    				current = 0;
-    			}
-    		}
-
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
     		break;
@@ -320,7 +310,7 @@ __interrupt void ADC10_ISR(void) {
     		voltage = (int8_t)(ADC_Result - vsense_vmid);
 
     		// Store and account for phase offset
-    		vbuff[vbuff_head++] = -1*voltage;
+    		vbuff[vbuff_head++] = voltage;
     		voltage = vbuff[getVoltageForPhase(vbuff_head)];
     		if(vbuff_head == SAMCOUNT) {
     			vbuff_head = 0;
@@ -338,7 +328,33 @@ __interrupt void ADC10_ISR(void) {
     		// Perform calculations for I^2, V^2, and P
     		// These are all done here to co-locate voltage and current sensing
     		// as much as possible
+#ifndef CALIBRATE
+    		int32_t new_current;
+//    		if(agg_current > 0) {
+//    			if(agg_current > CUROFF) {
+//    				new_current = agg_current - CUROFF;
+//    			}
+//    			else {
+//    				new_current = 0;
+//    			}
+//    		}
+//    		else {
+//    			if(agg_current < CUROFF) {
+//    				new_current = agg_current + CUROFF;
+//    			}
+//    			else {
+//    				new_current = 0;
+//    			}
+//    		}
+    		if(agg_current > 0) {
+    			new_current = agg_current + CUROFF;
+    		}
+    		else {
+    			new_current = agg_current - CUROFF;
+    		}
+#else
     		int32_t new_current = agg_current;
+#endif
     		acc_i_rms += new_current * new_current;
     		acc_p_ave += voltage * new_current;
     		acc_v_rms += voltage * voltage;
@@ -371,7 +387,7 @@ __interrupt void ADC10_ISR(void) {
     		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
     			SYS_EN_OUT &= ~SYS_EN_PIN;
-    			//ready = 0;
+    			ready = 0;
     		}
     		else if(ready == 0) {
     			if(	ADC_Result > ADC_VCHG) {
@@ -384,7 +400,7 @@ __interrupt void ADC10_ISR(void) {
     			}
     		}
     		else {
-    			//ready = 0;
+//    			ready = 0;
     		}
 
     		// Enable next sample
@@ -399,7 +415,7 @@ __interrupt void ADC10_ISR(void) {
     		ADC10CTL0 |= ADC10ENC;
 
     		// Set debug pin
-    		P1OUT |= BIT6;
+//    		P1OUT |= BIT6;
 
     		sampleCount++;
     		if(sampleCount == SAMCOUNT) { // Entire AC wave sampled (60 Hz)
@@ -463,7 +479,7 @@ __interrupt void ADC10_ISR(void) {
         break;                          // Clear CPUOFF bit from 0(SR)
     default: break;
   	}
-	P1OUT &= ~(BIT6);// + BIT2);
+//	P1OUT &= ~(BIT6);// + BIT2);
 }
 
 #pragma vector=USCI_A0_VECTOR
