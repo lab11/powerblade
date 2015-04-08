@@ -14,9 +14,9 @@
    SYSTEN ENABLE SECTION
  **************************************************************************/
 // SYS_EN = TCK Pins
-#define SYS_EN_DIR	PJDIR
-#define SYS_EN_OUT	PJOUT
-#define SYS_EN_PIN	BIT3
+#define SYS_EN_DIR	P2DIR
+#define SYS_EN_OUT	P2OUT
+#define SYS_EN_PIN	BIT2
 
 /**************************************************************************
    SENSE ENABLE SECTION
@@ -46,6 +46,7 @@
 	Nadc,max = 255 * (3.17 / 3.3) = 245 (0xF5)
 */
 #define ADC_VMIN	0x73
+//#define ADC_VMIN	0xA0
 #define ADC_VCHG	0xDB
 #define ADC_VMAX	0xF5
 
@@ -68,8 +69,8 @@
 /**************************************************************************
    SENSING CONSTANTS SECTION
  **************************************************************************/
-#define CUROFF		0
-#define PHASEOFF	3	// zero for in-phase
+#define CUROFF		100
+#define PHASEOFF	2	// zero for in-phase
 #define SAMCOUNT	42
 
 #endif
