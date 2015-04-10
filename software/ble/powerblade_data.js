@@ -11,6 +11,9 @@ var avePower = [10];
 var aveApp = [10];
 var aveIndex = 0;
 
+var watt_hours_tot = 0;
+var recv_last = 0;
+
 console.log('Looking for PowerBlades!');
 
 noble.on('stateChange', function(state) {
@@ -55,9 +58,9 @@ noble.on('discover', function(peripheral) {
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
     var v_rms_disp = v_rms*2.46;
-    var true_power_disp = true_power*0.0091;
-    var app_power_disp = apparent_power*0.0091;
-    var watt_hours_disp = watt_hours*0.00000308;
+    var true_power_disp = true_power*0.0094;
+    var app_power_disp = apparent_power*0.0094;
+    var watt_hours_disp = watt_hours*0.00000261;
     var pf_disp = true_power_disp / app_power_disp;
 
     // print unique seq's to user
@@ -82,6 +85,15 @@ noble.on('discover', function(peripheral) {
         aveIndex = 0;
       }
 
+      if(recv_last > 0) {
+        var timeDiff = recv_time - recv_last;
+      }
+      else {
+        var timeDiff = 1;
+      }
+      recv_last = recv_time;
+      watt_hours_tot += (timeDiff*true_power_disp) / 3600;
+
       peripherals[peripheral_uuid] = sequence_num;
       last_seq = sequence_num;
       console.log('Data: ' + recv_time);
@@ -97,6 +109,8 @@ noble.on('discover', function(peripheral) {
       console.log('                 Flags: ' + '0x' + flags.toString(16));
       console.log('    Average Power (10): ' + averagePower.toFixed(2));
       console.log('   Apparent Power (10): ' + appPower.toFixed(2));
+      console.log('Watt Hours Since Start: ' + watt_hours_tot.toFixed(2));
+      console.log('                  Time: ' + timeDiff.toFixed(2));
       //console.log(' Number of Connections: ' + num_connections);
 
       console.log('');
