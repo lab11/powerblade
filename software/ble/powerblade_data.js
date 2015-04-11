@@ -11,6 +11,9 @@ var avePower = [10];
 var aveApp = [10];
 var aveIndex = 0;
 
+var timesInThirty = [30];
+var indexToThirty = 0;
+
 var watt_hours_tot = 0;
 var recv_last = 0;
 
@@ -67,6 +70,17 @@ noble.on('discover', function(peripheral) {
     var last_seq = peripherals[peripheral_uuid];
     if (sequence_num != last_seq || sequence_num == 0) {
 
+      timesInThirty[indexToThirty++] = recv_time;
+      if(indexToThirty == 30) {
+        indexToThirty = 0;
+      }
+      var packetCount = 0;
+      for (var i = timesInThirty.length - 1; i >= 0; i--) {
+        if(timesInThirty[i] >= (recv_time - 30)) {
+          packetCount += 2;
+        }
+      };
+
       // Average power
       avePower[aveIndex] = true_power_disp;
       var averagePower = 0;
@@ -111,6 +125,7 @@ noble.on('discover', function(peripheral) {
       console.log('   Apparent Power (10): ' + appPower.toFixed(2));
       console.log('Watt Hours Since Start: ' + watt_hours_tot.toFixed(2));
       console.log('                  Time: ' + timeDiff.toFixed(2));
+      console.log('   Packets in last 30s: ' + packetCount.toFixed(2));
       //console.log(' Number of Connections: ' + num_connections);
 
       console.log('');
