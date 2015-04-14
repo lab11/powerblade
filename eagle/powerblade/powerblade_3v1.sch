@@ -7868,6 +7868,27 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <wire x1="0.625" y1="-1" x2="0.625" y2="-0.508" width="0.127" layer="21"/>
 <wire x1="-0.625" y1="0.254" x2="-0.625" y2="-0.254" width="0.127" layer="21"/>
 </package>
+<package name="AC3_SLOT_OUT2">
+<wire x1="-12.7" y1="-17.399" x2="-12.7" y2="8.001" width="0" layer="20"/>
+<wire x1="-12.7" y1="8.001" x2="12.7" y2="8.001" width="0" layer="20"/>
+<wire x1="12.7" y1="8.001" x2="12.7" y2="-17.399" width="0" layer="20"/>
+<wire x1="-7.874" y1="3.556" x2="-7.874" y2="-3.556" width="0" layer="20"/>
+<wire x1="-7.874" y1="-3.556" x2="-5.588" y2="-3.556" width="0" layer="20"/>
+<wire x1="-5.588" y1="-3.556" x2="-5.588" y2="3.556" width="0" layer="20"/>
+<wire x1="-5.588" y1="3.556" x2="-7.874" y2="3.556" width="0" layer="20"/>
+<wire x1="7.874" y1="4.445" x2="7.874" y2="-4.445" width="0" layer="20"/>
+<wire x1="7.874" y1="-4.445" x2="5.588" y2="-4.445" width="0" layer="20"/>
+<wire x1="5.588" y1="-4.445" x2="5.588" y2="4.445" width="0" layer="20"/>
+<wire x1="5.588" y1="4.445" x2="7.874" y2="4.445" width="0" layer="20"/>
+<smd name="P" x="-8.89" y="0" dx="6.35" dy="1.27" layer="16" rot="R90"/>
+<smd name="N" x="8.89" y="0" dx="7.62" dy="1.27" layer="16" rot="R90"/>
+<wire x1="-12.7" y1="-17.399" x2="12.7" y2="-17.399" width="0" layer="20"/>
+<wire x1="-2.6924" y1="-14.5796" x2="2.6924" y2="-14.5796" width="0" layer="20"/>
+<wire x1="2.6924" y1="-14.5796" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
+<wire x1="2.6924" y1="-11.8872" x2="0" y2="-9.1948" width="0" layer="20" curve="90"/>
+<wire x1="0" y1="-9.1948" x2="-2.6924" y2="-11.8872" width="0" layer="20" curve="90"/>
+<wire x1="-2.6924" y1="-11.8872" x2="-2.6924" y2="-14.5796" width="0" layer="20"/>
+</package>
 </packages>
 <symbols>
 <symbol name="DIODE-ZENER">
@@ -8130,6 +8151,15 @@ Source: www.bourns.com .. 6000_series.pdf</description>
 <connects>
 <connect gate="G$1" pin="N" pad="N N1 N2 N3 N4 N5"/>
 <connect gate="G$1" pin="P" pad="P P1 P2 P3 P4 P5 P6"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="SLOT2" package="AC3_SLOT_OUT2">
+<connects>
+<connect gate="G$1" pin="N" pad="P"/>
+<connect gate="G$1" pin="P" pad="N"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -9782,7 +9812,7 @@ In this library the device names are the same as the pin names of the symbols, t
 </part>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="P+1" library="supply1" deviceset="VCC" device=""/>
-<part name="J21" library="powerfilm" deviceset="AC_IN" device="TBFILM" value="AC_INTBFILM">
+<part name="J21" library="powerfilm" deviceset="AC_IN" device="SLOT2" value="AC_INSLOT2">
 <attribute name="DIGIKEY" value="NP"/>
 </part>
 <part name="RS+" library="skyspecs" deviceset="TP" device="_LONG" value="TP_LONG">
