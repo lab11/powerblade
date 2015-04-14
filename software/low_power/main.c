@@ -22,6 +22,7 @@
 
 #include "powerblade_test.h"
 
+#define VERSION0
 //#define CALIBRATE
 
 bool ready;
