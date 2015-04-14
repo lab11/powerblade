@@ -13,18 +13,30 @@
 /**************************************************************************
    SYSTEN ENABLE SECTION
  **************************************************************************/
-// SYS_EN = TCK Pins
-#define SYS_EN_DIR	P2DIR
-#define SYS_EN_OUT	P2OUT
-#define SYS_EN_PIN	BIT2
+#ifdef VERSION0
+   #define SYS_EN_DIR	PJDIR
+   #define SYS_EN_OUT	PJOUT
+   #define SYS_EN_PIN	BIT3
+#endif
+#ifdef VERSION1
+	#define SYS_EN_DIR	P2DIR
+	#define SYS_EN_OUT	P2OUT
+	#define SYS_EN_PIN	BIT2
+#endif
 
 /**************************************************************************
    SENSE ENABLE SECTION
  **************************************************************************/
-// SEN_EN = P1.7
 #define SEN_EN_DIR	P1DIR
 #define SEN_EN_OUT	P1OUT
 #define SEN_EN_PIN	BIT7
+
+/**************************************************************************
+   SENSE ENABLE SECTION
+ **************************************************************************/
+#define LED_EN_DIR	PJDIR
+#define LED_EN_OUT	PJOUT
+#define LED_EN_PIN	BIT1
 
 /**************************************************************************
    ANALOG SECTION
