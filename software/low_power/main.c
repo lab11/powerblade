@@ -22,11 +22,13 @@
 
 #include "powerblade_test.h"
 
-#define VERSION0
 //#define CALIBRATE
 
 bool ready;
 uint8_t data;
+
+uint8_t fivedata[] = {2,2,2,2,2,1,1,0,0,0,1,0,1,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
+uint8_t dataCount;
 
 // Variables for integration
 int16_t agg_current;
@@ -151,6 +153,10 @@ int main(void) {
     P2OUT = 0;
     P2REN = 0xFF;
 
+    dataCount = 0;
+//    memcpy(fivedata,)
+//    fivedata = {2,2,2,2,2,1,1,0,0,0,1,0,1,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
+
     // Set SEN_EN to output and disable (~200uA)
     SEN_EN_DIR |= SEN_EN_PIN;
     SEN_EN_OUT &= ~SEN_EN_PIN;
@@ -183,6 +189,8 @@ int main(void) {
     // Set SYS_EN to output and disable
     SYS_EN_DIR |= SYS_EN_PIN;
     SYS_EN_OUT &= ~SYS_EN_PIN;
+    LED_EN_DIR |= LED_EN_PIN;
+    LED_EN_OUT &= ~LED_EN_PIN;
     ready = 0;
 
     // Set up UART
@@ -247,6 +255,14 @@ __interrupt void TIMERA0_ISR(void) {
 __interrupt void TIMERA1_ISR(void) {
 	TA1CCTL1 &= ~CCIFG;
 	TA1CCR1 = pwm_duty;
+}
+
+#pragma vector=TIMER1_A0_VECTOR
+__interrupt void TIMERA1_ISR0(void) {
+	TA1CCTL0 = 0;
+	TA1CTL = 0;
+	SYS_EN_OUT &= ~SYS_EN_PIN;
+	LED_EN_OUT |= LED_EN_PIN;
 }
 
 void uart_send(char* buf, unsigned int len) {
@@ -388,6 +404,7 @@ __interrupt void ADC10_ISR(void) {
     		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
     			SYS_EN_OUT &= ~SYS_EN_PIN;
+    			LED_EN_OUT &= ~LED_EN_PIN;
     			ready = 0;
     		}
     		else if(ready == 0) {
@@ -530,6 +547,20 @@ __interrupt void USCI_A0_ISR(void) {
 			break;
 		case 1:
 			uart_send((char*)&flags, sizeof(flags));
+			if(fivedata[dataCount] == 1){
+				TA1CTL |= TASSEL_1 + MC_1 + TACLR;
+				TA1CCR0 = 1500;
+				TA1CCTL0 |= CCIE;
+			}
+			else if(fivedata[dataCount] == 0) {
+				TA1CTL |= TASSEL_1 + MC_1 + TACLR;
+				TA1CCR0 = 4500;
+				TA1CCTL0 |= CCIE;
+			}
+			dataCount++;
+			if(dataCount == 60) {
+				dataCount = 0;
+			}
 		default: break;
 		}
 		break;
