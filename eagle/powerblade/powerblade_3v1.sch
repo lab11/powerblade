@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -8,34 +8,34 @@
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
-<layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
-<layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
-<layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
-<layer number="5" name="Route5" color="4" fill="4" visible="no" active="no"/>
-<layer number="6" name="Route6" color="1" fill="8" visible="no" active="no"/>
-<layer number="7" name="Route7" color="4" fill="8" visible="no" active="no"/>
-<layer number="8" name="Route8" color="1" fill="2" visible="no" active="no"/>
-<layer number="9" name="Route9" color="4" fill="2" visible="no" active="no"/>
-<layer number="10" name="Route10" color="1" fill="7" visible="no" active="no"/>
-<layer number="11" name="Route11" color="4" fill="7" visible="no" active="no"/>
-<layer number="12" name="Route12" color="1" fill="5" visible="no" active="no"/>
-<layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
-<layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
-<layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
-<layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
-<layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="no"/>
-<layer number="20" name="Dimension" color="15" fill="1" visible="no" active="no"/>
-<layer number="21" name="tPlace" color="7" fill="1" visible="no" active="no"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="no"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="no"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="no"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="no" active="no"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="no" active="no"/>
-<layer number="27" name="tValues" color="7" fill="1" visible="no" active="no"/>
-<layer number="28" name="bValues" color="7" fill="1" visible="no" active="no"/>
+<layer number="1" name="Top" color="4" fill="1" visible="yes" active="no"/>
+<layer number="2" name="Route2" color="1" fill="3" visible="yes" active="no"/>
+<layer number="3" name="Route3" color="4" fill="3" visible="yes" active="no"/>
+<layer number="4" name="Route4" color="1" fill="4" visible="yes" active="no"/>
+<layer number="5" name="Route5" color="4" fill="4" visible="yes" active="no"/>
+<layer number="6" name="Route6" color="1" fill="8" visible="yes" active="no"/>
+<layer number="7" name="Route7" color="4" fill="8" visible="yes" active="no"/>
+<layer number="8" name="Route8" color="1" fill="2" visible="yes" active="no"/>
+<layer number="9" name="Route9" color="4" fill="2" visible="yes" active="no"/>
+<layer number="10" name="Route10" color="1" fill="7" visible="yes" active="no"/>
+<layer number="11" name="Route11" color="4" fill="7" visible="yes" active="no"/>
+<layer number="12" name="Route12" color="1" fill="5" visible="yes" active="no"/>
+<layer number="13" name="Route13" color="4" fill="5" visible="yes" active="no"/>
+<layer number="14" name="Route14" color="1" fill="6" visible="yes" active="no"/>
+<layer number="15" name="Route15" color="4" fill="6" visible="yes" active="no"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="no"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="no"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="no"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="no"/>
+<layer number="20" name="Dimension" color="15" fill="1" visible="yes" active="no"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="no"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="no"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="no"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="no"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="no"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="no"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="no"/>
+<layer number="28" name="bValues" color="7" fill="1" visible="yes" active="no"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="no"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="no"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="no"/>
@@ -44,8 +44,8 @@
 <layer number="34" name="bFinish" color="6" fill="6" visible="no" active="no"/>
 <layer number="35" name="tGlue" color="7" fill="4" visible="no" active="no"/>
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="no"/>
-<layer number="37" name="tTest" color="7" fill="1" visible="no" active="no"/>
-<layer number="38" name="bTest" color="7" fill="1" visible="no" active="no"/>
+<layer number="37" name="tTest" color="7" fill="1" visible="yes" active="no"/>
+<layer number="38" name="bTest" color="7" fill="1" visible="yes" active="no"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="no"/>
 <layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="no"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="no"/>
@@ -53,17 +53,17 @@
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="no"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="no"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="no" active="no"/>
-<layer number="46" name="Milling" color="3" fill="1" visible="no" active="no"/>
-<layer number="47" name="Measures" color="7" fill="1" visible="no" active="no"/>
-<layer number="48" name="Document" color="7" fill="1" visible="no" active="no"/>
-<layer number="49" name="Reference" color="7" fill="1" visible="no" active="no"/>
-<layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
-<layer number="51" name="tDocu" color="7" fill="1" visible="no" active="no"/>
-<layer number="52" name="bDocu" color="7" fill="1" visible="no" active="no"/>
-<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
-<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
-<layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
-<layer number="57" name="tCAD" color="7" fill="1" visible="no" active="no"/>
+<layer number="46" name="Milling" color="3" fill="1" visible="yes" active="no"/>
+<layer number="47" name="Measures" color="7" fill="1" visible="yes" active="no"/>
+<layer number="48" name="Document" color="7" fill="1" visible="yes" active="no"/>
+<layer number="49" name="Reference" color="7" fill="1" visible="yes" active="no"/>
+<layer number="50" name="dxf" color="7" fill="1" visible="yes" active="no"/>
+<layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="no"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="no"/>
+<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="yes" active="no"/>
+<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="yes" active="no"/>
+<layer number="56" name="wert" color="7" fill="1" visible="yes" active="no"/>
+<layer number="57" name="tCAD" color="7" fill="1" visible="yes" active="no"/>
 <layer number="91" name="Nets" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="92" name="Busses" color="1" fill="1" visible="yes" active="yes"/>
 <layer number="93" name="Pins" color="2" fill="1" visible="no" active="yes"/>
@@ -14615,6 +14615,13 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="0" y1="-9.1948" x2="-2.6924" y2="-11.8872" width="0" layer="20" curve="90"/>
 <wire x1="-2.6924" y1="-11.8872" x2="-2.6924" y2="-14.5796" width="0" layer="20"/>
 </package>
+<package name="UREACH_XTEND">
+<smd name="P1" x="-1.7" y="0" dx="0.8" dy="2.4" layer="1"/>
+<smd name="NC" x="1.7" y="0" dx="0.8" dy="2.4" layer="1"/>
+<wire x1="-1.15" y1="1" x2="1.15" y2="1" width="0.127" layer="21"/>
+<wire x1="1.15" y1="-1" x2="-1.15" y2="-1" width="0.127" layer="21"/>
+<text x="-2.54" y="1.27" size="1.27" layer="25">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="DIODE-ZENER">
@@ -14760,6 +14767,15 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <vertex x="2.032" y="-0.254"/>
 <vertex x="0.762" y="-0.254"/>
 </polygon>
+</symbol>
+<symbol name="ANT">
+<pin name="P1" x="10.16" y="0" visible="pad" length="middle" rot="R180"/>
+<wire x1="0" y1="7.62" x2="2.54" y2="13.97" width="0.254" layer="94"/>
+<wire x1="2.54" y1="13.97" x2="-2.54" y2="13.97" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="13.97" x2="0" y2="7.62" width="0.254" layer="94"/>
+<wire x1="0" y1="7.62" x2="0" y2="0" width="0.254" layer="94"/>
+<wire x1="0" y1="0" x2="5.08" y2="0" width="0.254" layer="94"/>
+<text x="2.54" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -15036,6 +15052,23 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <technologies>
 <technology name="">
 <attribute name="DIGIKEY" value="2SK1829TE85LFCT-ND" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="UREACH_XTEND" prefix="Y">
+<gates>
+<gate name="G$1" symbol="ANT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="UREACH_XTEND">
+<connects>
+<connect gate="G$1" pin="P1" pad="P1"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="FRACTUS" value="FR05-S1-N-0-110" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -15781,18 +15814,6 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <smd name="SE" x="0.537" y="0" dx="0.22" dy="0.22" layer="1" roundness="100"/>
 <text x="0" y="0.75" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
-<package name="FRACTUS-ANTENNA-FR05-S1-N-0-102">
-<smd name="1" x="-2.55" y="0" dx="1.5" dy="2.6" layer="1"/>
-<smd name="2" x="2.55" y="0" dx="1.5" dy="2.6" layer="1"/>
-<wire x1="-3.5" y1="1.5" x2="-1.2" y2="1.5" width="0.127" layer="21"/>
-<wire x1="-1.2" y1="1.5" x2="3.5" y2="1.5" width="0.127" layer="21"/>
-<wire x1="3.5" y1="1.5" x2="3.5" y2="-1.5" width="0.127" layer="21"/>
-<wire x1="3.5" y1="-1.5" x2="-1.2" y2="-1.5" width="0.127" layer="21"/>
-<wire x1="-1.2" y1="-1.5" x2="-3.5" y2="-1.5" width="0.127" layer="21"/>
-<wire x1="-3.5" y1="-1.5" x2="-3.5" y2="1.5" width="0.127" layer="21"/>
-<wire x1="-1.2" y1="1.5" x2="-1.2" y2="-1.5" width="0.127" layer="21"/>
-<text x="0" y="1.8" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-</package>
 </packages>
 <symbols>
 <symbol name="NRF51822">
@@ -15860,17 +15881,6 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <wire x1="12.7" y1="5.08" x2="-12.7" y2="5.08" width="0.254" layer="94"/>
 <text x="-12.7" y="5.588" size="1.778" layer="95" ratio="12">&gt;NAME</text>
 <text x="-6.858" y="5.588" size="1.778" layer="96" ratio="12">&gt;VALUE</text>
-</symbol>
-<symbol name="ANTENNA">
-<description>Simple Antenna symbol</description>
-<wire x1="-3.81" y1="5.08" x2="0" y2="5.08" width="0.254" layer="94"/>
-<wire x1="0" y1="5.08" x2="3.81" y2="5.08" width="0.254" layer="94"/>
-<wire x1="3.81" y1="5.08" x2="0" y2="0" width="0.254" layer="94"/>
-<wire x1="0" y1="0" x2="-3.81" y2="5.08" width="0.254" layer="94"/>
-<pin name="ANTENNA" x="0" y="-5.08" visible="off" length="short" rot="R90"/>
-<wire x1="0" y1="-2.54" x2="0" y2="5.08" width="0.254" layer="94"/>
-<text x="-3.81" y="5.842" size="1.016" layer="95" font="vector" ratio="12">&gt;NAME</text>
-<text x="-1.524" y="5.842" size="1.016" layer="96" font="vector" ratio="12">&gt;VALUE</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -15960,27 +15970,6 @@ nRF24LE1, nRF51822-QFAA/AB, with integrated harmonic filter</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="FRACTUS-2.4GHZ-FR05-S1-N-0-102" prefix="A">
-<description>Fractus Compact Reach XtendTM chip antenna is engineered specifically for Bluetooth,
-WLAN 802.11 b/g/n and other wireless devices operating at the ISM 2.4 GHz band.
-Compact Reach Xtend combines small form factor size and high performance to improve
-the functionality of your wireless devices.</description>
-<gates>
-<gate name="G$1" symbol="ANTENNA" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="FRACTUS-ANTENNA-FR05-S1-N-0-102">
-<connects>
-<connect gate="G$1" pin="ANTENNA" pad="1"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="RICHARDSON_RFPD" value="FR05-S1-N-0102B" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
 </devicesets>
 </library>
 <library name="crystals">
@@ -15998,17 +15987,6 @@ the functionality of your wireless devices.</description>
 <wire x1="-1.3" y1="1.1" x2="-0.3" y2="1.1" width="0.127" layer="21"/>
 <text x="0" y="1.3" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
-<package name="ABS05">
-<smd name="B" x="0.55" y="0" dx="0.5" dy="1" layer="1"/>
-<smd name="A" x="-0.55" y="0" dx="0.5" dy="1" layer="1"/>
-<wire x1="-0.2" y1="0.5" x2="0.3" y2="0.5" width="0.127" layer="21"/>
-<wire x1="0.3" y1="-0.5" x2="-0.3" y2="-0.5" width="0.127" layer="21"/>
-<wire x1="-0.4" y1="0.6" x2="-0.2" y2="0.6" width="0.127" layer="21"/>
-<wire x1="-0.2" y1="0.6" x2="-0.2" y2="0.5" width="0.127" layer="21"/>
-<wire x1="-0.2" y1="0.5" x2="-0.2" y2="0.3" width="0.127" layer="21"/>
-<text x="0" y="0.7" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
-<text x="0" y="-1.7" size="1.016" layer="27" font="vector" ratio="12" align="bottom-center">&gt;VALUE</text>
-</package>
 </packages>
 <symbols>
 <symbol name="CRYSTAL-GND">
@@ -16024,18 +16002,6 @@ the functionality of your wireless devices.</description>
 <text x="-2.54" y="5.08" size="1.27" layer="96">&gt;VALUE</text>
 <pin name="GND" x="0" y="-5.08" visible="off" length="short" rot="R90"/>
 <text x="0" y="-2.54" size="0.762" layer="95" ratio="12" align="bottom-center">GND</text>
-</symbol>
-<symbol name="CRYSTAL">
-<pin name="1" x="-5.08" y="0" visible="pad" length="short"/>
-<pin name="2" x="5.08" y="0" visible="pad" length="short" rot="R180"/>
-<wire x1="-2.54" y1="2.54" x2="-2.54" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="2.54" y1="2.54" x2="2.54" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="3.81" x2="-1.27" y2="-3.81" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="-3.81" x2="1.27" y2="-3.81" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-3.81" x2="1.27" y2="3.81" width="0.254" layer="94"/>
-<wire x1="1.27" y1="3.81" x2="-1.27" y2="3.81" width="0.254" layer="94"/>
-<text x="-2.54" y="7.62" size="1.27" layer="95">&gt;NAME</text>
-<text x="-2.54" y="5.08" size="1.27" layer="96">&gt;VALUE</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -16053,36 +16019,6 @@ the functionality of your wireless devices.</description>
 </connects>
 <technologies>
 <technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="ABS05-32.768KHZ" prefix="X">
-<description>32.768kHz Crystal</description>
-<gates>
-<gate name="G$1" symbol="CRYSTAL" x="0" y="0"/>
-</gates>
-<devices>
-<device name="-T" package="ABS05">
-<connects>
-<connect gate="G$1" pin="1" pad="A"/>
-<connect gate="G$1" pin="2" pad="B"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="535-11899-1-ND" constant="no"/>
-</technology>
-</technologies>
-</device>
-<device name="-9-T" package="ABS05">
-<connects>
-<connect gate="G$1" pin="1" pad="A"/>
-<connect gate="G$1" pin="2" pad="B"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="DIGIKEY" value="535-11897-1-ND" constant="no"/>
-</technology>
 </technologies>
 </device>
 </devices>
@@ -16566,18 +16502,18 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="L3" library="rcl" deviceset="L-US" device="L0805">
 <attribute name="DIGIKEY" value="732-3452-1-ND"/>
 </part>
-<part name="R14" library="rcl" deviceset="R-US_" device="R0402" value="200">
+<part name="R14" library="rcl" deviceset="R-US_" device="R0402_SM" value="200">
 <attribute name="DIGIKEY" value="P200LCT-ND"/>
 </part>
-<part name="R15" library="rcl" deviceset="R-US_" device="R0402" value="1M 1%"/>
-<part name="R16" library="rcl" deviceset="R-US_" device="R0402" value="75 1%"/>
-<part name="R17" library="rcl" deviceset="R-US_" device="R0402" value="20k 1%">
+<part name="R15" library="rcl" deviceset="R-US_" device="R0402_SM" value="1M 1%"/>
+<part name="R16" library="rcl" deviceset="R-US_" device="R0402_SM" value="75 1%"/>
+<part name="R17" library="rcl" deviceset="R-US_" device="R0402_SM" value="20k 1%">
 <attribute name="DIGIKEY" value="P20.0KLCT-ND"/>
 </part>
-<part name="R18" library="rcl" deviceset="R-US_" device="R0402" value="4.99 1%">
+<part name="R18" library="rcl" deviceset="R-US_" device="R0402_SM" value="4.99 1%">
 <attribute name="DIGIKEY" value="541-2.49LLCT-ND"/>
 </part>
-<part name="C27" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<part name="C27" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
 <attribute name="DIGIKEY" value="445-1265-1-ND"/>
 </part>
 <part name="U6" library="powerfilm" deviceset="MAX9910" device="">
@@ -16598,34 +16534,34 @@ In this library the device names are the same as the pin names of the symbols, t
 <attribute name="DIGIKEY" value="5129K-ND"/>
 </part>
 <part name="U7" library="powerfilm" deviceset="OPA2369" device=""/>
-<part name="C38" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<part name="C38" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
 <attribute name="DIGIKEY" value="445-1265-1-ND"/>
 </part>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
-<part name="R35" library="rcl" deviceset="R-US_" device="R0402" value="20k">
+<part name="R35" library="rcl" deviceset="R-US_" device="R0402_SM" value="20k">
 <attribute name="DIGIKEY" value="P2.00KLCT-ND"/>
 </part>
-<part name="R37" library="rcl" deviceset="R-US_" device="R0402" value="887k 1%">
+<part name="R37" library="rcl" deviceset="R-US_" device="R0402_SM" value="887k 1%">
 <attribute name="DIGIKEY" value="P90.9KLCT-ND"/>
 </part>
-<part name="R38" library="rcl" deviceset="R-US_" device="R0402" value="137k 1%">
+<part name="R38" library="rcl" deviceset="R-US_" device="R0402_SM" value="137k 1%">
 <attribute name="DIGIKEY" value="P3.09KHCT-ND"/>
 </part>
-<part name="R40" library="rcl" deviceset="R-US_" device="R0402" value="1M 1%"/>
-<part name="C39" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF">
+<part name="R40" library="rcl" deviceset="R-US_" device="R0402_SM" value="1M 1%"/>
+<part name="C39" library="rcl" deviceset="C-EU" device="C0402_SM" value="1.5uF">
 <attribute name="DIGIKEY" value="445-13874-1-ND"/>
 </part>
 <part name="TP2" library="skyspecs" deviceset="TP" device="_LONG" value="TP_LONG">
 <attribute name="DIGIKEY" value="5126K-ND"/>
 </part>
-<part name="R39" library="rcl" deviceset="R-US_" device="R0402" value="71.5k 1%">
+<part name="R39" library="rcl" deviceset="R-US_" device="R0402_SM" value="71.5k 1%">
 <attribute name="DIGIKEY" value="P100KLCT-ND"/>
 </part>
-<part name="R2" library="rcl" deviceset="R-US_" device="R0603"/>
+<part name="R2" library="rcl" deviceset="R-US_" device="R0402_SM"/>
 <part name="TP1" library="skyspecs" deviceset="TP" device="_LONG" value="TP_LONG">
 <attribute name="DIGIKEY" value="5126K-ND"/>
 </part>
-<part name="C2" library="rcl" deviceset="C-EU" device="C0603"/>
+<part name="C2" library="rcl" deviceset="C-EU" device="C0402_SM"/>
 <part name="U2" library="powerfilm" deviceset="MCP6V3" device=""/>
 <part name="R3" library="rcl" deviceset="R-US_" device="R1210" value="80k">
 <attribute name="DIGIKEY" value="P80.6KAACT-ND"/>
@@ -16716,7 +16652,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="R4" library="passives" deviceset="RESISTOR" device="" value="12k">
 <attribute name="DIGIKEY" value="RHM12.0KCDCT-ND"/>
 </part>
-<part name="A1" library="chips" deviceset="FRACTUS-2.4GHZ-FR05-S1-N-0-102" device=""/>
 <part name="L4" library="passives" deviceset="INDUCTOR" device="0603" value="10uH">
 <attribute name="DIGIKEY" value="490-4025-1-ND"/>
 </part>
@@ -16724,18 +16659,11 @@ In this library the device names are the same as the pin names of the symbols, t
 <attribute name="DIGIKEY" value="490-6269-1-ND"/>
 </part>
 <part name="J4" library="connector" deviceset="TC2030-JLINK" device="-NL"/>
-<part name="X2" library="crystals" deviceset="ABS05-32.768KHZ" device="-9-T"/>
-<part name="C24" library="passives" deviceset="CAPACITOR" device="" value="12pF">
-<attribute name="DIGIKEY" value="490-6197-1-ND"/>
-</part>
-<part name="C25" library="passives" deviceset="CAPACITOR" device="" value="12pF">
-<attribute name="DIGIKEY" value="490-6197-1-ND"/>
-</part>
 <part name="+3V9" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V10" library="supply1" deviceset="+3V3" device=""/>
 <part name="Q1" library="nav" deviceset="2N7002" device=""/>
 <part name="SUPPLY1" library="supply2" deviceset="GND2" device=""/>
-<part name="R5" library="rcl" deviceset="R-US_" device="R0603" value="220k"/>
+<part name="R5" library="rcl" deviceset="R-US_" device="R0402_SM" value="220k"/>
 <part name="SUPPLY2" library="supply2" deviceset="GND2" device=""/>
 <part name="SUPPLY3" library="supply2" deviceset="GND2" device=""/>
 <part name="SUPPLY4" library="supply2" deviceset="GND2" device=""/>
@@ -16743,7 +16671,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="SUPPLY6" library="supply2" deviceset="GND2" device=""/>
 <part name="SUPPLY7" library="supply2" deviceset="GND2" device=""/>
 <part name="SUPPLY8" library="supply2" deviceset="GND2" device=""/>
-<part name="SUPPLY9" library="supply2" deviceset="GND2" device=""/>
 <part name="SUPPLY10" library="supply2" deviceset="GND2" device=""/>
 <part name="SUPPLY11" library="supply2" deviceset="GND2" device=""/>
 <part name="SUPPLY12" library="supply2" deviceset="GND2" device=""/>
@@ -16783,6 +16710,8 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="C5" library="rcl" deviceset="C-EU" device="C0805_SM" value="22uF">
 <attribute name="DIGIKEY" value="445-9077-1-ND"/>
 </part>
+<part name="Y1" library="powerfilm" deviceset="UREACH_XTEND" device=""/>
+<part name="R1" library="rcl" deviceset="R-US_" device="R0402_SM" value="NP"/>
 </parts>
 <sheets>
 <sheet>
@@ -17505,7 +17434,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="R4" gate="G$1" x="-68.58" y="-43.18" rot="R270">
 <attribute name="DIGIKEY" x="-68.58" y="-43.18" size="1.27" layer="96" rot="R270" display="off"/>
 </instance>
-<instance part="A1" gate="G$1" x="60.96" y="-25.4"/>
 <instance part="L4" gate="G$1" x="-83.82" y="27.94">
 <attribute name="DIGIKEY" x="-83.82" y="27.94" size="1.778" layer="96" display="off"/>
 </instance>
@@ -17513,13 +17441,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <attribute name="DIGIKEY" x="55.88" y="-50.8" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="J4" gate="G$1" x="5.08" y="68.58"/>
-<instance part="X2" gate="G$1" x="10.16" y="10.16"/>
-<instance part="C24" gate="G$1" x="2.54" y="5.08">
-<attribute name="DIGIKEY" x="2.54" y="5.08" size="1.778" layer="96" display="off"/>
-</instance>
-<instance part="C25" gate="G$1" x="17.78" y="5.08">
-<attribute name="DIGIKEY" x="17.78" y="5.08" size="1.778" layer="96" display="off"/>
-</instance>
 <instance part="+3V9" gate="G$1" x="-45.72" y="53.34"/>
 <instance part="+3V10" gate="G$1" x="-10.16" y="78.74"/>
 <instance part="Q1" gate="G$1" x="-12.7" y="-106.68"/>
@@ -17532,13 +17453,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="SUPPLY6" gate="G$1" x="10.16" y="-76.2"/>
 <instance part="SUPPLY7" gate="G$1" x="48.26" y="-76.2"/>
 <instance part="SUPPLY8" gate="G$1" x="55.88" y="-76.2"/>
-<instance part="SUPPLY9" gate="G$1" x="10.16" y="-7.62"/>
 <instance part="SUPPLY10" gate="G$1" x="38.1" y="-7.62"/>
 <instance part="SUPPLY11" gate="G$1" x="-91.44" y="30.48"/>
 <instance part="SUPPLY12" gate="G$1" x="-58.42" y="30.48"/>
 <instance part="SUPPLY13" gate="G$1" x="-30.48" y="30.48"/>
 <instance part="SUPPLY14" gate="G$1" x="-10.16" y="58.42"/>
 <instance part="GND29" gate="1" x="-12.7" y="-124.46"/>
+<instance part="Y1" gate="G$1" x="68.58" y="-33.02" rot="MR0"/>
 </instances>
 <busses>
 </busses>
@@ -17571,12 +17492,11 @@ In this library the device names are the same as the pin names of the symbols, t
 <net name="N$4" class="0">
 <segment>
 <wire x1="43.18" y1="-33.02" x2="55.88" y2="-33.02" width="0.1524" layer="91"/>
-<wire x1="55.88" y1="-33.02" x2="60.96" y2="-33.02" width="0.1524" layer="91"/>
-<wire x1="60.96" y1="-33.02" x2="60.96" y2="-30.48" width="0.1524" layer="91"/>
 <pinref part="B1" gate="G$1" pin="SE"/>
-<pinref part="A1" gate="G$1" pin="ANTENNA"/>
 <pinref part="C23" gate="G$1" pin="1"/>
 <wire x1="55.88" y1="-48.26" x2="55.88" y2="-33.02" width="0.1524" layer="91"/>
+<pinref part="Y1" gate="G$1" pin="P1"/>
+<wire x1="55.88" y1="-33.02" x2="58.42" y2="-33.02" width="0.1524" layer="91"/>
 <junction x="55.88" y="-33.02"/>
 </segment>
 </net>
@@ -17697,32 +17617,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="-17.78" y="-17.78" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="A1" class="0">
-<segment>
-<pinref part="U4" gate="G$1" pin="P27/AIN1/XL1"/>
-<wire x1="-20.32" y1="-12.7" x2="22.86" y2="-12.7" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="-12.7" x2="22.86" y2="10.16" width="0.1524" layer="91"/>
-<pinref part="X2" gate="G$1" pin="2"/>
-<pinref part="C25" gate="G$1" pin="1"/>
-<wire x1="15.24" y1="10.16" x2="17.78" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="17.78" y1="10.16" x2="17.78" y2="7.62" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="10.16" x2="17.78" y2="10.16" width="0.1524" layer="91"/>
-<junction x="17.78" y="10.16"/>
-</segment>
-</net>
-<net name="A0" class="0">
-<segment>
-<pinref part="U4" gate="G$1" pin="P26/AIN0/XL2"/>
-<pinref part="C24" gate="G$1" pin="1"/>
-<wire x1="2.54" y1="7.62" x2="2.54" y2="10.16" width="0.1524" layer="91"/>
-<pinref part="X2" gate="G$1" pin="1"/>
-<wire x1="2.54" y1="10.16" x2="5.08" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="2.54" y1="10.16" x2="-2.54" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="-2.54" y1="10.16" x2="-2.54" y2="-10.16" width="0.1524" layer="91"/>
-<junction x="2.54" y="10.16"/>
-<wire x1="-2.54" y1="-10.16" x2="-20.32" y2="-10.16" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="+3V3" class="0">
 <segment>
 <pinref part="C11" gate="G$1" pin="1"/>
@@ -17811,17 +17705,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <junction x="38.1" y="-2.54"/>
 </segment>
 <segment>
-<pinref part="C25" gate="G$1" pin="2"/>
-<wire x1="17.78" y1="0" x2="17.78" y2="-2.54" width="0.1524" layer="91"/>
-<pinref part="C24" gate="G$1" pin="2"/>
-<wire x1="17.78" y1="-2.54" x2="10.16" y2="-2.54" width="0.1524" layer="91"/>
-<wire x1="10.16" y1="-2.54" x2="2.54" y2="-2.54" width="0.1524" layer="91"/>
-<wire x1="2.54" y1="-2.54" x2="2.54" y2="0" width="0.1524" layer="91"/>
-<pinref part="SUPPLY9" gate="G$1" pin="GND2"/>
-<wire x1="10.16" y1="-5.08" x2="10.16" y2="-2.54" width="0.1524" layer="91"/>
-<junction x="10.16" y="-2.54"/>
-</segment>
-<segment>
 <pinref part="C11" gate="G$1" pin="2"/>
 <wire x1="-53.34" y1="38.1" x2="-53.34" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="C13" gate="G$1" pin="2"/>
@@ -17862,9 +17745,9 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="BLE_LPINT" class="0">
 <segment>
-<pinref part="U4" gate="G$1" pin="P30"/>
-<wire x1="-17.78" y1="-20.32" x2="-20.32" y2="-20.32" width="0.1524" layer="91"/>
-<label x="-17.78" y="-20.32" size="1.27" layer="95" xref="yes"/>
+<label x="-68.58" y="0" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="U4" gate="G$1" pin="P05/AIN6"/>
+<wire x1="-68.58" y1="0" x2="-66.04" y2="0" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
@@ -17965,6 +17848,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="SUPPLY27" gate="G$1" x="134.62" y="2.54"/>
 <instance part="SUPPLY28" gate="G$1" x="116.84" y="-2.54"/>
 <instance part="GND2" gate="1" x="20.32" y="-88.9"/>
+<instance part="R1" gate="G$1" x="76.2" y="-30.48"/>
 </instances>
 <busses>
 </busses>
@@ -17983,6 +17867,9 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="50.8" y1="-27.94" x2="50.8" y2="-30.48" width="0.1524" layer="91"/>
 <pinref part="L3" gate="G$1" pin="2"/>
 <wire x1="50.8" y1="-20.32" x2="50.8" y2="-30.48" width="0.1524" layer="91"/>
+<pinref part="R1" gate="G$1" pin="1"/>
+<wire x1="71.12" y1="-30.48" x2="68.58" y2="-30.48" width="0.1524" layer="91"/>
+<junction x="68.58" y="-30.48"/>
 </segment>
 </net>
 <net name="N$38" class="0">
@@ -18182,6 +18069,8 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="83.82" y1="-33.02" x2="83.82" y2="-30.48" width="0.1524" layer="91"/>
 <junction x="83.82" y="-30.48"/>
 <pinref part="U2" gate="G$1" pin="IN-"/>
+<pinref part="R1" gate="G$1" pin="2"/>
+<wire x1="81.28" y1="-30.48" x2="83.82" y2="-30.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
