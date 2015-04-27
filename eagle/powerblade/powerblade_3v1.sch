@@ -16569,39 +16569,33 @@ In this library the device names are the same as the pin names of the symbols, t
 <attribute name="DIGIKEY_3" value="P40.2KAACT-ND"/>
 </part>
 <part name="U3" library="powerfilm" deviceset="MSP430FR5738" device=""/>
-<part name="C14" library="rcl" deviceset="C-EU" device="C0603" value="0.1uF">
-<attribute name="DIGIKEY" value="445-1316-1-ND"/>
-</part>
-<part name="C15" library="rcl" deviceset="C-EU" device="C0603" value="10uF">
-<attribute name="DIGIKEY" value="1276-1119-1-ND"/>
-</part>
-<part name="C16" library="rcl" deviceset="C-EU" device="C0603" value="470nF">
+<part name="C14" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF"/>
+<part name="C15" library="rcl" deviceset="C-EU" device="C0603_SM" value="10uF"/>
+<part name="C16" library="rcl" deviceset="C-EU" device="C0402_SM" value="470nF">
 <attribute name="DIGIKEY" value="445-5192-1-ND"/>
 </part>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
 <part name="GND20" library="supply1" deviceset="GND" device=""/>
 <part name="GND21" library="supply1" deviceset="GND" device=""/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
-<part name="R19" library="rcl" deviceset="R-US_" device="R0603" value="47k">
-<attribute name="DIGIKEY" value="P47KGCT-ND"/>
-</part>
+<part name="R19" library="rcl" deviceset="R-US_" device="R0402_SM" value="47k"/>
 <part name="GND22" library="supply1" deviceset="GND" device=""/>
 <part name="J1" library="ibat" deviceset="JTAG_14PIN" device="_IDC" value="JTAG_14PIN_IDC">
 <attribute name="DIGIKEY" value="NP"/>
 </part>
 <part name="+3V7" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND23" library="supply1" deviceset="GND" device=""/>
-<part name="R11" library="rcl" deviceset="R-US_" device="R0603" value="670k"/>
-<part name="R12" library="rcl" deviceset="R-US_" device="R0603" value="330k"/>
+<part name="R11" library="rcl" deviceset="R-US_" device="R0402_SM" value="670k"/>
+<part name="R12" library="rcl" deviceset="R-US_" device="R0402_SM" value="330k"/>
 <part name="GND25" library="supply1" deviceset="GND" device=""/>
 <part name="P+4" library="supply1" deviceset="VCC" device=""/>
 <part name="X3" library="general" deviceset="CRYSTAL_0805" device="" value="32.768kHz">
 <attribute name="DIGIKEY" value="535-12373-1-ND"/>
 </part>
-<part name="C6" library="rcl" deviceset="C-EU" device="C0603" value="8pF">
+<part name="C6" library="rcl" deviceset="C-EU" device="C0402_SM" value="8pF">
 <attribute name="DIGIKEY" value="1276-1817-1-ND"/>
 </part>
-<part name="C34" library="rcl" deviceset="C-EU" device="C0603" value="8pF">
+<part name="C34" library="rcl" deviceset="C-EU" device="C0402_SM" value="8pF">
 <attribute name="DIGIKEY" value="1276-1817-1-ND"/>
 </part>
 <part name="GND26" library="supply1" deviceset="GND" device=""/>
@@ -16683,7 +16677,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="SUPPLY18" library="supply2" deviceset="GND3" device=""/>
 <part name="Q4" library="powerfilm" deviceset="2SK1829" device=""/>
 <part name="SUPPLY19" library="supply2" deviceset="GND3" device=""/>
-<part name="R6" library="rcl" deviceset="R-US_" device="R0603" value="660k"/>
+<part name="R6" library="rcl" deviceset="R-US_" device="R0603_SM" value="660k"/>
 <part name="SUPPLY20" library="supply2" deviceset="GND3" device=""/>
 <part name="SUPPLY21" library="supply2" deviceset="GND3" device=""/>
 <part name="SUPPLY22" library="supply2" deviceset="GND3" device=""/>
@@ -16694,9 +16688,9 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="SUPPLY27" library="supply2" deviceset="GND3" device=""/>
 <part name="SUPPLY28" library="supply2" deviceset="GND3" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
-<part name="R10" library="rcl" deviceset="R-US_" device="R0603" value="220k"/>
-<part name="R13" library="rcl" deviceset="R-US_" device="R0603" value="330k"/>
-<part name="R22" library="rcl" deviceset="R-US_" device="R0603" value="670k"/>
+<part name="R10" library="rcl" deviceset="R-US_" device="R0402_SM" value="220k"/>
+<part name="R13" library="rcl" deviceset="R-US_" device="R0402_SM" value="330k"/>
+<part name="R22" library="rcl" deviceset="R-US_" device="R0402_SM" value="670k"/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 <part name="R24" library="rcl" deviceset="R-US_" device="R0603_SM" value="1 1%">
 <attribute name="DIGIKEY" value="P1.0AJCT-ND"/>
@@ -16985,12 +16979,8 @@ In this library the device names are the same as the pin names of the symbols, t
 </plain>
 <instances>
 <instance part="U3" gate="G$1" x="0" y="0"/>
-<instance part="C14" gate="G$1" x="-35.56" y="35.56">
-<attribute name="DIGIKEY" x="-35.56" y="35.56" size="1.27" layer="96" display="off"/>
-</instance>
-<instance part="C15" gate="G$1" x="-45.72" y="35.56">
-<attribute name="DIGIKEY" x="-45.72" y="35.56" size="1.27" layer="96" display="off"/>
-</instance>
+<instance part="C14" gate="G$1" x="-35.56" y="35.56"/>
+<instance part="C15" gate="G$1" x="-45.72" y="35.56"/>
 <instance part="C16" gate="G$1" x="-43.18" y="15.24" smashed="yes" rot="R90">
 <attribute name="NAME" x="-41.656" y="18.161" size="1.778" layer="95"/>
 <attribute name="VALUE" x="-41.656" y="10.541" size="1.778" layer="96"/>
@@ -17000,9 +16990,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="GND20" gate="1" x="-35.56" y="25.4"/>
 <instance part="GND21" gate="1" x="-48.26" y="10.16"/>
 <instance part="+3V4" gate="G$1" x="-35.56" y="50.8"/>
-<instance part="R19" gate="G$1" x="-55.88" y="33.02" rot="R90">
-<attribute name="DIGIKEY" x="-55.88" y="33.02" size="1.27" layer="96" rot="R90" display="off"/>
-</instance>
+<instance part="R19" gate="G$1" x="-55.88" y="33.02" rot="R90"/>
 <instance part="GND22" gate="1" x="27.94" y="-27.94"/>
 <instance part="J1" gate="G$1" x="17.78" y="48.26">
 <attribute name="DIGIKEY" x="17.78" y="48.26" size="1.27" layer="96" display="off"/>
