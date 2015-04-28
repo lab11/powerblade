@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.3">
+<eagle version="6.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -792,7 +792,6 @@
 <package name="AC3_SLOT_OUT2">
 <wire x1="-12.7" y1="-17.399" x2="-12.7" y2="8.001" width="0" layer="20"/>
 <wire x1="-12.7" y1="8.001" x2="12.7" y2="8.001" width="0" layer="20"/>
-<wire x1="12.7" y1="8.001" x2="12.7" y2="-17.399" width="0" layer="20"/>
 <wire x1="-7.874" y1="3.556" x2="-7.874" y2="-3.556" width="0" layer="20"/>
 <wire x1="-7.874" y1="-3.556" x2="-5.588" y2="-3.556" width="0" layer="20"/>
 <wire x1="-5.588" y1="-3.556" x2="-5.588" y2="3.556" width="0" layer="20"/>
