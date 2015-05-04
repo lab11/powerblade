@@ -16335,104 +16335,6 @@ W = angled&lt;p&gt;
 </deviceset>
 </devicesets>
 </library>
-<library name="skyspecs">
-<packages>
-<package name="TP">
-<pad name="P$1" x="0" y="0" drill="1.0287"/>
-<text x="-1.27" y="1.905" size="1.27" layer="25">&gt;NAME</text>
-<circle x="0" y="0" radius="1.27" width="0.127" layer="21"/>
-</package>
-<package name="TP_LARGE">
-<pad name="P$1" x="0" y="0" drill="2.2" diameter="3.81"/>
-<text x="-1.27" y="2.54" size="1.27" layer="25">&gt;NAME</text>
-</package>
-<package name="TP_SMD">
-<smd name="P$1" x="0" y="0" dx="1" dy="1" layer="1"/>
-<text x="-1.27" y="1.27" size="1.27" layer="25">&gt;NAME</text>
-</package>
-<package name="TP_SMALL">
-<pad name="P$1" x="0" y="0" drill="0.635"/>
-<text x="-1.27" y="1.27" size="1.27" layer="25">&gt;NAME</text>
-</package>
-<package name="TP_MULT">
-<pad name="P$1" x="0" y="0" drill="1.6"/>
-<text x="-1.27" y="1.905" size="1.27" layer="25">&gt;NAME</text>
-<circle x="0" y="0" radius="1.58" width="0.127" layer="21"/>
-</package>
-<package name="TP_LONG">
-<pad name="P$1" x="0" y="0" drill="1.0287" shape="long"/>
-<text x="-1.27" y="1.905" size="1.27" layer="25">&gt;NAME</text>
-<circle x="0" y="0" radius="1.27" width="0.127" layer="21"/>
-</package>
-</packages>
-<symbols>
-<symbol name="TP">
-<pin name="P$1" x="-5.08" y="0" visible="off" length="middle"/>
-<wire x1="0" y1="2.54" x2="0" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="0" y1="-2.54" x2="5.08" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="5.08" y1="-2.54" x2="5.08" y2="2.54" width="0.254" layer="94"/>
-<wire x1="5.08" y1="2.54" x2="0" y2="2.54" width="0.254" layer="94"/>
-<text x="0" y="3.048" size="1.27" layer="95">&gt;NAME</text>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="TP" prefix="TP">
-<gates>
-<gate name="G$1" symbol="TP" x="0" y="0"/>
-</gates>
-<devices>
-<device name="_STD" package="TP">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="_LG" package="TP_LARGE">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="_SMD" package="TP_SMD">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="_SMALL" package="TP_SMALL">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="_MULT" package="TP_MULT">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="_LONG" package="TP_LONG">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
 </libraries>
 <attributes>
 </attributes>
@@ -16562,9 +16464,6 @@ W = angled&lt;p&gt;
 <attribute name="DIGIKEY" value="1276-1817-1-ND"/>
 </part>
 <part name="GND26" library="supply1" deviceset="GND" device=""/>
-<part name="+3V13" library="supply1" deviceset="+3V3" device=""/>
-<part name="Q3" library="powerfilm" deviceset="2SK1829" device=""/>
-<part name="GND27" library="supply1" deviceset="GND" device=""/>
 <part name="C12" library="passives" deviceset="CAPACITOR" device="" value="1nF">
 <attribute name="DIGIKEY" value="490-1303-1-ND"/>
 </part>
@@ -16639,7 +16538,6 @@ W = angled&lt;p&gt;
 <part name="SUPPLY27" library="supply2" deviceset="GND3" device=""/>
 <part name="SUPPLY28" library="supply2" deviceset="GND3" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
-<part name="R10" library="rcl" deviceset="R-US_" device="R0402_SM" value="220k"/>
 <part name="R13" library="rcl" deviceset="R-US_" device="R0402_SM" value="330k"/>
 <part name="R22" library="rcl" deviceset="R-US_" device="R0402_SM" value="670k"/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
@@ -16670,8 +16568,6 @@ W = angled&lt;p&gt;
 <part name="C13" library="passives" deviceset="CAPACITOR" device="" value="0.1uF">
 <attribute name="DIGIKEY" value="445-1265-1-ND"/>
 </part>
-<part name="TP1" library="skyspecs" deviceset="TP" device="_STD"/>
-<part name="TP2" library="skyspecs" deviceset="TP" device="_STD"/>
 </parts>
 <sheets>
 <sheet>
@@ -16962,15 +16858,9 @@ W = angled&lt;p&gt;
 <attribute name="DIGIKEY" x="-60.96" y="-15.24" size="1.27" layer="96" rot="R90" display="off"/>
 </instance>
 <instance part="GND26" gate="1" x="-66.04" y="-22.86"/>
-<instance part="+3V13" gate="G$1" x="71.12" y="76.2"/>
-<instance part="Q3" gate="G$1" x="71.12" y="43.18"/>
-<instance part="GND27" gate="1" x="71.12" y="30.48"/>
-<instance part="R10" gate="G$1" x="63.5" y="35.56"/>
 <instance part="R13" gate="G$1" x="60.96" y="2.54" rot="R90"/>
 <instance part="R22" gate="G$1" x="60.96" y="17.78" rot="R90"/>
 <instance part="GND8" gate="1" x="60.96" y="-7.62"/>
-<instance part="TP1" gate="G$1" x="78.74" y="71.12"/>
-<instance part="TP2" gate="G$1" x="81.28" y="50.8"/>
 </instances>
 <busses>
 </busses>
@@ -17024,15 +16914,6 @@ W = angled&lt;p&gt;
 <junction x="-66.04" y="-15.24"/>
 </segment>
 <segment>
-<pinref part="Q3" gate="G$1" pin="S"/>
-<pinref part="GND27" gate="1" pin="GND"/>
-<wire x1="71.12" y1="38.1" x2="71.12" y2="35.56" width="0.1524" layer="91"/>
-<pinref part="R10" gate="G$1" pin="2"/>
-<wire x1="71.12" y1="35.56" x2="71.12" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="68.58" y1="35.56" x2="71.12" y2="35.56" width="0.1524" layer="91"/>
-<junction x="71.12" y="35.56"/>
-</segment>
-<segment>
 <pinref part="R13" gate="G$1" pin="1"/>
 <pinref part="GND8" gate="1" pin="GND"/>
 <wire x1="60.96" y1="-2.54" x2="60.96" y2="-5.08" width="0.1524" layer="91"/>
@@ -17066,12 +16947,6 @@ W = angled&lt;p&gt;
 <wire x1="35.56" y1="55.88" x2="35.56" y2="63.5" width="0.1524" layer="91"/>
 <pinref part="J1" gate="G$1" pin="2"/>
 <wire x1="27.94" y1="55.88" x2="35.56" y2="55.88" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="+3V13" gate="G$1" pin="+3V3"/>
-<wire x1="71.12" y1="73.66" x2="71.12" y2="71.12" width="0.1524" layer="91"/>
-<pinref part="TP1" gate="G$1" pin="P$1"/>
-<wire x1="73.66" y1="71.12" x2="71.12" y2="71.12" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="RST" class="0">
@@ -17122,16 +16997,6 @@ W = angled&lt;p&gt;
 <pinref part="J1" gate="G$1" pin="3"/>
 <label x="5.08" y="53.34" size="1.27" layer="95" rot="R180" xref="yes"/>
 <wire x1="5.08" y1="53.34" x2="7.62" y2="53.34" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="Q3" gate="G$1" pin="G"/>
-<wire x1="50.8" y1="43.18" x2="55.88" y2="43.18" width="0.1524" layer="91"/>
-<label x="50.8" y="43.18" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="R10" gate="G$1" pin="1"/>
-<wire x1="55.88" y1="43.18" x2="66.04" y2="43.18" width="0.1524" layer="91"/>
-<wire x1="58.42" y1="35.56" x2="55.88" y2="35.56" width="0.1524" layer="91"/>
-<wire x1="55.88" y1="35.56" x2="55.88" y2="43.18" width="0.1524" layer="91"/>
-<junction x="55.88" y="43.18"/>
 </segment>
 </net>
 <net name="TMS" class="0">
@@ -17245,14 +17110,6 @@ W = angled&lt;p&gt;
 <pinref part="U3" gate="G$1" pin="XIN"/>
 <wire x1="-25.4" y1="-2.54" x2="-38.1" y2="-2.54" width="0.1524" layer="91"/>
 <wire x1="-38.1" y1="-2.54" x2="-38.1" y2="0" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$59" class="0">
-<segment>
-<pinref part="Q3" gate="G$1" pin="D"/>
-<wire x1="71.12" y1="50.8" x2="71.12" y2="48.26" width="0.1524" layer="91"/>
-<pinref part="TP2" gate="G$1" pin="P$1"/>
-<wire x1="76.2" y1="50.8" x2="71.12" y2="50.8" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="FROMBLE_RX" class="0">
