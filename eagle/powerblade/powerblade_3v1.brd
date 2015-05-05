@@ -147,6 +147,8 @@
 <wire x1="12.7" y1="8.001" x2="12.7" y2="-17.399" width="0" layer="20"/>
 <wire x1="5.207" y1="8.001" x2="5.207" y2="3.0226" width="0" layer="48"/>
 <wire x1="5.207" y1="3.0226" x2="12.7" y2="3.0226" width="0" layer="48"/>
+<text x="10.31875" y="-4.445" size="0.762" layer="21" rot="R90">PowerBlade 3v0</text>
+<text x="11.43" y="-4.445" size="0.762" layer="21" rot="R90">S.DeBruin 5.5.15</text>
 </plain>
 <libraries>
 <library name="rcl">
