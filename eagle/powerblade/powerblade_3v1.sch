@@ -14687,50 +14687,26 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <pad name="P2E" x="6.6675" y="-2.54" drill="0.3556" shape="square"/>
 <polygon width="0.2032" layer="15">
 <vertex x="-6.0325" y="3.175"/>
-<vertex x="-7.3025" y="3.175"/>
-<vertex x="-7.3025" y="0.9525"/>
-<vertex x="-7.62" y="0.635"/>
-<vertex x="-9.2075" y="0.635"/>
-<vertex x="-9.2075" y="-0.635"/>
-<vertex x="-7.62" y="-0.635"/>
-<vertex x="-7.3025" y="-0.9525"/>
-<vertex x="-7.3025" y="-3.175"/>
+<vertex x="-9.2075" y="3.175"/>
+<vertex x="-9.2075" y="-3.175"/>
 <vertex x="-6.0325" y="-3.175"/>
 </polygon>
 <polygon width="0.2032" layer="2">
 <vertex x="-6.0325" y="3.175"/>
-<vertex x="-7.3025" y="3.175"/>
-<vertex x="-7.3025" y="0.9525"/>
-<vertex x="-7.62" y="0.635"/>
-<vertex x="-9.2075" y="0.635"/>
-<vertex x="-9.2075" y="-0.635"/>
-<vertex x="-7.62" y="-0.635"/>
-<vertex x="-7.3025" y="-0.9525"/>
-<vertex x="-7.3025" y="-3.175"/>
+<vertex x="-9.2075" y="3.175"/>
+<vertex x="-9.2075" y="-3.175"/>
 <vertex x="-6.0325" y="-3.175"/>
 </polygon>
 <polygon width="0.2032" layer="2">
 <vertex x="6.0325" y="-3.175"/>
-<vertex x="7.3025" y="-3.175"/>
-<vertex x="7.3025" y="-0.9525"/>
-<vertex x="7.62" y="-0.635"/>
-<vertex x="9.2075" y="-0.635"/>
-<vertex x="9.2075" y="0.635"/>
-<vertex x="7.62" y="0.635"/>
-<vertex x="7.3025" y="0.9525"/>
-<vertex x="7.3025" y="3.175"/>
+<vertex x="9.2075" y="-3.175"/>
+<vertex x="9.2075" y="3.175"/>
 <vertex x="6.0325" y="3.175"/>
 </polygon>
 <polygon width="0.2032" layer="15">
 <vertex x="6.0325" y="-3.175"/>
-<vertex x="7.3025" y="-3.175"/>
-<vertex x="7.3025" y="-0.9525"/>
-<vertex x="7.62" y="-0.635"/>
-<vertex x="9.2075" y="-0.635"/>
-<vertex x="9.2075" y="0.635"/>
-<vertex x="7.62" y="0.635"/>
-<vertex x="7.3025" y="0.9525"/>
-<vertex x="7.3025" y="3.175"/>
+<vertex x="9.2075" y="-3.175"/>
+<vertex x="9.2075" y="3.175"/>
 <vertex x="6.0325" y="3.175"/>
 </polygon>
 </package>
