@@ -1430,26 +1430,50 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <pad name="P2E" x="6.6675" y="-2.54" drill="0.3556" shape="square"/>
 <polygon width="0.2032" layer="15">
 <vertex x="-6.0325" y="3.175"/>
-<vertex x="-9.2075" y="3.175"/>
-<vertex x="-9.2075" y="-3.175"/>
+<vertex x="-7.3025" y="3.175"/>
+<vertex x="-7.3025" y="0.9525"/>
+<vertex x="-7.62" y="0.635"/>
+<vertex x="-9.2075" y="0.635"/>
+<vertex x="-9.2075" y="-0.635"/>
+<vertex x="-7.62" y="-0.635"/>
+<vertex x="-7.3025" y="-0.9525"/>
+<vertex x="-7.3025" y="-3.175"/>
 <vertex x="-6.0325" y="-3.175"/>
 </polygon>
 <polygon width="0.2032" layer="2">
 <vertex x="-6.0325" y="3.175"/>
-<vertex x="-9.2075" y="3.175"/>
-<vertex x="-9.2075" y="-3.175"/>
+<vertex x="-7.3025" y="3.175"/>
+<vertex x="-7.3025" y="0.9525"/>
+<vertex x="-7.62" y="0.635"/>
+<vertex x="-9.2075" y="0.635"/>
+<vertex x="-9.2075" y="-0.635"/>
+<vertex x="-7.62" y="-0.635"/>
+<vertex x="-7.3025" y="-0.9525"/>
+<vertex x="-7.3025" y="-3.175"/>
 <vertex x="-6.0325" y="-3.175"/>
 </polygon>
 <polygon width="0.2032" layer="2">
 <vertex x="6.0325" y="-3.175"/>
-<vertex x="9.2075" y="-3.175"/>
-<vertex x="9.2075" y="3.175"/>
+<vertex x="7.3025" y="-3.175"/>
+<vertex x="7.3025" y="-0.9525"/>
+<vertex x="7.62" y="-0.635"/>
+<vertex x="9.2075" y="-0.635"/>
+<vertex x="9.2075" y="0.635"/>
+<vertex x="7.62" y="0.635"/>
+<vertex x="7.3025" y="0.9525"/>
+<vertex x="7.3025" y="3.175"/>
 <vertex x="6.0325" y="3.175"/>
 </polygon>
 <polygon width="0.2032" layer="15">
 <vertex x="6.0325" y="-3.175"/>
-<vertex x="9.2075" y="-3.175"/>
-<vertex x="9.2075" y="3.175"/>
+<vertex x="7.3025" y="-3.175"/>
+<vertex x="7.3025" y="-0.9525"/>
+<vertex x="7.62" y="-0.635"/>
+<vertex x="9.2075" y="-0.635"/>
+<vertex x="9.2075" y="0.635"/>
+<vertex x="7.62" y="0.635"/>
+<vertex x="7.3025" y="0.9525"/>
+<vertex x="7.3025" y="3.175"/>
 <vertex x="6.0325" y="3.175"/>
 </polygon>
 </package>
@@ -3428,24 +3452,24 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <approved hash="4,16,4b6f9ef7759a0c72"/>
 <approved hash="4,16,64003fcc573cd83b"/>
 <approved hash="4,16,fa74b4dff1427fe2"/>
-<approved hash="4,2,66be356649039258"/>
-<approved hash="4,2,d2916d067be586ba"/>
-<approved hash="4,2,d2c01e1f22f43cd3"/>
-<approved hash="4,2,6ae83ff6313ebeda"/>
-<approved hash="4,15,d2916d067be586ba"/>
-<approved hash="4,15,66be356649039258"/>
-<approved hash="4,15,d2c01e1f22f43cd3"/>
-<approved hash="4,15,6ae83ff6313ebeda"/>
 <approved hash="2,20,e1291c3519ace4b0"/>
 <approved hash="2,20,e0111d0d194ce450"/>
-<approved hash="19,1,f94ac488c9fdf43f"/>
 <approved hash="19,1,38c7850583fe3e3c"/>
-<approved hash="19,1,bc9959db5f26ba64"/>
+<approved hash="19,1,f94ac488c9fdf43f"/>
 <approved hash="19,1,7d14185615257067"/>
+<approved hash="19,1,bc9959db5f26ba64"/>
 <approved hash="4,2,708feb8f948d0f8d"/>
-<approved hash="4,2,53b70c0ed07fcaf8"/>
+<approved hash="4,2,d2916d067be586ba"/>
+<approved hash="4,2,66be356649039258"/>
+<approved hash="4,2,d2c01e1f22f43cd3"/>
 <approved hash="4,2,e303c4b8a4f5c670"/>
+<approved hash="4,2,53b70c0ed07fcaf8"/>
+<approved hash="4,2,6ae83ff6313ebeda"/>
 <approved hash="4,15,708feb8f948d0f8d"/>
+<approved hash="4,15,d2c01e1f22f43cd3"/>
+<approved hash="4,15,66be356649039258"/>
+<approved hash="4,15,d2916d067be586ba"/>
+<approved hash="4,15,6ae83ff6313ebeda"/>
 <approved hash="4,15,f47271720e708b70"/>
 <approved hash="4,16,4dfb1195905e5324"/>
 <approved hash="4,16,b468f8daf700ee3d"/>
