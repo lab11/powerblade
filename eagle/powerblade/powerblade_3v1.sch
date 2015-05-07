@@ -14654,8 +14654,9 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="-4" y1="4.86" x2="-9" y2="4.86" width="0.0508" layer="48"/>
 </package>
 <package name="AC3_F2">
-<wire x1="-12.7" y1="-17.399" x2="-12.7" y2="8.001" width="0" layer="20"/>
-<wire x1="-12.7" y1="8.001" x2="12.7" y2="8.001" width="0" layer="20"/>
+<wire x1="-12.065" y1="-17.399" x2="-12.7" y2="-16.764" width="0" layer="20" curve="-90"/>
+<wire x1="-12.7" y1="7.366" x2="-12.065" y2="8.001" width="0" layer="20" curve="-90"/>
+<wire x1="-12.065" y1="8.001" x2="12.065" y2="8.001" width="0" layer="20"/>
 <wire x1="-7.874" y1="3.556" x2="-7.874" y2="-3.556" width="0" layer="20"/>
 <wire x1="-7.874" y1="-3.556" x2="-5.2705" y2="-3.556" width="0" layer="20"/>
 <wire x1="-5.2705" y1="-3.556" x2="-5.2705" y2="3.556" width="0" layer="20"/>
@@ -14664,7 +14665,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="7.874" y1="-4.445" x2="5.2705" y2="-4.445" width="0" layer="20"/>
 <wire x1="5.2705" y1="-4.445" x2="5.2705" y2="4.445" width="0" layer="20"/>
 <wire x1="5.2705" y1="4.445" x2="7.874" y2="4.445" width="0" layer="20"/>
-<wire x1="-12.7" y1="-17.399" x2="12.7" y2="-17.399" width="0" layer="20"/>
+<wire x1="-12.065" y1="-17.399" x2="12.065" y2="-17.399" width="0" layer="20"/>
 <wire x1="-2.6924" y1="-14.5796" x2="2.6924" y2="-14.5796" width="0" layer="20"/>
 <wire x1="2.6924" y1="-14.5796" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
 <wire x1="2.6924" y1="-11.8872" x2="0" y2="-9.1948" width="0" layer="20" curve="90"/>
@@ -14674,7 +14675,9 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="-9" y1="-4.86" x2="-4" y2="-4.86" width="0.0508" layer="48"/>
 <wire x1="-4" y1="-4.86" x2="-4" y2="4.86" width="0.0508" layer="48"/>
 <wire x1="-4" y1="4.86" x2="-9" y2="4.86" width="0.0508" layer="48"/>
-<wire x1="12.7" y1="-17.399" x2="12.7" y2="8.001" width="0" layer="20"/>
+<wire x1="12.065" y1="-17.399" x2="12.7" y2="-16.764" width="0" layer="20" curve="90"/>
+<wire x1="12.7" y1="-16.764" x2="12.7" y2="7.366" width="0" layer="20"/>
+<wire x1="12.7" y1="7.366" x2="12.065" y2="8.001" width="0" layer="20" curve="90"/>
 <pad name="P1A" x="-8.5725" y="0" drill="0.3556" shape="square"/>
 <pad name="P2A" x="8.5725" y="0" drill="0.3556" shape="square"/>
 <polygon width="0.2032" layer="15">
@@ -14737,6 +14740,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="6.477" y1="-3.302" x2="7.874" y2="-3.302" width="0" layer="20"/>
 <wire x1="6.477" y1="3.302" x2="6.477" y2="-3.302" width="0" layer="20"/>
 <wire x1="-6.477" y1="-3.302" x2="-6.477" y2="3.302" width="0" layer="20"/>
+<wire x1="-12.7" y1="7.366" x2="-12.7" y2="-16.764" width="0" layer="20"/>
 </package>
 </packages>
 <symbols>
