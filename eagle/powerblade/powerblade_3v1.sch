@@ -14675,64 +14675,68 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="-4" y1="-4.86" x2="-4" y2="4.86" width="0.0508" layer="48"/>
 <wire x1="-4" y1="4.86" x2="-9" y2="4.86" width="0.0508" layer="48"/>
 <wire x1="12.7" y1="-17.399" x2="12.7" y2="8.001" width="0" layer="20"/>
-<pad name="P1A" x="-6.6675" y="2.54" drill="0.3556" shape="square"/>
-<pad name="P1B" x="-6.6675" y="1.27" drill="0.3556" shape="square"/>
-<pad name="P1C" x="-6.6675" y="0" drill="0.3556" shape="square"/>
-<pad name="P1D" x="-6.6675" y="-1.27" drill="0.3556" shape="square"/>
-<pad name="P1E" x="-6.6675" y="-2.54" drill="0.3556" shape="square"/>
-<pad name="P2C" x="6.6675" y="0" drill="0.3556" shape="square"/>
-<pad name="P2B" x="6.6675" y="1.27" drill="0.3556" shape="square"/>
-<pad name="P2A" x="6.6675" y="2.54" drill="0.3556" shape="square"/>
-<pad name="P2D" x="6.6675" y="-1.27" drill="0.3556" shape="square"/>
-<pad name="P2E" x="6.6675" y="-2.54" drill="0.3556" shape="square"/>
+<pad name="P1A" x="-8.5725" y="0" drill="0.3556" shape="square"/>
+<pad name="P2A" x="8.5725" y="0" drill="0.3556" shape="square"/>
 <polygon width="0.2032" layer="15">
-<vertex x="-6.0325" y="3.175"/>
-<vertex x="-7.3025" y="3.175"/>
+<vertex x="-5.9436" y="2.9464"/>
+<vertex x="-7.3025" y="2.9464"/>
 <vertex x="-7.3025" y="0.9525"/>
 <vertex x="-7.62" y="0.635"/>
 <vertex x="-9.2075" y="0.635"/>
 <vertex x="-9.2075" y="-0.635"/>
 <vertex x="-7.62" y="-0.635"/>
 <vertex x="-7.3025" y="-0.9525"/>
-<vertex x="-7.3025" y="-3.175"/>
-<vertex x="-6.0325" y="-3.175"/>
+<vertex x="-7.3025" y="-2.9464"/>
+<vertex x="-5.9436" y="-2.9464"/>
 </polygon>
 <polygon width="0.2032" layer="2">
-<vertex x="-6.0325" y="3.175"/>
-<vertex x="-7.3025" y="3.175"/>
+<vertex x="-5.9436" y="2.9464"/>
+<vertex x="-7.3025" y="2.9464"/>
 <vertex x="-7.3025" y="0.9525"/>
 <vertex x="-7.62" y="0.635"/>
 <vertex x="-9.2075" y="0.635"/>
 <vertex x="-9.2075" y="-0.635"/>
 <vertex x="-7.62" y="-0.635"/>
 <vertex x="-7.3025" y="-0.9525"/>
-<vertex x="-7.3025" y="-3.175"/>
-<vertex x="-6.0325" y="-3.175"/>
+<vertex x="-7.3025" y="-2.9464"/>
+<vertex x="-5.9436" y="-2.9464"/>
 </polygon>
 <polygon width="0.2032" layer="2">
-<vertex x="6.0325" y="-3.175"/>
-<vertex x="7.3025" y="-3.175"/>
+<vertex x="5.9436" y="-2.9464"/>
+<vertex x="7.3025" y="-2.9464"/>
 <vertex x="7.3025" y="-0.9525"/>
 <vertex x="7.62" y="-0.635"/>
 <vertex x="9.2075" y="-0.635"/>
 <vertex x="9.2075" y="0.635"/>
 <vertex x="7.62" y="0.635"/>
 <vertex x="7.3025" y="0.9525"/>
-<vertex x="7.3025" y="3.175"/>
-<vertex x="6.0325" y="3.175"/>
+<vertex x="7.3025" y="2.9464"/>
+<vertex x="5.9436" y="2.9464"/>
 </polygon>
 <polygon width="0.2032" layer="15">
-<vertex x="6.0325" y="-3.175"/>
-<vertex x="7.3025" y="-3.175"/>
+<vertex x="5.9436" y="-2.9464"/>
+<vertex x="7.3025" y="-2.9464"/>
 <vertex x="7.3025" y="-0.9525"/>
 <vertex x="7.62" y="-0.635"/>
 <vertex x="9.2075" y="-0.635"/>
 <vertex x="9.2075" y="0.635"/>
 <vertex x="7.62" y="0.635"/>
 <vertex x="7.3025" y="0.9525"/>
-<vertex x="7.3025" y="3.175"/>
-<vertex x="6.0325" y="3.175"/>
+<vertex x="7.3025" y="2.9464"/>
+<vertex x="5.9436" y="2.9464"/>
 </polygon>
+<wire x1="-7.874" y1="3.302" x2="-6.477" y2="3.302" width="0" layer="20"/>
+<wire x1="-6.477" y1="3.302" x2="-5.842" y2="3.302" width="0" layer="20"/>
+<wire x1="-5.842" y1="3.302" x2="-5.842" y2="-3.302" width="0" layer="20"/>
+<wire x1="-5.842" y1="-3.302" x2="-6.477" y2="-3.302" width="0" layer="20"/>
+<wire x1="-6.477" y1="-3.302" x2="-7.874" y2="-3.302" width="0" layer="20"/>
+<wire x1="7.874" y1="3.302" x2="6.477" y2="3.302" width="0" layer="20"/>
+<wire x1="6.477" y1="3.302" x2="5.842" y2="3.302" width="0" layer="20"/>
+<wire x1="5.842" y1="3.302" x2="5.842" y2="-3.302" width="0" layer="20"/>
+<wire x1="5.842" y1="-3.302" x2="6.477" y2="-3.302" width="0" layer="20"/>
+<wire x1="6.477" y1="-3.302" x2="7.874" y2="-3.302" width="0" layer="20"/>
+<wire x1="6.477" y1="3.302" x2="6.477" y2="-3.302" width="0" layer="20"/>
+<wire x1="-6.477" y1="-3.302" x2="-6.477" y2="3.302" width="0" layer="20"/>
 </package>
 </packages>
 <symbols>
@@ -15188,8 +15192,8 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 </device>
 <device name="F2" package="AC3_F2">
 <connects>
-<connect gate="G$1" pin="N" pad="P2A P2B P2C P2D P2E"/>
-<connect gate="G$1" pin="P" pad="P1A P1B P1C P1D P1E"/>
+<connect gate="G$1" pin="N" pad="P2A"/>
+<connect gate="G$1" pin="P" pad="P1A"/>
 </connects>
 <technologies>
 <technology name=""/>
