@@ -1489,7 +1489,7 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 </library>
 <library name="ibat">
 <packages>
-<package name="TC2050-IDC-NL-430">
+<package name="TC2050-IDC-NL-430-ND">
 <smd name="P10" x="-2.54" y="0.635" dx="0.7874" dy="0.7874" layer="1" roundness="100" cream="no"/>
 <smd name="P1" x="-2.54" y="-0.635" dx="0.7874" dy="0.7874" layer="1" roundness="100" cream="no"/>
 <smd name="P2" x="-1.27" y="-0.635" dx="0.7874" dy="0.7874" layer="1" roundness="100" cream="no"/>
@@ -1502,8 +1502,6 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <smd name="P5" x="2.54" y="-0.635" dx="0.7874" dy="0.7874" layer="1" roundness="100" cream="no"/>
 <text x="-2.54" y="3.81" size="1.27" layer="25">&gt;NAME</text>
 <hole x="-3.81" y="0" drill="1.0287"/>
-<hole x="3.81" y="1.016" drill="1.0287"/>
-<hole x="3.81" y="-1.016" drill="1.0287"/>
 <wire x1="-6.223" y1="2.0955" x2="-3.81" y2="3.3655" width="0.127" layer="51"/>
 <wire x1="-3.81" y1="3.3655" x2="6.223" y2="3.3655" width="0.127" layer="51"/>
 <wire x1="6.223" y1="3.3655" x2="6.223" y2="-3.3655" width="0.127" layer="51"/>
@@ -2037,8 +2035,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="445-5192-1-ND" x="-9.610725" y="-37.31895" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="R19" library="rcl" package="R0402_SM" value="47k" x="-9.68375" y="-9.4488" rot="R90"/>
-<element name="J1" library="ibat" package="TC2050-IDC-NL-430" value="JTAG_14PIN_IDC-NL" x="-2.54" y="-6.4262" rot="MR180">
-<attribute name="TAG-CONNECT" value="TC2050-IDC-NL-430" x="-2.54" y="21.7678" size="1.778" layer="28" rot="MR180" display="off"/>
+<element name="J1" library="ibat" package="TC2050-IDC-NL-430-ND" value="JTAG_14PIN_IDC-ND" x="-2.54" y="-6.4262" rot="MR180">
 <attribute name="DIGIKEY" value="NP" x="-2.54" y="21.7678" size="1.778" layer="28" rot="MR180" display="off"/>
 </element>
 <element name="R11" library="rcl" package="R0402_SM" value="670k" x="-7.6835" y="-4.7879" rot="R180"/>
@@ -3447,11 +3444,9 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </signal>
 </signals>
 <errors>
-<approved hash="2,20,e0111d0d194ce450"/>
-<approved hash="2,20,e1291c3519ace4b0"/>
 <approved hash="4,1,f265f3c4df74dfd5"/>
-<approved hash="19,1,38c7850583fe3e3c"/>
 <approved hash="19,1,f94ac488c9fdf43f"/>
+<approved hash="19,1,38c7850583fe3e3c"/>
 <approved hash="19,1,bc9959db5f26ba64"/>
 <approved hash="19,1,7d14185615257067"/>
 <approved hash="4,1,dc93dd32ee43eee2"/>
@@ -3460,23 +3455,19 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <approved hash="4,2,58ba3967412a20f7"/>
 <approved hash="4,2,884d8b9ef400f2d3"/>
 <approved hash="4,2,22e1214b8cfe9254"/>
-<approved hash="4,2,a16793c39d5526c9"/>
 <approved hash="4,2,53b70c0ed07fcaf8"/>
+<approved hash="4,2,a16793c39d5526c9"/>
+<approved hash="4,2,cf15c12a66ace464"/>
+<approved hash="4,2,04ff80737232750e"/>
 <approved hash="4,2,896e700ea4f01e1d"/>
 <approved hash="4,2,413fea27fb6c960b"/>
 <approved hash="4,2,85ea8731faa7f381"/>
-<approved hash="4,2,cf15c12a66ace464"/>
-<approved hash="4,2,04ff80737232750e"/>
 <approved hash="4,2,53da5070e226fc8c"/>
 <approved hash="4,15,22e1214b8cfe9254"/>
 <approved hash="4,15,53da5070e226fc8c"/>
 <approved hash="4,16,f265f3c4df74dfd5"/>
-<approved hash="4,16,6cdc999f14fc4fb2"/>
-<approved hash="4,16,ddd7f6d6fdb2b238"/>
-<approved hash="4,16,4dfb1195905e5324"/>
 <approved hash="4,16,b468f8daf700ee3d"/>
-<approved hash="4,16,764eea0084df5990"/>
-<approved hash="4,16,5c508127e4484927"/>
+<approved hash="4,16,ddd7f6d6fdb2b238"/>
 <approved hash="4,16,a4206d818901ea25"/>
 <approved hash="4,16,d94c8f50686aa5f7"/>
 <approved hash="4,16,dc93dd32ee43eee2"/>
