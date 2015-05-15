@@ -14666,11 +14666,13 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="5.2705" y1="-4.445" x2="5.2705" y2="4.445" width="0" layer="20"/>
 <wire x1="5.2705" y1="4.445" x2="7.874" y2="4.445" width="0" layer="20"/>
 <wire x1="-12.065" y1="-17.399" x2="12.065" y2="-17.399" width="0" layer="20"/>
-<wire x1="-2.6924" y1="-14.5796" x2="2.6924" y2="-14.5796" width="0" layer="20"/>
-<wire x1="2.6924" y1="-14.5796" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
+<wire x1="-2.5654" y1="-14.5796" x2="2.5654" y2="-14.5796" width="0" layer="20"/>
+<wire x1="2.5654" y1="-14.5796" x2="2.6924" y2="-14.4526" width="0" layer="20" curve="90"/>
+<wire x1="2.6924" y1="-14.4526" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
 <wire x1="2.6924" y1="-11.8872" x2="0" y2="-9.1948" width="0" layer="20" curve="90"/>
 <wire x1="0" y1="-9.1948" x2="-2.6924" y2="-11.8872" width="0" layer="20" curve="90"/>
-<wire x1="-2.6924" y1="-11.8872" x2="-2.6924" y2="-14.5796" width="0" layer="20"/>
+<wire x1="-2.6924" y1="-11.8872" x2="-2.6924" y2="-14.4526" width="0" layer="20"/>
+<wire x1="-2.6924" y1="-14.4526" x2="-2.5654" y2="-14.5796" width="0" layer="20" curve="90"/>
 <wire x1="-9" y1="4.86" x2="-9" y2="-4.86" width="0.0508" layer="48"/>
 <wire x1="-9" y1="-4.86" x2="-4" y2="-4.86" width="0.0508" layer="48"/>
 <wire x1="-4" y1="-4.86" x2="-4" y2="4.86" width="0.0508" layer="48"/>
@@ -15239,7 +15241,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="NTS4173">
+<deviceset name="NTS4173" prefix="Q">
 <gates>
 <gate name="G$1" symbol="PFET" x="0" y="0"/>
 </gates>
