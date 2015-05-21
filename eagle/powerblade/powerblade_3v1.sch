@@ -16778,8 +16778,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <sheet>
 <description>AC-DC Power Supply</description>
 <plain>
-<text x="-17.78" y="0" size="1.778" layer="97">Co-locate C1 &amp; R3 to save space</text>
-<text x="-17.78" y="-2.54" size="1.778" layer="97">Ensure gap in both &gt; 1.25mm</text>
 </plain>
 <instances>
 <instance part="D1" gate="G$1" x="58.42" y="7.62" smashed="yes" rot="R90">
@@ -17462,11 +17460,11 @@ We've spent an enormous amount of time creating and checking these footprints an
 <instance part="L4" gate="G$1" x="-83.82" y="27.94">
 <attribute name="DIGIKEY" x="-83.82" y="27.94" size="1.27" layer="96" display="off"/>
 </instance>
-<instance part="Q1" gate="G$1" x="33.02" y="-111.76"/>
-<instance part="+3V11" gate="G$1" x="33.02" y="-93.98"/>
-<instance part="P+6" gate="1" x="33.02" y="-124.46" rot="R180"/>
-<instance part="R8" gate="G$1" x="25.4" y="-101.6">
-<attribute name="DIGIKEY" x="25.4" y="-101.6" size="1.27" layer="96" display="off"/>
+<instance part="Q1" gate="G$1" x="63.5" y="35.56"/>
+<instance part="+3V11" gate="G$1" x="63.5" y="53.34"/>
+<instance part="P+6" gate="1" x="63.5" y="22.86" rot="R180"/>
+<instance part="R8" gate="G$1" x="55.88" y="45.72">
+<attribute name="DIGIKEY" x="55.88" y="45.72" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="GND10" gate="1" x="55.88" y="-76.2"/>
 <instance part="GND11" gate="1" x="48.26" y="-76.2"/>
@@ -17637,23 +17635,23 @@ We've spent an enormous amount of time creating and checking these footprints an
 <segment>
 <pinref part="+3V11" gate="G$1" pin="+3V3"/>
 <pinref part="Q1" gate="G$1" pin="S"/>
-<wire x1="33.02" y1="-96.52" x2="33.02" y2="-101.6" width="0.1524" layer="91"/>
+<wire x1="63.5" y1="50.8" x2="63.5" y2="45.72" width="0.1524" layer="91"/>
 <pinref part="R8" gate="G$1" pin="2"/>
-<wire x1="33.02" y1="-101.6" x2="33.02" y2="-106.68" width="0.1524" layer="91"/>
-<wire x1="30.48" y1="-101.6" x2="33.02" y2="-101.6" width="0.1524" layer="91"/>
-<junction x="33.02" y="-101.6"/>
+<wire x1="63.5" y1="45.72" x2="63.5" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="45.72" x2="63.5" y2="45.72" width="0.1524" layer="91"/>
+<junction x="63.5" y="45.72"/>
 </segment>
 </net>
 <net name="BLE_ENABLE" class="0">
 <segment>
 <pinref part="R8" gate="G$1" pin="1"/>
-<wire x1="20.32" y1="-101.6" x2="17.78" y2="-101.6" width="0.1524" layer="91"/>
-<wire x1="17.78" y1="-101.6" x2="17.78" y2="-111.76" width="0.1524" layer="91"/>
+<wire x1="50.8" y1="45.72" x2="48.26" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="45.72" x2="48.26" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="Q1" gate="G$1" pin="G"/>
-<wire x1="17.78" y1="-111.76" x2="27.94" y2="-111.76" width="0.1524" layer="91"/>
-<wire x1="15.24" y1="-111.76" x2="17.78" y2="-111.76" width="0.1524" layer="91"/>
-<junction x="17.78" y="-111.76"/>
-<label x="15.24" y="-111.76" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="48.26" y1="35.56" x2="58.42" y2="35.56" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="35.56" x2="48.26" y2="35.56" width="0.1524" layer="91"/>
+<junction x="48.26" y="35.56"/>
+<label x="45.72" y="35.56" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -17757,7 +17755,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <segment>
 <pinref part="Q1" gate="G$1" pin="D"/>
 <pinref part="P+6" gate="1" pin="V+"/>
-<wire x1="33.02" y1="-116.84" x2="33.02" y2="-121.92" width="0.1524" layer="91"/>
+<wire x1="63.5" y1="30.48" x2="63.5" y2="25.4" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <wire x1="-63.5" y1="48.26" x2="-53.34" y2="48.26" width="0.1524" layer="91"/>
