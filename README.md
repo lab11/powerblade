@@ -14,10 +14,10 @@ there have been several iterations of flexible PCBs to determine the optimum
 construction for the tabs to ensure strength and elasticity.
 
 Future work on this system will include improvements to the accuracy of the unit
-- PowerBlade readings currently have 5% to 10% error but we believe this can be
-significantly lower - as well as safety.
+(PowerBlade readings currently have 5% to 10% error but we believe this can be
+significantly lower), as well as safety.
 
 [
-![pb](https://raw.github.com/lab11/powerblade/master/images/powerblade.png)
+![pb](https://raw.github.com/lab11/powerblade/master/images/powerblade_400x350.png)
 ](https://raw.github.com/lab11/powerblade/master/images/powerblade.png)
 
