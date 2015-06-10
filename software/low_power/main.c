@@ -27,9 +27,6 @@
 bool ready;
 uint8_t data;
 
-uint8_t fivedata[] = {2,2,2,2,2,1,1,0,0,0,1,0,1,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-uint8_t dataCount;
-
 // Variables for integration
 int16_t agg_current;
 int16_t offset;
@@ -69,8 +66,8 @@ int32_t isense_count;
 uint8_t isense_vmin;
 uint8_t vsense_vmax;
 uint8_t vsense_vmin;
-uint8_t isense_vmid;
-uint8_t vsense_vmid;
+//uint8_t isense_vmid;
+//uint8_t vsense_vmid;
 
 // Buffer to hold old voltage measurements
 // This is used to account for a phase delay between current and voltage
@@ -138,13 +135,13 @@ int main(void) {
     PJOUT = 0;
     PJREN = 0xFF;
 
-//    PJOUT = 0;                                // output ACLK
+    // Output ACLK
 //    PJDIR |= BIT2;
 //    PJSEL1 &= ~BIT2;
 //    PJSEL0 |= BIT2;
 
     // Low power in port 1
-    P1DIR = 0;// + BIT2;
+    P1DIR = 0;
     P1OUT = 0;
     P1REN = 0xFF;
 
@@ -152,10 +149,6 @@ int main(void) {
     P2DIR = 0;
     P2OUT = 0;
     P2REN = 0xFF;
-
-    dataCount = 0;
-//    memcpy(fivedata,)
-//    fivedata = {2,2,2,2,2,1,1,0,0,0,1,0,1,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 
     // Set SEN_EN to output and disable (~200uA)
     SEN_EN_DIR |= SEN_EN_PIN;
@@ -175,15 +168,6 @@ int main(void) {
     powerblade_id = 0;
     flags = 0;
     agg_current = 0;
-
-    // Vmid values are initally set to defaults, adjusted during run
-//    vsense_vmax = 0;
-//    vsense_vmin = 255;
-    vsense_vmid = V_VCC2;
-    isense_vmax = 0;
-    isense_count = 0;
-//    isense_vmin  = 255;
-    isense_vmid = I_VCC2;
     vbuff_head = 0;
 
     // Set SYS_EN to output and disable
@@ -257,14 +241,6 @@ __interrupt void TIMERA1_ISR(void) {
 	TA1CCR1 = pwm_duty;
 }
 
-#pragma vector=TIMER1_A0_VECTOR
-__interrupt void TIMERA1_ISR0(void) {
-	TA1CCTL0 = 0;
-	TA1CTL = 0;
-	SYS_EN_OUT &= ~SYS_EN_PIN;
-	LED_EN_OUT |= LED_EN_PIN;
-}
-
 void uart_send(char* buf, unsigned int len) {
 	txBuf = buf;
 	txLen = len;
@@ -293,38 +269,18 @@ __interrupt void ADC10_ISR(void) {
     	ADC_Channel = ADC10MCTL0 & ADC10INCH_7;
     	switch(ADC_Channel) {
     	case 4:	// I_SENSE
-    		// Set debug pin
-//    		P1OUT |= BIT2;
-
-    		// Grab peak values
-//    		if(ADC_Result > isense_vmax) {
-//    			isense_vmax = ADC_Result;
-//    		}
-//    		else if(ADC_Result < isense_vmin) {
-//    			isense_vmin = ADC_Result;
-//    		}
-
+    	{
     		// Store current value for future calculations
-    		current = (int8_t)(ADC_Result - isense_vmid);
+    		current = (int8_t)(ADC_Result - I_VCC2);
 
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
     		break;
+    	}
     	case 3:	// V_SENSE
     	{
-    		// Set debug pin
-//    		P1OUT |= BIT2;
-
-    		// Grab peak values
-//    		if(ADC_Result > vsense_vmax) {
-//				vsense_vmax = ADC_Result;
-//			}
-//    		else if(ADC_Result < vsense_vmin) {
-//				vsense_vmin = ADC_Result;
-//			}
-
     		// Store voltage value
-    		voltage = (int8_t)(ADC_Result - vsense_vmid);
+    		voltage = (int8_t)(ADC_Result - V_VCC2);
 
     		// Store and account for phase offset
     		vbuff[vbuff_head++] = voltage;
@@ -332,7 +288,8 @@ __interrupt void ADC10_ISR(void) {
     		if(vbuff_head == SAMCOUNT) {
     			vbuff_head = 0;
     		}
-    		//current = 0x7F;
+
+
     		agg_current += (int16_t)(current + (current >> 1));
     		agg_average = agg_current >> 5;
     		agg_current -= agg_average;
@@ -347,22 +304,6 @@ __interrupt void ADC10_ISR(void) {
     		// as much as possible
 #ifndef CALIBRATE
     		int32_t new_current;
-//    		if(agg_current > 0) {
-//    			if(agg_current > CUROFF) {
-//    				new_current = agg_current - CUROFF;
-//    			}
-//    			else {
-//    				new_current = 0;
-//    			}
-//    		}
-//    		else {
-//    			if(agg_current < CUROFF) {
-//    				new_current = agg_current + CUROFF;
-//    			}
-//    			else {
-//    				new_current = 0;
-//    			}
-//    		}
     		if(agg_current > 0) {
     			new_current = agg_current + CUROFF;
     		}
@@ -380,18 +321,6 @@ __interrupt void ADC10_ISR(void) {
     		//TA1CCR1 = (agg_current >> 5) + 196;
     		pwm_duty = (agg_current >> 3) + 786;
     		//pwm_duty = voltage + 786;
-
-    		// Offset calculation
-//    		agg_average += agg_current;
-//    		agg_count += 1;
-//    		if(agg_count >= (SAMCOUNT/2)){
-//    			offset = agg_average/agg_count;
-//    			truePower = (uint16_t)offset;
-//    			agg_current -= offset;
-//    			flags = (uint8_t)((offset>>8) & 0xFF);
-//    			agg_average = 0;
-//    			agg_count = 0;
-//    		}
 
     		// Enable next sample
     		ADC10CTL0 += ADC10SC;
@@ -454,14 +383,6 @@ __interrupt void ADC10_ISR(void) {
 				acc_v_rms = 0;
                 voltAmpsToAverage += (uint32_t)(Irms * Vrms);
 
-				// Calculate V_SENSE & I_SENSE mid values
-//				vsense_vmid = (vsense_vmax >> 1) + (vsense_vmin >> 1);
-//				vsense_vmax = 0;
-//				vsense_vmin = 255;
-//				isense_vmid = (isense_vmax >> 1) + (isense_vmin >> 1);
-//				isense_vmax = 0;
-//				isense_vmin = 255;
-
     			measCount++;
     			if(measCount >= 60) { // Another second has passed
     				measCount = 0;
@@ -470,9 +391,7 @@ __interrupt void ADC10_ISR(void) {
     				time++;
 
 #ifdef CALIBRATE
-    				tx_i_ave = (uint32_t)Irms;//(isense_vmax / isense_count);
-    				isense_vmax = 0;
-    				isense_count = 0;
+    				tx_i_ave = (uint32_t)Irms;
 #endif
 
                     truePower = (uint16_t)(wattHoursToAverage / 60);
@@ -547,20 +466,7 @@ __interrupt void USCI_A0_ISR(void) {
 			break;
 		case 1:
 			uart_send((char*)&flags, sizeof(flags));
-			if(fivedata[dataCount] == 1){
-				TA1CTL |= TASSEL_1 + MC_1 + TACLR;
-				TA1CCR0 = 1500;
-				TA1CCTL0 |= CCIE;
-			}
-			else if(fivedata[dataCount] == 0) {
-				TA1CTL |= TASSEL_1 + MC_1 + TACLR;
-				TA1CCR0 = 4500;
-				TA1CCTL0 |= CCIE;
-			}
-			dataCount++;
-			if(dataCount == 60) {
-				dataCount = 0;
-			}
+			break;
 		default: break;
 		}
 		break;
