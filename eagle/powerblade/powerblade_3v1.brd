@@ -2041,8 +2041,8 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <param name="mvCreamFrame" value="1"/>
 <param name="mlMinStopFrame" value="3mil"/>
 <param name="mlMaxStopFrame" value="3mil"/>
-<param name="mlMinCreamFrame" value="1mil"/>
-<param name="mlMaxCreamFrame" value="1mil"/>
+<param name="mlMinCreamFrame" value="0.5mil"/>
+<param name="mlMaxCreamFrame" value="0.5mil"/>
 <param name="mlViaStopLimit" value="0mil"/>
 <param name="srRoundness" value="0"/>
 <param name="srMinRoundness" value="0mil"/>
