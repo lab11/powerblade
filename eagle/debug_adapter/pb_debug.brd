@@ -1570,25 +1570,25 @@ design rules under a new name.</description>
 <element name="J1" library="ibat" package="MA14-JTAG" value="JTAG_14PIN_FULL" x="-17.78" y="13.97">
 <attribute name="DIGIKEY" value="HRP14H-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
 </element>
-<element name="SV1" library="con-lstb" package="MA06-1_1MM27_LONG" value="" x="50.8" y="36.83" rot="MR90"/>
-<element name="SV2" library="con-lstb" package="MA12-1_1MM27_LONG" value="" x="20.32" y="29.21" rot="MR90"/>
-<element name="TP1" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-27.94" y="38.1"/>
-<element name="TP2" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-33.02" y="38.1"/>
-<element name="TP3" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-38.1" y="38.1"/>
-<element name="TP4" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-16.51" y="44.45"/>
-<element name="TP5" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-21.59" y="44.45"/>
-<element name="TP6" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-26.67" y="44.45"/>
-<element name="TP7" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-31.75" y="44.45"/>
-<element name="TP8" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-36.83" y="44.45"/>
-<element name="TP9" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-41.91" y="44.45"/>
-<element name="TP10" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-39.37" y="29.21"/>
-<element name="TP11" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-22.86" y="38.1"/>
-<element name="TP12" library="skyspecs" package="TP_MULT" value="TP_MULT" x="-16.51" y="38.1"/>
-<element name="SV3" library="con-lstb" package="MA06-2" value="" x="-21.59" y="31.75">
-<attribute name="OC_NEWARK" value="unknown" x="0" y="0" size="1.778" layer="27" display="off"/>
-<attribute name="MPN" value="" x="0" y="0" size="1.778" layer="27" display="off"/>
-<attribute name="MF" value="" x="0" y="0" size="1.778" layer="27" display="off"/>
-<attribute name="OC_FARNELL" value="unknown" x="0" y="0" size="1.778" layer="27" display="off"/>
+<element name="SV1" library="con-lstb" package="MA06-1_1MM27_LONG" value="" x="44.45" y="21.59" rot="MR90"/>
+<element name="SV2" library="con-lstb" package="MA12-1_1MM27_LONG" value="" x="17.78" y="21.59" rot="MR90"/>
+<element name="TP1" library="skyspecs" package="TP_MULT" value="TP_MULT" x="5.08" y="-11.43"/>
+<element name="TP2" library="skyspecs" package="TP_MULT" value="TP_MULT" x="8.89" y="-11.43"/>
+<element name="TP3" library="skyspecs" package="TP_MULT" value="TP_MULT" x="12.7" y="-11.43"/>
+<element name="TP4" library="skyspecs" package="TP_MULT" value="TP_MULT" x="16.51" y="-11.43"/>
+<element name="TP5" library="skyspecs" package="TP_MULT" value="TP_MULT" x="20.32" y="-11.43"/>
+<element name="TP6" library="skyspecs" package="TP_MULT" value="TP_MULT" x="24.13" y="-11.43"/>
+<element name="TP7" library="skyspecs" package="TP_MULT" value="TP_MULT" x="27.94" y="-11.43"/>
+<element name="TP8" library="skyspecs" package="TP_MULT" value="TP_MULT" x="31.75" y="-11.43"/>
+<element name="TP9" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-11.43"/>
+<element name="TP10" library="skyspecs" package="TP_MULT" value="TP_MULT" x="39.37" y="-11.43"/>
+<element name="TP11" library="skyspecs" package="TP_MULT" value="TP_MULT" x="43.18" y="-11.43"/>
+<element name="TP12" library="skyspecs" package="TP_MULT" value="TP_MULT" x="46.99" y="-11.43"/>
+<element name="SV3" library="con-lstb" package="MA06-2" value="" x="44.45" y="13.97" rot="R180">
+<attribute name="OC_NEWARK" value="unknown" x="22.86" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MPN" value="" x="22.86" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="MF" value="" x="22.86" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="OC_FARNELL" value="unknown" x="22.86" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="R1" library="rcl" package="R0603" value="0" x="-41.91" y="-2.54"/>
 <element name="R2" library="rcl" package="R0603" value="0" x="-41.91" y="-6.35"/>
@@ -1611,97 +1611,97 @@ design rules under a new name.</description>
 <contactref element="SV2" pad="P12"/>
 <contactref element="TP1" pad="P$1"/>
 <contactref element="R1" pad="1"/>
-<wire x1="-27.94" y1="38.1" x2="-42.76" y2="-2.54" width="0" layer="19" extent="1-1"/>
-<wire x1="13.335" y1="29.21" x2="-27.94" y2="38.1" width="0" layer="19" extent="16-16"/>
+<wire x1="5.08" y1="-11.43" x2="-42.76" y2="-2.54" width="0" layer="19" extent="1-1"/>
+<wire x1="10.795" y1="21.59" x2="5.08" y2="-11.43" width="0" layer="19" extent="16-16"/>
 </signal>
 <signal name="N$2">
 <contactref element="SV2" pad="P11"/>
 <contactref element="TP2" pad="P$1"/>
-<wire x1="-33.02" y1="38.1" x2="14.605" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="8.89" y1="-11.43" x2="12.065" y2="21.59" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$3">
 <contactref element="SV2" pad="P10"/>
 <contactref element="TP3" pad="P$1"/>
-<wire x1="-38.1" y1="38.1" x2="15.875" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="12.7" y1="-11.43" x2="13.335" y2="21.59" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$4">
 <contactref element="SV2" pad="P9"/>
 <contactref element="TP4" pad="P$1"/>
-<wire x1="17.145" y1="29.21" x2="-16.51" y2="44.45" width="0" layer="19" extent="1-1"/>
+<wire x1="14.605" y1="21.59" x2="16.51" y2="-11.43" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$5">
 <contactref element="SV2" pad="P8"/>
 <contactref element="TP5" pad="P$1"/>
 <contactref element="R2" pad="1"/>
-<wire x1="-21.59" y1="44.45" x2="18.415" y2="29.21" width="0" layer="19" extent="16-16"/>
-<wire x1="-42.76" y1="-6.35" x2="-21.59" y2="44.45" width="0" layer="19" extent="1-1"/>
+<wire x1="20.32" y1="-11.43" x2="15.875" y2="21.59" width="0" layer="19" extent="16-16"/>
+<wire x1="-42.76" y1="-6.35" x2="20.32" y2="-11.43" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$8">
 <contactref element="SV2" pad="P6"/>
 <contactref element="TP7" pad="P$1"/>
-<wire x1="-31.75" y1="44.45" x2="20.955" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="27.94" y1="-11.43" x2="18.415" y2="21.59" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$9">
 <contactref element="SV2" pad="P5"/>
 <contactref element="TP8" pad="P$1"/>
-<wire x1="-36.83" y1="44.45" x2="22.225" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="31.75" y1="-11.43" x2="19.685" y2="21.59" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$10">
 <contactref element="SV2" pad="P4"/>
 <contactref element="TP9" pad="P$1"/>
-<wire x1="-41.91" y1="44.45" x2="23.495" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="35.56" y1="-11.43" x2="20.955" y2="21.59" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$11">
 <contactref element="SV2" pad="P3"/>
 <contactref element="TP10" pad="P$1"/>
-<wire x1="-39.37" y1="29.21" x2="24.765" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="39.37" y1="-11.43" x2="22.225" y2="21.59" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$12">
 <contactref element="SV2" pad="P2"/>
 <contactref element="TP11" pad="P$1"/>
-<wire x1="26.035" y1="29.21" x2="-22.86" y2="38.1" width="0" layer="19" extent="1-1"/>
+<wire x1="23.495" y1="21.59" x2="43.18" y2="-11.43" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$13">
 <contactref element="SV2" pad="P1"/>
 <contactref element="TP12" pad="P$1"/>
-<wire x1="27.305" y1="29.21" x2="-16.51" y2="38.1" width="0" layer="19" extent="1-1"/>
+<wire x1="24.765" y1="21.59" x2="46.99" y2="-11.43" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$6">
 <contactref element="SV2" pad="P7"/>
 <contactref element="TP6" pad="P$1"/>
 <contactref element="R3" pad="1"/>
-<wire x1="-26.67" y1="44.45" x2="-42.76" y2="-10.16" width="0" layer="19" extent="1-1"/>
-<wire x1="19.685" y1="29.21" x2="-26.67" y2="44.45" width="0" layer="19" extent="16-16"/>
+<wire x1="24.13" y1="-11.43" x2="-42.76" y2="-10.16" width="0" layer="19" extent="1-1"/>
+<wire x1="17.145" y1="21.59" x2="24.13" y2="-11.43" width="0" layer="19" extent="16-16"/>
 </signal>
 <signal name="TDO">
 <contactref element="J1" pad="TDO"/>
-<contactref element="SV3" pad="11"/>
-<wire x1="-19.05" y1="21.59" x2="-15.24" y2="30.48" width="0" layer="19" extent="1-1"/>
+<contactref element="SV3" pad="12"/>
+<wire x1="-19.05" y1="21.59" x2="38.1" y2="12.7" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="TDI">
 <contactref element="J1" pad="TDI"/>
-<contactref element="SV3" pad="9"/>
-<wire x1="-19.05" y1="19.05" x2="-17.78" y2="30.48" width="0" layer="19" extent="1-1"/>
+<contactref element="SV3" pad="10"/>
+<wire x1="-19.05" y1="19.05" x2="40.64" y2="12.7" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="TMS">
 <contactref element="J1" pad="TMS"/>
-<contactref element="SV3" pad="7"/>
-<wire x1="-19.05" y1="16.51" x2="-20.32" y2="30.48" width="0" layer="19" extent="1-1"/>
+<contactref element="SV3" pad="8"/>
+<wire x1="-19.05" y1="16.51" x2="43.18" y2="12.7" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="TCK">
 <contactref element="J1" pad="TCK"/>
-<contactref element="SV3" pad="5"/>
-<wire x1="-19.05" y1="13.97" x2="-22.86" y2="30.48" width="0" layer="19" extent="1-1"/>
+<contactref element="SV3" pad="6"/>
+<wire x1="-19.05" y1="13.97" x2="45.72" y2="12.7" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="!RST!">
 <contactref element="J1" pad="!RST!"/>
-<contactref element="SV3" pad="3"/>
-<wire x1="-25.4" y1="30.48" x2="-19.05" y2="8.89" width="0" layer="19" extent="1-1"/>
+<contactref element="SV3" pad="4"/>
+<wire x1="-19.05" y1="8.89" x2="48.26" y2="12.7" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="TEST">
 <contactref element="J1" pad="TEST"/>
-<contactref element="SV3" pad="1"/>
-<wire x1="-27.94" y1="30.48" x2="-16.51" y2="13.97" width="0" layer="19" extent="1-1"/>
+<contactref element="SV3" pad="2"/>
+<wire x1="-16.51" y1="13.97" x2="50.8" y2="12.7" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="+3V3">
 <contactref element="J1" pad="VCC_TARGET"/>
@@ -1728,36 +1728,6 @@ design rules under a new name.</description>
 <wire x1="-41.91" y1="-26.67" x2="-42.86" y2="-30.48" width="0" layer="19" extent="1-1"/>
 <wire x1="-41.06" y1="-10.16" x2="-41.91" y2="-26.67" width="0" layer="19" extent="1-1"/>
 <wire x1="-19.05" y1="11.43" x2="-41.06" y2="-10.16" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$7">
-<contactref element="SV3" pad="12"/>
-<contactref element="SV1" pad="P6"/>
-<wire x1="47.625" y1="36.83" x2="-15.24" y2="33.02" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$14">
-<contactref element="SV3" pad="10"/>
-<contactref element="SV1" pad="P5"/>
-<wire x1="48.895" y1="36.83" x2="-17.78" y2="33.02" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$15">
-<contactref element="SV3" pad="8"/>
-<contactref element="SV1" pad="P4"/>
-<wire x1="50.165" y1="36.83" x2="-20.32" y2="33.02" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$16">
-<contactref element="SV3" pad="6"/>
-<contactref element="SV1" pad="P3"/>
-<wire x1="51.435" y1="36.83" x2="-22.86" y2="33.02" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$17">
-<contactref element="SV3" pad="4"/>
-<contactref element="SV1" pad="P2"/>
-<wire x1="52.705" y1="36.83" x2="-25.4" y2="33.02" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$18">
-<contactref element="SV3" pad="2"/>
-<contactref element="SV1" pad="P1"/>
-<wire x1="53.975" y1="36.83" x2="-27.94" y2="33.02" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="V+">
 <contactref element="R1" pad="2"/>
@@ -1786,6 +1756,36 @@ design rules under a new name.</description>
 <contactref element="R4" pad="2"/>
 <wire x1="-41.91" y1="-40.64" x2="-41.06" y2="-45.72" width="0" layer="19" extent="1-1"/>
 <wire x1="-40.96" y1="-31.13" x2="-41.91" y2="-40.64" width="0" layer="19" extent="1-1"/>
+</signal>
+<signal name="N$7">
+<contactref element="SV1" pad="P6"/>
+<contactref element="SV3" pad="11"/>
+<wire x1="38.1" y1="15.24" x2="41.275" y2="21.59" width="0" layer="19" extent="16-16"/>
+</signal>
+<signal name="N$14">
+<contactref element="SV1" pad="P5"/>
+<contactref element="SV3" pad="9"/>
+<wire x1="40.64" y1="15.24" x2="42.545" y2="21.59" width="0" layer="19" extent="16-16"/>
+</signal>
+<signal name="N$15">
+<contactref element="SV1" pad="P4"/>
+<contactref element="SV3" pad="7"/>
+<wire x1="43.18" y1="15.24" x2="43.815" y2="21.59" width="0" layer="19" extent="16-16"/>
+</signal>
+<signal name="N$16">
+<contactref element="SV1" pad="P3"/>
+<contactref element="SV3" pad="5"/>
+<wire x1="45.72" y1="15.24" x2="45.085" y2="21.59" width="0" layer="19" extent="16-16"/>
+</signal>
+<signal name="N$17">
+<contactref element="SV1" pad="P2"/>
+<contactref element="SV3" pad="3"/>
+<wire x1="48.26" y1="15.24" x2="46.355" y2="21.59" width="0" layer="19" extent="16-16"/>
+</signal>
+<signal name="N$18">
+<contactref element="SV1" pad="P1"/>
+<contactref element="SV3" pad="1"/>
+<wire x1="50.8" y1="15.24" x2="47.625" y2="21.59" width="0" layer="19" extent="16-16"/>
 </signal>
 </signals>
 </board>
