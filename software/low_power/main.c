@@ -27,6 +27,8 @@
 bool ready;
 uint8_t data;
 
+uint16_t delay_count;
+
 // Variables for integration
 int16_t agg_current;
 int16_t offset;
@@ -111,6 +113,15 @@ uint32_t SquareRoot(uint32_t a_nInput)
  */
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+
+  	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
+  	TA0CCR0 = 12;						// PWM Period
+  	TA0CCR1 = 2;                     	// TA0.1 ADC trigger
+  	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
+  	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
+  	delay_count = 1250;
+    __bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
+    TA0CTL = 0;
 
     // XT1 Setup
     PJSEL0 |= BIT4 + BIT5;
@@ -232,13 +243,33 @@ int main(void) {
 __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL1 &= ~CCIFG;
 	//P2OUT ^= BIT0;
-	ADC10CTL0 += ADC10SC;
+	if(delay_count > 1) {
+		delay_count--;
+	}
+	else if(delay_count == 1) {
+		delay_count--;
+		__bic_SR_register_on_exit(LPM3_bits);
+	}
+	else {
+		ADC10CTL0 += ADC10SC;
+	}
 }
 
 #pragma vector=TIMER1_A1_VECTOR
 __interrupt void TIMERA1_ISR(void) {
 	TA1CCTL1 &= ~CCIFG;
 	TA1CCR1 = pwm_duty;
+}
+
+void uart_enable(bool enable) {
+	if(enable) {
+		P2SEL0 &= ~(BIT0);// + BIT1);
+		P2SEL1 |= BIT0;// + BIT1;
+	}
+	else {
+		//P2SEL0 |= BIT0;
+		P2SEL1 &= ~BIT0;
+	}
 }
 
 void uart_send(char* buf, unsigned int len) {
@@ -280,6 +311,9 @@ __interrupt void ADC10_ISR(void) {
     		// Enable next sample
     		//ADC10CTL0 += ADC10SC;
     		SYS_EN_OUT &= ~SYS_EN_PIN;
+    		uart_enable(1);
+			uart_send((char*)&powerblade_id, sizeof(powerblade_id));
+			data = 8;
     		break;
     	}
     	case 3:	// V_SENSE (same in versions 0, 1, and 3)
@@ -341,6 +375,7 @@ __interrupt void ADC10_ISR(void) {
 
     		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
+    			uart_enable(0);
     			SYS_EN_OUT |= SYS_EN_PIN;
     			ready = 0;
     		}
