@@ -152,6 +152,7 @@ int main(void) {
 //    PJSEL0 |= BIT2;
 
     // Low power in port 1
+//    P1DIR = BIT2 + BIT3;
     P1DIR = 0;
     P1OUT = 0;
     P1REN = 0xFF;
@@ -283,6 +284,55 @@ void uart_send(char* buf, unsigned int len) {
 	}
 }
 
+void transmitTry(void) {
+	if(sampleCount == SAMCOUNT) { // Entire AC wave sampled (60 Hz)
+		// Reset sampleCount once per wave
+		sampleCount = 0;
+
+		// Increment energy calc and reset accumulator
+		if(acc_p_ave < 0) {
+			acc_p_ave = 0;
+		}
+		wattHoursToAverage += (uint32_t)(acc_p_ave / SAMCOUNT);
+		acc_p_ave = 0;
+
+		// Calculate Irms, Vrms, and apparent power
+		uint16_t Irms = (uint16_t)SquareRoot(acc_i_rms / SAMCOUNT);
+		Vrms = (uint8_t)SquareRoot(acc_v_rms / SAMCOUNT);
+		acc_i_rms = 0;
+		acc_v_rms = 0;
+        voltAmpsToAverage += (uint32_t)(Irms * Vrms);
+
+		measCount++;
+		if(measCount >= 60) { // Another second has passed
+			measCount = 0;
+
+			sequence++;
+			time++;
+
+#ifdef CALIBRATE
+			tx_i_ave = (uint32_t)Irms;
+#endif
+
+            truePower = (uint16_t)(wattHoursToAverage / 60);
+			wattHours += (uint32_t)truePower;
+            apparentPower = (uint16_t)(voltAmpsToAverage / 60);
+			wattHoursToAverage = 0;
+            voltAmpsToAverage = 0;
+
+//			ready = 1;
+			if(ready == 1) {
+				SYS_EN_OUT &= ~SYS_EN_PIN;
+				uart_enable(1);
+				__delay_cycles(80000);
+				uart_send((char*)&powerblade_id, sizeof(powerblade_id));
+				data = 8;
+				//ready = 0;
+			}
+		}
+	}
+}
+
 #pragma vector=ADC10_VECTOR
 __interrupt void ADC10_ISR(void) {
 
@@ -302,22 +352,26 @@ __interrupt void ADC10_ISR(void) {
 #if defined (VERSION0) | defined (VERSION1)
     	case 4:	// I_SENSE
 #elif defined (VERSION3)
-    	case 5:	// I_SENSE (A0)
+    	case 0:	// I_SENSE (A0)
 #endif
     	{
+    		// Set debug pin
+    		P1OUT |= BIT2;
+
     		// Store current value for future calculations
     		current = (int8_t)(ADC_Result - I_VCC2);
 
     		// Enable next sample
     		//ADC10CTL0 += ADC10SC;
-    		SYS_EN_OUT &= ~SYS_EN_PIN;
-    		uart_enable(1);
-			uart_send((char*)&powerblade_id, sizeof(powerblade_id));
-			data = 8;
+    		sampleCount++;
+    		transmitTry();
     		break;
     	}
     	case 3:	// V_SENSE (same in versions 0, 1, and 3)
     	{
+    		// Set debug pin
+    		P1OUT |= BIT2;
+
     		// Store voltage value
     		voltage = (int8_t)(ADC_Result - V_VCC2);
 
@@ -371,7 +425,7 @@ __interrupt void ADC10_ISR(void) {
     	case 4:	// VCC_SENSE
 #endif
     		// Set debug pin
-//    		P1OUT |= BIT2;
+    		P1OUT |= BIT2;
 
     		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
@@ -406,6 +460,7 @@ __interrupt void ADC10_ISR(void) {
 
     		// Set debug pin
 //    		P1OUT |= BIT6;
+    		P1OUT |= BIT3;
 
     		ADC10CTL0 += ADC10SC;
     		break;
@@ -463,6 +518,7 @@ __interrupt void ADC10_ISR(void) {
     default: break;
   	}
 //	P1OUT &= ~(BIT6);// + BIT2);
+	P1OUT &= ~(BIT3 + BIT2);
 }
 
 #pragma vector=USCI_A0_VECTOR
