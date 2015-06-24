@@ -27,6 +27,8 @@
 bool ready;
 uint8_t data;
 
+uint16_t delay_count;
+
 // Variables for integration
 int16_t agg_current;
 int16_t offset;
@@ -72,7 +74,7 @@ uint8_t vsense_vmin;
 // Buffer to hold old voltage measurements
 // This is used to account for a phase delay between current and voltage
 int8_t vbuff[SAMCOUNT];
-uint8_t vbuff_head;
+volatile uint8_t vbuff_head;
 uint8_t getVoltageForPhase(uint8_t head);
 
 void uart_send(char* buf, unsigned int len);
@@ -112,7 +114,14 @@ uint32_t SquareRoot(uint32_t a_nInput)
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-    __delay_cycles(4000000);                      // ref delay
+  	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
+  	TA0CCR0 = 12;						// PWM Period
+  	TA0CCR1 = 2;                     	// TA0.1 ADC trigger
+  	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
+  	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
+  	delay_count = 1250;
+    __bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
+    TA0CTL = 0;
 
     // XT1 Setup
     PJSEL0 |= BIT4 + BIT5;
@@ -130,6 +139,8 @@ int main(void) {
     	SFRIFG1 &= ~OFIFG;
   	}while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
 
+//  	__bis_SR_register(LPM3_bits);        	// Enter LPM3 w/ interrupts
+
     // Low power in port J
     PJDIR = 0;
     PJOUT = 0;
@@ -141,6 +152,7 @@ int main(void) {
 //    PJSEL0 |= BIT2;
 
     // Low power in port 1
+//    P1DIR = BIT2 + BIT3;
     P1DIR = 0;
     P1OUT = 0;
     P1REN = 0xFF;
@@ -151,8 +163,8 @@ int main(void) {
     P2REN = 0xFF;
 
     // Set SEN_EN to output and disable (~200uA)
-    SEN_EN_DIR |= SEN_EN_PIN;
     SEN_EN_OUT &= ~SEN_EN_PIN;
+    SEN_EN_DIR |= SEN_EN_PIN;
 
     // Zero all sensing values
     sampleCount = 0;
@@ -170,20 +182,18 @@ int main(void) {
     agg_current = 0;
     vbuff_head = 0;
 
-    // Set SYS_EN to output and disable
+    // Set SYS_EN to output and disable (PMOS)
+    SYS_EN_OUT |= SYS_EN_PIN;
     SYS_EN_DIR |= SYS_EN_PIN;
-    SYS_EN_OUT &= ~SYS_EN_PIN;
-    LED_EN_DIR |= LED_EN_PIN;
-    LED_EN_OUT &= ~LED_EN_PIN;
     ready = 0;
 
     // Set up UART
-    P2SEL0 &= ~(BIT0);// + BIT1);
-    P2SEL1 |= BIT0;// + BIT1;
-    P2DIR |= BIT1;
-    P2OUT |= BIT1;
-    P1DIR |= BIT6;
-    P1OUT |= BIT6;
+//    P2SEL0 &= ~(BIT0);// + BIT1);
+//    P2SEL1 |= BIT0;// + BIT1;
+//    P2DIR |= BIT1;
+//    P2OUT |= BIT1;
+//    P1DIR |= BIT6;
+//    P1OUT |= BIT6;
     UCA0CTL1 |= UCSWRST;
     UCA0CTL1 |= UCSSEL_2;
 //    UCA0BR0 = 52;
@@ -196,10 +206,12 @@ int main(void) {
     UCA0IE |= UCRXIE + UCTXCPTIE;
 
     // Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
-    P1SEL1 |= BIT3 + BIT4 + BIT5;
-    P1SEL0 |= BIT3 + BIT4 + BIT5;
-    P1DIR |= BIT4 + BIT5;
-    P1OUT |= BIT4 + BIT5;
+    P1SEL1 |= BIT0 + BIT1 + BIT4 + BIT5;
+    P1SEL0 |= BIT0 + BIT1 + BIT4 + BIT5;
+//    P1DIR |= BIT4 + BIT5;
+//    P1OUT |= BIT4 + BIT5;
+    P1DIR |= BIT4 + BIT0;
+    P1OUT |= BIT4 + BIT0;
 	ADC10CTL0 |= ADC10ON;// + ADC10MSC;          	// ADC10ON
   	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3;  	// rpt series of ch; TA0.1 trig sample start
   	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
@@ -232,13 +244,33 @@ int main(void) {
 __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL1 &= ~CCIFG;
 	//P2OUT ^= BIT0;
-	ADC10CTL0 += ADC10SC;
+	if(delay_count > 1) {
+		delay_count--;
+	}
+	else if(delay_count == 1) {
+		delay_count--;
+		__bic_SR_register_on_exit(LPM3_bits);
+	}
+	else {
+		ADC10CTL0 += ADC10SC;
+	}
 }
 
 #pragma vector=TIMER1_A1_VECTOR
 __interrupt void TIMERA1_ISR(void) {
 	TA1CCTL1 &= ~CCIFG;
 	TA1CCR1 = pwm_duty;
+}
+
+void uart_enable(bool enable) {
+	if(enable) {
+		P2SEL0 &= ~(BIT0);// + BIT1);
+		P2SEL1 |= BIT0;// + BIT1;
+	}
+	else {
+		//P2SEL0 |= BIT0;
+		P2SEL1 &= ~BIT0;
+	}
 }
 
 void uart_send(char* buf, unsigned int len) {
@@ -249,6 +281,55 @@ void uart_send(char* buf, unsigned int len) {
 	UCA0IE |= UCTXIE;
 	if(txCt < txLen) {
 		UCA0TXBUF = buf[txCt++];
+	}
+}
+
+void transmitTry(void) {
+	if(sampleCount == SAMCOUNT) { // Entire AC wave sampled (60 Hz)
+		// Reset sampleCount once per wave
+		sampleCount = 0;
+
+		// Increment energy calc and reset accumulator
+		if(acc_p_ave < 0) {
+			acc_p_ave = 0;
+		}
+		wattHoursToAverage += (uint32_t)(acc_p_ave / SAMCOUNT);
+		acc_p_ave = 0;
+
+		// Calculate Irms, Vrms, and apparent power
+		uint16_t Irms = (uint16_t)SquareRoot(acc_i_rms / SAMCOUNT);
+		Vrms = (uint8_t)SquareRoot(acc_v_rms / SAMCOUNT);
+		acc_i_rms = 0;
+		acc_v_rms = 0;
+        voltAmpsToAverage += (uint32_t)(Irms * Vrms);
+
+		measCount++;
+		if(measCount >= 60) { // Another second has passed
+			measCount = 0;
+
+			sequence++;
+			time++;
+
+#ifdef CALIBRATE
+			tx_i_ave = (uint32_t)Irms;
+#endif
+
+            truePower = (uint16_t)(wattHoursToAverage / 60);
+			wattHours += (uint32_t)truePower;
+            apparentPower = (uint16_t)(voltAmpsToAverage / 60);
+			wattHoursToAverage = 0;
+            voltAmpsToAverage = 0;
+
+//			ready = 1;
+			if(ready == 1) {
+				SYS_EN_OUT &= ~SYS_EN_PIN;
+				uart_enable(1);
+				__delay_cycles(80000);
+				uart_send((char*)&powerblade_id, sizeof(powerblade_id));
+				data = 8;
+				//ready = 0;
+			}
+		}
 	}
 }
 
@@ -268,17 +349,29 @@ __interrupt void ADC10_ISR(void) {
     case 12: ADC_Result = ADC10MEM0;
     	ADC_Channel = ADC10MCTL0 & ADC10INCH_7;
     	switch(ADC_Channel) {
+#if defined (VERSION0) | defined (VERSION1)
     	case 4:	// I_SENSE
+#elif defined (VERSION3)
+    	case 0:	// I_SENSE (A0)
+#endif
     	{
+    		// Set debug pin
+    		P1OUT |= BIT2;
+
     		// Store current value for future calculations
     		current = (int8_t)(ADC_Result - I_VCC2);
 
     		// Enable next sample
-    		ADC10CTL0 += ADC10SC;
+    		//ADC10CTL0 += ADC10SC;
+    		sampleCount++;
+    		transmitTry();
     		break;
     	}
-    	case 3:	// V_SENSE
+    	case 3:	// V_SENSE (same in versions 0, 1, and 3)
     	{
+    		// Set debug pin
+    		P1OUT |= BIT2;
+
     		// Store voltage value
     		voltage = (int8_t)(ADC_Result - V_VCC2);
 
@@ -326,14 +419,18 @@ __interrupt void ADC10_ISR(void) {
     		ADC10CTL0 += ADC10SC;
     		break;
     	}
+#if defined (VERSION0) | defined (VERSION1)
     	case 2:	// VCC_SENSE
+#elif defined (VERSION3)
+    	case 4:	// VCC_SENSE
+#endif
     		// Set debug pin
-//    		P1OUT |= BIT2;
+    		P1OUT |= BIT2;
 
     		// Perform Vcap measurements
     		if(ADC_Result < ADC_VMIN) {
-    			SYS_EN_OUT &= ~SYS_EN_PIN;
-    			LED_EN_OUT &= ~LED_EN_PIN;
+    			uart_enable(0);
+    			SYS_EN_OUT |= SYS_EN_PIN;
     			ready = 0;
     		}
     		else if(ready == 0) {
@@ -356,13 +453,17 @@ __interrupt void ADC10_ISR(void) {
     	default: // ADC Reset condition
     	{
     		// Reset sequence
-    		ADC10CTL1 &= ~ADC10CONSEQ_3;
-    		ADC10CTL0 &= ~ADC10ENC;
-    		ADC10CTL1 |= ADC10CONSEQ_3;
-    		ADC10CTL0 |= ADC10ENC;
+//    		ADC10CTL1 &= ~ADC10CONSEQ_3;
+//    		ADC10CTL0 &= ~ADC10ENC;
+//    		ADC10CTL1 |= ADC10CONSEQ_3;
+//    		ADC10CTL0 |= ADC10ENC;
 
     		// Set debug pin
 //    		P1OUT |= BIT6;
+    		P1OUT |= BIT3;
+
+    		ADC10CTL0 += ADC10SC;
+    		break;
 
     		sampleCount++;
     		if(sampleCount == SAMCOUNT) { // Entire AC wave sampled (60 Hz)
@@ -402,7 +503,7 @@ __interrupt void ADC10_ISR(void) {
 
 //					ready = 1;
 					if(ready == 1) {
-						SYS_EN_OUT |= SYS_EN_PIN;
+						SYS_EN_OUT &= ~SYS_EN_PIN;
 						__delay_cycles(40000);
 						uart_send((char*)&powerblade_id, sizeof(powerblade_id));
 						data = 8;
@@ -417,6 +518,7 @@ __interrupt void ADC10_ISR(void) {
     default: break;
   	}
 //	P1OUT &= ~(BIT6);// + BIT2);
+	P1OUT &= ~(BIT3 + BIT2);
 }
 
 #pragma vector=USCI_A0_VECTOR

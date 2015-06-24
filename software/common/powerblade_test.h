@@ -5,8 +5,6 @@
 #ifndef POWERBLADE_TEST_H_
 #define POWERBLADE_TEST_H_
 
-#define VERSION0
-
 /**************************************************************************
    SAMPLE BUFFER SECTION
  **************************************************************************/
@@ -25,20 +23,25 @@
 	#define SYS_EN_OUT	P2OUT
 	#define SYS_EN_PIN	BIT2
 #endif
+#ifdef VERSION3
+	#define SYS_EN_DIR	P1DIR
+	#define SYS_EN_OUT	P1OUT
+	#define SYS_EN_PIN	BIT6
+#endif
 
 /**************************************************************************
    SENSE ENABLE SECTION
  **************************************************************************/
-#define SEN_EN_DIR	P1DIR
-#define SEN_EN_OUT	P1OUT
-#define SEN_EN_PIN	BIT7
-
-/**************************************************************************
-   SENSE ENABLE SECTION
- **************************************************************************/
-#define LED_EN_DIR	PJDIR
-#define LED_EN_OUT	PJOUT
-#define LED_EN_PIN	BIT1
+#if defined (VERSION0) | defined (VERSION1)
+	#define SEN_EN_DIR	P1DIR
+	#define SEN_EN_OUT	P1OUT
+	#define SEN_EN_PIN	BIT7
+#endif
+#if defined (VERSION3)
+	#define SEN_EN_DIR	P2DIR
+	#define SEN_EN_OUT	P2OUT
+	#define SEN_EN_PIN	BIT2
+#endif
 
 /**************************************************************************
    ANALOG SECTION
@@ -59,8 +62,8 @@
 	Vmax,div = 3.17V
 	Nadc,max = 255 * (3.17 / 3.3) = 245 (0xF5)
 */
+//#define ADC_VMIN	0xB3
 #define ADC_VMIN	0x73
-//#define ADC_VMIN	0xA0
 #define ADC_VCHG	0xDB
 #define ADC_VMAX	0xF5
 
