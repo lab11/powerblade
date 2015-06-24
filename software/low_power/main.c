@@ -352,7 +352,7 @@ __interrupt void ADC10_ISR(void) {
 #if defined (VERSION0) | defined (VERSION1)
     	case 4:	// I_SENSE
 #elif defined (VERSION3)
-    	case 0:	// I_SENSE (A0)
+    	case 5:	// I_SENSE (A0) (case 0 for filt, 5 for isense)
 #endif
     	{
     		// Set debug pin
