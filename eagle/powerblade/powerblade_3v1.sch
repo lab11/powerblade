@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.3">
+<eagle version="6.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -16604,7 +16604,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="R2" library="rcl" deviceset="R-US_" device="R0402_SM"/>
 <part name="C2" library="rcl" deviceset="C-EU" device="C0402_SM"/>
 <part name="U2" library="powerfilm" deviceset="MCP6V3" device="">
-<attribute name="DIGIKEY_2" value="296-19547-1-ND"/>
+<attribute name="DIGIKEY_POP" value="296-19547-1-ND"/>
 </part>
 <part name="R3" library="rcl" deviceset="R-US_" device="R1210" value="80k">
 <attribute name="DIGIKEY" value="P80.6KAACT-ND"/>
@@ -17866,7 +17866,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <instance part="R2" gate="G$1" x="200.66" y="-12.7"/>
 <instance part="C2" gate="G$1" x="213.36" y="-30.48"/>
 <instance part="U2" gate="G$1" x="93.98" y="-10.16">
-<attribute name="DIGIKEY_2" x="93.98" y="-10.16" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_POP" x="93.98" y="-10.16" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="SUPPLY15" gate="G$1" x="-20.32" y="-5.08"/>
 <instance part="SUPPLY16" gate="G$1" x="-27.94" y="-25.4"/>
