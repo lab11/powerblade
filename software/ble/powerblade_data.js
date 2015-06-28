@@ -17,6 +17,8 @@ var indexToThirty = 0;
 var watt_hours_tot = 0;
 var recv_last = 0;
 
+var iden_count = 0;
+
 console.log('Looking for PowerBlades!');
 
 noble.on('stateChange', function(state) {
@@ -69,6 +71,12 @@ noble.on('discover', function(peripheral) {
     // print unique seq's to user
     var last_seq = peripherals[peripheral_uuid];
     if (sequence_num != last_seq || sequence_num == 0) {
+
+      // Finish last packet (by displaying count)
+      // and reset iden_count
+      console.log('          Num Received: ' + iden_count);
+      iden_count = 0;
+      console.log('');
 
       timesInThirty[indexToThirty++] = recv_time;
       if(indexToThirty == 30) {
@@ -128,7 +136,10 @@ noble.on('discover', function(peripheral) {
       console.log('   Packets in last 30s: ' + packetCount.toFixed(2));
       //console.log(' Number of Connections: ' + num_connections);
 
-      console.log('');
+      //console.log('');
+    }
+    else {
+      iden_count += 1;
     }
 
     //explore(peripheral);
