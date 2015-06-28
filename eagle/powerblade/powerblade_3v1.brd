@@ -2292,7 +2292,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <element name="C2" library="rcl" package="C0402_SM" value="" x="-3.413125" y="-6.19125" rot="R90"/>
 <element name="U2" library="powerfilm" package="SC70-5" value="MCP6V3" x="0.762" y="0.635" rot="R270">
 <attribute name="DIGIKEY" value="MCP6V31UT-E/LTCT-ND" x="0.762" y="0.635" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="DIGIKEY_2" value="296-19547-1-ND" x="0.762" y="0.635" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="DIGIKEY_POP" value="296-19547-1-ND" x="0.762" y="0.635" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R3" library="rcl" package="R1210" value="80k" x="-10.795" y="5.191125" rot="R90">
 <attribute name="DIGIKEY" value="P80.6KAACT-ND" x="-10.795" y="5.191125" size="1.778" layer="27" rot="R90" display="off"/>
