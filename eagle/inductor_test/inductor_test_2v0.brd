@@ -1370,7 +1370,6 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-12.065" y1="-17.399" x2="-12.7" y2="-16.764" width="0" layer="20" curve="-90"/>
 <wire x1="-12.7" y1="7.366" x2="-12.065" y2="8.001" width="0" layer="20" curve="-90"/>
 <wire x1="-12.065" y1="8.001" x2="12.065" y2="8.001" width="0" layer="20"/>
-<wire x1="-7.874" y1="3.556" x2="-7.874" y2="-3.556" width="0" layer="20"/>
 <wire x1="-7.874" y1="-3.556" x2="-5.2705" y2="-3.556" width="0" layer="20"/>
 <wire x1="-5.2705" y1="-3.556" x2="-5.2705" y2="3.556" width="0" layer="20"/>
 <wire x1="-5.2705" y1="3.556" x2="-7.874" y2="3.556" width="0" layer="20"/>
@@ -1378,19 +1377,36 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="7.874" y1="-4.445" x2="5.2705" y2="-4.445" width="0" layer="20"/>
 <wire x1="5.2705" y1="-4.445" x2="5.2705" y2="4.445" width="0" layer="20"/>
 <wire x1="5.2705" y1="4.445" x2="7.874" y2="4.445" width="0" layer="20"/>
-<wire x1="-12.065" y1="-17.399" x2="12.065" y2="-17.399" width="0" layer="20"/>
-<wire x1="-2.5654" y1="-14.5796" x2="2.5654" y2="-14.5796" width="0" layer="20"/>
-<wire x1="2.5654" y1="-14.5796" x2="2.6924" y2="-14.4526" width="0" layer="20" curve="90"/>
-<wire x1="2.6924" y1="-14.4526" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
+<wire x1="-12.065" y1="-17.399" x2="-3.3274" y2="-17.399" width="0" layer="20"/>
+<wire x1="3.3274" y1="-17.399" x2="12.065" y2="-17.399" width="0" layer="20"/>
+<wire x1="3.3274" y1="-17.399" x2="2.6924" y2="-16.764" width="0" layer="20" curve="-90"/>
+<wire x1="2.6924" y1="-16.764" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
 <wire x1="2.6924" y1="-11.8872" x2="0" y2="-9.1948" width="0" layer="20" curve="90"/>
 <wire x1="0" y1="-9.1948" x2="-2.6924" y2="-11.8872" width="0" layer="20" curve="90"/>
-<wire x1="-2.6924" y1="-11.8872" x2="-2.6924" y2="-14.4526" width="0" layer="20"/>
-<wire x1="-2.6924" y1="-14.4526" x2="-2.5654" y2="-14.5796" width="0" layer="20" curve="90"/>
+<wire x1="-2.6924" y1="-11.8872" x2="-2.6924" y2="-16.764" width="0" layer="20"/>
+<wire x1="-2.6924" y1="-16.764" x2="-3.3274" y2="-17.399" width="0" layer="20" curve="-90"/>
 <wire x1="-9" y1="4.86" x2="-9" y2="-4.86" width="0.0508" layer="48"/>
 <wire x1="-9" y1="-4.86" x2="-4" y2="-4.86" width="0.0508" layer="48"/>
 <wire x1="-4" y1="-4.86" x2="-4" y2="4.86" width="0.0508" layer="48"/>
 <wire x1="-4" y1="4.86" x2="-9" y2="4.86" width="0.0508" layer="48"/>
 <wire x1="-12.7" y1="7.366" x2="-12.7" y2="-16.764" width="0" layer="20"/>
+<wire x1="-7.874" y1="3.556" x2="-7.874" y2="1.2065" width="0" layer="20"/>
+<wire x1="-7.874" y1="-3.556" x2="-7.874" y2="-1.2065" width="0" layer="20"/>
+<wire x1="-9.652" y1="-1.2065" x2="-7.874" y2="-1.2065" width="0" layer="20"/>
+<wire x1="-7.112" y1="-3.302" x2="-5.588" y2="-3.302" width="0" layer="48"/>
+<wire x1="-5.588" y1="-3.302" x2="-5.588" y2="3.302" width="0" layer="48"/>
+<wire x1="-5.588" y1="3.302" x2="-7.112" y2="3.302" width="0" layer="48"/>
+<wire x1="-7.112" y1="3.302" x2="-7.112" y2="-3.302" width="0" layer="48"/>
+<wire x1="5.588" y1="-4.0894" x2="5.588" y2="4.0894" width="0" layer="48"/>
+<wire x1="5.588" y1="4.0894" x2="7.112" y2="4.0894" width="0" layer="48"/>
+<wire x1="7.112" y1="-4.0894" x2="5.588" y2="-4.0894" width="0" layer="48"/>
+<wire x1="7.112" y1="4.0894" x2="7.112" y2="-4.0894" width="0" layer="48"/>
+<wire x1="-9.652" y1="-1.2065" x2="-9.652" y2="1.2065" width="0" layer="20"/>
+<wire x1="-9.652" y1="1.2065" x2="-7.874" y2="1.2065" width="0" layer="20"/>
+<smd name="P2" x="-8.89" y="-1.905" dx="1.27" dy="0.635" layer="1"/>
+<smd name="P1" x="-8.89" y="1.905" dx="1.27" dy="0.635" layer="1"/>
+<smd name="P3" x="-8.89" y="-1.905" dx="1.27" dy="0.635" layer="16" rot="R180"/>
+<smd name="P4" x="-8.89" y="1.905" dx="1.27" dy="0.635" layer="16" rot="R180"/>
 </package>
 <package name="WDFN-6">
 <smd name="P1" x="-1.05" y="0.65" dx="0.65" dy="0.25" layer="1"/>
@@ -1438,6 +1454,32 @@ W = angled&lt;p&gt;
 <wire x1="-3.81" y1="-12.26" x2="3.81" y2="-12.26" width="0.127" layer="48"/>
 <text x="-5.08" y="-10.16" size="0.762" layer="48">MAX DIST TO EDGE</text>
 <text x="-5.08" y="-12.26" size="0.762" layer="48">MAX DIST OF CONN</text>
+</package>
+</packages>
+</library>
+<library name="SparkFun-LED">
+<description>&lt;h3&gt;SparkFun Electronics' preferred foot prints&lt;/h3&gt;
+In this library you'll find discrete LEDs for illumination or indication, but no displays.&lt;br&gt;&lt;br&gt;
+We've spent an enormous amount of time creating and checking these footprints and parts, but it is the end user's responsibility to ensure correctness and suitablity for a given componet or application. If you enjoy using this library, please buy one of our products at www.sparkfun.com.
+&lt;br&gt;&lt;br&gt;
+&lt;b&gt;Licensing:&lt;/b&gt; CC v3.0 Share-Alike You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
+<packages>
+<package name="LED3MM">
+<description>&lt;B&gt;LED&lt;/B&gt;&lt;p&gt;
+3 mm, round</description>
+<wire x1="1.5748" y1="-1.27" x2="1.5748" y2="1.27" width="0.254" layer="51"/>
+<wire x1="0" y1="2.032" x2="1.561" y2="1.3009" width="0.254" layer="21" curve="-50.193108" cap="flat"/>
+<wire x1="-1.7929" y1="0.9562" x2="0" y2="2.032" width="0.254" layer="21" curve="-61.926949" cap="flat"/>
+<wire x1="0" y1="-2.032" x2="1.5512" y2="-1.3126" width="0.254" layer="21" curve="49.763022" cap="flat"/>
+<wire x1="-1.7643" y1="-1.0082" x2="0" y2="-2.032" width="0.254" layer="21" curve="60.255215" cap="flat"/>
+<wire x1="-2.032" y1="0" x2="-1.7891" y2="0.9634" width="0.254" layer="51" curve="-28.301701" cap="flat"/>
+<wire x1="-2.032" y1="0" x2="-1.7306" y2="-1.065" width="0.254" layer="51" curve="31.60822" cap="flat"/>
+<wire x1="1.5748" y1="1.2954" x2="1.5748" y2="0.7874" width="0.254" layer="21"/>
+<wire x1="1.5748" y1="-1.2954" x2="1.5748" y2="-0.8382" width="0.254" layer="21"/>
+<pad name="A" x="-1.27" y="0" drill="0.8128" diameter="1.8796"/>
+<pad name="K" x="1.27" y="0" drill="0.8128" diameter="1.8796"/>
+<text x="1.905" y="0.381" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="1.905" y="-1.651" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
 </package>
 </packages>
 </library>
@@ -1750,6 +1792,8 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <element name="R28" library="rcl" package="R0603" value="10k" x="28.336875" y="6.82625" rot="R270"/>
 <element name="R29" library="rcl" package="R0603" value="10" x="29.606875" y="9.04875" rot="R270"/>
 <element name="R30" library="rcl" package="R0603" value="10" x="30.48" y="3.095625" rot="R180"/>
+<element name="R31" library="rcl" package="R0603" value="" x="19.84375" y="-8.651875" rot="R90"/>
+<element name="LED1" library="SparkFun-LED" package="LED3MM" value="" x="21.59" y="-12.065"/>
 </elements>
 <signals>
 <signal name="L1P2">
@@ -1880,6 +1924,9 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="12.54125" y1="0.873125" x2="13.0175" y2="0.396875" width="0.254" layer="1"/>
 <wire x1="13.0175" y1="0.396875" x2="13.0175" y2="0.17" width="0.254" layer="1"/>
 <wire x1="13.0175" y1="0.17" x2="13.335" y2="-0.1475" width="0.254" layer="1"/>
+<contactref element="R31" pad="2"/>
+<wire x1="18.57375" y1="-7.46125" x2="19.503125" y2="-7.46125" width="0.4064" layer="1"/>
+<wire x1="19.503125" y1="-7.46125" x2="19.84375" y2="-7.801875" width="0.4064" layer="1"/>
 </signal>
 <signal name="GND">
 <contactref element="U3" pad="P2"/>
@@ -2013,6 +2060,7 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <via x="17.700625" y="-0.79375" extent="1-16" drill="0.508"/>
 <via x="17.30375" y="-3.81" extent="1-16" drill="0.508"/>
 <via x="27.94" y="-19.685" extent="1-16" drill="0.508"/>
+<contactref element="LED1" pad="K"/>
 </signal>
 <signal name="L_SIG">
 <contactref element="U3" pad="P1"/>
@@ -2502,15 +2550,33 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="32.385" y1="14.605" x2="35.56" y2="17.78" width="0.254" layer="1"/>
 <wire x1="35.56" y1="17.78" x2="35.56" y2="18.415" width="0.254" layer="1"/>
 </signal>
+<signal name="N$24">
+<contactref element="R31" pad="1"/>
+<contactref element="LED1" pad="A"/>
+<wire x1="19.84375" y1="-9.501875" x2="19.84375" y2="-11.58875" width="0.4064" layer="1"/>
+<wire x1="19.84375" y1="-11.58875" x2="20.32" y2="-12.065" width="0.4064" layer="1"/>
+</signal>
 </signals>
 <errors>
-<approved hash="4,1,8810f97f250cede8"/>
+<approved hash="4,1,af24383ceaf8d667"/>
+<approved hash="4,1,1fc3f84f561f1514"/>
+<approved hash="4,1,5dadae3f31235301"/>
+<approved hash="4,1,6cda32e993e45c67"/>
+<approved hash="4,1,9695e12ec4c1c2ea"/>
+<approved hash="4,1,e5159c3ec5d1cf6a"/>
 <approved hash="4,1,e058b455a97d64bb"/>
+<approved hash="4,1,8810f97f250cede8"/>
 <approved hash="4,1,c30066bf7a4f4763"/>
 <approved hash="4,1,534482633214d382"/>
-<approved hash="4,1,6b3393dc7d85223d"/>
 <approved hash="4,1,c8bf2a942077dde9"/>
+<approved hash="4,1,6b3393dc7d85223d"/>
 <approved hash="4,1,c33fdb9de70d232d"/>
+<approved hash="4,16,6cda32e993e45c67"/>
+<approved hash="4,16,1fc3f84f561f1514"/>
+<approved hash="4,16,af24383ceaf8d667"/>
+<approved hash="4,16,5dadae3f31235301"/>
+<approved hash="4,16,e5159c3ec5d1cf6a"/>
+<approved hash="4,16,9695e12ec4c1c2ea"/>
 </errors>
 </board>
 </drawing>
