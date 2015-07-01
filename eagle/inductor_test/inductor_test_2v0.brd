@@ -1685,15 +1685,15 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="296-22191-1-ND" x="15.875" y="8.255" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="16.4625" y="1.15875" size="1.016" layer="25" font="vector"/>
 </element>
-<element name="C3" library="rcl" package="C0402" value="" x="20.240625" y="2.143125" smashed="yes" rot="R180">
+<element name="C3" library="rcl" package="C0402" value="0.1uF" x="20.240625" y="2.143125" smashed="yes" rot="R180">
 <attribute name="NAME" x="16.430625" y="2.460625" size="1.016" layer="25" font="vector"/>
 <attribute name="VALUE" x="20.875625" y="4.048125" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="R6" library="rcl" package="R0402" value="" x="19.685" y="-0.9525" smashed="yes">
+<element name="R6" library="rcl" package="R0402" value="4.99k/1.3M" x="19.685" y="-0.9525" smashed="yes">
 <attribute name="NAME" x="16.430625" y="-0.15875" size="1.016" layer="25" font="vector"/>
 <attribute name="VALUE" x="19.05" y="-2.8575" size="1.27" layer="27"/>
 </element>
-<element name="R7" library="rcl" package="R0402" value="" x="19.685" y="-2.143125" smashed="yes" rot="R180">
+<element name="R7" library="rcl" package="R0402" value="4.99/1k" x="19.685" y="-2.143125" smashed="yes" rot="R180">
 <attribute name="NAME" x="19.923125" y="-2.8575" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="20.32" y="-0.238125" size="1.27" layer="27" rot="R180"/>
 </element>
@@ -1701,19 +1701,19 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="MAX4238AUT+TCT-ND" x="15.875" y="-9.525" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="12.099375" y="-8.66" size="1.016" layer="25" font="vector"/>
 </element>
-<element name="C4" library="rcl" package="C0402" value="" x="16.8275" y="-7.381875" smashed="yes" rot="R180">
+<element name="C4" library="rcl" package="C0402" value="0.1uF" x="16.8275" y="-7.381875" smashed="yes" rot="R180">
 <attribute name="NAME" x="18.7325" y="-5.635625" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="17.4625" y="-5.476875" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="R8" library="rcl" package="R0402" value="" x="16.589375" y="-12.85875" smashed="yes">
+<element name="R8" library="rcl" package="R0402" value="4.99/1k" x="16.589375" y="-12.85875" smashed="yes">
 <attribute name="NAME" x="15.5575" y="-12.3825" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="15.954375" y="-14.76375" size="1.27" layer="27"/>
 </element>
-<element name="R9" library="rcl" package="R0402" value="" x="16.589375" y="-11.58875" smashed="yes" rot="R180">
+<element name="R9" library="rcl" package="R0402" value="4.99k/1.3M" x="16.589375" y="-11.58875" smashed="yes" rot="R180">
 <attribute name="NAME" x="15.5575" y="-11.191875" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="17.224375" y="-9.68375" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="C5" library="rcl" package="C0402" value="" x="22.304375" y="-19.764375" smashed="yes" rot="R180">
+<element name="C5" library="rcl" package="C0402" value="0.1uF" x="22.304375" y="-19.764375" smashed="yes" rot="R180">
 <attribute name="NAME" x="19.923125" y="-19.20875" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="22.939375" y="-17.859375" size="1.27" layer="27" rot="R180"/>
 </element>
@@ -1721,23 +1721,23 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="LMP2014MT/NOPB-ND" x="29.21" y="-19.685" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="31.59125" y="-23.731875" size="1.016" layer="25" font="vector"/>
 </element>
-<element name="R10" library="rcl" package="R0402" value="" x="24.526875" y="-17.224375" smashed="yes" rot="R90">
+<element name="R10" library="rcl" package="R0402" value="4.99k/1.3M" x="24.526875" y="-17.224375" smashed="yes" rot="R90">
 <attribute name="NAME" x="26.273125" y="-17.30375" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="26.431875" y="-17.859375" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="R11" library="rcl" package="R0402" value="" x="23.01875" y="-17.224375" smashed="yes" rot="R270">
+<element name="R11" library="rcl" package="R0402" value="4.99/1k" x="23.01875" y="-17.224375" smashed="yes" rot="R270">
 <attribute name="NAME" x="19.446875" y="-15.795625" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="21.11375" y="-16.589375" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="C6" library="rcl" package="C0402" value="" x="28.495625" y="-3.413125" smashed="yes" rot="R270">
+<element name="C6" library="rcl" package="C0402" value="1.5uF" x="28.495625" y="-3.413125" smashed="yes" rot="R270">
 <attribute name="NAME" x="31.511875" y="-4.7625" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="26.590625" y="-2.778125" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="C7" library="rcl" package="C0402" value="" x="22.304375" y="-20.875625" smashed="yes">
+<element name="C7" library="rcl" package="C0402" value="1.5uF" x="22.304375" y="-20.875625" smashed="yes">
 <attribute name="NAME" x="19.923125" y="-20.32" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="21.669375" y="-22.780625" size="1.27" layer="27"/>
 </element>
-<element name="C8" library="rcl" package="C0402" value="" x="27.6225" y="-10.4775" smashed="yes" rot="R90">
+<element name="C8" library="rcl" package="C0402" value="1.5uF" x="27.6225" y="-10.4775" smashed="yes" rot="R90">
 <attribute name="NAME" x="27.225625" y="-12.779375" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="29.5275" y="-11.1125" size="1.27" layer="27" rot="R90"/>
 </element>
@@ -1750,11 +1750,11 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <element name="R4" library="rcl" package="R0402" value="75" x="3.81" y="-6.35" smashed="yes" rot="R90">
 <attribute name="NAME" x="4.445" y="-9.36625" size="1.016" layer="25" font="vector" rot="R90"/>
 </element>
-<element name="C1" library="rcl" package="C0402" value="" x="8.255" y="6.0325" smashed="yes">
+<element name="C1" library="rcl" package="C0402" value="1.5uF" x="8.255" y="6.0325" smashed="yes">
 <attribute name="NAME" x="5.3975" y="6.429375" size="1.016" layer="25" font="vector"/>
 <attribute name="VALUE" x="7.62" y="4.1275" size="1.27" layer="27"/>
 </element>
-<element name="R5" library="rcl" package="R0402" value="" x="12.7" y="3.81" smashed="yes" rot="R270">
+<element name="R5" library="rcl" package="R0402" value="20k" x="12.7" y="3.81" smashed="yes" rot="R270">
 <attribute name="NAME" x="13.414375" y="5.635625" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="10.795" y="4.445" size="1.27" layer="27" rot="R270"/>
 </element>
@@ -1762,67 +1762,67 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="296-22671-1-ND" x="27.305" y="-6.985" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NAME" x="29.96625" y="-9.07875" size="1.016" layer="25" font="vector" rot="R90"/>
 </element>
-<element name="C2" library="rcl" package="C0402" value="" x="21.510625" y="-1.508125" smashed="yes" rot="R90">
+<element name="C2" library="rcl" package="C0402" value="Sh/10uF" x="21.510625" y="-1.508125" smashed="yes" rot="R90">
 <attribute name="NAME" x="21.986875" y="-4.365625" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="23.415625" y="-2.143125" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="C9" library="rcl" package="C0402" value="" x="16.589375" y="-14.12875" smashed="yes">
+<element name="C9" library="rcl" package="C0402" value="Sh/10uF" x="16.589375" y="-14.12875" smashed="yes">
 <attribute name="NAME" x="15.5575" y="-13.573125" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="15.954375" y="-16.03375" size="1.27" layer="27"/>
 </element>
-<element name="C10" library="rcl" package="C0402" value="" x="21.43125" y="-17.224375" smashed="yes" rot="R270">
+<element name="C10" library="rcl" package="C0402" value="Sh/10uF" x="21.43125" y="-17.224375" smashed="yes" rot="R270">
 <attribute name="NAME" x="18.018125" y="-15.795625" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="19.52625" y="-16.589375" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R1" library="rcl" package="R0402" value="" x="28.8925" y="-10.4775" smashed="yes" rot="R270">
+<element name="R1" library="rcl" package="R0402" value="20k" x="28.8925" y="-10.4775" smashed="yes" rot="R270">
 <attribute name="NAME" x="28.73375" y="-12.779375" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="26.9875" y="-9.8425" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R12" library="rcl" package="R0402" value="" x="29.845" y="-3.413125" smashed="yes" rot="R90">
+<element name="R12" library="rcl" package="R0402" value="20k" x="29.845" y="-3.413125" smashed="yes" rot="R90">
 <attribute name="NAME" x="32.623125" y="-4.7625" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="31.75" y="-4.048125" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="R13" library="rcl" package="R0402" value="" x="28.575" y="-22.939375" smashed="yes">
+<element name="R13" library="rcl" package="R0402" value="20k" x="28.575" y="-22.939375" smashed="yes">
 <attribute name="NAME" x="27.14625" y="-24.685625" size="1.016" layer="25" font="vector"/>
 <attribute name="VALUE" x="27.94" y="-24.844375" size="1.27" layer="27"/>
 </element>
-<element name="R14" library="rcl" package="R0402" value="" x="25.796875" y="-9.604375" smashed="yes" rot="R180">
+<element name="R14" library="rcl" package="R0402" value="887k" x="25.796875" y="-9.604375" smashed="yes" rot="R180">
 <attribute name="NAME" x="24.526875" y="-8.255" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="26.431875" y="-7.699375" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="R15" library="rcl" package="R0402" value="" x="25.796875" y="-11.1125" smashed="yes">
+<element name="R15" library="rcl" package="R0402" value="30k/29.8k" x="25.796875" y="-11.1125" smashed="yes">
 <attribute name="NAME" x="24.526875" y="-10.874375" size="1.016" layer="25" font="vector"/>
 <attribute name="VALUE" x="25.161875" y="-13.0175" size="1.27" layer="27"/>
 </element>
-<element name="C11" library="rcl" package="C0402" value="" x="25.796875" y="-12.7" smashed="yes">
+<element name="C11" library="rcl" package="C0402" value="Sh/10uF" x="25.796875" y="-12.7" smashed="yes">
 <attribute name="NAME" x="22.621875" y="-15.636875" size="1.016" layer="25" font="vector"/>
 <attribute name="VALUE" x="25.161875" y="-14.605" size="1.27" layer="27"/>
 </element>
-<element name="R16" library="rcl" package="R0402" value="" x="26.590625" y="-3.96875" smashed="yes" rot="R180">
+<element name="R16" library="rcl" package="R0402" value="887k" x="26.590625" y="-3.96875" smashed="yes" rot="R180">
 <attribute name="NAME" x="27.860625" y="-0.79375" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="27.225625" y="-2.06375" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="R17" library="rcl" package="R0402" value="" x="26.590625" y="-2.54" smashed="yes">
+<element name="R17" library="rcl" package="R0402" value="30k/29.8k" x="26.590625" y="-2.54" smashed="yes">
 <attribute name="NAME" x="27.860625" y="0.3175" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="25.955625" y="-4.445" size="1.27" layer="27"/>
 </element>
-<element name="C12" library="rcl" package="C0402" value="" x="24.685625" y="-3.175" smashed="yes" rot="R270">
+<element name="C12" library="rcl" package="C0402" value="Sh/10uF" x="24.685625" y="-3.175" smashed="yes" rot="R270">
 <attribute name="NAME" x="22.939375" y="-1.666875" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="22.780625" y="-2.54" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R18" library="rcl" package="R0402" value="" x="24.765" y="-21.9075" smashed="yes" rot="R270">
+<element name="R18" library="rcl" package="R0402" value="887k" x="24.765" y="-21.9075" smashed="yes" rot="R270">
 <attribute name="NAME" x="24.28875" y="-22.86" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="22.86" y="-21.2725" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="R19" library="rcl" package="R0402" value="" x="23.098125" y="-22.780625" smashed="yes" rot="R90">
+<element name="R19" library="rcl" package="R0402" value="30k/29.8k" x="23.098125" y="-22.780625" smashed="yes" rot="R90">
 <attribute name="NAME" x="23.8125" y="-26.51125" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="25.003125" y="-23.415625" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="C13" library="rcl" package="C0402" value="" x="21.43125" y="-22.780625" smashed="yes" rot="R90">
+<element name="C13" library="rcl" package="C0402" value="Sh/10uF" x="21.43125" y="-22.780625" smashed="yes" rot="R90">
 <attribute name="NAME" x="22.70125" y="-26.51125" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="23.33625" y="-23.415625" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="C14" library="rcl" package="C0402" value="" x="25.0825" y="-6.50875" smashed="yes" rot="R270">
+<element name="C14" library="rcl" package="C0402" value="0.1uF" x="25.0825" y="-6.50875" smashed="yes" rot="R270">
 <attribute name="NAME" x="21.986875" y="-5.23875" size="1.016" layer="25" font="vector" rot="R270"/>
 <attribute name="VALUE" x="23.1775" y="-5.87375" size="1.27" layer="27" rot="R270"/>
 </element>
@@ -1830,39 +1830,63 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="296-22671-1-ND" x="12.065" y="0.9525" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="8.530625" y="0.50625" size="1.016" layer="25" font="vector" rot="R270"/>
 </element>
-<element name="C15" library="rcl" package="C0402" value="" x="14.12875" y="0.3175" smashed="yes" rot="R90">
+<element name="C15" library="rcl" package="C0402" value="0.1uF" x="14.12875" y="0.3175" smashed="yes" rot="R90">
 <attribute name="NAME" x="15.875" y="0.396875" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="16.03375" y="-0.3175" size="1.27" layer="27" rot="R90"/>
 </element>
-<element name="R20" library="rcl" package="R0402" value="" x="11.033125" y="3.175" smashed="yes">
+<element name="R20" library="rcl" package="R0402" value="100k" x="11.033125" y="3.175" smashed="yes">
 <attribute name="NAME" x="12.85875" y="6.19125" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="10.398125" y="1.27" size="1.27" layer="27"/>
 </element>
-<element name="R21" library="rcl" package="R0402" value="" x="11.033125" y="4.28625" smashed="yes" rot="R180">
+<element name="R21" library="rcl" package="R0402" value="100k" x="11.033125" y="4.28625" smashed="yes" rot="R180">
 <attribute name="NAME" x="12.85875" y="7.46125" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="11.668125" y="6.19125" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="R22" library="rcl" package="R0402" value="" x="10.95375" y="-2.54" smashed="yes" rot="R180">
+<element name="R22" library="rcl" package="R0402" value="100k" x="10.95375" y="-2.54" smashed="yes" rot="R180">
 <attribute name="NAME" x="13.731875" y="-4.524375" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="11.58875" y="-0.635" size="1.27" layer="27" rot="R180"/>
 </element>
-<element name="R23" library="rcl" package="R0402" value="" x="10.95375" y="-1.349375" smashed="yes">
+<element name="R23" library="rcl" package="R0402" value="1.6k" x="10.95375" y="-1.349375" smashed="yes">
 <attribute name="NAME" x="13.731875" y="-3.33375" size="1.016" layer="25" font="vector" rot="R180"/>
 <attribute name="VALUE" x="10.31875" y="-3.254375" size="1.27" layer="27"/>
 </element>
 <element name="U$2" library="powerfilm" package="NEMA_F2" value="" x="0" y="0" smashed="yes"/>
-<element name="TP1" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="14.605" smashed="yes"/>
-<element name="TP2" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="6.985" smashed="yes"/>
-<element name="TP3" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="3.175" smashed="yes"/>
-<element name="TP4" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-4.7625" smashed="yes"/>
-<element name="TP5" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-16.51" smashed="yes"/>
-<element name="TP6" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-12.7" smashed="yes"/>
-<element name="TP7" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-24.13" smashed="yes"/>
-<element name="TP8" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-27.94" smashed="yes"/>
-<element name="TP9" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="10.795" smashed="yes"/>
-<element name="TP10" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-0.635" smashed="yes"/>
-<element name="TP11" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-20.32" smashed="yes"/>
-<element name="TP12" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-8.89" smashed="yes"/>
+<element name="TP1" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="14.605" smashed="yes">
+<attribute name="DIGIKEY" value="36-5126-ND" x="35.56" y="14.605" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP2" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="6.985" smashed="yes">
+<attribute name="DIGIKEY" value="36-5126-ND" x="35.56" y="6.985" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP3" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="3.175" smashed="yes">
+<attribute name="DIGIKEY" value="36-5128-ND" x="35.56" y="3.175" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP4" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-4.7625" smashed="yes">
+<attribute name="DIGIKEY" value="36-5128-ND" x="35.56" y="-4.7625" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP5" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-16.51" smashed="yes">
+<attribute name="DIGIKEY" value="36-5014-ND" x="35.56" y="-16.51" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP6" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-12.7" smashed="yes">
+<attribute name="DIGIKEY" value="36-5014-ND" x="35.56" y="-12.7" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP7" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-24.13" smashed="yes">
+<attribute name="DIGIKEY" value="36-5010-ND" x="35.56" y="-24.13" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP8" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-27.94" smashed="yes">
+<attribute name="DIGIKEY" value="36-5010-ND" x="35.56" y="-27.94" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP9" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="10.795" smashed="yes">
+<attribute name="DIGIKEY" value="36-5011-ND" x="35.56" y="10.795" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP10" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-0.635" smashed="yes">
+<attribute name="DIGIKEY" value="36-5011-ND" x="35.56" y="-0.635" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP11" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-20.32" smashed="yes">
+<attribute name="DIGIKEY" value="36-5011-ND" x="35.56" y="-20.32" size="1.778" layer="27" display="off"/>
+</element>
+<element name="TP12" library="skyspecs" package="TP_MULT" value="TP_MULT" x="35.56" y="-8.89" smashed="yes">
+<attribute name="DIGIKEY" value="36-5011-ND" x="35.56" y="-8.89" size="1.778" layer="27" display="off"/>
+</element>
 <element name="U6" library="powerfilm" package="WDFN-6" value="TPS62122" x="20.955" y="10.16" smashed="yes" rot="R90">
 <attribute name="DIGIKEY" value="296-27695-1-ND" x="4.445" y="5.08" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="NAME" x="19.05" y="9.36625" size="1.016" layer="25" font="vector" rot="R90"/>
@@ -1931,13 +1955,14 @@ This Sunstone Circuits 2 Layer .DRU has been set to cover our minimum requiremen
 <element name="R30" library="rcl" package="R0603" value="10" x="30.48" y="3.095625" smashed="yes" rot="R180">
 <attribute name="NAME" x="30.7975" y="1.190625" size="1.016" layer="25" font="vector" rot="R180"/>
 </element>
-<element name="R31" library="rcl" package="R0603" value="" x="19.84375" y="-8.651875" smashed="yes" rot="R90">
+<element name="R31" library="rcl" package="R0603" value="240" x="19.84375" y="-8.651875" smashed="yes" rot="R90">
 <attribute name="NAME" x="20.32" y="-6.985" size="1.016" layer="25" font="vector" rot="R90"/>
 <attribute name="VALUE" x="21.74875" y="-9.286875" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="LED1" library="SparkFun-LED" package="LED3MM" value="" x="21.59" y="-12.065" smashed="yes">
 <attribute name="NAME" x="18.0975" y="-15.33525" size="1.016" layer="25" font="vector"/>
 <attribute name="VALUE" x="23.495" y="-13.716" size="1.27" layer="27" ratio="10"/>
+<attribute name="DIGIKEY" value="1125-1181-ND" x="21.59" y="-12.065" size="1.778" layer="27" display="off"/>
 </element>
 </elements>
 <signals>

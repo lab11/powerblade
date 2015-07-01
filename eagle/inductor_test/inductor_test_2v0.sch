@@ -8588,87 +8588,111 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <part name="U3" library="powerfilm" deviceset="MCP6V3" device="" value="SC70">
 <attribute name="DIGIKEY" value="296-22191-1-ND"/>
 </part>
-<part name="C3" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="C3" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
-<part name="R6" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R7" library="rcl" deviceset="R-US_" device="R0402"/>
+<part name="R6" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M"/>
+<part name="R7" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k"/>
 <part name="U4" library="powerfilm" deviceset="MAX4238" device="" value="SOT-23-6"/>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
 <part name="GND11" library="supply1" deviceset="GND" device=""/>
-<part name="C4" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="C4" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
-<part name="R8" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R9" library="rcl" deviceset="R-US_" device="R0402"/>
+<part name="R8" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k"/>
+<part name="R9" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M"/>
 <part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
-<part name="C5" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="C5" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
 <part name="U5" library="powerfilm" deviceset="LMP2014" device="" value="TSSOP-14"/>
 <part name="GND14" library="supply1" deviceset="GND" device=""/>
-<part name="R10" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R11" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="C6" library="rcl" deviceset="C-EU" device="C0402"/>
-<part name="C7" library="rcl" deviceset="C-EU" device="C0402"/>
-<part name="C8" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="R10" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M"/>
+<part name="R11" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k"/>
+<part name="C6" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
+<part name="C7" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
+<part name="C8" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
 <part name="R2" library="rcl" deviceset="R-US_" device="R0402" value="200"/>
 <part name="R3" library="rcl" deviceset="R-US_" device="R0402" value="1M"/>
 <part name="R4" library="rcl" deviceset="R-US_" device="R0402" value="75"/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="+3V1" library="supply1" deviceset="+3V3" device=""/>
-<part name="C1" library="rcl" deviceset="C-EU" device="C0402"/>
-<part name="R5" library="rcl" deviceset="R-US_" device="R0402"/>
+<part name="C1" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
+<part name="R5" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
 <part name="U1" library="powerfilm" deviceset="OPA2369" device=""/>
-<part name="C2" library="rcl" deviceset="C-EU" device="C0402"/>
-<part name="C9" library="rcl" deviceset="C-EU" device="C0402"/>
-<part name="C10" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="C2" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
+<part name="C9" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
+<part name="C10" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
-<part name="R1" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R12" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R13" library="rcl" deviceset="R-US_" device="R0402"/>
+<part name="R1" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
+<part name="R12" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
+<part name="R13" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
-<part name="R14" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R15" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="C11" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="R14" library="rcl" deviceset="R-US_" device="R0402" value="887k"/>
+<part name="R15" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k"/>
+<part name="C11" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
-<part name="R16" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R17" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="C12" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="R16" library="rcl" deviceset="R-US_" device="R0402" value="887k"/>
+<part name="R17" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k"/>
+<part name="C12" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
-<part name="R18" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R19" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="C13" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="R18" library="rcl" deviceset="R-US_" device="R0402" value="887k"/>
+<part name="R19" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k"/>
+<part name="C13" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
 <part name="+3V2" library="supply1" deviceset="+3V3" device=""/>
-<part name="C14" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="C14" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="GND15" library="supply1" deviceset="GND" device=""/>
 <part name="U2" library="powerfilm" deviceset="OPA2369" device=""/>
 <part name="GND16" library="supply1" deviceset="GND" device=""/>
-<part name="C15" library="rcl" deviceset="C-EU" device="C0402"/>
+<part name="C15" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="GND17" library="supply1" deviceset="GND" device=""/>
 <part name="+3V6" library="supply1" deviceset="+3V3" device=""/>
-<part name="R20" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R21" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R22" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="R23" library="rcl" deviceset="R-US_" device="R0402"/>
+<part name="R20" library="rcl" deviceset="R-US_" device="R0402" value="100k"/>
+<part name="R21" library="rcl" deviceset="R-US_" device="R0402" value="100k"/>
+<part name="R22" library="rcl" deviceset="R-US_" device="R0402" value="100k"/>
+<part name="R23" library="rcl" deviceset="R-US_" device="R0402" value="1.6k"/>
 <part name="+3V7" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND18" library="supply1" deviceset="GND" device=""/>
 <part name="+3V8" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND19" library="supply1" deviceset="GND" device=""/>
-<part name="TP1" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP2" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP3" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP4" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP5" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP6" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP7" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP8" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP9" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP10" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP11" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="TP12" library="skyspecs" deviceset="TP" device="_MULT"/>
+<part name="TP1" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5126-ND"/>
+</part>
+<part name="TP2" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5126-ND"/>
+</part>
+<part name="TP3" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5128-ND"/>
+</part>
+<part name="TP4" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5128-ND"/>
+</part>
+<part name="TP5" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5014-ND"/>
+</part>
+<part name="TP6" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5014-ND"/>
+</part>
+<part name="TP7" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5010-ND"/>
+</part>
+<part name="TP8" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5010-ND"/>
+</part>
+<part name="TP9" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5011-ND"/>
+</part>
+<part name="TP10" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5011-ND"/>
+</part>
+<part name="TP11" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5011-ND"/>
+</part>
+<part name="TP12" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5011-ND"/>
+</part>
 <part name="GND20" library="supply1" deviceset="GND" device=""/>
 <part name="GND21" library="supply1" deviceset="GND" device=""/>
 <part name="U6" library="powerfilm" deviceset="TPS62122" device=""/>
@@ -8721,8 +8745,10 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <part name="R30" library="rcl" deviceset="R-US_" device="R0603" value="10"/>
 <part name="GND28" library="supply1" deviceset="GND" device=""/>
 <part name="+3V11" library="supply1" deviceset="+3V3" device=""/>
-<part name="R31" library="rcl" deviceset="R-US_" device="R0603"/>
-<part name="LED1" library="SparkFun-LED" deviceset="LED" device="3MM"/>
+<part name="R31" library="rcl" deviceset="R-US_" device="R0603" value="240"/>
+<part name="LED1" library="SparkFun-LED" deviceset="LED" device="3MM">
+<attribute name="DIGIKEY" value="1125-1181-ND"/>
+</part>
 <part name="GND29" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
@@ -9490,7 +9516,9 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <instance part="GND28" gate="1" x="76.2" y="73.66"/>
 <instance part="+3V11" gate="G$1" x="30.48" y="73.66"/>
 <instance part="R31" gate="G$1" x="111.76" y="-2.54" rot="R90"/>
-<instance part="LED1" gate="G$1" x="111.76" y="-15.24"/>
+<instance part="LED1" gate="G$1" x="111.76" y="-15.24">
+<attribute name="DIGIKEY" x="111.76" y="-15.24" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND29" gate="1" x="111.76" y="-30.48"/>
 </instances>
 <busses>
@@ -9714,18 +9742,42 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <plain>
 </plain>
 <instances>
-<instance part="TP1" gate="G$1" x="-15.24" y="10.16"/>
-<instance part="TP2" gate="G$1" x="17.78" y="10.16"/>
-<instance part="TP3" gate="G$1" x="-15.24" y="2.54"/>
-<instance part="TP4" gate="G$1" x="17.78" y="2.54"/>
-<instance part="TP5" gate="G$1" x="-15.24" y="-5.08"/>
-<instance part="TP6" gate="G$1" x="17.78" y="-5.08"/>
-<instance part="TP7" gate="G$1" x="-15.24" y="-12.7"/>
-<instance part="TP8" gate="G$1" x="17.78" y="-12.7"/>
-<instance part="TP9" gate="G$1" x="-15.24" y="-20.32"/>
-<instance part="TP10" gate="G$1" x="17.78" y="-20.32"/>
-<instance part="TP11" gate="G$1" x="17.78" y="-27.94"/>
-<instance part="TP12" gate="G$1" x="-15.24" y="-27.94"/>
+<instance part="TP1" gate="G$1" x="-15.24" y="10.16">
+<attribute name="DIGIKEY" x="-15.24" y="10.16" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP2" gate="G$1" x="17.78" y="10.16">
+<attribute name="DIGIKEY" x="17.78" y="10.16" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP3" gate="G$1" x="-15.24" y="2.54">
+<attribute name="DIGIKEY" x="-15.24" y="2.54" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP4" gate="G$1" x="17.78" y="2.54">
+<attribute name="DIGIKEY" x="17.78" y="2.54" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP5" gate="G$1" x="-15.24" y="-5.08">
+<attribute name="DIGIKEY" x="-15.24" y="-5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP6" gate="G$1" x="17.78" y="-5.08">
+<attribute name="DIGIKEY" x="17.78" y="-5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP7" gate="G$1" x="-15.24" y="-12.7">
+<attribute name="DIGIKEY" x="-15.24" y="-12.7" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP8" gate="G$1" x="17.78" y="-12.7">
+<attribute name="DIGIKEY" x="17.78" y="-12.7" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP9" gate="G$1" x="-15.24" y="-20.32">
+<attribute name="DIGIKEY" x="-15.24" y="-20.32" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP10" gate="G$1" x="17.78" y="-20.32">
+<attribute name="DIGIKEY" x="17.78" y="-20.32" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP11" gate="G$1" x="17.78" y="-27.94">
+<attribute name="DIGIKEY" x="17.78" y="-27.94" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="TP12" gate="G$1" x="-15.24" y="-27.94">
+<attribute name="DIGIKEY" x="-15.24" y="-27.94" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND20" gate="1" x="10.16" y="-43.18"/>
 <instance part="GND21" gate="1" x="-22.86" y="-43.18"/>
 </instances>
