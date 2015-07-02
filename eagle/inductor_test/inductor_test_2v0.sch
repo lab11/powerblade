@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -8580,79 +8580,171 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 </class>
 </classes>
 <parts>
-<part name="L2" library="rcl" deviceset="L-US" device="L0805"/>
-<part name="L5" library="rcl" deviceset="L-US" device="L0805"/>
-<part name="L1" library="rcl" deviceset="L-US" device="L0805"/>
-<part name="L4" library="rcl" deviceset="L-US" device="L0805"/>
-<part name="L3" library="rcl" deviceset="L-US" device="L0805"/>
+<part name="L2" library="rcl" deviceset="L-US" device="L0805">
+<attribute name="DIGIKEY" value="732-3452-1-ND"/>
+</part>
+<part name="L5" library="rcl" deviceset="L-US" device="L0805">
+<attribute name="DIGIKEY" value="732-3452-1-ND"/>
+</part>
+<part name="L1" library="rcl" deviceset="L-US" device="L0805">
+<attribute name="DIGIKEY" value="732-3452-1-ND"/>
+</part>
+<part name="L4" library="rcl" deviceset="L-US" device="L0805">
+<attribute name="DIGIKEY" value="732-3452-1-ND"/>
+</part>
+<part name="L3" library="rcl" deviceset="L-US" device="L0805">
+<attribute name="DIGIKEY" value="732-3452-1-ND"/>
+</part>
 <part name="U3" library="powerfilm" deviceset="MCP6V3" device="" value="SC70">
 <attribute name="DIGIKEY" value="296-22191-1-ND"/>
 </part>
-<part name="C3" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C3" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<attribute name="DIGIKEY" value="445-4952-1-ND"/>
+</part>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
-<part name="R6" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M"/>
-<part name="R7" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k"/>
+<part name="R6" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M">
+<attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
+<attribute name="DIGIKEY_2" value="541-1.30MLCT-ND "/>
+</part>
+<part name="R7" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k">
+<attribute name="DIGIKEY" value="RMCF0402FT4R99CT-ND"/>
+<attribute name="DIGIKEY_2" value="P1.00KLCT-ND"/>
+</part>
 <part name="U4" library="powerfilm" deviceset="MAX4238" device="" value="SOT-23-6"/>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
 <part name="GND11" library="supply1" deviceset="GND" device=""/>
-<part name="C4" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C4" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<attribute name="DIGIKEY" value="445-4952-1-ND"/>
+</part>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
-<part name="R8" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k"/>
-<part name="R9" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M"/>
+<part name="R8" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k">
+<attribute name="DIGIKEY" value="RMCF0402FT4R99CT-ND"/>
+<attribute name="DIGIKEY_2" value="P1.00KLCT-ND"/>
+</part>
+<part name="R9" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M">
+<attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
+<attribute name="DIGIKEY_2" value="541-1.30MLCT-ND "/>
+</part>
 <part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
-<part name="C5" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C5" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<attribute name="DIGIKEY" value="445-4952-1-ND"/>
+</part>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
 <part name="U5" library="powerfilm" deviceset="LMP2014" device="" value="TSSOP-14"/>
 <part name="GND14" library="supply1" deviceset="GND" device=""/>
-<part name="R10" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M"/>
-<part name="R11" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k"/>
-<part name="C6" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
-<part name="C7" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
-<part name="C8" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
-<part name="R2" library="rcl" deviceset="R-US_" device="R0402" value="200"/>
-<part name="R3" library="rcl" deviceset="R-US_" device="R0402" value="1M"/>
-<part name="R4" library="rcl" deviceset="R-US_" device="R0402" value="75"/>
+<part name="R10" library="rcl" deviceset="R-US_" device="R0402" value="4.99k/1.3M">
+<attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
+<attribute name="DIGIKEY_2" value="541-1.30MLCT-ND "/>
+</part>
+<part name="R11" library="rcl" deviceset="R-US_" device="R0402" value="4.99/1k">
+<attribute name="DIGIKEY" value="RMCF0402FT4R99CT-ND"/>
+<attribute name="DIGIKEY_2" value="P1.00KLCT-ND"/>
+</part>
+<part name="C6" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF">
+<attribute name="DIGIKEY" value="445-13815-1-ND"/>
+</part>
+<part name="C7" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF">
+<attribute name="DIGIKEY" value="445-13815-1-ND"/>
+</part>
+<part name="C8" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF">
+<attribute name="DIGIKEY" value="445-13815-1-ND"/>
+</part>
+<part name="R2" library="rcl" deviceset="R-US_" device="R0402" value="200">
+<attribute name="DIGIKEY" value="P200LCT-ND"/>
+</part>
+<part name="R3" library="rcl" deviceset="R-US_" device="R0402" value="1M">
+<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+</part>
+<part name="R4" library="rcl" deviceset="R-US_" device="R0402" value="75">
+<attribute name="DIGIKEY" value="P75.0LCT-ND"/>
+</part>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="+3V1" library="supply1" deviceset="+3V3" device=""/>
-<part name="C1" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF"/>
-<part name="R5" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
+<part name="C1" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF">
+<attribute name="DIGIKEY" value="445-13815-1-ND"/>
+</part>
+<part name="R5" library="rcl" deviceset="R-US_" device="R0402" value="20k">
+<attribute name="DIGIKEY" value="P20.0KLCT-ND"/>
+</part>
 <part name="U1" library="powerfilm" deviceset="OPA2369" device=""/>
-<part name="C2" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
-<part name="C9" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
-<part name="C10" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
+<part name="C2" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF">
+<attribute name="DIGIKEY" value="1276-1450-1-ND"/>
+</part>
+<part name="C9" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF">
+<attribute name="DIGIKEY" value="1276-1450-1-ND"/>
+</part>
+<part name="C10" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF">
+<attribute name="DIGIKEY" value="1276-1450-1-ND"/>
+</part>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
-<part name="R1" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
-<part name="R12" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
-<part name="R13" library="rcl" deviceset="R-US_" device="R0402" value="20k"/>
+<part name="R1" library="rcl" deviceset="R-US_" device="R0402" value="20k">
+<attribute name="DIGIKEY" value="P20.0KLCT-ND"/>
+</part>
+<part name="R12" library="rcl" deviceset="R-US_" device="R0402" value="20k">
+<attribute name="DIGIKEY" value="P20.0KLCT-ND"/>
+</part>
+<part name="R13" library="rcl" deviceset="R-US_" device="R0402" value="20k">
+<attribute name="DIGIKEY" value="P20.0KLCT-ND"/>
+</part>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
-<part name="R14" library="rcl" deviceset="R-US_" device="R0402" value="887k"/>
-<part name="R15" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k"/>
-<part name="C11" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
+<part name="R14" library="rcl" deviceset="R-US_" device="R0402" value="887k">
+<attribute name="DIGIKEY" value="P887KLCT-ND"/>
+</part>
+<part name="R15" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k">
+<attribute name="DIGIKEY" value="P30.0KLCT-ND"/>
+</part>
+<part name="C11" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF">
+<attribute name="DIGIKEY" value="1276-1450-1-ND"/>
+</part>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
-<part name="R16" library="rcl" deviceset="R-US_" device="R0402" value="887k"/>
-<part name="R17" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k"/>
-<part name="C12" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
+<part name="R16" library="rcl" deviceset="R-US_" device="R0402" value="887k">
+<attribute name="DIGIKEY" value="P887KLCT-ND"/>
+</part>
+<part name="R17" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k">
+<attribute name="DIGIKEY" value="P30.0KLCT-ND"/>
+</part>
+<part name="C12" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF">
+<attribute name="DIGIKEY" value="1276-1450-1-ND"/>
+</part>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
-<part name="R18" library="rcl" deviceset="R-US_" device="R0402" value="887k"/>
-<part name="R19" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k"/>
-<part name="C13" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF"/>
+<part name="R18" library="rcl" deviceset="R-US_" device="R0402" value="887k">
+<attribute name="DIGIKEY" value="P887KLCT-ND"/>
+</part>
+<part name="R19" library="rcl" deviceset="R-US_" device="R0402" value="30k/29.8k">
+<attribute name="DIGIKEY" value="P30.0KLCT-ND"/>
+</part>
+<part name="C13" library="rcl" deviceset="C-EU" device="C0402" value="Sh/10uF">
+<attribute name="DIGIKEY" value="1276-1450-1-ND"/>
+</part>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
 <part name="+3V2" library="supply1" deviceset="+3V3" device=""/>
-<part name="C14" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C14" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<attribute name="DIGIKEY" value="445-4952-1-ND"/>
+</part>
 <part name="GND15" library="supply1" deviceset="GND" device=""/>
 <part name="U2" library="powerfilm" deviceset="OPA2369" device=""/>
 <part name="GND16" library="supply1" deviceset="GND" device=""/>
-<part name="C15" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C15" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<attribute name="DIGIKEY" value="445-4952-1-ND"/>
+</part>
 <part name="GND17" library="supply1" deviceset="GND" device=""/>
 <part name="+3V6" library="supply1" deviceset="+3V3" device=""/>
-<part name="R20" library="rcl" deviceset="R-US_" device="R0402" value="100k"/>
-<part name="R21" library="rcl" deviceset="R-US_" device="R0402" value="100k"/>
-<part name="R22" library="rcl" deviceset="R-US_" device="R0402" value="100k"/>
-<part name="R23" library="rcl" deviceset="R-US_" device="R0402" value="1.6k"/>
+<part name="R20" library="rcl" deviceset="R-US_" device="R0402" value="1M">
+<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+</part>
+<part name="R21" library="rcl" deviceset="R-US_" device="R0402" value="1M">
+<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+</part>
+<part name="R22" library="rcl" deviceset="R-US_" device="R0402" value="1M">
+<attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
+</part>
+<part name="R23" library="rcl" deviceset="R-US_" device="R0402" value="16k">
+<attribute name="DIGIKEY" value="P16.0KLCT-ND"/>
+</part>
 <part name="+3V7" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND18" library="supply1" deviceset="GND" device=""/>
 <part name="+3V8" library="supply1" deviceset="+3V3" device=""/>
@@ -8734,18 +8826,32 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 </part>
 <part name="J1" library="con-lstb" deviceset="MA02-1" device=""/>
 <part name="U7" library="powerfilm" deviceset="MAX9910" device=""/>
-<part name="C22" library="rcl" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C22" library="rcl" deviceset="C-EU" device="C0603" value="0.1uF">
+<attribute name="DIGIKEY" value="445-4952-1-ND"/>
+</part>
 <part name="GND26" library="supply1" deviceset="GND" device=""/>
 <part name="+3V10" library="supply1" deviceset="+3V3" device=""/>
-<part name="TP16" library="skyspecs" deviceset="TP" device="_MULT"/>
-<part name="R27" library="rcl" deviceset="R-US_" device="R0603" value="10k"/>
+<part name="TP16" library="skyspecs" deviceset="TP" device="_MULT">
+<attribute name="DIGIKEY" value="36-5013-ND"/>
+</part>
+<part name="R27" library="rcl" deviceset="R-US_" device="R0603" value="10k">
+<attribute name="DIGIKEY" value="P10KGCT-ND"/>
+</part>
 <part name="GND27" library="supply1" deviceset="GND" device=""/>
-<part name="R28" library="rcl" deviceset="R-US_" device="R0603" value="10k"/>
-<part name="R29" library="rcl" deviceset="R-US_" device="R0603" value="10"/>
-<part name="R30" library="rcl" deviceset="R-US_" device="R0603" value="10"/>
+<part name="R28" library="rcl" deviceset="R-US_" device="R0603" value="10k">
+<attribute name="DIGIKEY" value="P10KGCT-ND"/>
+</part>
+<part name="R29" library="rcl" deviceset="R-US_" device="R0603" value="10">
+<attribute name="DIGIKEY" value="P10GCT-ND"/>
+</part>
+<part name="R30" library="rcl" deviceset="R-US_" device="R0603" value="10">
+<attribute name="DIGIKEY" value="P10GCT-ND"/>
+</part>
 <part name="GND28" library="supply1" deviceset="GND" device=""/>
 <part name="+3V11" library="supply1" deviceset="+3V3" device=""/>
-<part name="R31" library="rcl" deviceset="R-US_" device="R0603" value="240"/>
+<part name="R31" library="rcl" deviceset="R-US_" device="R0603" value="240">
+<attribute name="DIGIKEY" value="P240GCT-ND"/>
+</part>
 <part name="LED1" library="SparkFun-LED" deviceset="LED" device="3MM">
 <attribute name="DIGIKEY" value="1125-1181-ND"/>
 </part>
@@ -8765,18 +8871,38 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <text x="7.62" y="-25.4" size="1.778" layer="97">&gt; DNP R3</text>
 </plain>
 <instances>
-<instance part="L2" gate="G$1" x="-33.02" y="5.08"/>
-<instance part="L5" gate="G$1" x="5.08" y="5.08"/>
-<instance part="L1" gate="G$1" x="-45.72" y="5.08"/>
-<instance part="L4" gate="G$1" x="-7.62" y="5.08"/>
-<instance part="L3" gate="G$1" x="-20.32" y="5.08"/>
-<instance part="R2" gate="G$1" x="30.48" y="5.08" rot="R90"/>
-<instance part="R3" gate="G$1" x="-58.42" y="-5.08"/>
-<instance part="R4" gate="G$1" x="-45.72" y="-15.24" rot="R90"/>
+<instance part="L2" gate="G$1" x="-33.02" y="5.08">
+<attribute name="DIGIKEY" x="-33.02" y="5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="L5" gate="G$1" x="5.08" y="5.08">
+<attribute name="DIGIKEY" x="5.08" y="5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="L1" gate="G$1" x="-45.72" y="5.08">
+<attribute name="DIGIKEY" x="-45.72" y="5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="L4" gate="G$1" x="-7.62" y="5.08">
+<attribute name="DIGIKEY" x="-7.62" y="5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="L3" gate="G$1" x="-20.32" y="5.08">
+<attribute name="DIGIKEY" x="-20.32" y="5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R2" gate="G$1" x="30.48" y="5.08" rot="R90">
+<attribute name="DIGIKEY" x="30.48" y="5.08" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R3" gate="G$1" x="-58.42" y="-5.08">
+<attribute name="DIGIKEY" x="-58.42" y="-5.08" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R4" gate="G$1" x="-45.72" y="-15.24" rot="R90">
+<attribute name="DIGIKEY" x="-45.72" y="-15.24" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="GND1" gate="1" x="-45.72" y="-25.4"/>
 <instance part="+3V1" gate="G$1" x="-68.58" y="5.08"/>
-<instance part="C1" gate="G$1" x="38.1" y="15.24" rot="R90"/>
-<instance part="R5" gate="G$1" x="50.8" y="25.4" rot="R90"/>
+<instance part="C1" gate="G$1" x="38.1" y="15.24" rot="R90">
+<attribute name="DIGIKEY" x="38.1" y="15.24" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R5" gate="G$1" x="50.8" y="25.4" rot="R90">
+<attribute name="DIGIKEY" x="50.8" y="25.4" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -8899,56 +9025,118 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 </plain>
 <instances>
 <instance part="U3" gate="G$1" x="-38.1" y="35.56"/>
-<instance part="C3" gate="G$1" x="-33.02" y="50.8"/>
+<instance part="C3" gate="G$1" x="-33.02" y="50.8">
+<attribute name="DIGIKEY" x="-33.02" y="50.8" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="+3V3" gate="G$1" x="-38.1" y="60.96"/>
 <instance part="GND7" gate="1" x="-38.1" y="22.86"/>
 <instance part="GND8" gate="1" x="-33.02" y="40.64"/>
-<instance part="R6" gate="G$1" x="-38.1" y="15.24"/>
-<instance part="R7" gate="G$1" x="-53.34" y="25.4" rot="R90"/>
+<instance part="R6" gate="G$1" x="-38.1" y="15.24">
+<attribute name="DIGIKEY" x="-38.1" y="15.24" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_2" x="-38.1" y="15.24" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R7" gate="G$1" x="-53.34" y="25.4" rot="R90">
+<attribute name="DIGIKEY" x="-53.34" y="25.4" size="1.27" layer="96" rot="R90" display="off"/>
+<attribute name="DIGIKEY_2" x="-53.34" y="25.4" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="U4" gate="G$1" x="-38.1" y="-17.78"/>
 <instance part="GND10" gate="1" x="-38.1" y="-30.48"/>
 <instance part="GND11" gate="1" x="-33.02" y="-12.7"/>
-<instance part="C4" gate="G$1" x="-33.02" y="-2.54"/>
+<instance part="C4" gate="G$1" x="-33.02" y="-2.54">
+<attribute name="DIGIKEY" x="-33.02" y="-2.54" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="+3V4" gate="G$1" x="-38.1" y="7.62"/>
-<instance part="R8" gate="G$1" x="-53.34" y="-27.94" rot="R90"/>
-<instance part="R9" gate="G$1" x="-38.1" y="-38.1"/>
+<instance part="R8" gate="G$1" x="-53.34" y="-27.94" rot="R90">
+<attribute name="DIGIKEY" x="-53.34" y="-27.94" size="1.27" layer="96" rot="R90" display="off"/>
+<attribute name="DIGIKEY_2" x="-53.34" y="-27.94" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R9" gate="G$1" x="-38.1" y="-38.1">
+<attribute name="DIGIKEY" x="-38.1" y="-38.1" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_2" x="-38.1" y="-38.1" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="+3V5" gate="G$1" x="-38.1" y="-45.72"/>
-<instance part="C5" gate="G$1" x="-33.02" y="-55.88"/>
+<instance part="C5" gate="G$1" x="-33.02" y="-55.88">
+<attribute name="DIGIKEY" x="-33.02" y="-55.88" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND13" gate="1" x="-33.02" y="-66.04"/>
 <instance part="U5" gate="G1" x="-38.1" y="-71.12"/>
 <instance part="U5" gate="G2" x="20.32" y="-73.66"/>
 <instance part="GND14" gate="1" x="-38.1" y="-83.82"/>
-<instance part="R10" gate="G$1" x="-38.1" y="-91.44"/>
-<instance part="R11" gate="G$1" x="-53.34" y="-81.28" rot="R90"/>
-<instance part="C6" gate="G$1" x="-2.54" y="-17.78" rot="R90"/>
-<instance part="C7" gate="G$1" x="-2.54" y="-71.12" rot="R90"/>
-<instance part="C8" gate="G$1" x="-2.54" y="35.56" rot="R90"/>
+<instance part="R10" gate="G$1" x="-38.1" y="-91.44">
+<attribute name="DIGIKEY" x="-38.1" y="-91.44" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_2" x="-38.1" y="-91.44" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R11" gate="G$1" x="-53.34" y="-81.28" rot="R90">
+<attribute name="DIGIKEY" x="-53.34" y="-81.28" size="1.27" layer="96" rot="R90" display="off"/>
+<attribute name="DIGIKEY_2" x="-53.34" y="-81.28" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C6" gate="G$1" x="-2.54" y="-17.78" rot="R90">
+<attribute name="DIGIKEY" x="-2.54" y="-17.78" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C7" gate="G$1" x="-2.54" y="-71.12" rot="R90">
+<attribute name="DIGIKEY" x="-2.54" y="-71.12" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C8" gate="G$1" x="-2.54" y="35.56" rot="R90">
+<attribute name="DIGIKEY" x="-2.54" y="35.56" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="U1" gate="G$1" x="20.32" y="33.02"/>
 <instance part="U1" gate="G$2" x="20.32" y="-20.32"/>
-<instance part="C2" gate="G$1" x="-53.34" y="15.24"/>
-<instance part="C9" gate="G$1" x="-53.34" y="-38.1"/>
-<instance part="C10" gate="G$1" x="-53.34" y="-91.44"/>
+<instance part="C2" gate="G$1" x="-53.34" y="15.24">
+<attribute name="DIGIKEY" x="-53.34" y="15.24" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="C9" gate="G$1" x="-53.34" y="-38.1">
+<attribute name="DIGIKEY" x="-53.34" y="-38.1" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="C10" gate="G$1" x="-53.34" y="-91.44">
+<attribute name="DIGIKEY" x="-53.34" y="-91.44" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND2" gate="1" x="-53.34" y="5.08"/>
 <instance part="GND3" gate="1" x="-53.34" y="-48.26"/>
 <instance part="GND4" gate="1" x="-53.34" y="-101.6"/>
-<instance part="R1" gate="G$1" x="5.08" y="45.72" rot="R90"/>
-<instance part="R12" gate="G$1" x="5.08" y="-10.16" rot="R90"/>
-<instance part="R13" gate="G$1" x="5.08" y="-63.5" rot="R90"/>
+<instance part="R1" gate="G$1" x="5.08" y="45.72" rot="R90">
+<attribute name="DIGIKEY" x="5.08" y="45.72" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R12" gate="G$1" x="5.08" y="-10.16" rot="R90">
+<attribute name="DIGIKEY" x="5.08" y="-10.16" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R13" gate="G$1" x="5.08" y="-63.5" rot="R90">
+<attribute name="DIGIKEY" x="5.08" y="-63.5" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="GND5" gate="1" x="20.32" y="20.32"/>
-<instance part="R14" gate="G$1" x="20.32" y="12.7"/>
-<instance part="R15" gate="G$1" x="5.08" y="22.86" rot="R90"/>
-<instance part="C11" gate="G$1" x="5.08" y="12.7"/>
+<instance part="R14" gate="G$1" x="20.32" y="12.7">
+<attribute name="DIGIKEY" x="20.32" y="12.7" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R15" gate="G$1" x="5.08" y="22.86" rot="R90">
+<attribute name="DIGIKEY" x="5.08" y="22.86" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C11" gate="G$1" x="5.08" y="12.7">
+<attribute name="DIGIKEY" x="5.08" y="12.7" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND6" gate="1" x="5.08" y="2.54"/>
-<instance part="R16" gate="G$1" x="20.32" y="-33.02"/>
-<instance part="R17" gate="G$1" x="5.08" y="-30.48" rot="R90"/>
-<instance part="C12" gate="G$1" x="5.08" y="-40.64"/>
+<instance part="R16" gate="G$1" x="20.32" y="-33.02">
+<attribute name="DIGIKEY" x="20.32" y="-33.02" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R17" gate="G$1" x="5.08" y="-30.48" rot="R90">
+<attribute name="DIGIKEY" x="5.08" y="-30.48" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C12" gate="G$1" x="5.08" y="-40.64">
+<attribute name="DIGIKEY" x="5.08" y="-40.64" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND9" gate="1" x="5.08" y="-50.8"/>
-<instance part="R18" gate="G$1" x="20.32" y="-86.36"/>
-<instance part="R19" gate="G$1" x="5.08" y="-83.82" rot="R90"/>
-<instance part="C13" gate="G$1" x="5.08" y="-93.98"/>
+<instance part="R18" gate="G$1" x="20.32" y="-86.36">
+<attribute name="DIGIKEY" x="20.32" y="-86.36" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R19" gate="G$1" x="5.08" y="-83.82" rot="R90">
+<attribute name="DIGIKEY" x="5.08" y="-83.82" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="C13" gate="G$1" x="5.08" y="-93.98">
+<attribute name="DIGIKEY" x="5.08" y="-93.98" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND12" gate="1" x="5.08" y="-104.14"/>
 <instance part="+3V2" gate="G$1" x="20.32" y="58.42"/>
-<instance part="C14" gate="G$1" x="25.4" y="48.26"/>
+<instance part="C14" gate="G$1" x="25.4" y="48.26">
+<attribute name="DIGIKEY" x="25.4" y="48.26" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND15" gate="1" x="25.4" y="38.1"/>
 </instances>
 <busses>
@@ -9343,13 +9531,23 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 <instance part="U2" gate="G$1" x="0" y="27.94"/>
 <instance part="U2" gate="G$2" x="0" y="-17.78"/>
 <instance part="GND16" gate="1" x="0" y="15.24"/>
-<instance part="C15" gate="G$1" x="5.08" y="45.72"/>
+<instance part="C15" gate="G$1" x="5.08" y="45.72">
+<attribute name="DIGIKEY" x="5.08" y="45.72" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND17" gate="1" x="5.08" y="35.56"/>
 <instance part="+3V6" gate="G$1" x="0" y="55.88"/>
-<instance part="R20" gate="G$1" x="-17.78" y="20.32" rot="R90"/>
-<instance part="R21" gate="G$1" x="-17.78" y="38.1" rot="R90"/>
-<instance part="R22" gate="G$1" x="-17.78" y="-7.62" rot="R90"/>
-<instance part="R23" gate="G$1" x="-17.78" y="-25.4" rot="R90"/>
+<instance part="R20" gate="G$1" x="-17.78" y="20.32" rot="R90">
+<attribute name="DIGIKEY" x="-17.78" y="20.32" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R21" gate="G$1" x="-17.78" y="38.1" rot="R90">
+<attribute name="DIGIKEY" x="-17.78" y="38.1" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R22" gate="G$1" x="-17.78" y="-7.62" rot="R90">
+<attribute name="DIGIKEY" x="-17.78" y="-7.62" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
+<instance part="R23" gate="G$1" x="-17.78" y="-25.4" rot="R90">
+<attribute name="DIGIKEY" x="-17.78" y="-25.4" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="+3V7" gate="G$1" x="-17.78" y="48.26"/>
 <instance part="GND18" gate="1" x="-17.78" y="10.16"/>
 <instance part="+3V8" gate="G$1" x="-17.78" y="2.54"/>
@@ -9498,24 +9696,36 @@ Standard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LE
 </instance>
 <instance part="J1" gate="G$1" x="-55.88" y="2.54"/>
 <instance part="U7" gate="G$1" x="83.82" y="63.5"/>
-<instance part="C22" gate="G$1" x="88.9" y="81.28"/>
+<instance part="C22" gate="G$1" x="88.9" y="81.28">
+<attribute name="DIGIKEY" x="88.9" y="81.28" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND26" gate="1" x="88.9" y="71.12"/>
 <instance part="+3V10" gate="G$1" x="83.82" y="91.44"/>
-<instance part="TP16" gate="G$1" x="106.68" y="63.5"/>
-<instance part="R27" gate="G$1" x="86.36" y="43.18"/>
+<instance part="TP16" gate="G$1" x="106.68" y="63.5">
+<attribute name="DIGIKEY" x="106.68" y="63.5" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="R27" gate="G$1" x="86.36" y="43.18">
+<attribute name="DIGIKEY" x="86.36" y="43.18" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="GND27" gate="1" x="83.82" y="50.8"/>
-<instance part="R28" gate="G$1" x="68.58" y="78.74"/>
+<instance part="R28" gate="G$1" x="68.58" y="78.74">
+<attribute name="DIGIKEY" x="68.58" y="78.74" size="1.27" layer="96" display="off"/>
+</instance>
 <instance part="R29" gate="G$1" x="53.34" y="66.04" smashed="yes">
 <attribute name="NAME" x="49.53" y="67.5386" size="1.778" layer="95"/>
 <attribute name="VALUE" x="56.134" y="67.564" size="1.778" layer="96"/>
+<attribute name="DIGIKEY" x="53.34" y="66.04" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="R30" gate="G$1" x="53.34" y="60.96" smashed="yes">
 <attribute name="NAME" x="49.53" y="62.4586" size="1.778" layer="95"/>
 <attribute name="VALUE" x="56.134" y="62.484" size="1.778" layer="96"/>
+<attribute name="DIGIKEY" x="53.34" y="60.96" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="GND28" gate="1" x="76.2" y="73.66"/>
 <instance part="+3V11" gate="G$1" x="30.48" y="73.66"/>
-<instance part="R31" gate="G$1" x="111.76" y="-2.54" rot="R90"/>
+<instance part="R31" gate="G$1" x="111.76" y="-2.54" rot="R90">
+<attribute name="DIGIKEY" x="111.76" y="-2.54" size="1.27" layer="96" rot="R90" display="off"/>
+</instance>
 <instance part="LED1" gate="G$1" x="111.76" y="-15.24">
 <attribute name="DIGIKEY" x="111.76" y="-15.24" size="1.27" layer="96" display="off"/>
 </instance>
