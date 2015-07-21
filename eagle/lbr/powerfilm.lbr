@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.075" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.025" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="yes" active="yes"/>
@@ -1019,10 +1019,10 @@
 <wire x1="7.112" y1="4.0894" x2="7.112" y2="-4.0894" width="0" layer="48"/>
 <wire x1="-9.6012" y1="0.6985" x2="-9.6012" y2="3.1115" width="0" layer="20"/>
 <wire x1="-9.6012" y1="3.1115" x2="-7.366" y2="3.1115" width="0" layer="20"/>
-<smd name="P2" x="-8.636" y="0" dx="1.524" dy="0.635" layer="1"/>
-<smd name="P1" x="-8.636" y="3.81" dx="1.524" dy="0.635" layer="1"/>
-<smd name="P3" x="-8.636" y="0" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="P4" x="-8.636" y="3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
+<smd name="PA.3" x="-8.636" y="0" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PA.1" x="-8.636" y="3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PA.4" x="-8.636" y="0" dx="1.524" dy="0.635" layer="16" rot="R180"/>
+<smd name="PA.2" x="-8.636" y="3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
 <wire x1="-2.5654" y1="-14.5796" x2="2.5654" y2="-14.5796" width="0" layer="20"/>
 <wire x1="2.5654" y1="-14.5796" x2="2.6924" y2="-14.4526" width="0" layer="20" curve="90"/>
 <wire x1="2.6924" y1="-14.4526" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
@@ -1035,20 +1035,20 @@
 <wire x1="9.6012" y1="3.1115" x2="7.366" y2="3.1115" width="0" layer="20"/>
 <wire x1="9.6012" y1="0.6985" x2="7.366" y2="0.6985" width="0" layer="20"/>
 <wire x1="9.6012" y1="3.1115" x2="9.6012" y2="0.6985" width="0" layer="20"/>
-<smd name="P5" x="8.636" y="3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="P6" x="8.636" y="3.81" dx="1.524" dy="0.635" layer="1"/>
-<smd name="P7" x="8.636" y="0" dx="1.524" dy="0.635" layer="1"/>
-<smd name="P8" x="8.636" y="0" dx="1.524" dy="0.635" layer="16" rot="R180"/>
+<smd name="PB.2" x="8.636" y="3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
+<smd name="PB.1" x="8.636" y="3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PB.3" x="8.636" y="0" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PB.4" x="8.636" y="0" dx="1.524" dy="0.635" layer="16" rot="R180"/>
 <wire x1="-9.6012" y1="-3.1115" x2="-9.6012" y2="-0.6985" width="0" layer="20"/>
 <wire x1="-9.6012" y1="-0.6985" x2="-7.366" y2="-0.6985" width="0" layer="20"/>
 <wire x1="-9.6012" y1="-3.1115" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
-<smd name="P9" x="-8.636" y="-3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="P10" x="-8.636" y="-3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PA.6" x="-8.636" y="-3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
+<smd name="PA.5" x="-8.636" y="-3.81" dx="1.524" dy="0.635" layer="1"/>
 <wire x1="9.6012" y1="-0.6985" x2="7.366" y2="-0.6985" width="0" layer="20"/>
 <wire x1="9.6012" y1="-3.1115" x2="7.366" y2="-3.1115" width="0" layer="20"/>
 <wire x1="9.6012" y1="-0.6985" x2="9.6012" y2="-3.1115" width="0" layer="20"/>
-<smd name="P11" x="8.636" y="-3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="P12" x="8.636" y="-3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PB.6" x="8.636" y="-3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
+<smd name="PB.5" x="8.636" y="-3.81" dx="1.524" dy="0.635" layer="1"/>
 </package>
 </packages>
 <symbols>
@@ -1762,6 +1762,15 @@
 <connects>
 <connect gate="G$1" pin="N" pad="P2A"/>
 <connect gate="G$1" pin="P" pad="P1A"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="F3" package="AC3_F3">
+<connects>
+<connect gate="G$1" pin="N" pad="PB.1 PB.2 PB.3 PB.4 PB.5 PB.6"/>
+<connect gate="G$1" pin="P" pad="PA.1 PA.2 PA.3 PA.4 PA.5 PA.6"/>
 </connects>
 <technologies>
 <technology name=""/>
