@@ -15430,7 +15430,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <device name="F3" package="AC3_F3">
 <connects>
 <connect gate="G$1" pin="N" pad="PB.1 PB.2 PB.3 PB.4 PB.5 PB.6"/>
-<connect gate="G$1" pin="P" pad="PA.1 PA.2 PA.3 PA.4 PA.5 PA.6"/>
+<connect gate="G$1" pin="P" pad="PA.4"/>
 </connects>
 <technologies>
 <technology name=""/>
