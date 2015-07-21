@@ -22,7 +22,7 @@
 
 #include "powerblade_test.h"
 
-//#define CALIBRATE
+#define CALIBRATE
 
 bool ready;
 uint8_t data;
@@ -320,7 +320,7 @@ void transmitTry(void) {
 			wattHoursToAverage = 0;
             voltAmpsToAverage = 0;
 
-//			ready = 1;
+			ready = 1;
 			if(ready == 1) {
 				SYS_EN_OUT &= ~SYS_EN_PIN;
 				uart_enable(1);
@@ -558,12 +558,14 @@ __interrupt void USCI_A0_ISR(void) {
 			uart_send((char*)&Vrms, sizeof(Vrms));
 			break;
 		case 4:
+			truePower = 0xFFFF;
 			uart_send((char*)&truePower, sizeof(truePower));
 			break;
 		case 3:
 			uart_send((char*)&apparentPower, sizeof(apparentPower));
 			break;
 		case 2:
+			wattHours = 0xFFFFFFFF;
 			uart_send((char*)&wattHours, sizeof(wattHours));
 			break;
 		case 1:
