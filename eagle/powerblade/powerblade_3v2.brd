@@ -1254,12 +1254,8 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <description>&lt;b&gt;RESISTOR&lt;/b&gt;</description>
 <wire x1="-0.913" y1="1.219" x2="0.939" y2="1.219" width="0.1524" layer="51"/>
 <wire x1="-0.913" y1="-1.219" x2="0.939" y2="-1.219" width="0.1524" layer="51"/>
-<wire x1="-2.473" y1="1.483" x2="2.473" y2="1.483" width="0.0508" layer="39"/>
-<wire x1="2.473" y1="1.483" x2="2.473" y2="-1.483" width="0.0508" layer="39"/>
-<wire x1="2.473" y1="-1.483" x2="-2.473" y2="-1.483" width="0.0508" layer="39"/>
-<wire x1="-2.473" y1="-1.483" x2="-2.473" y2="1.483" width="0.0508" layer="39"/>
-<smd name="1" x="-1.4" y="0" dx="1.6" dy="2.7" layer="1"/>
-<smd name="2" x="1.4" y="0" dx="1.6" dy="2.7" layer="1"/>
+<smd name="1" x="-1.175" y="0" dx="1.15" dy="2.55" layer="1"/>
+<smd name="2" x="1.175" y="0" dx="1.15" dy="2.55" layer="1"/>
 <text x="-2.54" y="1.905" size="1.27" layer="25">&gt;NAME</text>
 <text x="-2.54" y="-3.175" size="1.27" layer="27">&gt;VALUE</text>
 <rectangle x1="-1.651" y1="-1.3081" x2="-0.9009" y2="1.2918" layer="51"/>
@@ -1433,9 +1429,9 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-9.6012" y1="0.6985" x2="-9.6012" y2="3.1115" width="0" layer="20"/>
 <wire x1="-9.6012" y1="3.1115" x2="-7.366" y2="3.1115" width="0" layer="20"/>
 <smd name="PA.3" x="-8.636" y="0" dx="1.524" dy="0.635" layer="1"/>
-<smd name="PA.1" x="-8.636" y="3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PA.1" x="-8.509" y="3.81" dx="1.27" dy="0.635" layer="1"/>
 <smd name="PA.4" x="-8.636" y="0" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="PA.2" x="-8.636" y="3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
+<smd name="PA.2" x="-8.509" y="3.81" dx="1.27" dy="0.635" layer="16" rot="R180"/>
 <wire x1="-2.5654" y1="-14.5796" x2="2.5654" y2="-14.5796" width="0" layer="20"/>
 <wire x1="2.5654" y1="-14.5796" x2="2.6924" y2="-14.4526" width="0" layer="20" curve="90"/>
 <wire x1="2.6924" y1="-14.4526" x2="2.6924" y2="-11.8872" width="0" layer="20"/>
@@ -1448,20 +1444,20 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="9.6012" y1="3.1115" x2="7.366" y2="3.1115" width="0" layer="20"/>
 <wire x1="9.6012" y1="0.6985" x2="7.366" y2="0.6985" width="0" layer="20"/>
 <wire x1="9.6012" y1="3.1115" x2="9.6012" y2="0.6985" width="0" layer="20"/>
-<smd name="PB.2" x="8.636" y="3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="PB.1" x="8.636" y="3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PB.2" x="8.509" y="3.81" dx="1.27" dy="0.635" layer="16" rot="R180"/>
+<smd name="PB.1" x="8.509" y="3.81" dx="1.27" dy="0.635" layer="1"/>
 <smd name="PB.3" x="8.636" y="0" dx="1.524" dy="0.635" layer="1"/>
 <smd name="PB.4" x="8.636" y="0" dx="1.524" dy="0.635" layer="16" rot="R180"/>
 <wire x1="-9.6012" y1="-3.1115" x2="-9.6012" y2="-0.6985" width="0" layer="20"/>
 <wire x1="-9.6012" y1="-0.6985" x2="-7.366" y2="-0.6985" width="0" layer="20"/>
 <wire x1="-9.6012" y1="-3.1115" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
-<smd name="PA.6" x="-8.636" y="-3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="PA.5" x="-8.636" y="-3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PA.6" x="-8.509" y="-3.81" dx="1.27" dy="0.635" layer="16" rot="R180"/>
+<smd name="PA.5" x="-8.509" y="-3.81" dx="1.27" dy="0.635" layer="1"/>
 <wire x1="9.6012" y1="-0.6985" x2="7.366" y2="-0.6985" width="0" layer="20"/>
 <wire x1="9.6012" y1="-3.1115" x2="7.366" y2="-3.1115" width="0" layer="20"/>
 <wire x1="9.6012" y1="-0.6985" x2="9.6012" y2="-3.1115" width="0" layer="20"/>
-<smd name="PB.6" x="8.636" y="-3.81" dx="1.524" dy="0.635" layer="16" rot="R180"/>
-<smd name="PB.5" x="8.636" y="-3.81" dx="1.524" dy="0.635" layer="1"/>
+<smd name="PB.6" x="8.509" y="-3.81" dx="1.27" dy="0.635" layer="16" rot="R180"/>
+<smd name="PB.5" x="8.509" y="-3.81" dx="1.27" dy="0.635" layer="1"/>
 </package>
 </packages>
 </library>
@@ -2690,23 +2686,23 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="J2" pad="PA.1"/>
 <via x="-10.31875" y="1.905" extent="1-16" drill="0.3556"/>
 <wire x1="-10.31875" y1="1.905" x2="-10.31875" y2="3.314875" width="0.4064" layer="1"/>
-<wire x1="-10.31875" y1="3.314875" x2="-10.795" y2="3.791125" width="0.4064" layer="1"/>
+<wire x1="-10.31875" y1="3.314875" x2="-10.795" y2="4.016125" width="0.4064" layer="1"/>
 <wire x1="-10.324375" y1="1.899375" x2="-10.31875" y2="1.905" width="0.4064" layer="1"/>
 <wire x1="-11.8364" y1="2.534375" x2="-11.7475" y2="2.623275" width="0.254" layer="1"/>
 <wire x1="-11.7475" y1="2.623275" x2="-11.7475" y2="3.4925" width="0.254" layer="1"/>
 <wire x1="-11.7475" y1="3.4925" x2="-11.448875" y2="3.791125" width="0.254" layer="1"/>
-<wire x1="-11.448875" y1="3.791125" x2="-10.795" y2="3.791125" width="0.254" layer="1"/>
+<wire x1="-11.448875" y1="3.791125" x2="-10.795" y2="4.016125" width="0.254" layer="1"/>
 <contactref element="J2" pad="PA.2"/>
 <contactref element="J2" pad="PA.3"/>
 <contactref element="J2" pad="PA.4"/>
 <contactref element="J2" pad="PA.5"/>
 <contactref element="J2" pad="PA.6"/>
-<wire x1="-8.636" y1="-3.81" x2="-8.636" y2="-3.81" width="0" layer="19" extent="1-16"/>
-<wire x1="-8.636" y1="0" x2="-8.636" y2="-3.81" width="0" layer="19" extent="1-1"/>
+<wire x1="-8.509" y1="-3.81" x2="-8.509" y2="-3.81" width="0" layer="19" extent="1-16"/>
+<wire x1="-8.636" y1="0" x2="-8.509" y2="-3.81" width="0" layer="19" extent="1-1"/>
 <wire x1="-8.636" y1="0" x2="-8.636" y2="0" width="0" layer="19" extent="1-16"/>
 <wire x1="-10.31875" y1="1.905" x2="-8.636" y2="0" width="0" layer="19" extent="1-1"/>
-<wire x1="-8.636" y1="3.81" x2="-10.31875" y2="3.314875" width="0" layer="19" extent="1-1"/>
-<wire x1="-8.636" y1="3.81" x2="-8.636" y2="3.81" width="0" layer="19" extent="1-16"/>
+<wire x1="-8.509" y1="3.81" x2="-10.31875" y2="3.314875" width="0" layer="19" extent="1-1"/>
+<wire x1="-8.509" y1="3.81" x2="-8.509" y2="3.81" width="0" layer="19" extent="1-16"/>
 </signal>
 <signal name="VAMP">
 <contactref element="R17" pad="2"/>
@@ -3681,54 +3677,47 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="J2" pad="PB.4"/>
 <contactref element="J2" pad="PB.5"/>
 <contactref element="J2" pad="PB.6"/>
-<wire x1="8.636" y1="3.81" x2="9.8425" y2="3.81" width="0.254" layer="1"/>
+<wire x1="8.509" y1="3.81" x2="9.8425" y2="3.81" width="0.254" layer="1"/>
 <wire x1="9.8425" y1="3.81" x2="10.4775" y2="3.175" width="0.254" layer="1"/>
 <wire x1="10.4775" y1="3.175" x2="10.4775" y2="2.54" width="0.254" layer="1"/>
-<wire x1="8.636" y1="3.81" x2="9.8425" y2="3.81" width="0.254" layer="16"/>
+<wire x1="8.509" y1="3.81" x2="9.8425" y2="3.81" width="0.254" layer="16"/>
 <wire x1="9.8425" y1="3.81" x2="10.4775" y2="3.175" width="0.254" layer="16"/>
 <wire x1="10.4775" y1="3.175" x2="10.4775" y2="2.54" width="0.254" layer="16"/>
 </signal>
 </signals>
 <errors>
 <approved hash="4,1,a31c230536f4d31a"/>
-<approved hash="4,1,7f1b1743b858b328"/>
-<approved hash="4,1,20d5b18495861aeb"/>
-<approved hash="4,1,1e18a009ed0736e1"/>
 <approved hash="4,1,bfb94e7375fae818"/>
-<approved hash="4,1,ce015c0a2920dedc"/>
-<approved hash="4,1,6cdec0dded0824fc"/>
+<approved hash="4,1,1e18a009ed0736e1"/>
+<approved hash="4,1,7f1b1743b858b328"/>
+<approved hash="4,1,0881540ba722a3df"/>
+<approved hash="4,1,64dd065f9009aafc"/>
 <approved hash="19,1,38c7850583fe3e3c"/>
 <approved hash="19,1,f94ac488c9fdf43f"/>
 <approved hash="19,1,7d14185615257067"/>
 <approved hash="19,1,bc9959db5f26ba64"/>
 <approved hash="4,1,23ef81f7b50472e9"/>
 <approved hash="4,1,82ea1efa72f48b11"/>
-<approved hash="4,1,eff761f56d2086d7"/>
-<approved hash="4,1,5129e123b50b60f4"/>
-<approved hash="4,1,77ff356d6a38369d"/>
-<approved hash="4,1,8964c6eb9ba3c51b"/>
+<approved hash="4,1,9ff5ac75682003d5"/>
+<approved hash="4,1,9cab9123300b65f6"/>
 <approved hash="4,1,e895cac68a18c468"/>
 <approved hash="4,1,164439407bc937ee"/>
 <approved hash="4,16,bfb94e7375fae818"/>
-<approved hash="4,16,e067e8b4583441db"/>
 <approved hash="4,16,a31c230536f4d31a"/>
-<approved hash="4,16,6cdec0dded0824fc"/>
+<approved hash="4,16,64dd065f9009aafc"/>
 <approved hash="4,16,1e18a009ed0736e1"/>
 <approved hash="4,16,7f1b1743b858b328"/>
-<approved hash="4,16,20d5b18495861aeb"/>
-<approved hash="4,16,ce015c0a2920dedc"/>
+<approved hash="4,16,0881540ba722a3df"/>
 <approved hash="4,16,ddd7f6d6fdb2b238"/>
 <approved hash="4,16,b468f8daf700ee3d"/>
 <approved hash="4,16,d94c8f50686aa5f7"/>
 <approved hash="4,16,a4206d818901ea25"/>
-<approved hash="4,16,5129e123b50b60f4"/>
+<approved hash="4,16,9cab9123300b65f6"/>
 <approved hash="4,16,23ef81f7b50472e9"/>
 <approved hash="4,16,82ea1efa72f48b11"/>
-<approved hash="4,16,eff761f56d2086d7"/>
+<approved hash="4,16,9ff5ac75682003d5"/>
 <approved hash="4,16,e895cac68a18c468"/>
 <approved hash="4,16,164439407bc937ee"/>
-<approved hash="4,16,77ff356d6a38369d"/>
-<approved hash="4,16,8964c6eb9ba3c51b"/>
 </errors>
 </board>
 </drawing>
