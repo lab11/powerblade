@@ -16799,7 +16799,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <attribute name="DIGIKEY" value="P16.0KLCT-ND"/>
 </part>
 <part name="R2" library="rcl" deviceset="R-US_" device="R0402"/>
-<part name="C2" library="rcl" deviceset="C-EU" device="C0402_SM"/>
+<part name="C2" library="rcl" deviceset="C-EU" device="C0402"/>
 <part name="U2" library="powerfilm" deviceset="MCP6V3" device="">
 <attribute name="DIGIKEY_POP" value="296-19547-1-ND"/>
 </part>
@@ -17480,16 +17480,16 @@ We've spent an enormous amount of time creating and checking these footprints an
 </net>
 <net name="V_SENSE" class="0">
 <segment>
-<pinref part="U3" gate="G$1" pin="P1.4/TB0.1/A4"/>
-<wire x1="27.94" y1="7.62" x2="25.4" y2="7.62" width="0.1524" layer="91"/>
-<label x="27.94" y="7.62" size="1.27" layer="95" xref="yes"/>
+<label x="27.94" y="17.78" size="1.27" layer="95" xref="yes"/>
+<pinref part="U3" gate="G$1" pin="P1.0/VREF-"/>
+<wire x1="25.4" y1="17.78" x2="27.94" y2="17.78" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="I_SENSE" class="0">
 <segment>
-<label x="27.94" y="15.24" size="1.27" layer="95" xref="yes"/>
-<pinref part="U3" gate="G$1" pin="P1.1/VREF+"/>
-<wire x1="25.4" y1="15.24" x2="27.94" y2="15.24" width="0.1524" layer="91"/>
+<label x="27.94" y="7.62" size="1.27" layer="95" xref="yes"/>
+<pinref part="U3" gate="G$1" pin="P1.4/TB0.1/A4"/>
+<wire x1="25.4" y1="7.62" x2="27.94" y2="7.62" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="METER_ENABLE" class="0">
@@ -17593,9 +17593,9 @@ We've spent an enormous amount of time creating and checking these footprints an
 </net>
 <net name="VFILT" class="0">
 <segment>
-<label x="27.94" y="17.78" size="1.27" layer="95" xref="yes"/>
-<pinref part="U3" gate="G$1" pin="P1.0/VREF-"/>
-<wire x1="25.4" y1="17.78" x2="27.94" y2="17.78" width="0.1524" layer="91"/>
+<label x="27.94" y="15.24" size="1.27" layer="95" xref="yes"/>
+<pinref part="U3" gate="G$1" pin="P1.1/VREF+"/>
+<wire x1="25.4" y1="15.24" x2="27.94" y2="15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
