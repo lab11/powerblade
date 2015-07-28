@@ -1,12 +1,12 @@
 set terminal postscript enhanced eps solid color font "Helvetica,14" size 3in,2in
 set output "vrms.eps"
 
-set title "Vrms in PowerBlade"
+set title "Vrms in PowerBlade - Low Range"
 
 set xlabel "Watts (W) or equiv."
 set ylabel "Vrms (V)"
 
-set xrange [0:]
+set xrange [0:200]
 set yrange [0:]
 
 set key bottom right
