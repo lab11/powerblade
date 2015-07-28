@@ -16703,7 +16703,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="L1" library="rcl" deviceset="L-US" device="L0805" value="10uH">
 <attribute name="DIGIKEY" value="490-4990-1-ND"/>
 </part>
-<part name="R7" library="rcl" deviceset="R-US_" device="R0402_SM" value="560k">
+<part name="R7" library="rcl" deviceset="R-US_" device="R0402" value="560k">
 <attribute name="DIGIKEY" value="P560KLCT-ND"/>
 </part>
 <part name="R9" library="rcl" deviceset="R-US_" device="R0402_SM" value="180k">
@@ -16762,7 +16762,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="R20" library="rcl" deviceset="R-US_" device="R0402" value="1M 1%">
 <attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
 </part>
-<part name="R21" library="rcl" deviceset="R-US_" device="R0402" value="1M 1%">
+<part name="R21" library="rcl" deviceset="R-US_" device="R0402_SM" value="1M 1%">
 <attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
 </part>
 <part name="RI1" library="rcl" deviceset="R-US_" device="R0402" value="953k 1%">
@@ -16798,7 +16798,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="R39" library="rcl" deviceset="R-US_" device="R0402_SM" value="16k 1%">
 <attribute name="DIGIKEY" value="P16.0KLCT-ND"/>
 </part>
-<part name="R2" library="rcl" deviceset="R-US_" device="R0402"/>
+<part name="R2" library="rcl" deviceset="R-US_" device="R0402_SM"/>
 <part name="C2" library="rcl" deviceset="C-EU" device="C0402"/>
 <part name="U2" library="powerfilm" deviceset="MCP6V3" device="">
 <attribute name="DIGIKEY_POP" value="296-19547-1-ND"/>
@@ -16893,7 +16893,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="SUPPLY18" library="supply2" deviceset="GND3" device=""/>
 <part name="Q4" library="powerfilm" deviceset="2SK1829" device=""/>
 <part name="SUPPLY19" library="supply2" deviceset="GND3" device=""/>
-<part name="R6" library="rcl" deviceset="R-US_" device="R0402_SM" value="660k">
+<part name="R6" library="rcl" deviceset="R-US_" device="R0402" value="660k">
 <attribute name="DIGIKEY" value="P665KLCT-ND"/>
 </part>
 <part name="SUPPLY20" library="supply2" deviceset="GND3" device=""/>
@@ -16923,10 +16923,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <attribute name="DIGIKEY" value="445-9077-1-ND"/>
 </part>
 <part name="Y1" library="powerfilm" deviceset="UREACH_XTEND" device=""/>
-<part name="R1" library="rcl" deviceset="R-US_" device="R0402_SM" value="NP">
-<attribute name="DIGIKEY" value="NP"/>
-<attribute name="DIGIKEY_2" value="P0.0JCT-ND"/>
-</part>
 <part name="C24" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
 <attribute name="DIGIKEY" value="445-4952-1-ND"/>
 </part>
@@ -17480,9 +17476,9 @@ We've spent an enormous amount of time creating and checking these footprints an
 </net>
 <net name="V_SENSE" class="0">
 <segment>
-<label x="27.94" y="17.78" size="1.27" layer="95" xref="yes"/>
-<pinref part="U3" gate="G$1" pin="P1.0/VREF-"/>
-<wire x1="25.4" y1="17.78" x2="27.94" y2="17.78" width="0.1524" layer="91"/>
+<label x="27.94" y="15.24" size="1.27" layer="95" xref="yes"/>
+<pinref part="U3" gate="G$1" pin="P1.1/VREF+"/>
+<wire x1="25.4" y1="15.24" x2="27.94" y2="15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="I_SENSE" class="0">
@@ -17589,13 +17585,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <pinref part="U3" gate="G$1" pin="P1.3/TA1.2/A3"/>
 <wire x1="27.94" y1="10.16" x2="25.4" y2="10.16" width="0.1524" layer="91"/>
 <label x="27.94" y="10.16" size="1.27" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="VFILT" class="0">
-<segment>
-<label x="27.94" y="15.24" size="1.27" layer="95" xref="yes"/>
-<pinref part="U3" gate="G$1" pin="P1.1/VREF+"/>
-<wire x1="25.4" y1="15.24" x2="27.94" y2="15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
@@ -18083,10 +18072,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <instance part="SUPPLY27" gate="G$1" x="134.62" y="2.54"/>
 <instance part="SUPPLY28" gate="G$1" x="116.84" y="-2.54"/>
 <instance part="GND2" gate="1" x="20.32" y="-88.9"/>
-<instance part="R1" gate="G$1" x="76.2" y="-30.48">
-<attribute name="DIGIKEY" x="76.2" y="-30.48" size="1.27" layer="96" display="off"/>
-<attribute name="DIGIKEY_2" x="76.2" y="-30.48" size="1.27" layer="96" display="off"/>
-</instance>
 <instance part="C13" gate="G$1" x="-20.32" y="5.08" smashed="yes">
 <attribute name="DIGIKEY" x="-20.32" y="5.08" size="1.778" layer="96" display="off"/>
 <attribute name="NAME" x="-16.002" y="6.604" size="1.778" layer="95" ratio="12" align="bottom-center"/>
@@ -18111,9 +18096,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <wire x1="50.8" y1="-27.94" x2="50.8" y2="-30.48" width="0.1524" layer="91"/>
 <pinref part="L3" gate="G$1" pin="2"/>
 <wire x1="50.8" y1="-20.32" x2="50.8" y2="-30.48" width="0.1524" layer="91"/>
-<pinref part="R1" gate="G$1" pin="1"/>
-<wire x1="71.12" y1="-30.48" x2="68.58" y2="-30.48" width="0.1524" layer="91"/>
-<junction x="68.58" y="-30.48"/>
 </segment>
 </net>
 <net name="N$38" class="0">
@@ -18302,8 +18284,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <wire x1="83.82" y1="-33.02" x2="83.82" y2="-30.48" width="0.1524" layer="91"/>
 <junction x="83.82" y="-30.48"/>
 <pinref part="U2" gate="G$1" pin="IN-"/>
-<pinref part="R1" gate="G$1" pin="2"/>
-<wire x1="81.28" y1="-30.48" x2="83.82" y2="-30.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
