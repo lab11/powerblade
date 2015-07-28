@@ -16706,7 +16706,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="R7" library="rcl" deviceset="R-US_" device="R0402" value="560k">
 <attribute name="DIGIKEY" value="P560KLCT-ND"/>
 </part>
-<part name="R9" library="rcl" deviceset="R-US_" device="R0402_SM" value="180k">
+<part name="R9" library="rcl" deviceset="R-US_" device="R0402" value="180k">
 <attribute name="DIGIKEY" value="P180KLCT-ND"/>
 </part>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
@@ -16831,10 +16831,10 @@ We've spent an enormous amount of time creating and checking these footprints an
 </part>
 <part name="+3V7" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND23" library="supply1" deviceset="GND" device=""/>
-<part name="R11" library="rcl" deviceset="R-US_" device="R0402_SM" value="670k">
+<part name="R11" library="rcl" deviceset="R-US_" device="R0402" value="670k">
 <attribute name="DIGIKEY" value="P665KLCT-ND"/>
 </part>
-<part name="R12" library="rcl" deviceset="R-US_" device="R0402_SM" value="330k">
+<part name="R12" library="rcl" deviceset="R-US_" device="R0402" value="330k">
 <attribute name="DIGIKEY" value="P330KLCT-ND"/>
 </part>
 <part name="GND25" library="supply1" deviceset="GND" device=""/>
@@ -16905,10 +16905,10 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="SUPPLY27" library="supply2" deviceset="GND3" device=""/>
 <part name="SUPPLY28" library="supply2" deviceset="GND3" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
-<part name="R13" library="rcl" deviceset="R-US_" device="R0402_SM" value="330k">
+<part name="R13" library="rcl" deviceset="R-US_" device="R0402" value="330k">
 <attribute name="DIGIKEY" value="P330KLCT-ND"/>
 </part>
-<part name="R22" library="rcl" deviceset="R-US_" device="R0402_SM" value="670k">
+<part name="R22" library="rcl" deviceset="R-US_" device="R0402" value="670k">
 <attribute name="DIGIKEY" value="P665KLCT-ND"/>
 </part>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
