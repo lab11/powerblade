@@ -16711,14 +16711,14 @@ We've spent an enormous amount of time creating and checking these footprints an
 </part>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
-<part name="C4" library="rcl" deviceset="C-EU" device="C0402_SM" value="22pF">
+<part name="C4" library="rcl" deviceset="C-EU" device="C0402" value="22pF">
 <attribute name="DIGIKEY" value="445-1239-1-ND"/>
 </part>
 <part name="P+2" library="supply1" deviceset="VCC" device=""/>
-<part name="C7" library="rcl" deviceset="C-EU" device="C0402_SM" value="4.7uF">
+<part name="C7" library="rcl" deviceset="C-EU" device="C0402" value="4.7uF">
 <attribute name="DIGIKEY" value="445-8023-1-ND"/>
 </part>
-<part name="C8" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
+<part name="C8" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
 <attribute name="DIGIKEY" value="445-4952-1-ND"/>
 </part>
 <part name="C9" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
@@ -16733,24 +16733,24 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="L3" library="rcl" deviceset="L-US" device="L0805">
 <attribute name="DIGIKEY" value="732-3452-1-ND"/>
 </part>
-<part name="R14" library="rcl" deviceset="R-US_" device="R0402_SM" value="200">
+<part name="R14" library="rcl" deviceset="R-US_" device="R0402" value="200">
 <attribute name="DIGIKEY" value="P200LCT-ND"/>
 </part>
-<part name="R15" library="rcl" deviceset="R-US_" device="R0402_SM" value="1M 1%">
+<part name="R15" library="rcl" deviceset="R-US_" device="R0402" value="1M 1%">
 <attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
 </part>
-<part name="R16" library="rcl" deviceset="R-US_" device="R0402_SM" value="75 1%">
+<part name="R16" library="rcl" deviceset="R-US_" device="R0402" value="75 1%">
 <attribute name="DIGIKEY" value="P75.0LCT-ND"/>
 </part>
-<part name="R17" library="rcl" deviceset="R-US_" device="R0402_SM" value="4.99k 1%">
+<part name="R17" library="rcl" deviceset="R-US_" device="R0402" value="4.99k 1%">
 <attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
 <attribute name="DIGIKEY_2" value="P10.0KLCT-ND"/>
 </part>
-<part name="R18" library="rcl" deviceset="R-US_" device="R0402_SM" value="4.99 1%">
+<part name="R18" library="rcl" deviceset="R-US_" device="R0402" value="4.99 1%">
 <attribute name="DIGIKEY" value="RMCF0402FT4R99CT-ND"/>
 <attribute name="DIGIKEY_2" value="P10.0LCT-ND"/>
 </part>
-<part name="C27" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
+<part name="C27" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
 <attribute name="DIGIKEY" value="445-4952-1-ND"/>
 </part>
 <part name="U6" library="powerfilm" deviceset="MAX9910" device="">
@@ -16775,27 +16775,27 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="+3V6" library="supply1" deviceset="+3V3" device=""/>
 <part name="+3V8" library="supply1" deviceset="+3V3" device=""/>
 <part name="U7" library="powerfilm" deviceset="OPA2369" device=""/>
-<part name="C38" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
+<part name="C38" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
 <attribute name="DIGIKEY" value="445-4952-1-ND"/>
 </part>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
-<part name="R35" library="rcl" deviceset="R-US_" device="R0402_SM" value="20k">
+<part name="R35" library="rcl" deviceset="R-US_" device="R0402" value="20k">
 <attribute name="DIGIKEY" value="P2.00KLCT-ND"/>
 <attribute name="DIGIKEY_2" value="P20.0KLCT-ND"/>
 </part>
-<part name="R37" library="rcl" deviceset="R-US_" device="R0402_SM" value="887k 1%">
+<part name="R37" library="rcl" deviceset="R-US_" device="R0402" value="887k 1%">
 <attribute name="DIGIKEY" value="P887KLCT-ND"/>
 </part>
-<part name="R38" library="rcl" deviceset="R-US_" device="R0402_SM" value="30k 1%">
+<part name="R38" library="rcl" deviceset="R-US_" device="R0402" value="30k 1%">
 <attribute name="DIGIKEY" value="P30.0KLCT-ND"/>
 </part>
-<part name="R40" library="rcl" deviceset="R-US_" device="R0402_SM" value="1M 1%">
+<part name="R40" library="rcl" deviceset="R-US_" device="R0402" value="1M 1%">
 <attribute name="DIGIKEY" value="P1.00MLCT-ND"/>
 </part>
-<part name="C39" library="rcl" deviceset="C-EU" device="C0402_SM" value="1.5uF">
+<part name="C39" library="rcl" deviceset="C-EU" device="C0402" value="1.5uF">
 <attribute name="DIGIKEY" value="445-13815-1-ND"/>
 </part>
-<part name="R39" library="rcl" deviceset="R-US_" device="R0402_SM" value="16k 1%">
+<part name="R39" library="rcl" deviceset="R-US_" device="R0402" value="16k 1%">
 <attribute name="DIGIKEY" value="P16.0KLCT-ND"/>
 </part>
 <part name="R2" library="rcl" deviceset="R-US_" device="R0402_SM"/>
@@ -16809,20 +16809,20 @@ We've spent an enormous amount of time creating and checking these footprints an
 <attribute name="DIGIKEY_3" value="P40.2KAACT-ND"/>
 </part>
 <part name="U3" library="powerfilm" deviceset="MSP430FR5738" device=""/>
-<part name="C14" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
+<part name="C14" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
 <attribute name="DIGIKEY" value="445-4952-1-ND"/>
 </part>
 <part name="C15" library="rcl" deviceset="C-EU" device="C0603_SM" value="10uF">
 <attribute name="DIGIKEY" value="445-6853-1-ND"/>
 </part>
-<part name="C16" library="rcl" deviceset="C-EU" device="C0402_SM" value="470nF">
+<part name="C16" library="rcl" deviceset="C-EU" device="C0402" value="470nF">
 <attribute name="DIGIKEY" value="445-4989-1-ND"/>
 </part>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
 <part name="GND20" library="supply1" deviceset="GND" device=""/>
 <part name="GND21" library="supply1" deviceset="GND" device=""/>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
-<part name="R19" library="rcl" deviceset="R-US_" device="R0402_SM" value="47k">
+<part name="R19" library="rcl" deviceset="R-US_" device="R0402" value="47k">
 <attribute name="DIGIKEY" value="P47KJCT-ND"/>
 </part>
 <part name="GND22" library="supply1" deviceset="GND" device=""/>
@@ -16842,10 +16842,10 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="X3" library="general" deviceset="CRYSTAL_0805" device="" value="32.768kHz">
 <attribute name="DIGIKEY" value="535-12373-1-ND"/>
 </part>
-<part name="C6" library="rcl" deviceset="C-EU" device="C0402_SM" value="8pF">
+<part name="C6" library="rcl" deviceset="C-EU" device="C0402" value="8pF">
 <attribute name="DIGIKEY" value="445-4890-1-ND"/>
 </part>
-<part name="C34" library="rcl" deviceset="C-EU" device="C0402_SM" value="8pF">
+<part name="C34" library="rcl" deviceset="C-EU" device="C0402" value="8pF">
 <attribute name="DIGIKEY" value="445-4890-1-ND"/>
 </part>
 <part name="GND26" library="supply1" deviceset="GND" device=""/>
@@ -16919,14 +16919,14 @@ We've spent an enormous amount of time creating and checking these footprints an
 <attribute name="DIGIKEY" value="478-8650-1-ND"/>
 <attribute name="DIGIKEY_2" value="478-8654-1-ND"/>
 </part>
-<part name="C5" library="rcl" deviceset="C-EU" device="C0603_TN" value="22uF">
-<attribute name="DIGIKEY" value="445-9077-1-ND"/>
+<part name="C5" library="rcl" deviceset="C-EU" device="C0603_TN" value="NP">
+<attribute name="DIGIKEY" value="NP"/>
 </part>
 <part name="Y1" library="powerfilm" deviceset="UREACH_XTEND" device=""/>
-<part name="C24" library="rcl" deviceset="C-EU" device="C0402_SM" value="0.1uF">
+<part name="C24" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
 <attribute name="DIGIKEY" value="445-4952-1-ND"/>
 </part>
-<part name="C11" library="rcl" deviceset="C-EU" device="C0402_SM" value="4.7uF">
+<part name="C11" library="rcl" deviceset="C-EU" device="C0402" value="4.7uF">
 <attribute name="DIGIKEY" value="445-5947-1-ND"/>
 </part>
 <part name="SV1" library="con-lstb" deviceset="MA12-1" device="1M27">
