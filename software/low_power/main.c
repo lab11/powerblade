@@ -545,14 +545,14 @@ __interrupt void USCI_A0_ISR(void) {
 		data--;
 		switch(data){
 		case 7:
+			uart_send((char*)&sequence, sizeof(sequence));
+			break;
+		case 6:
 #ifdef CALIBRATE
 			uart_send((char*)&tx_i_ave, sizeof(tx_i_ave));
 #else
-			uart_send((char*)&sequence, sizeof(sequence));
-#endif
-			break;
-		case 6:
 			uart_send((char*)&time, sizeof(time));
+#endif
 			break;
 		case 5:
 			uart_send((char*)&Vrms, sizeof(Vrms));
