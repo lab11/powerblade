@@ -2729,6 +2729,9 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="-10.264775" y1="0.3429" x2="-9.921875" y2="0" width="0.3048" layer="1"/>
 <wire x1="-10.963275" y1="2.166875" x2="-10.3204" y2="2.166875" width="0.254" layer="1"/>
 <wire x1="-10.3204" y1="2.166875" x2="-10.264775" y2="2.2225" width="0.254" layer="1"/>
+<contactref element="J2" pad="PA.1"/>
+<wire x1="-8.509" y1="3.81" x2="-10.264775" y2="3.81" width="0.6096" layer="1"/>
+<wire x1="-10.264775" y1="3.81" x2="-10.264775" y2="3.8034" width="0.6096" layer="1"/>
 </signal>
 <signal name="VAMP">
 <contactref element="R17" pad="2"/>
@@ -3705,47 +3708,46 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </signal>
 </signals>
 <errors>
+<approved hash="4,1,bab79581287fabbd"/>
+<approved hash="4,1,04c3e68d22c39d71"/>
 <approved hash="4,1,67605bd438f5430d"/>
-<approved hash="4,1,58dd5a6c96d2209f"/>
 <approved hash="4,1,67605bd1dc9354de"/>
+<approved hash="4,1,58dd5a6c96d2209f"/>
 <approved hash="4,1,58dd5a6f8104c4fa"/>
-<approved hash="4,1,64dd065f9009aafc"/>
 <approved hash="4,1,a31c230536f4d31a"/>
-<approved hash="4,1,0881540ba722a3df"/>
-<approved hash="4,1,7f1b1743b858b328"/>
 <approved hash="4,1,bfb94e7375fae818"/>
+<approved hash="4,1,7f1b1743b858b328"/>
 <approved hash="4,1,1e18a009ed0736e1"/>
-<approved hash="19,1,f94ac488c9fdf43f"/>
+<approved hash="4,1,0881540ba722a3df"/>
+<approved hash="4,1,64dd065f9009aafc"/>
 <approved hash="19,1,38c7850583fe3e3c"/>
+<approved hash="19,1,f94ac488c9fdf43f"/>
 <approved hash="19,1,bc9959db5f26ba64"/>
 <approved hash="19,1,7d14185615257067"/>
 <approved hash="4,1,9cab9123300b65f6"/>
 <approved hash="4,1,82ea1efa72f48b11"/>
-<approved hash="4,1,23ef81f7b50472e9"/>
 <approved hash="4,1,9ff5ac75682003d5"/>
-<approved hash="4,1,164439407bc937ee"/>
+<approved hash="4,1,23ef81f7b50472e9"/>
 <approved hash="4,1,e895cac68a18c468"/>
-<approved hash="19,16,97c72eafe6c869a4"/>
-<approved hash="19,16,b508340cb44a2ba2"/>
+<approved hash="4,1,164439407bc937ee"/>
 <approved hash="19,16,08eaab4ae43c73b0"/>
-<approved hash="19,16,9f5c6b8e657e9f0c"/>
-<approved hash="19,16,b13030c9b7e828ab"/>
-<approved hash="4,16,0881540ba722a3df"/>
-<approved hash="4,16,1e18a009ed0736e1"/>
-<approved hash="4,16,7f1b1743b858b328"/>
-<approved hash="4,16,bfb94e7375fae818"/>
-<approved hash="4,16,a31c230536f4d31a"/>
+<approved hash="19,16,97c72eafe6c869a4"/>
 <approved hash="4,16,64dd065f9009aafc"/>
+<approved hash="4,16,bfb94e7375fae818"/>
+<approved hash="4,16,7f1b1743b858b328"/>
+<approved hash="4,16,1e18a009ed0736e1"/>
+<approved hash="4,16,a31c230536f4d31a"/>
+<approved hash="4,16,0881540ba722a3df"/>
 <approved hash="4,16,ddd7f6d6fdb2b238"/>
 <approved hash="4,16,b468f8daf700ee3d"/>
-<approved hash="4,16,a4206d818901ea25"/>
 <approved hash="4,16,d94c8f50686aa5f7"/>
-<approved hash="4,16,23ef81f7b50472e9"/>
-<approved hash="4,16,9cab9123300b65f6"/>
+<approved hash="4,16,a4206d818901ea25"/>
 <approved hash="4,16,9ff5ac75682003d5"/>
+<approved hash="4,16,9cab9123300b65f6"/>
 <approved hash="4,16,82ea1efa72f48b11"/>
-<approved hash="4,16,164439407bc937ee"/>
+<approved hash="4,16,23ef81f7b50472e9"/>
 <approved hash="4,16,e895cac68a18c468"/>
+<approved hash="4,16,164439407bc937ee"/>
 </errors>
 </board>
 </drawing>
