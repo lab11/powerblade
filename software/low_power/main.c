@@ -351,7 +351,7 @@ __interrupt void ADC10_ISR(void) {
     	switch(ADC_Channel) {
 #if defined (VERSION0) | defined (VERSION1)
     	case 4:	// I_SENSE
-#elif defined (VERSION3)
+#elif defined (VERSION31)
     	case 5:	// I_SENSE (A0) (case 0 for filt, 5 for isense)
 #endif
     	{
@@ -367,7 +367,7 @@ __interrupt void ADC10_ISR(void) {
     		transmitTry();
     		break;
     	}
-    	case 3:	// V_SENSE (same in versions 0, 1, and 3)
+    	case 3:	// V_SENSE (same in versions 0, 1, and 3.1)
     	{
     		// Set debug pin
     		P1OUT |= BIT2;
@@ -421,7 +421,7 @@ __interrupt void ADC10_ISR(void) {
     	}
 #if defined (VERSION0) | defined (VERSION1)
     	case 2:	// VCC_SENSE
-#elif defined (VERSION3)
+#elif defined (VERSION31)
     	case 4:	// VCC_SENSE
 #endif
     		// Set debug pin
