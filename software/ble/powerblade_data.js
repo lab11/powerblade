@@ -7,6 +7,9 @@ var CompanyID = 37392;
 
 var peripherals = {};
 
+var aveTime = [10];
+var timeIndex = 0;
+
 var avePower = [10];
 var aveApp = [10];
 var aveIndex = 0;
@@ -47,6 +50,11 @@ noble.on('discover', function(peripheral) {
         peripherals[peripheral_uuid] = -1;
     }
 
+    //XXX: Only works with PowerBlade #2
+    if(peripheral_uuid != 'd401ae49b9c5') {
+      return;
+    }
+
     // get data after the manufacturer ID
     var data = advertisement.manufacturerData.slice(2);
 
@@ -63,9 +71,12 @@ noble.on('discover', function(peripheral) {
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
     var v_rms_disp = v_rms*2.46;
-    var true_power_disp = true_power*0.0094;
-    var app_power_disp = apparent_power*0.0094;
-    var watt_hours_disp = watt_hours*0.00000261;
+    //var true_power_disp = true_power*0.0094;
+    //var app_power_disp = apparent_power*0.0094;
+    //var watt_hours_disp = watt_hours*0.00000261;
+    var true_power_disp = true_power*0.0113;
+    var app_power_disp = apparent_power*0.0113;
+    var watt_hours_disp = watt_hours*0.00000314;
     var pf_disp = true_power_disp / app_power_disp;
 
     // print unique seq's to user
@@ -106,6 +117,16 @@ noble.on('discover', function(peripheral) {
       if(aveIndex == 10) {
         aveIndex = 0;
       }
+      // Average Time
+      aveTime[timeIndex++] = time;
+      var averageTime = 0;
+      for (var i = aveTime.length - 1; i >= 0; i--) {
+        averageTime += aveTime[i];
+      }
+      averageTime = averageTime / 10;
+      if(timeIndex == 10) {
+        timeIndex = 0;
+      }
 
       if(recv_last > 0) {
         var timeDiff = recv_time - recv_last;
@@ -131,8 +152,9 @@ noble.on('discover', function(peripheral) {
       console.log('                 Flags: ' + '0x' + flags.toString(16));
       console.log('    Average Power (10): ' + averagePower.toFixed(2));
       console.log('   Apparent Power (10): ' + appPower.toFixed(2));
+      console.log('     Time Average (10): ' + averageTime.toFixed(2));
       console.log('Watt Hours Since Start: ' + watt_hours_tot.toFixed(2));
-      console.log('                  Time: ' + timeDiff.toFixed(2));
+      console.log('                ElTime: ' + timeDiff.toFixed(2));
       console.log('   Packets in last 30s: ' + packetCount.toFixed(2));
       //console.log(' Number of Connections: ' + num_connections);
 
