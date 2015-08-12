@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.3">
+<eagle version="6.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -145,8 +145,8 @@
 <plain>
 <wire x1="5.207" y1="8.001" x2="5.207" y2="3.0226" width="0" layer="48"/>
 <wire x1="5.207" y1="3.0226" x2="12.7" y2="3.0226" width="0" layer="48"/>
-<text x="10.31875" y="-4.445" size="0.762" layer="21" rot="R90">PowerBlade 3v0</text>
-<text x="11.43" y="-4.445" size="0.762" layer="21" rot="R90">S.DeBruin 5.5.15</text>
+<text x="10.4775" y="-4.445" size="0.635" layer="21" rot="R90">PowerBlade 3v2</text>
+<text x="11.27125" y="-4.445" size="0.635" layer="21" rot="R90">S.DeBruin 8.10.15</text>
 <text x="6.35" y="5.08" size="1.524" layer="22" rot="MR0">PowerBlade</text>
 <text x="3.4925" y="4.1275" size="0.762" layer="22" rot="MR0">S.DeBruin</text>
 </plain>
