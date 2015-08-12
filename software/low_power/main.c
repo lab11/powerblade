@@ -22,7 +22,7 @@
 
 #include "powerblade_test.h"
 
-#define CALIBRATE
+//#define CALIBRATE
 
 bool ready;
 uint8_t data;
@@ -254,7 +254,7 @@ __interrupt void TIMERA0_ISR(void) {
 	}
 }
 
-#pragma vector=TIMER1_A0_VECTOR
+#pragma vector=TIMER1_A1_VECTOR
 __interrupt void TIMERA1_ISR(void) {
 	TA1CTL &= ~TAIFG;
 	TA1CCR1 = pwm_duty;
@@ -411,7 +411,7 @@ __interrupt void ADC10_ISR(void) {
 			P1OUT |= BIT2;
 
 			// Store voltage value
-			voltage = (int8_t) (ADC_Result - V_VCC2);
+			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			// Store and account for phase offset
 			vbuff[vbuff_head++] = voltage;
