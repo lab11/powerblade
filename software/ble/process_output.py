@@ -27,6 +27,7 @@ for line in fin:
 		if line[0] == 'Sequence Number':
 			seqs.append(float(line[1].split(' ')[0]))
 		elif line[0] == 'Time':
+			#print line
 			times.append(float(line[1].split(' ')[0]))
 		elif line[0] == 'RMS Voltage':
 			rms.append(float(line[1].split(' ')[0]))
@@ -39,6 +40,14 @@ for line in fin:
 		elif line[0] == 'Power Factor':
 			pfs.append(float(line[1].split(' ')[0]))
 
+powers = powers[1:]
+pfs = pfs[1:]
 print 'True Power: ' + str(sum(powers)/len(powers))
 print 'Power Factor: ' + str(sum(pfs)/len(pfs))
+#print 'Time: ' + str(sum(times)/len(times))
+
+#for time in times:
+#	fout.write(str(time) + '\n')
+for idx, val in enumerate(powers):
+	fout.write(str(powers[idx]) + '\t' + str(pfs[idx]) + '\n')
 
