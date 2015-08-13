@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import statistics
 
 infile = sys.argv[1]
 outfile = sys.argv[2]
@@ -45,6 +46,7 @@ pfs = pfs[1:]
 print 'True Power: ' + str(sum(powers)/len(powers))
 print 'Power Factor: ' + str(sum(pfs)/len(pfs))
 #print 'Time: ' + str(sum(times)/len(times))
+print('Variance in TP: ' + str(statistics.variance(powers)))
 
 #for time in times:
 #	fout.write(str(time) + '\n')
