@@ -13,9 +13,10 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BleService extends Service {
 
@@ -107,7 +108,7 @@ public class BleService extends Service {
         public void onLeScan(final BluetoothDevice device, final int rssi, final byte[] scanRecord) {
             try {
                 radioSilenceCount=0;
-                System.out.println(device.getName() + " : " + getHexString(scanRecord));
+                //System.out.println(device.getName() + " : " + getHexString(scanRecord));
                 parseStuff(device, rssi, scanRecord);
             } catch (Exception e) { e.printStackTrace(); }
         }
@@ -116,12 +117,39 @@ public class BleService extends Service {
     @Override
     public IBinder onBind(Intent intent) { return null; }
 
-    public static String getHexString(byte[] buf) {
-        if (buf != null) {
-            StringBuilder sb = new StringBuilder();
-            for (byte b : buf) sb.append(String.format("%02X", b));
-            return sb.toString();
-        } else return "";
+    public double fixData(String msg) {
+        Map<String, String> m = new HashMap<String, String>();
+        m.put("0","0000");
+        m.put("1","0001");
+        m.put("2","0010");
+        m.put("3","0011");
+        m.put("4","0100");
+        m.put("5","0101");
+        m.put("6","0110");
+        m.put("7","0111");
+        m.put("8","1000");
+        m.put("9","1001");
+        m.put("A","1010");
+        m.put("B","1011");
+        m.put("C","1100");
+        m.put("D","1101");
+        m.put("E","1110");
+        m.put("F", "1111");
+        System.out.println(msg);
+        String bits = "";
+        for (int i = 0 ; i < msg.length(); i++) {
+            bits += m.get(String.valueOf(msg.charAt(i)));
+        }
+        System.out.println(bits);
+        String reversedbits = "";
+        int index = bits.length();
+        while (index > 0) {
+            index--;
+            reversedbits += bits.substring(index, index+1);
+        }
+        System.out.println(reversedbits);
+        return Double.valueOf(Integer.parseInt(reversedbits,2));
+
     }
 
     public void parseStuff(BluetoothDevice device, int rssi, byte[] scanRecord) {
@@ -132,14 +160,26 @@ public class BleService extends Service {
             int type = scanRecord[index];
             if (type == 0) break; // Done if our record isn't a valid type
             if (type==-1 && scanRecord[index+1]==0x08 && scanRecord[index+2]==0x49) {
-                System.out.println("Type matched, Parsing : " + device.getAddress());
+                //System.out.println("Type matched, Parsing : " + device.getAddress());
                 byte[] data = Arrays.copyOfRange(scanRecord, index + 3, index + length);
-                double pbid = 1.0000000 * (data[0] & 0xff);
-                double vrms = 2.4600000 * (data[9] & 0xff);
-                double trup = 0.0150000 * (ByteBuffer.wrap(Arrays.copyOfRange(data,10,12)).getShort() & 0xffff);
-                double appp = 0.0150000 * (ByteBuffer.wrap(Arrays.copyOfRange(data,12,14)).getShort() & 0xffff);
-                double wthr = 0.0000057 * (ByteBuffer.wrap(Arrays.copyOfRange(data,14,18)).getInt() & 0xffffffffL);
-                double pwfr = 1.0000000 * (trup / appp);
+
+                //because I am completely sick of dealing with this and am hitting bullshit
+                //over and over again, we will be quick about it and use... strings... thats right
+                StringBuilder sb = new StringBuilder();
+                for (byte b : data) {
+                    sb.append(String.format("%02X ", b));
+                }
+                String bytes = sb.toString().replaceAll("\\s+","");
+                double pbid = fixData(bytes.substring(0, 2));
+                double sequenceNum = fixData(bytes.substring(2, 10));
+                double time = fixData(bytes.substring(10,18));
+                double vrms = fixData(bytes.substring(18, 20))*2.460;
+                double trup = fixData(bytes.substring(20,24))*0.058;
+                double appp = fixData(bytes.substring(24,28))*0.058;
+                double wthr = fixData(bytes.substring(28, 36))*0.0000161;
+                double flags = fixData(bytes.substring(36, 38));
+                double numCmd = fixData(bytes.substring(38, 40));
+                double pwfr = (trup / appp) * 1.0000000;
                 cur_settings.edit().putString("address",      device.getAddress()).apply();
                 cur_settings.edit().putString("id",             di.format( pbid )).apply();
                 cur_settings.edit().putString("power",          di.format( trup )).apply();

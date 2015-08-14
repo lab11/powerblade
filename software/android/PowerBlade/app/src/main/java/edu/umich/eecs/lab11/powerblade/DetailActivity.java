@@ -68,7 +68,7 @@ public class DetailActivity extends ActionBarActivity implements SharedPreferenc
             ((TextView) findViewById(R.id.powr)).setText(cur_settings.getString("power", "?") + "W");
             ((TextView) findViewById(R.id.row5)).setText(cur_settings.getString("v_rms", "?") + " V");
             ((TextView) findViewById(R.id.row6)).setText(cur_settings.getString("true_power", "?") + " W");
-            ((TextView) findViewById(R.id.row7)).setText(cur_settings.getString("apparent_power", "?") + " W");
+            ((TextView) findViewById(R.id.row7)).setText(cur_settings.getString("apparent_power", "?") + " VA");
             ((TextView) findViewById(R.id.row8)).setText(cur_settings.getString("watt_hours", "?") + " Wh");
             ((TextView) findViewById(R.id.row9)).setText(cur_settings.getString("power_factor", "?"));
             ((TextView) findViewById(R.id.time)).setText("RECEIVED: " + format.format(new Date(cur_settings.getLong("time",0))));
