@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -2211,15 +2211,13 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="1.68275" y="-4.15925" size="0.762" layer="25"/>
 <attribute name="DIGIKEY" value="P75.0LCT-ND" x="3.90525" y="-1.93675" size="1.778" layer="27" display="off"/>
 </element>
-<element name="R17" library="rcl" package="R0402" value="4.99k 1%" x="0.714375" y="-1.190625" smashed="yes" rot="R180">
+<element name="R17" library="rcl" package="R0402" value="1k 1%" x="0.714375" y="-1.190625" smashed="yes" rot="R180">
 <attribute name="NAME" x="0.333375" y="-0.727075" size="0.762" layer="25"/>
-<attribute name="DIGIKEY" value="P4.99KLCT-ND" x="0.714375" y="-1.190625" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="DIGIKEY_2" value="P10.0KLCT-ND" x="0.714375" y="-1.190625" size="1.778" layer="27" rot="R180" display="off"/>
+<attribute name="DIGIKEY" value="P1.00KLCT-ND" x="0.714375" y="-1.190625" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="R18" library="rcl" package="R0402" value="4.99 1%" x="-0.9525" y="2.54" smashed="yes">
 <attribute name="DIGIKEY" value="RMCF0402FT4R99CT-ND" x="-0.9525" y="-7.62" size="1.778" layer="27" display="off"/>
 <attribute name="NAME" x="-1.905" y="3.01625" size="0.762" layer="25"/>
-<attribute name="DIGIKEY_2" value="P10.0LCT-ND" x="-0.9525" y="2.54" size="1.778" layer="27" display="off"/>
 </element>
 <element name="C27" library="rcl" package="C0402" value="0.1uF" x="2.1082" y="0.1778" smashed="yes" rot="R90">
 <attribute name="DIGIKEY" value="445-4952-1-ND" x="12.2682" y="-20.1422" size="1.778" layer="27" rot="R90" display="off"/>
@@ -2258,9 +2256,8 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="0.079375" y="5.476875" size="0.762" layer="25" rot="R270"/>
 </element>
 <element name="R35" library="rcl" package="R0402" value="20k" x="-3.0988" y="-3.1496" smashed="yes" rot="R270">
-<attribute name="DIGIKEY" value="P2.00KLCT-ND" x="-75.4888" y="12.0904" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="-4.0513" y="0.18415" size="0.762" layer="25" rot="R270"/>
-<attribute name="DIGIKEY_2" value="P20.0KLCT-ND" x="-3.0988" y="-3.1496" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="DIGIKEY" value="P20.0KLCT-ND" x="-3.0988" y="-3.1496" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R37" library="rcl" package="R0402" value="887k 1%" x="-3.01625" y="1.5875" smashed="yes" rot="R180">
 <attribute name="NAME" x="-2.06375" y="1.11125" size="0.762" layer="25" rot="R180"/>
@@ -2282,16 +2279,17 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="NAME" x="-0.79375" y="-4.28625" size="0.762" layer="25" rot="R180"/>
 <attribute name="DIGIKEY" value="P16.0KLCT-ND" x="-1.74625" y="-2.69875" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
-<element name="R2" library="rcl" package="R0402_SM" value="" x="-3.81" y="-6.746875" rot="R270"/>
-<element name="C2" library="rcl" package="C0402" value="" x="-3.175" y="-8.4074"/>
-<element name="U2" library="powerfilm" package="SC70-5" value="MCP6V3" x="0.762" y="0.635" rot="R270">
-<attribute name="DIGIKEY" value="MCP6V31UT-E/LTCT-ND" x="0.762" y="0.635" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="DIGIKEY_POP" value="296-19547-1-ND" x="0.762" y="0.635" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="R2" library="rcl" package="R0402_SM" value="3k" x="-3.81" y="-6.746875" rot="R270">
+<attribute name="DIGIKEY" value="P3.00KLCT-ND" x="-3.81" y="-6.746875" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
-<element name="R3" library="rcl" package="R1210" value="80k" x="-10.795" y="5.508625" rot="R90">
-<attribute name="DIGIKEY" value="P80.6KAACT-ND" x="-10.795" y="5.508625" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="DIGIKEY_2" value="P69.8KAACT-ND" x="-10.795" y="5.508625" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="DIGIKEY_3" value="P40.2KAACT-ND" x="-10.795" y="5.508625" size="1.778" layer="27" rot="R90" display="off"/>
+<element name="C2" library="rcl" package="C0402" value="0.1uF" x="-3.175" y="-8.4074">
+<attribute name="DIGIKEY" value="490-10777-1-ND" x="-3.175" y="-8.4074" size="1.778" layer="27" display="off"/>
+</element>
+<element name="U2" library="powerfilm" package="SC70-5" value="MCP6V3" x="0.762" y="0.635" rot="R270">
+<attribute name="DIGIKEY" value="296-19547-1-ND" x="0.762" y="0.635" size="1.778" layer="27" rot="R270" display="off"/>
+</element>
+<element name="R3" library="rcl" package="R1210" value="69.8k" x="-10.795" y="5.508625" rot="R90">
+<attribute name="DIGIKEY" value="P69.8KAACT-ND" x="-10.795" y="5.508625" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="U3" library="powerfilm" package="VQFN-24" value="MSP430FR5738" x="-7.445375" y="-12.22375" rot="R180">
 <attribute name="DIGIKEY" value="296-29232-1-ND" x="5.508625" y="-12.22375" size="1.778" layer="27" rot="R180" display="off"/>
@@ -2387,7 +2385,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </element>
 <element name="C1" library="rcl" package="CPOL0805_SM" value="33uF" x="-5.5118" y="5.794375" rot="R270">
 <attribute name="DIGIKEY" value="478-8650-1-ND" x="-5.5118" y="5.794375" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="DIGIKEY_2" value="478-8654-1-ND" x="-5.5118" y="5.794375" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="C5" library="rcl" package="C0603_TN" value="NP" x="3.77825" y="4.46405" rot="R180">
 <attribute name="DIGIKEY" value="NP" x="3.77825" y="4.46405" size="1.778" layer="27" rot="R180" display="off"/>
@@ -3707,48 +3704,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="-11.43" y1="-16.66875" x2="-11.58875" y2="-16.51" width="0.254" layer="1"/>
 </signal>
 </signals>
-<errors>
-<approved hash="4,1,bab79581287fabbd"/>
-<approved hash="4,1,04c3e68d22c39d71"/>
-<approved hash="4,1,67605bd438f5430d"/>
-<approved hash="4,1,67605bd1dc9354de"/>
-<approved hash="4,1,58dd5a6c96d2209f"/>
-<approved hash="4,1,58dd5a6f8104c4fa"/>
-<approved hash="4,1,a31c230536f4d31a"/>
-<approved hash="4,1,bfb94e7375fae818"/>
-<approved hash="4,1,7f1b1743b858b328"/>
-<approved hash="4,1,1e18a009ed0736e1"/>
-<approved hash="4,1,0881540ba722a3df"/>
-<approved hash="4,1,64dd065f9009aafc"/>
-<approved hash="19,1,38c7850583fe3e3c"/>
-<approved hash="19,1,f94ac488c9fdf43f"/>
-<approved hash="19,1,bc9959db5f26ba64"/>
-<approved hash="19,1,7d14185615257067"/>
-<approved hash="4,1,9cab9123300b65f6"/>
-<approved hash="4,1,82ea1efa72f48b11"/>
-<approved hash="4,1,9ff5ac75682003d5"/>
-<approved hash="4,1,23ef81f7b50472e9"/>
-<approved hash="4,1,e895cac68a18c468"/>
-<approved hash="4,1,164439407bc937ee"/>
-<approved hash="19,16,08eaab4ae43c73b0"/>
-<approved hash="19,16,97c72eafe6c869a4"/>
-<approved hash="4,16,64dd065f9009aafc"/>
-<approved hash="4,16,bfb94e7375fae818"/>
-<approved hash="4,16,7f1b1743b858b328"/>
-<approved hash="4,16,1e18a009ed0736e1"/>
-<approved hash="4,16,a31c230536f4d31a"/>
-<approved hash="4,16,0881540ba722a3df"/>
-<approved hash="4,16,ddd7f6d6fdb2b238"/>
-<approved hash="4,16,b468f8daf700ee3d"/>
-<approved hash="4,16,d94c8f50686aa5f7"/>
-<approved hash="4,16,a4206d818901ea25"/>
-<approved hash="4,16,9ff5ac75682003d5"/>
-<approved hash="4,16,9cab9123300b65f6"/>
-<approved hash="4,16,82ea1efa72f48b11"/>
-<approved hash="4,16,23ef81f7b50472e9"/>
-<approved hash="4,16,e895cac68a18c468"/>
-<approved hash="4,16,164439407bc937ee"/>
-</errors>
 </board>
 </drawing>
 </eagle>

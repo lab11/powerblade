@@ -16742,13 +16742,11 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="R16" library="rcl" deviceset="R-US_" device="R0402" value="75 1%">
 <attribute name="DIGIKEY" value="P75.0LCT-ND"/>
 </part>
-<part name="R17" library="rcl" deviceset="R-US_" device="R0402" value="4.99k 1%">
-<attribute name="DIGIKEY" value="P4.99KLCT-ND"/>
-<attribute name="DIGIKEY_2" value="P10.0KLCT-ND"/>
+<part name="R17" library="rcl" deviceset="R-US_" device="R0402" value="1k 1%">
+<attribute name="DIGIKEY" value="P1.00KLCT-ND"/>
 </part>
 <part name="R18" library="rcl" deviceset="R-US_" device="R0402" value="4.99 1%">
 <attribute name="DIGIKEY" value="RMCF0402FT4R99CT-ND"/>
-<attribute name="DIGIKEY_2" value="P10.0LCT-ND"/>
 </part>
 <part name="C27" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
 <attribute name="DIGIKEY" value="445-4952-1-ND"/>
@@ -16780,8 +16778,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 </part>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="R35" library="rcl" deviceset="R-US_" device="R0402" value="20k">
-<attribute name="DIGIKEY" value="P2.00KLCT-ND"/>
-<attribute name="DIGIKEY_2" value="P20.0KLCT-ND"/>
+<attribute name="DIGIKEY" value="P20.0KLCT-ND"/>
 </part>
 <part name="R37" library="rcl" deviceset="R-US_" device="R0402" value="887k 1%">
 <attribute name="DIGIKEY" value="P887KLCT-ND"/>
@@ -16798,15 +16795,17 @@ We've spent an enormous amount of time creating and checking these footprints an
 <part name="R39" library="rcl" deviceset="R-US_" device="R0402" value="16k 1%">
 <attribute name="DIGIKEY" value="P16.0KLCT-ND"/>
 </part>
-<part name="R2" library="rcl" deviceset="R-US_" device="R0402_SM"/>
-<part name="C2" library="rcl" deviceset="C-EU" device="C0402"/>
-<part name="U2" library="powerfilm" deviceset="MCP6V3" device="">
-<attribute name="DIGIKEY_POP" value="296-19547-1-ND"/>
+<part name="R2" library="rcl" deviceset="R-US_" device="R0402_SM" value="3k">
+<attribute name="DIGIKEY" value="P3.00KLCT-ND"/>
 </part>
-<part name="R3" library="rcl" deviceset="R-US_" device="R1210" value="80k">
-<attribute name="DIGIKEY" value="P80.6KAACT-ND"/>
-<attribute name="DIGIKEY_2" value="P69.8KAACT-ND"/>
-<attribute name="DIGIKEY_3" value="P40.2KAACT-ND"/>
+<part name="C2" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
+<attribute name="DIGIKEY" value="490-10777-1-ND"/>
+</part>
+<part name="U2" library="powerfilm" deviceset="MCP6V3" device="">
+<attribute name="DIGIKEY" value="296-19547-1-ND"/>
+</part>
+<part name="R3" library="rcl" deviceset="R-US_" device="R1210" value="69.8k">
+<attribute name="DIGIKEY" value="P69.8KAACT-ND"/>
 </part>
 <part name="U3" library="powerfilm" deviceset="MSP430FR5738" device=""/>
 <part name="C14" library="rcl" deviceset="C-EU" device="C0402" value="0.1uF">
@@ -16917,7 +16916,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 </part>
 <part name="C1" library="rcl" deviceset="CPOL-US" device="0805_SM" value="33uF">
 <attribute name="DIGIKEY" value="478-8650-1-ND"/>
-<attribute name="DIGIKEY_2" value="478-8654-1-ND"/>
 </part>
 <part name="C5" library="rcl" deviceset="C-EU" device="C0603_TN" value="NP">
 <attribute name="DIGIKEY" value="NP"/>
@@ -16984,12 +16982,9 @@ We've spent an enormous amount of time creating and checking these footprints an
 <instance part="P+1" gate="VCC" x="93.98" y="27.94"/>
 <instance part="R3" gate="G$1" x="15.24" y="17.78">
 <attribute name="DIGIKEY" x="15.24" y="17.78" size="1.27" layer="96" display="off"/>
-<attribute name="DIGIKEY_2" x="15.24" y="17.78" size="1.27" layer="96" display="off"/>
-<attribute name="DIGIKEY_3" x="15.24" y="17.78" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="C1" gate="G$1" x="104.14" y="5.08">
 <attribute name="DIGIKEY" x="104.14" y="5.08" size="1.27" layer="96" display="off"/>
-<attribute name="DIGIKEY_2" x="104.14" y="5.08" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="J2" gate="G$1" x="-43.18" y="15.24">
 <attribute name="DIGIKEY" x="-43.18" y="15.24" size="1.27" layer="96" display="off"/>
@@ -18003,11 +17998,9 @@ We've spent an enormous amount of time creating and checking these footprints an
 </instance>
 <instance part="R17" gate="G$1" x="93.98" y="-30.48">
 <attribute name="DIGIKEY" x="93.98" y="-30.48" size="1.27" layer="96" display="off"/>
-<attribute name="DIGIKEY_2" x="93.98" y="-30.48" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="R18" gate="G$1" x="83.82" y="-38.1" rot="R90">
 <attribute name="DIGIKEY" x="83.82" y="-38.1" size="1.27" layer="96" rot="R90" display="off"/>
-<attribute name="DIGIKEY_2" x="83.82" y="-38.1" size="1.27" layer="96" rot="R90" display="off"/>
 </instance>
 <instance part="C27" gate="G$1" x="99.06" y="10.16">
 <attribute name="DIGIKEY" x="99.06" y="10.16" size="1.27" layer="96" display="off"/>
@@ -18039,7 +18032,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <instance part="+3V3" gate="G$1" x="134.62" y="43.18"/>
 <instance part="R35" gate="G$1" x="152.4" y="15.24">
 <attribute name="DIGIKEY" x="152.4" y="15.24" size="1.27" layer="96" display="off"/>
-<attribute name="DIGIKEY_2" x="152.4" y="15.24" size="1.27" layer="96" display="off"/>
 </instance>
 <instance part="R37" gate="G$1" x="172.72" y="-30.48">
 <attribute name="DIGIKEY" x="172.72" y="-30.48" size="1.27" layer="96" display="off"/>
@@ -18056,11 +18048,13 @@ We've spent an enormous amount of time creating and checking these footprints an
 <instance part="R39" gate="G$1" x="116.84" y="7.62" rot="R90">
 <attribute name="DIGIKEY" x="116.84" y="7.62" size="1.27" layer="96" rot="R90" display="off"/>
 </instance>
-<instance part="R2" gate="G$1" x="200.66" y="-12.7"/>
-<instance part="C2" gate="G$1" x="213.36" y="-30.48"/>
-<instance part="U2" gate="G$1" x="93.98" y="-10.16">
-<attribute name="DIGIKEY_POP" x="93.98" y="-10.16" size="1.27" layer="96" display="off"/>
+<instance part="R2" gate="G$1" x="200.66" y="-12.7">
+<attribute name="DIGIKEY" x="200.66" y="-12.7" size="1.27" layer="96" display="off"/>
 </instance>
+<instance part="C2" gate="G$1" x="213.36" y="-30.48">
+<attribute name="DIGIKEY" x="213.36" y="-30.48" size="1.27" layer="96" display="off"/>
+</instance>
+<instance part="U2" gate="G$1" x="93.98" y="-10.16"/>
 <instance part="SUPPLY15" gate="G$1" x="-20.32" y="-5.08"/>
 <instance part="SUPPLY16" gate="G$1" x="-27.94" y="-25.4"/>
 <instance part="SUPPLY17" gate="G$1" x="-58.42" y="-40.64"/>
