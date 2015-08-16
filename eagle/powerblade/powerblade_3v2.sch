@@ -16940,7 +16940,10 @@ We've spent an enormous amount of time creating and checking these footprints an
 <attribute name="DIGIKEY" value="490-4025-1-ND"/>
 </part>
 <part name="J2" library="powerfilm" deviceset="AC_IN" device="F3" value="AC_INF3">
-<attribute name="DIGIKEY" value="NP"/>
+<attribute name="DIGIKEY" value="ED1649-ND"/>
+<attribute name="DIGIKEY_2" value="ED1649-ND"/>
+<attribute name="DIGIKEY_3" value="ED1649-ND"/>
+<attribute name="DIGIKEY_4" value="ED1649-ND"/>
 </part>
 <part name="Q1" library="powerfilm" deviceset="NTS4173" device=""/>
 <part name="+3V11" library="supply1" deviceset="+3V3" device=""/>
@@ -16988,6 +16991,9 @@ We've spent an enormous amount of time creating and checking these footprints an
 </instance>
 <instance part="J2" gate="G$1" x="-43.18" y="15.24">
 <attribute name="DIGIKEY" x="-43.18" y="15.24" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_2" x="-43.18" y="15.24" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_3" x="-43.18" y="15.24" size="1.27" layer="96" display="off"/>
+<attribute name="DIGIKEY_4" x="-43.18" y="15.24" size="1.27" layer="96" display="off"/>
 </instance>
 </instances>
 <busses>

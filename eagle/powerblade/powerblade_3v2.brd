@@ -2408,7 +2408,10 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <attribute name="DIGIKEY" value="490-4025-1-ND" x="4.727575" y="-16.002" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="J2" library="powerfilm" package="AC3_F3" value="AC_INF3" x="0" y="0">
-<attribute name="DIGIKEY" value="NP" x="0" y="0" size="1.778" layer="27" display="off"/>
+<attribute name="DIGIKEY" value="ED1649-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
+<attribute name="DIGIKEY_2" value="ED1649-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
+<attribute name="DIGIKEY_3" value="ED1649-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
+<attribute name="DIGIKEY_4" value="ED1649-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
 </element>
 <element name="Q1" library="powerfilm" package="SC-70-3" value="NTS4173" x="0.841375" y="-16.03375">
 <attribute name="DIGIKEY" value="NTS4173PT1GOSCT-ND" x="0.841375" y="-16.03375" size="1.778" layer="27" display="off"/>
