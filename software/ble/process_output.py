@@ -9,6 +9,7 @@ outfile = sys.argv[2]
 fin = open(infile,'r')
 fout = open(outfile,'w')
 
+timestamps = []
 seqs = []
 times = []
 rms = []
@@ -24,8 +25,10 @@ for line in fin:
 		line = line.split(':')
 		for idx, item in enumerate(line):
 			line[idx] = item.strip()
-		
-		if line[0] == 'Sequence Number':
+
+		if line[0] == 'Data':
+			timestamps.append(float(line[1].split(' ')[0]))
+		elif line[0] == 'Sequence Number':
 			seqs.append(float(line[1].split(' ')[0]))
 		elif line[0] == 'Time':
 			#print line
@@ -51,5 +54,5 @@ print('Variance in TP: ' + str(statistics.variance(powers)))
 #for time in times:
 #	fout.write(str(time) + '\n')
 for idx, val in enumerate(powers):
-	fout.write(str(powers[idx]) + '\t' + str(pfs[idx]) + '\n')
+	fout.write(str(timestamps[idx]) + '\t' + str(powers[idx]) + '\t' + str(pfs[idx]) + '\n')
 
