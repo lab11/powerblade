@@ -64,10 +64,10 @@ print("PowerBlade True Power:")
 print("Mean: " + str(round(sum(pbPower)/len(pbPower),2)) + ',\t' + str(round(statistics.variance(pbPower),4)))
 print()
 print("Actual Power Factor:")
-print("Mean: " + str(round(sum(trueFactor)/len(trueFactor),2)) + ',\t' + str(round(statistics.variance(trueFactor),4)))
+print("Mean: " + str(round(sum(trueFactor)/len(trueFactor),3)) + ',\t' + str(round(statistics.variance(trueFactor),4)))
 print()
 print("PowerBlade Power Factor:")
-print("Mean: " + str(round(sum(pbFactor)/len(pbFactor),2)) + ',\t' + str(round(statistics.variance(pbFactor),4)))
+print("Mean: " + str(round(sum(pbFactor)/len(pbFactor),3)) + ',\t' + str(round(statistics.variance(pbFactor),4)))
 print()
 
 
