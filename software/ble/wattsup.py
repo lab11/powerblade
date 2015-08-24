@@ -19,7 +19,7 @@ def process_message(message):
 
 	if messageType == 'd':
 		ser.write(bytes(b'#R,W,0;'))
-		watt = float(message[3]) / 10
+		watt = (float(message[3]) / 10) - 0.2 	# Account for PowerBlade
 		volt = float(message[4]) / 10
 		amp = float(message[5]) / 1000
 		wattHour = float(message[6]) / 10
@@ -44,14 +44,20 @@ def process_message(message):
 
 	elif messageType == 'l':
 		ser.write(bytes(b'#D,R,0;'))
-
-for root, dirs, filenames in os.walk('/dev'):
-	for f in filenames:
-		#print(f)
-		if('ttyUSB' in f or 'tty.usbserial' in f or 'tty.usbmodem' in f):
-			ser = serial.Serial('/dev/' + f)
-			ser.baudrate = 115200
-			print("Connected to: " + ser.name)
+if len(sys.argv) > 1:
+	ser = serial.Serial(
+		port=sys.argv[1],
+		baudrate=115200
+	)
+	print("Connected to: " + ser.name)
+else:
+	for root, dirs, filenames in os.walk('/dev'):
+		for f in filenames:
+			#print(f)
+			if('ttyUSB' in f or 'tty.usbserial' in f or 'tty.usbmodem' in f):
+				ser = serial.Serial('/dev/' + f)
+				ser.baudrate = 115200
+				print("Connected to: " + ser.name)
 
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -59,8 +65,8 @@ signal.signal(signal.SIGINT, signal_handler)
 print(time.time())
 
 # Prepare to write data
-outfile = sys.argv[1]
-fout = open(outfile,'w')
+#outfile = sys.argv[1]
+fout = open('wattsup.dat','w')
 
 message = ''
 
