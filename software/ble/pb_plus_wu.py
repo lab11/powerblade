@@ -4,17 +4,21 @@ import statistics
 powerblade = open(sys.argv[1], 'r')
 output = open(sys.argv[2], 'w')
 
-output.write("#Time\tDiff\tAct P\tPB P\tAct PF\tPB PF\n")
+output.write("#Time\tAct P\tWU P\tPB P\tAct PF\tWU PF\tPB PF\n")
 
 timeStart = 0
 
 truePower = []
+wuPower = []
 pbPower = []
+
 trueFactor = []
+wuFactor = []
 pbFactor = []
 
 for PBline in powerblade:
 	wattsup = open('wattsup.dat','r')
+	plm = open('plm1.dat','r')
 	if(len(PBline) > 0):
 		# print('#####################################')
 		# print(PBline)
@@ -44,31 +48,65 @@ for PBline in powerblade:
 				bestTime = wutime
 				bestTrue = wutrue
 				bestPF = wupf
-		
+		wuPower.append(bestTrue)
+		wuFactor.append(bestPF)
+
 		wattsup.close()
 
+		bestPLMTime = 0
+		bestPLMTrue = 0
+		bestPLMPF = 0
+		for PLMline in plm:
+			PLMline = PLMline.split('\t')
+			plmtime = float(PLMline[0])
+			plmtrue = float(PLMline[1])
+			plmpf = float(PLMline[3])
+		
+			# Determine if this point is closer than others
+			if(abs(pbtime - bestPLMTime) > abs(pbtime - plmtime)):
+				bestPLMTime = plmtime
+				bestPLMTrue = plmtrue
+				bestPLMPF = plmpf
+		truePower.append(bestPLMTrue)
+		trueFactor.append(bestPLMPF)
+
+		plm.close()
+
 		# Output values
-		truePower.append(bestTrue)
 		pbPower.append(pbtrue)
-		trueFactor.append(bestPF)
 		pbFactor.append(pbpf)
-		outstring = str(round(pbtime-timeStart,2)) + '\t' + str(round(pbtime-bestTime,2)) + '\t' + str(bestTrue) + '\t' + str(pbtrue) + '\t' + str(bestPF) + '\t' + str(pbpf)
+		outstring = str(round(pbtime-timeStart,2)) + '\t' + str(bestPLMTrue) + '\t' + str(bestTrue) + '\t' + str(pbtrue) + '\t' + str(bestPLMPF) + '\t' + str(bestPF) + '\t' + str(pbpf)
 		#print(outstring)
 		output.write(outstring + '\n')
 
+mean_trueP = sum(truePower)/len(truePower)
+mean_wuP = sum(wuPower)/len(wuPower)
+mean_pbP = sum(pbPower)/len(pbPower)
+mean_truePF = sum(trueFactor)/len(trueFactor)
+mean_wuPF = sum(wuFactor)/len(wuFactor)
+mean_pbPF = sum(pbFactor)/len(pbFactor)
+
 print()
-print("Actual True Power:")
-print("Mean: " + str(round(sum(truePower)/len(truePower),2)) + ',\t' + str(round(statistics.variance(truePower),4)))
+print("PLM True Power:\t\t\tPower Factor:")
+print("Mean: " + str(round(mean_trueP,2)) + ',\t' + str(round(statistics.variance(truePower),4)),end="")
+print("\t\t",end="")
+print("Mean: " + str(round(mean_truePF,3)) + ',\t' + str(round(statistics.variance(trueFactor),4)))
 print()
-print("PowerBlade True Power:")
-print("Mean: " + str(round(sum(pbPower)/len(pbPower),2)) + ',\t' + str(round(statistics.variance(pbPower),4)))
+print("Watts Up True Power:\t\tPower Factor")
+print("Mean: " + str(round(mean_wuP,2)) + ',\t' + str(round(statistics.variance(wuPower),4)),end="")
+print("\t\t",end="")
+print("Mean: " + str(round(mean_wuPF,3)) + ',\t' + str(round(statistics.variance(wuFactor),4)))
+if mean_trueP > 0:
+	print("Error: " + str(round(100*abs(mean_trueP-mean_wuP)/mean_trueP,2)))
 print()
-print("Actual Power Factor:")
-print("Mean: " + str(round(sum(trueFactor)/len(trueFactor),3)) + ',\t' + str(round(statistics.variance(trueFactor),4)))
+print("PowerBlade True Power:\t\tPower Factor")
+print("Mean: " + str(round(mean_pbP,2)) + ',\t' + str(round(statistics.variance(pbPower),4)),end="")
+print("\t\t",end="")
+print("Mean: " + str(round(mean_pbPF,3)) + ',\t' + str(round(statistics.variance(pbFactor),4)))
+if mean_trueP > 0:
+	print("Error: " + str(round(100*abs(mean_trueP-mean_pbP)/mean_trueP,2)))
 print()
-print("PowerBlade Power Factor:")
-print("Mean: " + str(round(sum(pbFactor)/len(pbFactor),3)) + ',\t' + str(round(statistics.variance(pbFactor),4)))
-print()
+
 
 
 
