@@ -295,18 +295,18 @@ void transmitTry(void) {
 	// Perform calculations for I^2, V^2, and P
 	// These are all done here to co-locate voltage and current sensing
 	// as much as possible
-//#ifndef CALIBRATE
-//	int32_t new_current;
-//	if(agg_current > 0) {
-//		new_current = agg_current + CUROFF;
-//	}
-//	else {
-//		new_current = agg_current - CUROFF;
-//	}
-//#else
-//	int32_t new_current = agg_current;
-//#endif
+#ifndef CALIBRATE
+	int32_t new_current;
+	if(agg_current > 0) {
+		new_current = agg_current - CUROFF;
+	}
+	else {
+		new_current = agg_current + CUROFF;
+	}
+#else
 	int32_t new_current = agg_current;
+#endif
+	new_current = agg_current;
 	acc_i_rms += new_current * new_current;
 	acc_p_ave += voltage * new_current;
 	acc_v_rms += voltage * voltage;
@@ -330,12 +330,12 @@ void transmitTry(void) {
 
 		// Calculate Irms, Vrms, and apparent power
 		uint16_t Irms = (uint16_t) SquareRoot(acc_i_rms / SAMCOUNT);
-#ifndef CALIBRATE
-		Irms -= CUROFF;
-		if(Irms <= 0) {
-			Irms = 0;
-		}
-#endif
+//#ifndef CALIBRATE
+//		Irms -= CUROFF;
+//		if(Irms <= 0) {
+//			Irms = 0;
+//		}
+//#endif
 		Vrms = (uint8_t) SquareRoot(acc_v_rms / SAMCOUNT);
 		acc_i_rms = 0;
 		acc_v_rms = 0;
