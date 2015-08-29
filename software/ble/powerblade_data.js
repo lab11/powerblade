@@ -51,9 +51,9 @@ noble.on('discover', function(peripheral) {
     }
 
     //XXX: Only works with PowerBlade #2
-    if(peripheral_uuid != 'd401ae49b9c5') {
-      return;
-    }
+    // if(peripheral_uuid != 'd401ae49b9c5') {
+    //   return;
+    // }
 
     // get data after the manufacturer ID
     var data = advertisement.manufacturerData.slice(2);
@@ -99,7 +99,7 @@ noble.on('discover', function(peripheral) {
       var packetCount = 0;
       for (var i = timesInThirty.length - 1; i >= 0; i--) {
         if(timesInThirty[i] >= (recv_time - 30)) {
-          packetCount += 2;
+          packetCount += 1;
         }
       };
 
