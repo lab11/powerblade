@@ -76,7 +76,7 @@ noble.on('discover', function(peripheral) {
     //var watt_hours_disp = watt_hours*0.00000261;
     var true_power_disp = true_power*0.058;
     var app_power_disp = apparent_power*0.058;
-    var watt_hours_disp = watt_hours*0.0000161;
+    var watt_hours_disp = watt_hours*1.055;
     var pf_disp = true_power_disp / app_power_disp;
 
     // print unique seq's to user
