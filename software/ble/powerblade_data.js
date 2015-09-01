@@ -51,9 +51,9 @@ noble.on('discover', function(peripheral) {
     }
 
     //XXX: Only works with PowerBlade #2
-    if(peripheral_uuid != 'd401ae49b9c5') {
-      return;
-    }
+    // if(peripheral_uuid != 'd401ae49b9c5') {
+    //   return;
+    // }
 
     // get data after the manufacturer ID
     var data = advertisement.manufacturerData.slice(2);
@@ -71,13 +71,13 @@ noble.on('discover', function(peripheral) {
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
     var v_rms_disp = v_rms*2.46;
-    //var true_power_disp = true_power*0.0094;
-    //var app_power_disp = apparent_power*0.0094;
-    //var watt_hours_disp = watt_hours*0.00000261;
-    var true_power_disp = true_power*0.058;
-    var app_power_disp = apparent_power*0.058;
-    var watt_hours_disp = watt_hours*1.055;
+    var true_power_disp = true_power*0.0586;
+    var app_power_disp = apparent_power*0.0586;
+    var watt_hours_disp = watt_hours*1.066;
     var pf_disp = true_power_disp / app_power_disp;
+
+    // Exponential scaling
+    true_power_disp = true_power_disp - 6.6*Math.exp(-0.015*true_power_disp)
 
     // print unique seq's to user
     var last_seq = peripherals[peripheral_uuid];
@@ -96,7 +96,7 @@ noble.on('discover', function(peripheral) {
       var packetCount = 0;
       for (var i = timesInThirty.length - 1; i >= 0; i--) {
         if(timesInThirty[i] >= (recv_time - 30)) {
-          packetCount += 2;
+          packetCount += 1;
         }
       };
 

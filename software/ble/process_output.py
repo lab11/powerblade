@@ -3,6 +3,8 @@
 import sys
 import statistics
 
+calibrate = 0
+
 infile = sys.argv[1]
 outfile = sys.argv[2]
 
@@ -46,13 +48,17 @@ for line in fin:
 
 powers = powers[1:]
 pfs = pfs[1:]
-print 'True Power: ' + str(sum(powers)/len(powers))
-print 'Power Factor: ' + str(sum(pfs)/len(pfs))
-#print 'Time: ' + str(sum(times)/len(times))
-print('Variance in TP: ' + str(statistics.variance(powers)))
+if calibrate == 1:
+	print 'Time: ' + str(sum(times)/len(times))
+	print('Variance: ' + str(statistics.variance(times)))
+	
+	for idx, val in enumerate(times):
+		fout.write(str(timestamps[idx]) + '\t' + str(times[idx]) + '\t0.0\n')
+else:
+	print 'True Power: ' + str(sum(powers)/len(powers))
+	print 'Power Factor: ' + str(sum(pfs)/len(pfs))
+	print('Variance in TP: ' + str(statistics.variance(powers)))
 
-#for time in times:
-#	fout.write(str(time) + '\n')
-for idx, val in enumerate(powers):
-	fout.write(str(timestamps[idx]) + '\t' + str(powers[idx]) + '\t' + str(pfs[idx]) + '\n')
+	for idx, val in enumerate(powers):
+		fout.write(str(timestamps[idx]) + '\t' + str(powers[idx]) + '\t' + str(pfs[idx]) + '\n')
 
