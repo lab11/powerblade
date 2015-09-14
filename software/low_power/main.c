@@ -24,17 +24,16 @@
 
 //#define CALIBRATE
 
+// Transmission variables
 bool ready;
 uint8_t data;
 
+// Delay (used at startup)
 uint16_t delay_count;
 
 // Variables for integration
 int16_t agg_current;
-int16_t offset;
 int32_t agg_average;
-int32_t agg_count;
-int8_t lastCurrent;
 
 // Used for data visualizer
 uint16_t pwm_duty;
@@ -64,15 +63,6 @@ uint16_t apparentPower;
 uint64_t wattHours;
 uint32_t wattHoursSend;
 uint8_t flags;
-
-// Variables used to center both waveforms at Vcc/2-ish
-//int32_t isense_vmax;
-//int32_t isense_count;
-uint8_t isense_vmin;
-uint8_t vsense_vmax;
-uint8_t vsense_vmin;
-//uint8_t isense_vmid;
-//uint8_t vsense_vmid;
 
 // Buffer to hold old voltage measurements
 // This is used to account for a phase delay between current and voltage
@@ -178,7 +168,6 @@ int main(void) {
 	flags = 0;
 	agg_current = 0;
 	vbuff_head = 0;
-	lastCurrent = 0;
 
 	// Set SYS_EN to output and disable (PMOS)
 	SYS_EN_OUT |= SYS_EN_PIN;
@@ -437,9 +426,7 @@ __interrupt void ADC10_ISR(void) {
 				if (ADC_Result > ADC_VCHG) {
 					SEN_EN_OUT |= SEN_EN_PIN;
 					agg_current = 0;
-					offset = 0;
 					agg_average = 0;
-					agg_count = 0;
 					ready = 1;
 				}
 			}
