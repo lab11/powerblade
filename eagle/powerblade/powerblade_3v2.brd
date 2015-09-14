@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.3">
+<eagle version="6.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="2" unitdist="mil" unit="mil" style="lines" multiple="1" display="no" altdistance="3.125" altunitdist="mil" altunit="mil"/>
+<grid distance="25" unitdist="mil" unit="mil" style="lines" multiple="1" display="no" altdistance="3.125" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="yes" active="yes"/>
@@ -48,7 +48,7 @@
 <layer number="38" name="bTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="yes"/>
 <layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="yes"/>
-<layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="yes"/>
+<layer number="41" name="tRestrict" color="4" fill="10" visible="yes" active="yes"/>
 <layer number="42" name="bRestrict" color="1" fill="10" visible="no" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
@@ -145,8 +145,8 @@
 <plain>
 <wire x1="5.207" y1="8.001" x2="5.207" y2="3.0226" width="0" layer="48"/>
 <wire x1="5.207" y1="3.0226" x2="12.7" y2="3.0226" width="0" layer="48"/>
-<text x="10.4775" y="-4.445" size="0.635" layer="21" rot="R90">PowerBlade 3v2</text>
-<text x="11.27125" y="-4.445" size="0.635" layer="21" rot="R90">S.DeBruin 8.10.15</text>
+<text x="10.4775" y="-4.445" size="0.635" layer="21" rot="R90">PowerBlade 3v3</text>
+<text x="11.27125" y="-4.445" size="0.635" layer="21" rot="R90">S.DeBruin 9.14.15</text>
 <text x="6.35" y="5.08" size="1.524" layer="22" rot="MR0">PowerBlade</text>
 <text x="3.4925" y="4.1275" size="0.762" layer="22" rot="MR0">S.DeBruin</text>
 </plain>
@@ -1425,9 +1425,9 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-7.366" y1="-3.556" x2="-5.334" y2="-3.556" width="0" layer="20"/>
 <wire x1="-5.334" y1="-3.556" x2="-5.334" y2="3.556" width="0" layer="20"/>
 <wire x1="-5.334" y1="3.556" x2="-7.366" y2="3.556" width="0" layer="20"/>
-<wire x1="7.366" y1="4.445" x2="7.366" y2="2.9845" width="0" layer="20"/>
-<wire x1="7.366" y1="0.8255" x2="7.366" y2="-0.8255" width="0" layer="20"/>
-<wire x1="7.366" y1="-2.9845" x2="7.366" y2="-4.445" width="0" layer="20"/>
+<wire x1="7.366" y1="4.445" x2="7.366" y2="3.1115" width="0" layer="20"/>
+<wire x1="7.366" y1="0.6985" x2="7.366" y2="-0.6985" width="0" layer="20"/>
+<wire x1="7.366" y1="-3.1115" x2="7.366" y2="-4.445" width="0" layer="20"/>
 <wire x1="7.366" y1="-4.445" x2="5.334" y2="-4.445" width="0" layer="20"/>
 <wire x1="5.334" y1="-4.445" x2="5.334" y2="4.445" width="0" layer="20"/>
 <wire x1="5.334" y1="4.445" x2="7.366" y2="4.445" width="0" layer="20"/>
@@ -1438,10 +1438,10 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-4.318" y1="-4.572" x2="-4.318" y2="4.572" width="0.0508" layer="48"/>
 <wire x1="-4.318" y1="4.572" x2="-8.128" y2="4.572" width="0.0508" layer="48"/>
 <wire x1="-12.7" y1="7.366" x2="-12.7" y2="-16.764" width="0" layer="20"/>
-<wire x1="-7.366" y1="3.556" x2="-7.366" y2="2.9845" width="0" layer="20"/>
-<wire x1="-7.366" y1="-3.556" x2="-7.366" y2="-2.9845" width="0" layer="20"/>
-<wire x1="-7.366" y1="-0.8255" x2="-7.366" y2="0.8255" width="0" layer="20"/>
-<wire x1="-9.6012" y1="0.6985" x2="-7.366" y2="0.8255" width="0" layer="20"/>
+<wire x1="-7.366" y1="3.556" x2="-7.366" y2="3.1115" width="0" layer="20"/>
+<wire x1="-7.366" y1="-3.556" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
+<wire x1="-7.366" y1="-0.6985" x2="-7.366" y2="0.6985" width="0" layer="20"/>
+<wire x1="-9.6012" y1="0.6985" x2="-7.366" y2="0.6985" width="0" layer="20"/>
 <wire x1="-7.112" y1="-3.302" x2="-5.588" y2="-3.302" width="0" layer="48"/>
 <wire x1="-5.588" y1="-3.302" x2="-5.588" y2="3.302" width="0" layer="48"/>
 <wire x1="-5.588" y1="3.302" x2="-7.112" y2="3.302" width="0" layer="48"/>
@@ -1451,7 +1451,7 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="7.112" y1="-4.0894" x2="5.588" y2="-4.0894" width="0" layer="48"/>
 <wire x1="7.112" y1="4.0894" x2="7.112" y2="-4.0894" width="0" layer="48"/>
 <wire x1="-9.6012" y1="0.6985" x2="-9.6012" y2="3.1115" width="0" layer="20"/>
-<wire x1="-9.6012" y1="3.1115" x2="-7.366" y2="2.9845" width="0" layer="20"/>
+<wire x1="-9.6012" y1="3.1115" x2="-7.366" y2="3.1115" width="0" layer="20"/>
 <smd name="PA.3" x="-7.493" y="0" dx="0.1524" dy="0.635" layer="1" stop="no" thermals="no" cream="no"/>
 <wire x1="-2.5654" y1="-14.5796" x2="2.5654" y2="-14.5796" width="0" layer="20"/>
 <wire x1="2.5654" y1="-14.5796" x2="2.6924" y2="-14.4526" width="0" layer="20" curve="90"/>
@@ -1462,144 +1462,172 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="12.065" y1="-17.399" x2="12.7" y2="-16.764" width="0" layer="20" curve="90"/>
 <wire x1="12.7" y1="-16.764" x2="12.7" y2="7.366" width="0" layer="20"/>
 <wire x1="12.7" y1="7.366" x2="12.065" y2="8.001" width="0" layer="20" curve="90"/>
-<wire x1="9.6012" y1="3.1115" x2="7.366" y2="2.9845" width="0" layer="20"/>
-<wire x1="9.6012" y1="0.6985" x2="7.366" y2="0.8255" width="0" layer="20"/>
+<wire x1="9.6012" y1="3.1115" x2="7.366" y2="3.1115" width="0" layer="20"/>
+<wire x1="9.6012" y1="0.6985" x2="7.366" y2="0.6985" width="0" layer="20"/>
 <wire x1="9.6012" y1="3.1115" x2="9.6012" y2="0.6985" width="0" layer="20"/>
 <smd name="PB.3" x="7.493" y="0" dx="0.1524" dy="0.635" layer="1" stop="no" thermals="no" cream="no"/>
 <wire x1="-9.6012" y1="-3.1115" x2="-9.6012" y2="-0.6985" width="0" layer="20"/>
-<wire x1="-9.6012" y1="-0.6985" x2="-7.366" y2="-0.8255" width="0" layer="20"/>
-<wire x1="-9.6012" y1="-3.1115" x2="-7.366" y2="-2.9845" width="0" layer="20"/>
-<wire x1="9.6012" y1="-0.6985" x2="7.366" y2="-0.8255" width="0" layer="20"/>
-<wire x1="9.6012" y1="-3.1115" x2="7.366" y2="-2.9845" width="0" layer="20"/>
+<wire x1="-9.6012" y1="-0.6985" x2="-7.366" y2="-0.6985" width="0" layer="20"/>
+<wire x1="-9.6012" y1="-3.1115" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
+<wire x1="9.6012" y1="-0.6985" x2="7.366" y2="-0.6985" width="0" layer="20"/>
+<wire x1="9.6012" y1="-3.1115" x2="7.366" y2="-3.1115" width="0" layer="20"/>
 <wire x1="9.6012" y1="-0.6985" x2="9.6012" y2="-3.1115" width="0" layer="20"/>
+<smd name="PB.1" x="7.493" y="0" dx="0.1524" dy="0.635" layer="16" stop="no" thermals="no" cream="no"/>
 <polygon width="0" layer="1">
-<vertex x="-5.334" y="3.556"/>
-<vertex x="-5.334" y="-3.556"/>
-<vertex x="-7.366" y="-3.556"/>
-<vertex x="-7.366" y="-2.9845"/>
-<vertex x="-9.6012" y="-3.1115"/>
-<vertex x="-9.6012" y="-0.6985"/>
-<vertex x="-7.366" y="-0.8255"/>
-<vertex x="-7.366" y="0.8255"/>
-<vertex x="-9.6012" y="0.6985"/>
-<vertex x="-9.6012" y="3.1115"/>
-<vertex x="-7.366" y="2.9845"/>
-<vertex x="-7.366" y="3.556"/>
-<vertex x="-7.62" y="3.556"/>
-<vertex x="-7.62" y="3.3655"/>
-<vertex x="-9.8552" y="3.3655"/>
-<vertex x="-9.8552" y="0.4445"/>
-<vertex x="-7.62" y="0.4445"/>
-<vertex x="-7.62" y="-0.4445"/>
-<vertex x="-9.8552" y="-0.4445"/>
-<vertex x="-9.8552" y="-3.3655"/>
-<vertex x="-7.62" y="-3.3655"/>
-<vertex x="-7.62" y="-3.81"/>
-<vertex x="-5.08" y="-3.81"/>
-<vertex x="-5.08" y="3.556"/>
-</polygon>
-<polygon width="0" layer="1">
-<vertex x="-5.08" y="3.556"/>
-<vertex x="-7.62" y="3.556"/>
-<vertex x="-7.62" y="3.81"/>
-<vertex x="-5.08" y="3.81"/>
-</polygon>
-<polygon width="0" layer="16">
-<vertex x="-5.334" y="3.556"/>
-<vertex x="-5.334" y="-3.556"/>
-<vertex x="-7.366" y="-3.556"/>
-<vertex x="-7.366" y="-2.9845"/>
-<vertex x="-9.6012" y="-3.1115"/>
-<vertex x="-9.6012" y="-0.6985"/>
-<vertex x="-7.366" y="-0.8255"/>
-<vertex x="-7.366" y="0.8255"/>
-<vertex x="-9.6012" y="0.6985"/>
-<vertex x="-9.6012" y="3.1115"/>
-<vertex x="-7.366" y="2.9845"/>
-<vertex x="-7.366" y="3.556"/>
-<vertex x="-7.62" y="3.556"/>
-<vertex x="-7.62" y="3.3655"/>
-<vertex x="-9.8552" y="3.3655"/>
-<vertex x="-9.8552" y="0.4445"/>
-<vertex x="-7.62" y="0.4445"/>
-<vertex x="-7.62" y="-0.4445"/>
-<vertex x="-9.8552" y="-0.4445"/>
-<vertex x="-9.8552" y="-3.3655"/>
-<vertex x="-7.62" y="-3.3655"/>
-<vertex x="-7.62" y="-3.81"/>
-<vertex x="-5.08" y="-3.81"/>
-<vertex x="-5.08" y="3.556"/>
-</polygon>
-<polygon width="0" layer="16">
-<vertex x="-5.08" y="3.556"/>
-<vertex x="-7.62" y="3.556"/>
-<vertex x="-7.62" y="3.81"/>
-<vertex x="-5.08" y="3.81"/>
-</polygon>
-<polygon width="0" layer="1">
+<vertex x="7.528421875" y="4.699"/>
+<vertex x="5.151840625" y="4.699" curve="90"/>
+<vertex x="5.08" y="4.627159375"/>
+<vertex x="5.08" y="-4.064"/>
+<vertex x="4.5212" y="-4.064"/>
+<vertex x="4.5212" y="-4.953"/>
+<vertex x="5.08" y="-4.953"/>
+<vertex x="5.08" y="-4.9784"/>
+<vertex x="7.8994" y="-4.9784"/>
+<vertex x="7.8994" y="-3.6449"/>
+<vertex x="10.1346" y="-3.6449"/>
+<vertex x="10.1346" y="-0.1651"/>
+<vertex x="7.8994" y="-0.1651"/>
+<vertex x="7.8994" y="0.381"/>
+<vertex x="7.366" y="0.381"/>
+<vertex x="7.366" y="-0.6985"/>
+<vertex x="9.6012" y="-0.6985"/>
+<vertex x="9.6012" y="-3.1115"/>
+<vertex x="7.366" y="-3.1115"/>
+<vertex x="7.366" y="-4.445"/>
 <vertex x="5.334" y="-4.445"/>
 <vertex x="5.334" y="4.445"/>
 <vertex x="7.366" y="4.445"/>
-<vertex x="7.366" y="2.9845"/>
+<vertex x="7.366" y="3.1115"/>
 <vertex x="9.6012" y="3.1115"/>
 <vertex x="9.6012" y="0.6985"/>
-<vertex x="7.366" y="0.8255"/>
-<vertex x="7.366" y="-0.8255"/>
-<vertex x="9.6012" y="-0.6985"/>
-<vertex x="9.6012" y="-3.1115"/>
-<vertex x="7.366" y="-2.9845"/>
-<vertex x="7.366" y="-4.445"/>
-<vertex x="7.62" y="-4.445"/>
-<vertex x="7.62" y="-3.3655"/>
-<vertex x="9.8552" y="-3.3655"/>
-<vertex x="9.8552" y="-0.4445"/>
-<vertex x="7.62" y="-0.4445"/>
-<vertex x="7.62" y="0.4445"/>
-<vertex x="9.8552" y="0.4445"/>
-<vertex x="9.8552" y="3.3655"/>
+<vertex x="7.366" y="0.6985"/>
+<vertex x="7.366" y="0.381003125"/>
+<vertex x="7.899403125" y="0.381003125"/>
+<vertex x="7.899403125" y="0.1651"/>
+<vertex x="10.1346" y="0.1651"/>
+<vertex x="10.1346" y="1.6764"/>
+<vertex x="10.3886" y="1.6764"/>
+<vertex x="10.3886" y="2.974975"/>
+<vertex x="10.22325" y="2.974975" curve="-90"/>
+<vertex x="10.1346" y="3.063625" curve="90"/>
+<vertex x="9.832725" y="3.3655"/>
 <vertex x="7.62" y="3.3655"/>
-<vertex x="7.62" y="4.699"/>
-<vertex x="5.08" y="4.699"/>
-<vertex x="5.08" y="-4.445"/>
-</polygon>
-<polygon width="0" layer="1">
-<vertex x="5.08" y="-4.445"/>
-<vertex x="7.62" y="-4.445"/>
-<vertex x="7.62" y="-4.699"/>
-<vertex x="5.08" y="-4.699"/>
+<vertex x="7.62" y="4.607421875" curve="90"/>
 </polygon>
 <polygon width="0" layer="16">
+<vertex x="7.528421875" y="4.699"/>
+<vertex x="5.151840625" y="4.699" curve="90"/>
+<vertex x="5.08" y="4.627159375"/>
+<vertex x="5.08" y="-4.064"/>
+<vertex x="4.5212" y="-4.064"/>
+<vertex x="4.5212" y="-4.6736"/>
+<vertex x="5.08" y="-4.6736"/>
+<vertex x="5.08" y="-4.699"/>
+<vertex x="7.8994" y="-4.699"/>
+<vertex x="7.8994" y="-3.6449"/>
+<vertex x="10.1346" y="-3.6449"/>
+<vertex x="10.1346" y="-0.1651"/>
+<vertex x="7.8994" y="-0.1651"/>
+<vertex x="7.8994" y="0.381"/>
+<vertex x="7.366" y="0.381"/>
+<vertex x="7.366" y="-0.6985"/>
+<vertex x="9.6012" y="-0.6985"/>
+<vertex x="9.6012" y="-3.1115"/>
+<vertex x="7.366" y="-3.1115"/>
+<vertex x="7.366" y="-4.445"/>
 <vertex x="5.334" y="-4.445"/>
 <vertex x="5.334" y="4.445"/>
 <vertex x="7.366" y="4.445"/>
-<vertex x="7.366" y="2.9845"/>
+<vertex x="7.366" y="3.1115"/>
 <vertex x="9.6012" y="3.1115"/>
 <vertex x="9.6012" y="0.6985"/>
-<vertex x="7.366" y="0.8255"/>
-<vertex x="7.366" y="-0.8255"/>
-<vertex x="9.6012" y="-0.6985"/>
-<vertex x="9.6012" y="-3.1115"/>
-<vertex x="7.366" y="-2.9845"/>
-<vertex x="7.366" y="-4.445"/>
-<vertex x="7.62" y="-4.445"/>
-<vertex x="7.62" y="-3.3655"/>
-<vertex x="9.8552" y="-3.3655"/>
-<vertex x="9.8552" y="-0.4445"/>
-<vertex x="7.62" y="-0.4445"/>
-<vertex x="7.62" y="0.4445"/>
-<vertex x="9.8552" y="0.4445"/>
-<vertex x="9.8552" y="3.3655"/>
+<vertex x="7.366" y="0.6985"/>
+<vertex x="7.366" y="0.381003125"/>
+<vertex x="7.899403125" y="0.381003125"/>
+<vertex x="7.899403125" y="0.1651"/>
+<vertex x="10.1346" y="0.1651"/>
+<vertex x="10.1346" y="1.6764"/>
+<vertex x="10.3886" y="1.6764"/>
+<vertex x="10.3886" y="2.974975"/>
+<vertex x="10.22325" y="2.974975" curve="-90"/>
+<vertex x="10.1346" y="3.063625" curve="90"/>
+<vertex x="9.832725" y="3.3655"/>
 <vertex x="7.62" y="3.3655"/>
-<vertex x="7.62" y="4.699"/>
-<vertex x="5.08" y="4.699"/>
-<vertex x="5.08" y="-4.445"/>
+<vertex x="7.62" y="4.607421875" curve="90"/>
 </polygon>
 <polygon width="0" layer="16">
-<vertex x="5.08" y="-4.445"/>
-<vertex x="7.62" y="-4.445"/>
-<vertex x="7.62" y="-4.699"/>
-<vertex x="5.08" y="-4.699"/>
+<vertex x="-7.426559375" y="-3.81"/>
+<vertex x="-5.2649125" y="-3.81" curve="90"/>
+<vertex x="-5.08" y="-3.6250875"/>
+<vertex x="-5.08" y="3.6250875" curve="90"/>
+<vertex x="-5.2649125" y="3.81"/>
+<vertex x="-7.426559375" y="3.81" curve="90"/>
+<vertex x="-7.62" y="3.616559375"/>
+<vertex x="-7.62" y="3.3655"/>
+<vertex x="-9.553325" y="3.3655" curve="90"/>
+<vertex x="-9.8552" y="3.063625"/>
+<vertex x="-9.8552" y="0.1651"/>
+<vertex x="-7.8994" y="0.1651"/>
+<vertex x="-7.8994" y="-0.381"/>
+<vertex x="-7.366" y="-0.381"/>
+<vertex x="-7.366" y="0.6985"/>
+<vertex x="-9.6012" y="0.6985"/>
+<vertex x="-9.6012" y="3.1115"/>
+<vertex x="-7.366" y="3.1115"/>
+<vertex x="-7.366" y="3.556"/>
+<vertex x="-5.334" y="3.556"/>
+<vertex x="-5.334" y="-3.556"/>
+<vertex x="-7.366" y="-3.556"/>
+<vertex x="-7.366" y="-3.1115"/>
+<vertex x="-9.6012" y="-3.1115"/>
+<vertex x="-9.6012" y="-0.6985"/>
+<vertex x="-7.366" y="-0.6985"/>
+<vertex x="-7.366" y="-0.381003125"/>
+<vertex x="-7.899403125" y="-0.381003125"/>
+<vertex x="-7.899403125" y="-0.1651"/>
+<vertex x="-9.8552" y="-0.1651"/>
+<vertex x="-9.8552" y="-3.063625" curve="90"/>
+<vertex x="-9.553325" y="-3.3655"/>
+<vertex x="-7.62" y="-3.3655"/>
+<vertex x="-7.62" y="-3.616559375" curve="90"/>
 </polygon>
+<polygon width="0" layer="1">
+<vertex x="-7.426559375" y="-3.81"/>
+<vertex x="-5.2649125" y="-3.81" curve="90"/>
+<vertex x="-5.08" y="-3.6250875"/>
+<vertex x="-5.08" y="3.6250875" curve="90"/>
+<vertex x="-5.2649125" y="3.81"/>
+<vertex x="-7.426559375" y="3.81" curve="90"/>
+<vertex x="-7.62" y="3.616559375"/>
+<vertex x="-7.62" y="3.3655"/>
+<vertex x="-9.553325" y="3.3655" curve="90"/>
+<vertex x="-9.8552" y="3.063625"/>
+<vertex x="-9.8552" y="0.1651"/>
+<vertex x="-7.8994" y="0.1651"/>
+<vertex x="-7.8994" y="-0.381"/>
+<vertex x="-7.366" y="-0.381"/>
+<vertex x="-7.366" y="0.6985"/>
+<vertex x="-9.6012" y="0.6985"/>
+<vertex x="-9.6012" y="3.1115"/>
+<vertex x="-7.366" y="3.1115"/>
+<vertex x="-7.366" y="3.556"/>
+<vertex x="-5.334" y="3.556"/>
+<vertex x="-5.334" y="-3.556"/>
+<vertex x="-7.366" y="-3.556"/>
+<vertex x="-7.366" y="-3.1115"/>
+<vertex x="-9.6012" y="-3.1115"/>
+<vertex x="-9.6012" y="-0.6985"/>
+<vertex x="-7.366" y="-0.6985"/>
+<vertex x="-7.366" y="-0.381003125"/>
+<vertex x="-7.899403125" y="-0.381003125"/>
+<vertex x="-7.899403125" y="-0.1651"/>
+<vertex x="-9.8552" y="-0.1651"/>
+<vertex x="-9.8552" y="-3.063625" curve="90"/>
+<vertex x="-9.553325" y="-3.3655"/>
+<vertex x="-7.62" y="-3.3655"/>
+<vertex x="-7.62" y="-3.616559375" curve="90"/>
+</polygon>
+<smd name="PA.1" x="-7.493" y="0" dx="0.1524" dy="0.635" layer="16" stop="no" thermals="no" cream="no"/>
 </package>
 </packages>
 </library>
@@ -2550,7 +2578,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="D2" pad="C"/>
 <contactref element="C1" pad="+"/>
 <contactref element="SV1" pad="P10"/>
-<polygon width="0.1524" layer="1" thermals="no">
+<polygon width="0.1524" layer="1" thermals="no" rank="2">
 <vertex x="-1.508125" y="4.683125"/>
 <vertex x="-2.2225" y="4.683125"/>
 <vertex x="-2.301875" y="4.60375"/>
@@ -2840,15 +2868,15 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <contactref element="RI1" pad="1"/>
 <contactref element="R3" pad="1"/>
 <contactref element="J2" pad="PA.3"/>
-<wire x1="-7.493" y1="0" x2="-9.921875" y2="0" width="0.4064" layer="1"/>
 <wire x1="-10.795" y1="4.333625" x2="-10.264775" y2="3.8034" width="0.4064" layer="1"/>
 <wire x1="-10.264775" y1="3.8034" x2="-10.264775" y2="2.2225" width="0.3048" layer="1"/>
 <wire x1="-10.264775" y1="2.2225" x2="-10.264775" y2="0.3429" width="0.3048" layer="1"/>
 <wire x1="-10.264775" y1="0.3429" x2="-9.921875" y2="0" width="0.3048" layer="1"/>
 <wire x1="-10.963275" y1="2.166875" x2="-10.3204" y2="2.166875" width="0.254" layer="1"/>
 <wire x1="-10.3204" y1="2.166875" x2="-10.264775" y2="2.2225" width="0.254" layer="1"/>
-<wire x1="-8.509" y1="3.81" x2="-10.264775" y2="3.81" width="0.6096" layer="1"/>
 <wire x1="-10.264775" y1="3.81" x2="-10.264775" y2="3.8034" width="0.6096" layer="1"/>
+<wire x1="-9.921875" y1="0" x2="-7.62" y2="0" width="0.4064" layer="1"/>
+<wire x1="-7.62" y1="0" x2="-7.493" y2="0" width="0.1524" layer="1"/>
 </signal>
 <signal name="VAMP">
 <contactref element="R17" pad="2"/>
@@ -3647,7 +3675,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <polygon width="0.2032" layer="1" rank="6">
 <vertex x="-13.97" y="9.144"/>
 <vertex x="5.08" y="9.144"/>
-<vertex x="5.08" y="2.8575"/>
+<vertex x="5.08" y="2.873375"/>
 <vertex x="12.192" y="2.873375"/>
 <vertex x="12.192" y="-17.78"/>
 <vertex x="-13.97" y="-17.78"/>
@@ -3655,7 +3683,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <polygon width="0.2032" layer="16" rank="6">
 <vertex x="-13.97" y="9.144"/>
 <vertex x="5.08" y="9.144"/>
-<vertex x="5.08" y="2.8575"/>
+<vertex x="5.08" y="2.873375"/>
 <vertex x="12.192" y="2.873375"/>
 <vertex x="12.192" y="-17.78"/>
 <vertex x="-13.97" y="-17.78"/>
@@ -3690,7 +3718,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <vertex x="-8.5725" y="9.144"/>
 <vertex x="-8.5725" y="9.128125"/>
 <vertex x="5.08" y="9.144"/>
-<vertex x="5.08" y="2.8575"/>
+<vertex x="5.08" y="2.873375"/>
 <vertex x="12.192" y="2.873375"/>
 <vertex x="12.192" y="-17.78"/>
 <vertex x="-13.97" y="-17.78"/>
@@ -3783,12 +3811,6 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="2.301875" y1="-15.24" x2="2.539275" y2="-15.4774" width="0.2032" layer="1"/>
 <wire x1="2.539275" y1="-15.4774" x2="2.8702" y2="-15.5274" width="0.2032" layer="1"/>
 <contactref element="J2" pad="PB.3"/>
-<wire x1="8.509" y1="3.81" x2="9.8425" y2="3.81" width="0.254" layer="1"/>
-<wire x1="9.8425" y1="3.81" x2="10.4775" y2="3.175" width="0.254" layer="1"/>
-<wire x1="10.4775" y1="3.175" x2="10.4775" y2="2.54" width="0.254" layer="1"/>
-<wire x1="8.509" y1="3.81" x2="9.8425" y2="3.81" width="0.254" layer="16"/>
-<wire x1="9.8425" y1="3.81" x2="10.4775" y2="3.175" width="0.254" layer="16"/>
-<wire x1="10.4775" y1="3.175" x2="10.4775" y2="2.54" width="0.254" layer="16"/>
 <polygon width="0.2032" layer="1" thermals="no">
 <vertex x="-7.9375" y="5.55625"/>
 <vertex x="-7.46125" y="5.08"/>
@@ -3818,8 +3840,85 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <wire x1="-10.31875" y1="-16.66875" x2="-11.43" y2="-16.66875" width="0.254" layer="1"/>
 <wire x1="-11.43" y1="-16.66875" x2="-11.58875" y2="-16.51" width="0.254" layer="1"/>
 <wire x1="7.493" y1="0" x2="8.255" y2="0" width="0.2032" layer="1"/>
+<contactref element="J2" pad="PB.1"/>
+<wire x1="7.493" y1="0" x2="11.7602" y2="0" width="0.2032" layer="16"/>
+<wire x1="11.7602" y1="0" x2="11.7602" y2="1.27" width="0.2032" layer="16"/>
 </signal>
 </signals>
+<errors>
+<approved hash="3,1,0a2c082808280a2c"/>
+<approved hash="3,1,99799b7f9b7f9979"/>
+<approved hash="3,16,99799b7f9b7f9979"/>
+<approved hash="3,16,0a2c082808280a2c"/>
+<approved hash="4,1,67605bd1dc9354de"/>
+<approved hash="4,1,58dd5a6d8109bafa"/>
+<approved hash="4,1,58dd5a6c96d2209f"/>
+<approved hash="4,1,67605bd946f7430d"/>
+<approved hash="4,1,66649c55b8cf7ffe"/>
+<approved hash="4,1,b22a1a6c6f9ea733"/>
+<approved hash="4,1,607d750134a33f98"/>
+<approved hash="4,1,c6ee19922f600045"/>
+<approved hash="4,1,660eeb0114150901"/>
+<approved hash="4,1,33fdbc0c19649775"/>
+<approved hash="4,1,59191922fd45c599"/>
+<approved hash="4,1,a5e3c88b9de061da"/>
+<approved hash="4,1,95ebb81bac336e31"/>
+<approved hash="4,1,d9ed081fe3add2ff"/>
+<approved hash="4,1,da3a4015cb11543e"/>
+<approved hash="4,1,1b1840042ef01e09"/>
+<approved hash="4,1,090e9a986878e9f0"/>
+<approved hash="4,1,c338a196c313bebd"/>
+<approved hash="19,1,057517598030305a"/>
+<approved hash="4,1,2170e8010365fd37"/>
+<approved hash="4,1,21a3e402baa3eb66"/>
+<approved hash="4,1,e63ae1d1f90b1957"/>
+<approved hash="4,1,e51b35b612da8121"/>
+<approved hash="4,1,7277835fb5f8fa70"/>
+<approved hash="4,1,e9fe340c35d2e820"/>
+<approved hash="4,1,8fe01ce0bb0e280e"/>
+<approved hash="4,1,8cf83089e1331aeb"/>
+<approved hash="4,1,980d53e447f897b4"/>
+<approved hash="4,1,262700c9f55706b3"/>
+<approved hash="4,1,b1b2183b0562c708"/>
+<approved hash="4,1,46287fda7f3b46c9"/>
+<approved hash="19,1,f94ac488c9fdf43f"/>
+<approved hash="19,1,38c7850583fe3e3c"/>
+<approved hash="19,1,bc9959db5f26ba64"/>
+<approved hash="19,1,7d14185615257067"/>
+<approved hash="4,1,40e240b0474c401e"/>
+<approved hash="19,16,97c72eafe6c869a4"/>
+<approved hash="19,16,08eaab4ae43c73b0"/>
+<approved hash="4,16,33fdbc0c19649775"/>
+<approved hash="4,16,607d750134a33f98"/>
+<approved hash="4,16,660eeb0114150901"/>
+<approved hash="4,16,b22a1a6c6f9ea733"/>
+<approved hash="4,16,c6ee19922f600045"/>
+<approved hash="4,16,59191922fd45c599"/>
+<approved hash="4,16,a5e3c88b9de061da"/>
+<approved hash="4,16,1b1840042ef01e09"/>
+<approved hash="4,16,d9ed081fe3add2ff"/>
+<approved hash="4,16,95ebb81bac336e31"/>
+<approved hash="4,16,da3a4015cb11543e"/>
+<approved hash="4,16,090e9a986878e9f0"/>
+<approved hash="4,16,ddd7f6d6fdb2b238"/>
+<approved hash="4,16,b468f8daf700ee3d"/>
+<approved hash="4,16,d94c8f50686aa5f7"/>
+<approved hash="4,16,a4206d818901ea25"/>
+<approved hash="19,16,0aaf2aeaab5694fe"/>
+<approved hash="4,16,bcba2521ea5ba1aa"/>
+<approved hash="4,16,e63ae1d1f90b1957"/>
+<approved hash="4,16,01bf204c771fd5a2"/>
+<approved hash="4,16,e8b2f3946a4796a5"/>
+<approved hash="4,16,8fe01ce0bb0e280e"/>
+<approved hash="4,16,980d53e447f897b4"/>
+<approved hash="4,16,02f265945797eac8"/>
+<approved hash="4,16,e9fe340c35d2e820"/>
+<approved hash="4,16,e51b35b612da8121"/>
+<approved hash="4,16,7277835fb5f8fa70"/>
+<approved hash="4,16,46287fda7f3b46c9"/>
+<approved hash="4,16,b1b2183b0562c708"/>
+<approved hash="4,16,40e240b0474c401e"/>
+</errors>
 </board>
 </drawing>
 </eagle>
