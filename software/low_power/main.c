@@ -61,7 +61,8 @@ uint32_t time;
 uint8_t Vrms;
 uint16_t truePower;
 uint16_t apparentPower;
-uint32_t wattHours;
+uint64_t wattHours;
+uint32_t wattHoursSend;
 uint8_t flags;
 
 // Variables used to center both waveforms at Vcc/2-ish
@@ -284,17 +285,12 @@ void uart_send(char* buf, unsigned int len) {
 
 void transmitTry(void) {
 
+	// Integrate current
 	agg_current += (int16_t) (current + (current >> 1));
 	agg_average = agg_current >> 5;
 	agg_current -= agg_average;
-//	agg_current += ((int16_t)lastCurrent + (int16_t)current) >> 1;
-//	agg_average = agg_current >> 5;
-//	agg_current -= agg_average;
-//	lastCurrent = current;
 
-	// Perform calculations for I^2, V^2, and P
-	// These are all done here to co-locate voltage and current sensing
-	// as much as possible
+	// Subtract offset, if not in calibration mode
 #ifndef CALIBRATE
 	int32_t new_current;
 	if(agg_current > 0) {
@@ -306,17 +302,18 @@ void transmitTry(void) {
 #else
 	int32_t new_current = agg_current;
 #endif
+
+	// Perform calculations for I^2, V^2, and P
 	new_current = agg_current;
 	acc_i_rms += new_current * new_current;
 	acc_p_ave += voltage * new_current;
 	acc_v_rms += voltage * voltage;
 
 	// Set side channel output
-	//TA1CCR1 = (agg_current >> 5) + 196;
 	pwm_duty = (agg_current >> 3) + 786;
 	voltage_duty = voltage + 786;
-	//pwm_duty = voltage + 786;
 
+	sampleCount++;
 	if (sampleCount == SAMCOUNT) { // Entire AC wave sampled (60 Hz)
 		// Reset sampleCount once per wave
 		sampleCount = 0;
@@ -330,12 +327,6 @@ void transmitTry(void) {
 
 		// Calculate Irms, Vrms, and apparent power
 		uint16_t Irms = (uint16_t) SquareRoot(acc_i_rms / SAMCOUNT);
-//#ifndef CALIBRATE
-//		Irms -= CUROFF;
-//		if(Irms <= 0) {
-//			Irms = 0;
-//		}
-//#endif
 		Vrms = (uint8_t) SquareRoot(acc_v_rms / SAMCOUNT);
 		acc_i_rms = 0;
 		acc_v_rms = 0;
@@ -353,7 +344,7 @@ void transmitTry(void) {
 #endif
 
 			truePower = (uint16_t) (wattHoursToAverage / 60);
-			wattHours += (uint32_t) truePower;
+			wattHours += (uint64_t) truePower;
 			apparentPower = (uint16_t) (voltAmpsToAverage / 60);
 			wattHoursToAverage = 0;
 			voltAmpsToAverage = 0;
@@ -365,7 +356,6 @@ void transmitTry(void) {
 				__delay_cycles(80000);
 				uart_send((char*) &powerblade_id, sizeof(powerblade_id));
 				data = 8;
-				//ready = 0;
 			}
 		}
 	}
@@ -401,21 +391,20 @@ __interrupt void ADC10_ISR(void) {
 #endif
 		{
 			// Set debug pin
-			P1OUT |= BIT2;
+			//P1OUT |= BIT2;
 
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
 
 			// Enable next sample
 			//ADC10CTL0 += ADC10SC;
-			sampleCount++;
 			transmitTry();
 			break;
 		}
 		case 3:	// V_SENSE (same in versions 0, 1, and 3.1)
 		{
 			// Set debug pin
-			P1OUT |= BIT2;
+			//P1OUT |= BIT2;
 
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
@@ -437,7 +426,7 @@ __interrupt void ADC10_ISR(void) {
 		case 4:	// VCC_SENSE
 #endif
 			// Set debug pin
-			P1OUT |= BIT2;
+			//P1OUT |= BIT2;
 
 			// Perform Vcap measurements
 			if (ADC_Result < ADC_VMIN) {
@@ -453,8 +442,6 @@ __interrupt void ADC10_ISR(void) {
 					agg_count = 0;
 					ready = 1;
 				}
-			} else {
-//    			ready = 0;
 			}
 
 			// Enable next sample
@@ -462,8 +449,7 @@ __interrupt void ADC10_ISR(void) {
 			break;
 		default: // ADC Reset condition
 			// Set debug pin
-//    		P1OUT |= BIT6;
-			P1OUT |= BIT3;
+			//P1OUT |= BIT3;
 
 			ADC10CTL0 += ADC10SC;
 			break;
@@ -472,19 +458,15 @@ __interrupt void ADC10_ISR(void) {
 	default:
 		break;
 	}
-//	P1OUT &= ~(BIT6);// + BIT2);
-	P1OUT &= ~(BIT3 + BIT2);
+	//P1OUT &= ~(BIT3 + BIT2);
 }
 
 #pragma vector=USCI_A0_VECTOR
 __interrupt void USCI_A0_ISR(void) {
 	switch (__even_in_range(UCA0IV, 8)) {
 	case 0:
-		break;							// No interrupt
+		break;								// No interrupt
 	case 2: 								// RX interrupt
-		// Reset the incrementing variables if we've gotten a confirm
-		wattHours = 0;
-		time = 0;
 		break;
 	case 4:									// TX interrupt
 		if (txCt < txLen) {
@@ -495,7 +477,7 @@ __interrupt void USCI_A0_ISR(void) {
 		}
 		break;
 	case 6:
-		break;							// Start bit received
+		break;								// Start bit received
 	case 8: 								// Transmit complete
 		UCA0IE &= ~UCTXCPTIE;
 		data--;
@@ -514,15 +496,14 @@ __interrupt void USCI_A0_ISR(void) {
 			uart_send((char*) &Vrms, sizeof(Vrms));
 			break;
 		case 4:
-//			truePower = 0xFFFF;
 			uart_send((char*) &truePower, sizeof(truePower));
 			break;
 		case 3:
 			uart_send((char*) &apparentPower, sizeof(apparentPower));
 			break;
 		case 2:
-//			wattHours = 0xFFFFFFFF;
-			uart_send((char*) &wattHours, sizeof(wattHours));
+			wattHoursSend = (uint32_t)(wattHours >> 9);
+			uart_send((char*) &wattHoursSend, sizeof(wattHoursSend));
 			break;
 		case 1:
 			uart_send((char*) &flags, sizeof(flags));
