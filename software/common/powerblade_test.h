@@ -6,11 +6,6 @@
 #define POWERBLADE_TEST_H_
 
 /**************************************************************************
-   SAMPLE BUFFER SECTION
- **************************************************************************/
-#define SAM_BUFSIZE	100
-
-/**************************************************************************
    SYSTEN ENABLE SECTION
  **************************************************************************/
 #ifdef VERSION0
@@ -62,31 +57,16 @@
 	Vmax,div = 3.17V
 	Nadc,max = 255 * (3.17 / 3.3) = 245 (0xF5)
 */
-//#define ADC_VMIN	0xB3
 #define ADC_VMIN	0x73
 #define ADC_VCHG	0xDB
-#define ADC_VMAX	0xF5
 
 #define ADC_VCC2	0x80
 #define V_VCC2		ADC_VCC2
 #define I_VCC2		0x7F
 
-//#define ADC_PERUS	500
-//#define ADC_PERCT	ADC_PERUS*(32768/1E6)
-//#define ADC_PERUS	793.65
-#define ADC_PERCT	26
-
-/**************************************************************************
-   METERING SECTION
- **************************************************************************/
-// V_SENSE RESISTORS
-#define RI			220
-#define RF			1.5
-
 /**************************************************************************
    SENSING CONSTANTS SECTION
  **************************************************************************/
-//#define CUROFF		6
 #define CUROFF		27
 #define PHASEOFF	1	// zero for in-phase
 #define SAMCOUNT	42
