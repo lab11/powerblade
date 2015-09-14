@@ -70,13 +70,14 @@ noble.on('discover', function(peripheral) {
     var flags = BitArray.fromBuffer(data.slice(18,19)).toNumber();
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
-    var v_rms_disp = v_rms*2.46;
-    //var true_power_disp = true_power*0.0586;
-    //var app_power_disp = apparent_power*0.0586;
-    //var watt_hours_disp = watt_hours*1.066;
-    var true_power_disp = true_power*0.0646;
-    var app_power_disp = apparent_power*0.0378;
-    var watt_hours_disp = watt_hours*0.0000179;
+    var volt_scale = 2.46;
+    var power_scale = 0.0586;
+    var wh_shift = 9;
+
+    var v_rms_disp = v_rms*volt_scale;
+    var true_power_disp = true_power*power_scale;
+    var app_power_disp = apparent_power*power_scale;
+    var watt_hours_disp = (watt_hours << wh_shift)*(power_scale/3600);
     var pf_disp = true_power_disp / app_power_disp;
 
     // Exponential scaling
