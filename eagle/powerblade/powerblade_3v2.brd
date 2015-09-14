@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="12.5" unitdist="mil" unit="mil" style="lines" multiple="1" display="no" altdistance="3.125" altunitdist="mil" altunit="mil"/>
+<grid distance="2" unitdist="mil" unit="mil" style="lines" multiple="1" display="no" altdistance="3.125" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="yes" active="yes"/>
@@ -1425,9 +1425,9 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-7.366" y1="-3.556" x2="-5.334" y2="-3.556" width="0" layer="20"/>
 <wire x1="-5.334" y1="-3.556" x2="-5.334" y2="3.556" width="0" layer="20"/>
 <wire x1="-5.334" y1="3.556" x2="-7.366" y2="3.556" width="0" layer="20"/>
-<wire x1="7.366" y1="4.445" x2="7.366" y2="3.1115" width="0" layer="20"/>
-<wire x1="7.366" y1="0.6985" x2="7.366" y2="-0.6985" width="0" layer="20"/>
-<wire x1="7.366" y1="-3.1115" x2="7.366" y2="-4.445" width="0" layer="20"/>
+<wire x1="7.366" y1="4.445" x2="7.366" y2="2.9845" width="0" layer="20"/>
+<wire x1="7.366" y1="0.8255" x2="7.366" y2="-0.8255" width="0" layer="20"/>
+<wire x1="7.366" y1="-2.9845" x2="7.366" y2="-4.445" width="0" layer="20"/>
 <wire x1="7.366" y1="-4.445" x2="5.334" y2="-4.445" width="0" layer="20"/>
 <wire x1="5.334" y1="-4.445" x2="5.334" y2="4.445" width="0" layer="20"/>
 <wire x1="5.334" y1="4.445" x2="7.366" y2="4.445" width="0" layer="20"/>
@@ -1438,10 +1438,10 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-4.318" y1="-4.572" x2="-4.318" y2="4.572" width="0.0508" layer="48"/>
 <wire x1="-4.318" y1="4.572" x2="-8.128" y2="4.572" width="0.0508" layer="48"/>
 <wire x1="-12.7" y1="7.366" x2="-12.7" y2="-16.764" width="0" layer="20"/>
-<wire x1="-7.366" y1="3.556" x2="-7.366" y2="3.1115" width="0" layer="20"/>
-<wire x1="-7.366" y1="-3.556" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
-<wire x1="-7.366" y1="-0.6985" x2="-7.366" y2="0.6985" width="0" layer="20"/>
-<wire x1="-9.6012" y1="0.6985" x2="-7.366" y2="0.6985" width="0" layer="20"/>
+<wire x1="-7.366" y1="3.556" x2="-7.366" y2="2.9845" width="0" layer="20"/>
+<wire x1="-7.366" y1="-3.556" x2="-7.366" y2="-2.9845" width="0" layer="20"/>
+<wire x1="-7.366" y1="-0.8255" x2="-7.366" y2="0.8255" width="0" layer="20"/>
+<wire x1="-9.6012" y1="0.6985" x2="-7.366" y2="0.8255" width="0" layer="20"/>
 <wire x1="-7.112" y1="-3.302" x2="-5.588" y2="-3.302" width="0" layer="48"/>
 <wire x1="-5.588" y1="-3.302" x2="-5.588" y2="3.302" width="0" layer="48"/>
 <wire x1="-5.588" y1="3.302" x2="-7.112" y2="3.302" width="0" layer="48"/>
@@ -1451,7 +1451,7 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="7.112" y1="-4.0894" x2="5.588" y2="-4.0894" width="0" layer="48"/>
 <wire x1="7.112" y1="4.0894" x2="7.112" y2="-4.0894" width="0" layer="48"/>
 <wire x1="-9.6012" y1="0.6985" x2="-9.6012" y2="3.1115" width="0" layer="20"/>
-<wire x1="-9.6012" y1="3.1115" x2="-7.366" y2="3.1115" width="0" layer="20"/>
+<wire x1="-9.6012" y1="3.1115" x2="-7.366" y2="2.9845" width="0" layer="20"/>
 <smd name="PA.3" x="-7.493" y="0" dx="0.1524" dy="0.635" layer="1" stop="no" thermals="no" cream="no"/>
 <wire x1="-2.5654" y1="-14.5796" x2="2.5654" y2="-14.5796" width="0" layer="20"/>
 <wire x1="2.5654" y1="-14.5796" x2="2.6924" y2="-14.4526" width="0" layer="20" curve="90"/>
@@ -1462,28 +1462,28 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="12.065" y1="-17.399" x2="12.7" y2="-16.764" width="0" layer="20" curve="90"/>
 <wire x1="12.7" y1="-16.764" x2="12.7" y2="7.366" width="0" layer="20"/>
 <wire x1="12.7" y1="7.366" x2="12.065" y2="8.001" width="0" layer="20" curve="90"/>
-<wire x1="9.6012" y1="3.1115" x2="7.366" y2="3.1115" width="0" layer="20"/>
-<wire x1="9.6012" y1="0.6985" x2="7.366" y2="0.6985" width="0" layer="20"/>
+<wire x1="9.6012" y1="3.1115" x2="7.366" y2="2.9845" width="0" layer="20"/>
+<wire x1="9.6012" y1="0.6985" x2="7.366" y2="0.8255" width="0" layer="20"/>
 <wire x1="9.6012" y1="3.1115" x2="9.6012" y2="0.6985" width="0" layer="20"/>
 <smd name="PB.3" x="7.493" y="0" dx="0.1524" dy="0.635" layer="1" stop="no" thermals="no" cream="no"/>
 <wire x1="-9.6012" y1="-3.1115" x2="-9.6012" y2="-0.6985" width="0" layer="20"/>
-<wire x1="-9.6012" y1="-0.6985" x2="-7.366" y2="-0.6985" width="0" layer="20"/>
-<wire x1="-9.6012" y1="-3.1115" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
-<wire x1="9.6012" y1="-0.6985" x2="7.366" y2="-0.6985" width="0" layer="20"/>
-<wire x1="9.6012" y1="-3.1115" x2="7.366" y2="-3.1115" width="0" layer="20"/>
+<wire x1="-9.6012" y1="-0.6985" x2="-7.366" y2="-0.8255" width="0" layer="20"/>
+<wire x1="-9.6012" y1="-3.1115" x2="-7.366" y2="-2.9845" width="0" layer="20"/>
+<wire x1="9.6012" y1="-0.6985" x2="7.366" y2="-0.8255" width="0" layer="20"/>
+<wire x1="9.6012" y1="-3.1115" x2="7.366" y2="-2.9845" width="0" layer="20"/>
 <wire x1="9.6012" y1="-0.6985" x2="9.6012" y2="-3.1115" width="0" layer="20"/>
 <polygon width="0" layer="1">
 <vertex x="-5.334" y="3.556"/>
 <vertex x="-5.334" y="-3.556"/>
 <vertex x="-7.366" y="-3.556"/>
-<vertex x="-7.366" y="-3.1115"/>
+<vertex x="-7.366" y="-2.9845"/>
 <vertex x="-9.6012" y="-3.1115"/>
 <vertex x="-9.6012" y="-0.6985"/>
-<vertex x="-7.366" y="-0.6985"/>
-<vertex x="-7.366" y="0.6985"/>
+<vertex x="-7.366" y="-0.8255"/>
+<vertex x="-7.366" y="0.8255"/>
 <vertex x="-9.6012" y="0.6985"/>
 <vertex x="-9.6012" y="3.1115"/>
-<vertex x="-7.366" y="3.1115"/>
+<vertex x="-7.366" y="2.9845"/>
 <vertex x="-7.366" y="3.556"/>
 <vertex x="-7.62" y="3.556"/>
 <vertex x="-7.62" y="3.3655"/>
@@ -1508,14 +1508,14 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <vertex x="-5.334" y="3.556"/>
 <vertex x="-5.334" y="-3.556"/>
 <vertex x="-7.366" y="-3.556"/>
-<vertex x="-7.366" y="-3.1115"/>
+<vertex x="-7.366" y="-2.9845"/>
 <vertex x="-9.6012" y="-3.1115"/>
 <vertex x="-9.6012" y="-0.6985"/>
-<vertex x="-7.366" y="-0.6985"/>
-<vertex x="-7.366" y="0.6985"/>
+<vertex x="-7.366" y="-0.8255"/>
+<vertex x="-7.366" y="0.8255"/>
 <vertex x="-9.6012" y="0.6985"/>
 <vertex x="-9.6012" y="3.1115"/>
-<vertex x="-7.366" y="3.1115"/>
+<vertex x="-7.366" y="2.9845"/>
 <vertex x="-7.366" y="3.556"/>
 <vertex x="-7.62" y="3.556"/>
 <vertex x="-7.62" y="3.3655"/>
@@ -1540,14 +1540,14 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <vertex x="5.334" y="-4.445"/>
 <vertex x="5.334" y="4.445"/>
 <vertex x="7.366" y="4.445"/>
-<vertex x="7.366" y="3.1115"/>
+<vertex x="7.366" y="2.9845"/>
 <vertex x="9.6012" y="3.1115"/>
 <vertex x="9.6012" y="0.6985"/>
-<vertex x="7.366" y="0.6985"/>
-<vertex x="7.366" y="-0.6985"/>
+<vertex x="7.366" y="0.8255"/>
+<vertex x="7.366" y="-0.8255"/>
 <vertex x="9.6012" y="-0.6985"/>
 <vertex x="9.6012" y="-3.1115"/>
-<vertex x="7.366" y="-3.1115"/>
+<vertex x="7.366" y="-2.9845"/>
 <vertex x="7.366" y="-4.445"/>
 <vertex x="7.62" y="-4.445"/>
 <vertex x="7.62" y="-3.3655"/>
@@ -1572,14 +1572,14 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <vertex x="5.334" y="-4.445"/>
 <vertex x="5.334" y="4.445"/>
 <vertex x="7.366" y="4.445"/>
-<vertex x="7.366" y="3.1115"/>
+<vertex x="7.366" y="2.9845"/>
 <vertex x="9.6012" y="3.1115"/>
 <vertex x="9.6012" y="0.6985"/>
-<vertex x="7.366" y="0.6985"/>
-<vertex x="7.366" y="-0.6985"/>
+<vertex x="7.366" y="0.8255"/>
+<vertex x="7.366" y="-0.8255"/>
 <vertex x="9.6012" y="-0.6985"/>
 <vertex x="9.6012" y="-3.1115"/>
-<vertex x="7.366" y="-3.1115"/>
+<vertex x="7.366" y="-2.9845"/>
 <vertex x="7.366" y="-4.445"/>
 <vertex x="7.62" y="-4.445"/>
 <vertex x="7.62" y="-3.3655"/>
