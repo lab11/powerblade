@@ -476,6 +476,9 @@ __interrupt void USCI_A0_ISR(void) {
 #ifdef CALIBRATE
 			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
 #else
+			time = PSCALE;
+			time = (time<<8)+VSCALE;
+			time = (time<<8)+WHSCALE;
 			uart_send((char*)&time, sizeof(time));
 #endif
 			break;
