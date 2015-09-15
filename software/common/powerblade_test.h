@@ -71,4 +71,12 @@
 #define PHASEOFF	1	// zero for in-phase
 #define SAMCOUNT	42
 
+/**************************************************************************
+   SCALING CONSTANTS SECTION
+ **************************************************************************/
+
+#define PSCALE		0x424A
+#define VSCALE		0x7B
+#define WHSCALE		0x09
+
 #endif
