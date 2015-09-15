@@ -62,7 +62,10 @@ noble.on('discover', function(peripheral) {
     var recv_time = (new Date).getTime()/1000;
     var powerblade_id = BitArray.fromBuffer(data.slice(0,1)).toNumber();
     var sequence_num = BitArray.fromBuffer(data.slice(1,5)).toNumber();
-    var time = BitArray.fromBuffer(data.slice(5,9)).toNumber();
+    //var time = BitArray.fromBuffer(data.slice(5,9)).toNumber();
+    var pscale = BitArray.fromBuffer(data.slice(7,9)).toNumber();
+    var vscale = BitArray.fromBuffer(data.slice(6,7)).toNumber();
+    var whscale = BitArray.fromBuffer(data.slice(5,6)).toNumber();
     var v_rms = BitArray.fromBuffer(data.slice(9,10)).toNumber();
     var true_power = BitArray.fromBuffer(data.slice(10,12)).toNumber();
     var apparent_power = BitArray.fromBuffer(data.slice(12,14)).toNumber();
@@ -70,9 +73,12 @@ noble.on('discover', function(peripheral) {
     var flags = BitArray.fromBuffer(data.slice(18,19)).toNumber();
     var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
 
-    var volt_scale = 2.46;
-    var power_scale = 0.0586;
-    var wh_shift = 9;
+    //var volt_scale = 2.46;
+    //var power_scale = 0.0586;
+    //var wh_shift = 9;
+    var volt_scale = vscale / 50;
+    var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
+    var wh_shift = whscale;
 
     var v_rms_disp = v_rms*volt_scale;
     var true_power_disp = true_power*power_scale;
@@ -122,15 +128,15 @@ noble.on('discover', function(peripheral) {
         aveIndex = 0;
       }
       // Average Time
-      aveTime[timeIndex++] = time;
-      var averageTime = 0;
-      for (var i = aveTime.length - 1; i >= 0; i--) {
-        averageTime += aveTime[i];
-      }
-      averageTime = averageTime / 10;
-      if(timeIndex == 10) {
-        timeIndex = 0;
-      }
+      // aveTime[timeIndex++] = time;
+      // var averageTime = 0;
+      // for (var i = aveTime.length - 1; i >= 0; i--) {
+      //   averageTime += aveTime[i];
+      // }
+      // averageTime = averageTime / 10;
+      // if(timeIndex == 10) {
+      //   timeIndex = 0;
+      // }
 
       if(recv_last > 0) {
         var timeDiff = recv_time - recv_last;
@@ -147,7 +153,7 @@ noble.on('discover', function(peripheral) {
       console.log('           BLE Address: ' + peripheral_uuid);
       console.log('         PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
       console.log('       Sequence Number: ' + sequence_num + ' (0x' + sequence_num.toString(16) + ')');
-      console.log('                  Time: ' + time + ' (0x' + time.toString(16) + ')');
+      //console.log('                  Time: ' + time + ' (0x' + time.toString(16) + ')');
       console.log('           RMS Voltage: ' + v_rms_disp.toFixed(2) + ' (0x' + v_rms.toString(16) + ')');
       console.log('    Current True Power: ' + true_power_disp.toFixed(2) + ' (0x' + true_power.toString(16) + ')');
       console.log('Current Apparent Power: ' + app_power_disp.toFixed(2) + ' (0x' + apparent_power.toString(16) + ')');
@@ -156,7 +162,7 @@ noble.on('discover', function(peripheral) {
       console.log('                 Flags: ' + '0x' + flags.toString(16));
       console.log('    Average Power (10): ' + averagePower.toFixed(2));
       console.log('   Apparent Power (10): ' + appPower.toFixed(2));
-      console.log('     Time Average (10): ' + averageTime.toFixed(2));
+      //console.log('     Time Average (10): ' + averageTime.toFixed(2));
       console.log('Watt Hours Since Start: ' + watt_hours_tot.toFixed(2));
       console.log('                ElTime: ' + timeDiff.toFixed(2));
       console.log('   Packets in last 30s: ' + packetCount.toFixed(2));
