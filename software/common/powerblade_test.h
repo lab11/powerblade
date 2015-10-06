@@ -18,7 +18,7 @@
 	#define SYS_EN_OUT	P2OUT
 	#define SYS_EN_PIN	BIT2
 #endif
-#ifdef VERSION31
+#if defined (VERSION31) | defined (VERSION32)
 	#define SYS_EN_DIR	P1DIR
 	#define SYS_EN_OUT	P1OUT
 	#define SYS_EN_PIN	BIT6
@@ -32,7 +32,7 @@
 	#define SEN_EN_OUT	P1OUT
 	#define SEN_EN_PIN	BIT7
 #endif
-#if defined (VERSION31)
+#if defined (VERSION31) | defined (VERSION32)
 	#define SEN_EN_DIR	P2DIR
 	#define SEN_EN_OUT	P2OUT
 	#define SEN_EN_PIN	BIT2
