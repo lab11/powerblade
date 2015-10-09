@@ -377,6 +377,8 @@ __interrupt void ADC10_ISR(void) {
 		case 4:	// I_SENSE
 #elif defined (VERSION31)
 		case 5:	// I_SENSE (A0) (case 0 for filt, 5 for isense)
+#elif defined (VERSION32)
+		case 3:	// I_SENSE
 #endif
 		{
 			// Set debug pin
@@ -390,7 +392,11 @@ __interrupt void ADC10_ISR(void) {
 			transmitTry();
 			break;
 		}
+#if defined (VERSION32)
+		case 5:	// V_SENSE
+#else
 		case 3:	// V_SENSE (same in versions 0, 1, and 3.1)
+#endif
 		{
 			// Set debug pin
 			//P1OUT |= BIT2;
@@ -411,7 +417,7 @@ __interrupt void ADC10_ISR(void) {
 		}
 #if defined (VERSION0) | defined (VERSION1)
 			case 2:	// VCC_SENSE
-#elif defined (VERSION31)
+#elif defined (VERSION31) | defined (VERSION32)
 		case 4:	// VCC_SENSE
 #endif
 			// Set debug pin
@@ -474,13 +480,13 @@ __interrupt void USCI_A0_ISR(void) {
 			break;
 		case 6:
 #ifdef CALIBRATE
-			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
+			time = 0;
 #else
 			time = PSCALE;
 			time = (time<<8)+VSCALE;
 			time = (time<<8)+WHSCALE;
-			uart_send((char*)&time, sizeof(time));
 #endif
+			uart_send((char*)&time, sizeof(time));
 			break;
 		case 5:
 			uart_send((char*) &Vrms, sizeof(Vrms));
@@ -492,8 +498,12 @@ __interrupt void USCI_A0_ISR(void) {
 			uart_send((char*) &apparentPower, sizeof(apparentPower));
 			break;
 		case 2:
+#ifdef CALIBRATE
+			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
+#else
 			wattHoursSend = (uint32_t)(wattHours >> 9);
 			uart_send((char*) &wattHoursSend, sizeof(wattHoursSend));
+#endif
 			break;
 		case 1:
 			uart_send((char*) &flags, sizeof(flags));
