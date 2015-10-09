@@ -120,7 +120,7 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_4.3.exe.compilerRelease.299157513" name="MSP430 Compiler" superClass="com.ti.ccstudio.buildDefinitions.MSP430_4.3.exe.compilerRelease">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.DEFINE.1159905227" name="Pre-define NAME (--define, -D)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.DEFINE" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__MSP430FR5738__"/>
-									<listOptionValue builtIn="false" value="VERSION31"/>
+									<listOptionValue builtIn="false" value="VERSION32"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.SILICON_ERRATA.CPU21.1091130526" name="Workaround specified silicon errata (--silicon_errata) [CPU21]" superClass="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.SILICON_ERRATA.CPU21" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.SILICON_ERRATA.CPU22.1067254218" name="Workaround specified silicon errata (--silicon_errata) [CPU22]" superClass="com.ti.ccstudio.buildDefinitions.MSP430_4.3.compilerID.SILICON_ERRATA.CPU22" value="true" valueType="boolean"/>
