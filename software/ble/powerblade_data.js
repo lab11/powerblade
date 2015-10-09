@@ -83,7 +83,12 @@ noble.on('discover', function(peripheral) {
     var v_rms_disp = v_rms*volt_scale;
     var true_power_disp = true_power*power_scale;
     var app_power_disp = apparent_power*power_scale;
-    var watt_hours_disp = (watt_hours << wh_shift)*(power_scale/3600);
+    if(volt_scale > 0) {
+      var watt_hours_disp = (watt_hours << wh_shift)*(power_scale/3600);
+    }
+    else {
+      var watt_hours_disp = watt_hours;
+    }
     var pf_disp = true_power_disp / app_power_disp;
 
     // Exponential scaling
