@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- HTML for Template Summon UI -->
+<html>
+    <head>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css">
+        <script src="js/jquery-1.11.3.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.min.js"></script>
+        <script src="js/Sortable.js"></script>
+        <script src="js/ng-sortable.js"></script>
+        <script src="js/Ply.min.js"></script>
+
+		<link rel="shortcut icon" type="image/x-icon" href="img/powerblade.ico" />
+
+        <link rel="stylesheet" href="css/font-awesome-4.4.0/css/font-awesome.min.css">
+
+        <title>Powerblade</title>
+    </head>
+    <!-- <body id="main_view" data-role="main" class="frame"> -->
+    <body id="main_view" class="frame">
+
+        <div id="header-title">
+       <!--  <div id="header-title" data-role="header" data-theme="b"> -->
+            <h1 id="title">Powerblade</h1>
+            <h3>[ Powerblade ]</h3>
+        </div>
+
+        <div id="device-id">
+            TriTag ID: <span id="device-id-span"></span>
+        </div>
+
+        <div id="result">
+            <h3>Current Power</h3>
+            <div id="power">unknown</div>
+        </div>
+
+        <ul id="powerblades">
+            <li>blade 1</li>
+         </ul>
+
+        <div data-display="overlay" data-swipe-close="true" data-dismissible="false" data-position="right" data-role="panel" id="logPanel">
+            <h3>Log</h3>
+            <p id="console"></p>
+       </div>
+
+       <script type='text/javascript'>
+        /*$(document).on('pageinit',function(){
+            $("#main_view").on("swipeleft",function(){
+                $("#logPanel").panel("open");
+            });
+        });*/
+         
+        </script>
+
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/numeric-1.2.6.min.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>
