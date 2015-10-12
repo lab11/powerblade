@@ -480,13 +480,13 @@ __interrupt void USCI_A0_ISR(void) {
 			break;
 		case 6:
 #ifdef CALIBRATE
-			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
+			time = 0;
 #else
 			time = PSCALE;
 			time = (time<<8)+VSCALE;
 			time = (time<<8)+WHSCALE;
-			uart_send((char*)&time, sizeof(time));
 #endif
+			uart_send((char*)&time, sizeof(time));
 			break;
 		case 5:
 			uart_send((char*) &Vrms, sizeof(Vrms));
@@ -498,8 +498,12 @@ __interrupt void USCI_A0_ISR(void) {
 			uart_send((char*) &apparentPower, sizeof(apparentPower));
 			break;
 		case 2:
+#ifdef CALIBRATE
+			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
+#else
 			wattHoursSend = (uint32_t)(wattHours >> 9);
 			uart_send((char*) &wattHoursSend, sizeof(wattHoursSend));
+#endif
 			break;
 		case 1:
 			uart_send((char*) &flags, sizeof(flags));
