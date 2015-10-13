@@ -1418,7 +1418,7 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="1.15" y1="-1" x2="-1.15" y2="-1" width="0.127" layer="21"/>
 <text x="-2.54" y="1.27" size="1.27" layer="25">&gt;NAME</text>
 </package>
-<package name="AC3_F41">
+<package name="AC3_F45">
 <wire x1="-12.065" y1="-17.399" x2="-12.7" y2="-16.764" width="0" layer="20" curve="-90"/>
 <wire x1="-12.7" y1="7.366" x2="-12.065" y2="8.001" width="0" layer="20" curve="-90"/>
 <wire x1="-12.065" y1="8.001" x2="12.065" y2="8.001" width="0" layer="20"/>
@@ -1431,7 +1431,9 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-7.239" y1="3.556" x2="-7.366" y2="3.429" width="0" layer="20" curve="90"/>
 <wire x1="5.461" y1="4.445" x2="7.239" y2="4.445" width="0" layer="20"/>
 <wire x1="7.239" y1="4.445" x2="7.366" y2="4.318" width="0" layer="20" curve="-90"/>
-<wire x1="7.366" y1="4.318" x2="7.366" y2="-4.318" width="0" layer="20"/>
+<wire x1="7.366" y1="4.318" x2="7.366" y2="3.1115" width="0" layer="20"/>
+<wire x1="7.366" y1="0.6985" x2="7.366" y2="-0.6985" width="0" layer="20"/>
+<wire x1="7.366" y1="-3.1115" x2="7.366" y2="-4.318" width="0" layer="20"/>
 <wire x1="7.366" y1="-4.318" x2="7.239" y2="-4.445" width="0" layer="20" curve="-90"/>
 <wire x1="7.239" y1="-4.445" x2="5.461" y2="-4.445" width="0" layer="20"/>
 <wire x1="5.461" y1="-4.445" x2="5.334" y2="-4.318" width="0" layer="20" curve="-90"/>
@@ -1444,8 +1446,10 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-4.318" y1="-4.572" x2="-4.318" y2="4.572" width="0.0508" layer="48"/>
 <wire x1="-4.318" y1="4.572" x2="-8.128" y2="4.572" width="0.0508" layer="48"/>
 <wire x1="-12.7" y1="7.366" x2="-12.7" y2="-16.764" width="0" layer="20"/>
-<wire x1="-7.366" y1="-3.429" x2="-7.366" y2="3.429" width="0" layer="20"/>
-<wire x1="-9.306053125" y1="0.6985" x2="-9.388309375" y2="0.6985" width="0" layer="20"/>
+<wire x1="-7.366" y1="-3.429" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
+<wire x1="-7.366" y1="-0.6985" x2="-7.366" y2="0.6985" width="0" layer="20"/>
+<wire x1="-7.366" y1="3.1115" x2="-7.366" y2="3.429" width="0" layer="20"/>
+<wire x1="-7.366" y1="0.6985" x2="-9.388309375" y2="0.6985" width="0" layer="20"/>
 <wire x1="-9.388309375" y1="0.6985" x2="-9.6012" y2="0.911390625" width="0" layer="20" curve="-90"/>
 <wire x1="-9.6012" y1="0.911390625" x2="-9.6012" y2="2.898609375" width="0" layer="20"/>
 <wire x1="-7.112" y1="-3.302" x2="-5.588" y2="-3.302" width="0" layer="48"/>
@@ -1457,7 +1461,7 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="7.112" y1="-4.0894" x2="5.588" y2="-4.0894" width="0" layer="48"/>
 <wire x1="7.112" y1="4.0894" x2="7.112" y2="-4.0894" width="0" layer="48"/>
 <wire x1="-9.6012" y1="2.898609375" x2="-9.388309375" y2="3.1115" width="0" layer="20" curve="-90"/>
-<wire x1="-9.388309375" y1="3.1115" x2="-9.306053125" y2="3.1115" width="0" layer="20"/>
+<wire x1="-9.388309375" y1="3.1115" x2="-7.366" y2="3.1115" width="0" layer="20"/>
 <smd name="PA.3" x="-7.493" y="0" dx="0.1524" dy="0.635" layer="1" stop="no" thermals="no" cream="no"/>
 <wire x1="-2.5654" y1="-14.5796" x2="2.5654" y2="-14.5796" width="0" layer="20"/>
 <wire x1="2.5654" y1="-14.5796" x2="2.6924" y2="-14.4526" width="0" layer="20" curve="90"/>
@@ -1468,72 +1472,24 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="12.065" y1="-17.399" x2="12.7" y2="-16.764" width="0" layer="20" curve="90"/>
 <wire x1="12.7" y1="-16.764" x2="12.7" y2="7.366" width="0" layer="20"/>
 <wire x1="12.7" y1="7.366" x2="12.065" y2="8.001" width="0" layer="20" curve="90"/>
-<wire x1="9.306053125" y1="3.1115" x2="9.388309375" y2="3.1115" width="0" layer="20"/>
+<wire x1="7.366" y1="3.1115" x2="9.388309375" y2="3.1115" width="0" layer="20"/>
 <wire x1="9.388309375" y1="3.1115" x2="9.6012" y2="2.898609375" width="0" layer="20" curve="-90"/>
 <wire x1="9.6012" y1="2.898609375" x2="9.6012" y2="0.911390625" width="0" layer="20"/>
 <wire x1="9.6012" y1="0.911390625" x2="9.388309375" y2="0.6985" width="0" layer="20" curve="-90"/>
-<wire x1="9.388309375" y1="0.6985" x2="9.306053125" y2="0.6985" width="0" layer="20"/>
+<wire x1="9.388309375" y1="0.6985" x2="7.366" y2="0.6985" width="0" layer="20"/>
 <smd name="PB.3" x="7.493" y="0" dx="0.1524" dy="0.635" layer="1" stop="no" thermals="no" cream="no"/>
 <wire x1="-9.6012" y1="-0.911390625" x2="-9.6012" y2="-2.898609375" width="0" layer="20"/>
 <wire x1="-9.6012" y1="-2.898609375" x2="-9.388309375" y2="-3.1115" width="0" layer="20" curve="90"/>
-<wire x1="-9.388309375" y1="-3.1115" x2="-9.306053125" y2="-3.1115" width="0" layer="20"/>
+<wire x1="-9.388309375" y1="-3.1115" x2="-7.366" y2="-3.1115" width="0" layer="20"/>
 <wire x1="-9.6012" y1="-0.911390625" x2="-9.388309375" y2="-0.6985" width="0" layer="20" curve="-90"/>
-<wire x1="-9.388309375" y1="-0.6985" x2="-9.306053125" y2="-0.6985" width="0" layer="20"/>
-<wire x1="9.306053125" y1="-0.6985" x2="9.388309375" y2="-0.6985" width="0" layer="20"/>
+<wire x1="-9.388309375" y1="-0.6985" x2="-7.366" y2="-0.6985" width="0" layer="20"/>
+<wire x1="7.366" y1="-0.6985" x2="9.388309375" y2="-0.6985" width="0" layer="20"/>
 <wire x1="9.388309375" y1="-0.6985" x2="9.6012" y2="-0.911390625" width="0" layer="20" curve="-90"/>
 <wire x1="9.6012" y1="-0.911390625" x2="9.6012" y2="-2.898609375" width="0" layer="20"/>
 <wire x1="9.6012" y1="-2.898609375" x2="9.388309375" y2="-3.1115" width="0" layer="20" curve="-90"/>
-<wire x1="9.388309375" y1="-3.1115" x2="9.306053125" y2="-3.1115" width="0" layer="20"/>
+<wire x1="9.388309375" y1="-3.1115" x2="7.366" y2="-3.1115" width="0" layer="20"/>
 <smd name="PB.1" x="7.493" y="0" dx="0.1524" dy="0.635" layer="16" stop="no" thermals="no" cream="no"/>
 <smd name="PA.1" x="-7.493" y="0" dx="0.1524" dy="0.635" layer="16" stop="no" thermals="no" cream="no"/>
-<polygon width="0" layer="46">
-<vertex x="-7.366" y="-3.1115"/>
-<vertex x="-9.306053125" y="-3.1115" curve="90"/>
-<vertex x="-9.0932" y="-2.898646875"/>
-<vertex x="-9.0932" y="-2.54"/>
-<vertex x="-9.0932" y="-0.911353125" curve="90"/>
-<vertex x="-9.306053125" y="-0.6985"/>
-<vertex x="-7.366" y="-0.6985"/>
-</polygon>
-<polygon width="0" layer="46">
-<vertex x="-7.366" y="0.6985"/>
-<vertex x="-9.306053125" y="0.6985" curve="90"/>
-<vertex x="-9.0932" y="0.911353125"/>
-<vertex x="-9.0932" y="1.27"/>
-<vertex x="-9.0932" y="2.898646875" curve="90"/>
-<vertex x="-9.306053125" y="3.1115"/>
-<vertex x="-7.366" y="3.1115"/>
-</polygon>
-<polygon width="0" layer="46">
-<vertex x="7.366" y="-0.6985"/>
-<vertex x="9.306053125" y="-0.6985" curve="90"/>
-<vertex x="9.0932" y="-0.911353125"/>
-<vertex x="9.0932" y="-1.27"/>
-<vertex x="9.0932" y="-2.898646875" curve="90"/>
-<vertex x="9.306053125" y="-3.1115"/>
-<vertex x="7.366" y="-3.1115"/>
-</polygon>
-<polygon width="0" layer="46">
-<vertex x="7.366" y="3.1115"/>
-<vertex x="9.306053125" y="3.1115" curve="90"/>
-<vertex x="9.0932" y="2.898646875"/>
-<vertex x="9.0932" y="2.54"/>
-<vertex x="9.0932" y="0.911353125" curve="90"/>
-<vertex x="9.306053125" y="0.6985"/>
-<vertex x="7.366" y="0.6985"/>
-</polygon>
-<wire x1="-9.306053125" y1="0.6985" x2="-9.0932" y2="0.911353125" width="0" layer="20" curve="90"/>
-<wire x1="-9.0932" y1="0.911353125" x2="-9.0932" y2="2.898646875" width="0" layer="20"/>
-<wire x1="-9.0932" y1="2.898646875" x2="-9.306053125" y2="3.1115" width="0" layer="20" curve="90"/>
-<wire x1="-9.306053125" y1="-3.1115" x2="-9.0932" y2="-2.898646875" width="0" layer="20" curve="90"/>
-<wire x1="-9.0932" y1="-2.898646875" x2="-9.0932" y2="-0.911353125" width="0" layer="20"/>
-<wire x1="-9.0932" y1="-0.911353125" x2="-9.306053125" y2="-0.6985" width="0" layer="20" curve="90"/>
-<wire x1="9.306053125" y1="3.1115" x2="9.0932" y2="2.898646875" width="0" layer="20" curve="90"/>
-<wire x1="9.0932" y1="2.898646875" x2="9.0932" y2="0.911353125" width="0" layer="20"/>
-<wire x1="9.0932" y1="0.911353125" x2="9.306053125" y2="0.6985" width="0" layer="20" curve="90"/>
-<wire x1="9.306053125" y1="-0.6985" x2="9.0932" y2="-0.911353125" width="0" layer="20" curve="90"/>
-<wire x1="9.0932" y1="-0.911353125" x2="9.0932" y2="-2.898646875" width="0" layer="20"/>
-<wire x1="9.0932" y1="-2.898646875" x2="9.306053125" y2="-3.1115" width="0" layer="20" curve="90"/>
 <polygon width="0" layer="1">
 <vertex x="-7.366" y="-3.3655"/>
 <vertex x="-9.642309375" y="-3.3655" curve="-90"/>
@@ -1569,50 +1525,6 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <vertex x="-9.6012" y="-2.898609375" curve="90"/>
 <vertex x="-9.388309375" y="-3.1115"/>
 <vertex x="-7.366" y="-3.1115"/>
-</polygon>
-<polygon width="0" layer="16">
-<vertex x="-9.0932" y="1.27"/>
-<vertex x="-9.0932" y="2.898646875" curve="90"/>
-<vertex x="-9.306053125" y="3.1115"/>
-<vertex x="-9.388309375" y="3.1115" curve="90"/>
-<vertex x="-9.6012" y="2.898609375"/>
-<vertex x="-9.6012" y="0.911390625" curve="90"/>
-<vertex x="-9.388309375" y="0.6985"/>
-<vertex x="-9.306053125" y="0.6985" curve="90"/>
-<vertex x="-9.0932" y="0.911353125"/>
-<vertex x="-9.0932" y="1.269975"/>
-<vertex x="-8.8392" y="1.269975"/>
-<vertex x="-8.8392" y="0.657390625" curve="-90"/>
-<vertex x="-9.052090625" y="0.4445"/>
-<vertex x="-9.642309375" y="0.4445" curve="-90"/>
-<vertex x="-9.8552" y="0.657390625"/>
-<vertex x="-9.8552" y="3.152609375" curve="-90"/>
-<vertex x="-9.642309375" y="3.3655"/>
-<vertex x="-9.052090625" y="3.3655" curve="-90"/>
-<vertex x="-8.8392" y="3.152609375"/>
-<vertex x="-8.8392" y="1.27"/>
-</polygon>
-<polygon width="0" layer="16">
-<vertex x="-9.0932" y="-2.54"/>
-<vertex x="-9.0932" y="-0.911353125" curve="90"/>
-<vertex x="-9.306053125" y="-0.6985"/>
-<vertex x="-9.388309375" y="-0.6985" curve="90"/>
-<vertex x="-9.6012" y="-0.911390625"/>
-<vertex x="-9.6012" y="-2.898609375" curve="90"/>
-<vertex x="-9.388309375" y="-3.1115"/>
-<vertex x="-9.306053125" y="-3.1115" curve="90"/>
-<vertex x="-9.0932" y="-2.898646875"/>
-<vertex x="-9.0932" y="-2.540025"/>
-<vertex x="-8.8392" y="-2.540025"/>
-<vertex x="-8.8392" y="-3.152609375" curve="-90"/>
-<vertex x="-9.052090625" y="-3.3655"/>
-<vertex x="-9.642309375" y="-3.3655" curve="-90"/>
-<vertex x="-9.8552" y="-3.152609375"/>
-<vertex x="-9.8552" y="-0.657390625" curve="-90"/>
-<vertex x="-9.642309375" y="-0.4445"/>
-<vertex x="-9.052090625" y="-0.4445" curve="-90"/>
-<vertex x="-8.8392" y="-0.657390625"/>
-<vertex x="-8.8392" y="-2.54"/>
 </polygon>
 <polygon width="0" layer="1">
 <vertex x="7.366" y="3.3655"/>
@@ -1660,48 +1572,9 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <vertex x="9.388309375" y="3.1115"/>
 <vertex x="7.366" y="3.1115"/>
 </polygon>
+<text x="-1.905" y="2.54" size="1.778" layer="22" rot="MR0">1</text>
 <polygon width="0" layer="16">
-<vertex x="9.0932" y="-1.27"/>
-<vertex x="9.0932" y="-2.898646875" curve="90"/>
-<vertex x="9.306053125" y="-3.1115"/>
-<vertex x="9.388309375" y="-3.1115" curve="90"/>
-<vertex x="9.6012" y="-2.898609375"/>
-<vertex x="9.6012" y="-0.911390625" curve="90"/>
-<vertex x="9.388309375" y="-0.6985"/>
-<vertex x="9.306053125" y="-0.6985" curve="90"/>
-<vertex x="9.0932" y="-0.911353125"/>
-<vertex x="9.0932" y="-1.269975"/>
-<vertex x="8.8392" y="-1.269975"/>
-<vertex x="8.8392" y="-0.657390625" curve="-90"/>
-<vertex x="9.052090625" y="-0.4445"/>
-<vertex x="9.642309375" y="-0.4445" curve="-90"/>
-<vertex x="9.8552" y="-0.657390625"/>
-<vertex x="9.8552" y="-1.7018" curve="90"/>
-<vertex x="9.9314" y="-1.778"/>
-<vertex x="10.414" y="-1.778"/>
-<vertex x="10.414" y="-2.032"/>
-<vertex x="9.9314" y="-2.032" curve="90"/>
-<vertex x="9.8552" y="-2.1082"/>
-<vertex x="9.8552" y="-3.152609375" curve="-90"/>
-<vertex x="9.642309375" y="-3.3655"/>
-<vertex x="9.052090625" y="-3.3655" curve="-90"/>
-<vertex x="8.8392" y="-3.152609375"/>
-<vertex x="8.8392" y="-1.27"/>
-</polygon>
-<polygon width="0" layer="16">
-<vertex x="9.0932" y="2.54"/>
-<vertex x="9.0932" y="0.911353125" curve="90"/>
-<vertex x="9.306053125" y="0.6985"/>
-<vertex x="9.388309375" y="0.6985" curve="90"/>
-<vertex x="9.6012" y="0.911390625"/>
-<vertex x="9.6012" y="2.898609375" curve="90"/>
-<vertex x="9.388309375" y="3.1115"/>
-<vertex x="9.306053125" y="3.1115" curve="90"/>
-<vertex x="9.0932" y="2.898646875"/>
-<vertex x="9.0932" y="2.540025"/>
-<vertex x="8.8392" y="2.540025"/>
-<vertex x="8.8392" y="3.152609375" curve="-90"/>
-<vertex x="9.052090625" y="3.3655"/>
+<vertex x="7.366" y="3.3655"/>
 <vertex x="9.642309375" y="3.3655" curve="-90"/>
 <vertex x="9.8552" y="3.152609375"/>
 <vertex x="9.8552" y="2.1082" curve="90"/>
@@ -1712,11 +1585,76 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <vertex x="9.8552" y="1.7018"/>
 <vertex x="9.8552" y="0.657390625" curve="-90"/>
 <vertex x="9.642309375" y="0.4445"/>
-<vertex x="9.052090625" y="0.4445" curve="-90"/>
-<vertex x="8.8392" y="0.657390625"/>
-<vertex x="8.8392" y="2.54"/>
+<vertex x="7.832890625" y="0.4445" curve="90"/>
+<vertex x="7.62" y="0.231609375"/>
+<vertex x="7.62" y="-0.231609375" curve="90"/>
+<vertex x="7.832890625" y="-0.4445"/>
+<vertex x="9.642309375" y="-0.4445" curve="-90"/>
+<vertex x="9.8552" y="-0.657390625"/>
+<vertex x="9.8552" y="-1.7018" curve="90"/>
+<vertex x="9.9314" y="-1.778"/>
+<vertex x="10.414" y="-1.778"/>
+<vertex x="10.414" y="-2.032"/>
+<vertex x="9.9314" y="-2.032" curve="90"/>
+<vertex x="9.8552" y="-2.1082"/>
+<vertex x="9.8552" y="-3.152609375" curve="-90"/>
+<vertex x="9.642309375" y="-3.3655"/>
+<vertex x="8.7122" y="-3.3655" curve="90"/>
+<vertex x="8.636" y="-3.4417"/>
+<vertex x="8.636" y="-3.8735"/>
+<vertex x="8.382" y="-3.8735"/>
+<vertex x="8.382" y="-3.4417" curve="90"/>
+<vertex x="8.3058" y="-3.3655"/>
+<vertex x="7.366" y="-3.3655"/>
+<vertex x="7.366" y="-3.1115"/>
+<vertex x="9.388309375" y="-3.1115" curve="90"/>
+<vertex x="9.6012" y="-2.898609375"/>
+<vertex x="9.6012" y="-0.911390625" curve="90"/>
+<vertex x="9.388309375" y="-0.6985"/>
+<vertex x="7.366" y="-0.6985"/>
+<vertex x="7.366" y="0.6985"/>
+<vertex x="9.388309375" y="0.6985" curve="90"/>
+<vertex x="9.6012" y="0.911390625"/>
+<vertex x="9.6012" y="2.898609375" curve="90"/>
+<vertex x="9.388309375" y="3.1115"/>
+<vertex x="7.366" y="3.1115"/>
 </polygon>
-<text x="-1.905" y="2.54" size="1.778" layer="22" rot="MR0">1</text>
+<polygon width="0" layer="16">
+<vertex x="-7.366" y="-3.3655"/>
+<vertex x="-9.642309375" y="-3.3655" curve="-90"/>
+<vertex x="-9.8552" y="-3.152609375"/>
+<vertex x="-9.8552" y="-1.27"/>
+<vertex x="-9.8552" y="-0.657390625" curve="-90"/>
+<vertex x="-9.642309375" y="-0.4445"/>
+<vertex x="-8.89" y="-0.4445"/>
+<vertex x="-7.832890625" y="-0.4445" curve="90"/>
+<vertex x="-7.62" y="-0.231609375"/>
+<vertex x="-7.62" y="0"/>
+<vertex x="-7.62" y="0.231609375" curve="90"/>
+<vertex x="-7.832890625" y="0.4445"/>
+<vertex x="-8.89" y="0.4445"/>
+<vertex x="-9.642309375" y="0.4445" curve="-90"/>
+<vertex x="-9.8552" y="0.657390625"/>
+<vertex x="-9.8552" y="1.27"/>
+<vertex x="-9.8552" y="3.152609375" curve="-90"/>
+<vertex x="-9.642309375" y="3.3655"/>
+<vertex x="-8.89" y="3.3655"/>
+<vertex x="-7.366" y="3.3655"/>
+<vertex x="-7.366" y="3.1115"/>
+<vertex x="-9.388309375" y="3.1115" curve="90"/>
+<vertex x="-9.6012" y="2.898609375"/>
+<vertex x="-9.6012" y="1.27"/>
+<vertex x="-9.6012" y="0.911390625" curve="90"/>
+<vertex x="-9.388309375" y="0.6985"/>
+<vertex x="-7.366" y="0.6985"/>
+<vertex x="-7.366" y="-0.6985"/>
+<vertex x="-9.388309375" y="-0.6985" curve="90"/>
+<vertex x="-9.6012" y="-0.911390625"/>
+<vertex x="-9.6012" y="-2.54"/>
+<vertex x="-9.6012" y="-2.898609375" curve="90"/>
+<vertex x="-9.388309375" y="-3.1115"/>
+<vertex x="-7.366" y="-3.1115"/>
+</polygon>
 </package>
 </packages>
 </library>
@@ -2642,7 +2580,7 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 <element name="L4" library="rcl" package="C0603_TN" value="10uH" x="4.727575" y="-16.002" rot="R270">
 <attribute name="DIGIKEY" value="490-4025-1-ND" x="4.727575" y="-16.002" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
-<element name="J2" library="powerfilm" package="AC3_F41" value="AC_INF41" x="0" y="0">
+<element name="J2" library="powerfilm" package="AC3_F45" value="AC_INF45" x="0" y="0">
 <attribute name="DIGIKEY" value="ED1649-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
 <attribute name="DIGIKEY_2" value="ED1649-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
 <attribute name="DIGIKEY_3" value="ED1649-ND" x="0" y="0" size="1.778" layer="27" display="off"/>
