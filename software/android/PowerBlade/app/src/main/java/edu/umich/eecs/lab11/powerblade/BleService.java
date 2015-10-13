@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.text.DecimalFormat;
@@ -148,12 +149,87 @@ public class BleService extends Service {
             reversedbits += bits.substring(index, index+1);
         }
         System.out.println(reversedbits);
-        return Double.valueOf(Integer.parseInt(reversedbits,2));
+        return Long.valueOf(Long.parseLong(reversedbits,2));
 
+    }
+
+
+    public double fixPscale(String msg) {
+        Map<String, String> m = new HashMap<String, String>();
+        m.put("0","0000");
+        m.put("1","0001");
+        m.put("2","0010");
+        m.put("3","0011");
+        m.put("4","0100");
+        m.put("5","0101");
+        m.put("6","0110");
+        m.put("7","0111");
+        m.put("8","1000");
+        m.put("9","1001");
+        m.put("A","1010");
+        m.put("B","1011");
+        m.put("C","1100");
+        m.put("D","1101");
+        m.put("E","1110");
+        m.put("F", "1111");
+        System.out.println(msg);
+        String bits = "";
+        for (int i = 0 ; i < msg.length(); i++) {
+            bits += m.get(String.valueOf(msg.charAt(i)));
+        }
+        System.out.println(bits);
+        String reversedbits = "";
+        int index = bits.length();
+        while (index > 0) {
+            index--;
+            reversedbits += bits.substring(index, index+1);
+        }
+        System.out.println(reversedbits);
+        String number_str = reversedbits.substring(0,11);
+        String exp_str = reversedbits.substring(12,15);
+
+        double number = Double.valueOf(Integer.parseInt(number_str, 2));
+        double exp = -1 * Double.valueOf(Integer.parseInt(exp_str,2));
+        return number * Math.pow(10, exp);
+    }
+
+    public double fixWhScale(String msg) {
+        Map<String, String> m = new HashMap<String, String>();
+        m.put("0","0000");
+        m.put("1","0001");
+        m.put("2","0010");
+        m.put("3","0011");
+        m.put("4","0100");
+        m.put("5","0101");
+        m.put("6","0110");
+        m.put("7","0111");
+        m.put("8","1000");
+        m.put("9","1001");
+        m.put("A","1010");
+        m.put("B","1011");
+        m.put("C","1100");
+        m.put("D","1101");
+        m.put("E","1110");
+        m.put("F", "1111");
+        System.out.println(msg);
+        String bits = "";
+        for (int i = 0 ; i < msg.length(); i++) {
+            bits += m.get(String.valueOf(msg.charAt(i)));
+        }
+        System.out.println(bits);
+        String reversedbits = "";
+        int index = bits.length();
+        while (index > 0) {
+            index--;
+            reversedbits += bits.substring(index, index+1);
+        }
+        double exp = -1 * Double.valueOf(Integer.parseInt(reversedbits,2));
+        return Math.pow(2, exp)/3600;
     }
 
     public void parseStuff(BluetoothDevice device, int rssi, byte[] scanRecord) {
         int index = 0;
+
         while (index < scanRecord.length) {
             int length = scanRecord[index++];
             if (length == 0) break; // Done once we run out of records
@@ -161,6 +237,9 @@ public class BleService extends Service {
             if (type == 0) break; // Done if our record isn't a valid type
             if (type==-1 && scanRecord[index+1]==0x08 && scanRecord[index+2]==0x49) {
                 //System.out.println("Type matched, Parsing : " + device.getAddress());
+                Log.d("NOTE", "HIT");
+
+
                 byte[] data = Arrays.copyOfRange(scanRecord, index + 3, index + length);
 
                 //because I am completely sick of dealing with this and am hitting bullshit
@@ -169,16 +248,57 @@ public class BleService extends Service {
                 for (byte b : data) {
                     sb.append(String.format("%02X ", b));
                 }
-                String bytes = sb.toString().replaceAll("\\s+","");
+                String bytes = sb.toString().replaceAll("\\s+", "");
+                /*
+
+                */
+
+
+
+
+                /*
                 double pbid = fixData(bytes.substring(0, 2));
                 double sequenceNum = fixData(bytes.substring(2, 10));
                 double time = fixData(bytes.substring(10,18));
-                double vrms = fixData(bytes.substring(18, 20))*2.460;
-                double trup = fixData(bytes.substring(20,24))*0.058;
-                double appp = fixData(bytes.substring(24,28))*0.058;
-                double wthr = fixData(bytes.substring(28, 36))*0.0000161;
                 double flags = fixData(bytes.substring(36, 38));
                 double numCmd = fixData(bytes.substring(38, 40));
+
+                double vRMS_scale;
+                double power_scale;
+                double wh_scale;
+                double trup;
+                double appp;
+                double wthr;
+
+                if (pbid == 0) { //HACK for Prabal... remove soon
+                    power_scale = 0.0123;
+                    trup = fixData(bytes.substring(20,24))*0.0646;
+                    appp = fixData(bytes.substring(24,28))*0.0378;
+                    wthr = fixData(bytes.substring(28, 36))*0.0000179;
+                    Log.e("HACK", "PRABAL HACK");
+                } else {
+                    power_scale = 0.058;
+                    trup = fixData(bytes.substring(20,24))*power_scale;
+                    appp = fixData(bytes.substring(24,28))*power_scale;
+                    wh_scale = power_scale/3600;
+                    wthr = fixData(bytes.substring(28, 36))*wh_scale;
+
+                }
+                vRMS_scale = 2.46;
+                double vrms = fixData(bytes.substring(18, 20))*vRMS_scale;
+
+                */
+
+                double pbid = fixData(bytes.substring(0, 2));
+                double sequenceNum = fixData(bytes.substring(2, 10));
+                double whscale = fixWhScale(bytes.substring(10, 12));
+                double vscale = fixData(bytes.substring(12, 14));
+                double pscale = fixPscale(bytes.substring(14, 18));
+                double volt_scale = vscale/50;
+                double vrms = fixData(bytes.substring(18, 20))*volt_scale;
+                double trup = fixData(bytes.substring(20,24))*pscale;
+                double appp = fixData(bytes.substring(24,28))*pscale;
+                double wthr = fixData(bytes.substring(28, 36))*whscale;
                 double pwfr = (trup / appp) * 1.0000000;
                 cur_settings.edit().putString("address",      device.getAddress()).apply();
                 cur_settings.edit().putString("id",             di.format( pbid )).apply();
