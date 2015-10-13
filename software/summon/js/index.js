@@ -145,6 +145,7 @@ var app = {
         //Parse Advertised Data
         var adData = new Uint8Array(device.advertising);
 	
+        /*
         if ((adData[12] != 0x1A) || (adData[13] != 0x18)){
             app.log("not right");
             app.onEnable();
@@ -154,6 +155,7 @@ var app = {
         else{
             ble.stopScan(app.onStopScan, app.onError);
         }
+        */   
 
         // Save when we got this.
         last_update = Date.now();
