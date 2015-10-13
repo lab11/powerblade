@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!-- HTML for Template Summon UI -->
+<html>
+    <head>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css">
+        <script src="js/jquery-1.11.3.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.min.js"></script>
+        <script src="js/Sortable.js"></script>
+        <script src="js/ng-sortable.js"></script>
+        <script src="js/Ply.min.js"></script>
+
+		<link rel="shortcut icon" type="image/x-icon" href="img/powerblade.ico" />
+        <link rel="stylesheet" href="css/font-awesome-4.4.0/css/font-awesome.min.css">
+        <link href='http://fonts.googleapis.com/css?family=Josefin+Sans&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <link rel="shortcut icon" type="image/x-icon" href="img/powerblade.ico" />
+
+        <title>PowerBlade</title>
+    </head>
+    <body id="main_view" data-role="main" class="frame" style="text-align:center;color:#fffff">
+
+        <div data-role="header" data-theme="b">
+                </br>
+                <text align=center style="font-size: 250%">
+                    Powerblade
+                </text></br>
+                <h1 style="font-size: 90%;" id="title">deviceId</h1>
+        </div>
+
+        <div style="margin-top:10px;">
+            <span align="center" id="data_update">Waiting for data...</span>
+        </div>
+
+        <table border="0" align=center class="navbar" style="width:90%; margin-top:10px;">
+            <tr>
+                <td align=left class="charTitleCell">Time Since Last Recieved: </td>
+                <td align=center class="charValueCell" id="timeLastRecievedVal">0</td>
+            </tr>
+            <tr>
+                <td align=left class="charTitleCell">RMS Voltage: </td>
+                <td align=center class="charValueCell" id="rmsVoltageVal">0</td>
+            </tr>
+            <tr>
+                <td align=left class="charTitleCell">Current True Power: </td>
+                <td align=center class="charValueCell" id="truePowerVal">0</td>
+            </tr>
+            <tr>
+                <td align=left class="charTitleCell">Current Apparent Power: </td>
+                <td align=center class="charValueCell" id="apparentPowerVal">0</td>
+            </tr>
+            <tr>
+                <td align=left class="charTitleCell">Current Watt Hours: </td>
+                <td align=center class="charValueCell" id="wattHoursVal">0</td>
+            </tr>
+            <tr>
+                <td align=left class="charTitleCell">Power Factor: </td>
+                <td align=center class="charValueCell" id="powerFactorVal">0</td>
+            </tr>
+
+        </table>
+        </br>
+
+
+       <div data-display="overlay" data-swipe-close="true" data-dismissible="false" data-position="right" data-role="panel" id="logPanel">
+            <h2>Log</h2>
+            <p id="console" ></p>
+       </div>
+
+        <div data-role="popup" data-overlay-theme="b" id="about_page">
+            <p>Powerblade.</p>
+            <p>Find out more at <a href="https://github.com/lab11/powerblade">https://github.com/lab11/powerblade</a>.</p>
+        </div>
+
+       <div data-role="footer" data-theme="b" data-position="fixed">
+          <div data-role="navbar">
+            <ul>
+                <li><a href="#about_page" data-rel="popup" data-position-to="window"><i class="fa fa-info-circle fa-2x"></i></br>About</a></li>
+                <li><a href="#logPanel"><i name = "logbook" class="fa fa-book fa-2x"></i></br>Log</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>
