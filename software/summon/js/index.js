@@ -15,6 +15,7 @@ var last_update = 0;
 var switch_visibility_console_check = "visible";
 var switch_visibility_steadyscan_check = "visible";
 var steadyscan_on = true;
+var deviceId = "C0:98:E5:70:00:02";
 
 // Load the swipe pane
 $(document).on('pageinit',function(){
@@ -26,12 +27,10 @@ $(document).on('pageinit',function(){
 var app = {
     // Application Constructor
     initialize: function() {
-
         document.addEventListener("deviceready", app.onAppReady, false);
         document.addEventListener("resume", app.onAppReady, false);
         document.addEventListener("pause", app.onPause, false);
-        toggleOff.addEventListener('touchend', app.onTouchToggleOff, false);
-        app.onAppReady();
+        // toggleOff.addEventListener('touchend', app.onTouchToggleOff, false);
     },
     onStartTimer: function(device){
         connection_toggle = false;
@@ -70,14 +69,15 @@ var app = {
         //app.log("onEnable");
         app.onPause();                                                              // halt any previously running BLE processes
         ble.startScan([], app.onDiscover, app.onAppReady);                          // start BLE scan; if device discovered, goto: onDiscover
-        app.log("Searching for " + deviceName + " (" + deviceId + ").");
+        app.log("Searching for (" + deviceId + ").");
     },
     // BLE Device Discovered Callback
     onDiscover: function(device) {
         //app.log("onDiscover");
         if (device.id == deviceId) {
-            app.log("Found " + deviceName + " (" + deviceId + ")!");
+            app.log("Found (" + deviceId + ")!");
             app.onParseAdvData(device);
+            console.log("Yay!");
             //app.onStartConnection(device);
         }
     },
@@ -195,19 +195,19 @@ var app = {
         document.getElementById("powerFactorVal").innerHTML = String(pf_disp);
 	*/
 
-        if (intAcc) {
-            document.getElementById('accLastIntCell').style.color = "#ED97B9";
-            document.getElementById('accLastIntCell2').style.color = "#ED97B9";
-            document.getElementById('accSpinnerInt').style.visibility = "visible";
-            document.getElementById('accNotSpinnerInt').style.visibility = "hidden";
+        // if (intAcc) {
+        //     document.getElementById('accLastIntCell').style.color = "#ED97B9";
+        //     document.getElementById('accLastIntCell2').style.color = "#ED97B9";
+        //     document.getElementById('accSpinnerInt').style.visibility = "visible";
+        //     document.getElementById('accNotSpinnerInt').style.visibility = "hidden";
 
-        }
-        else {
-            document.getElementById('accLastIntCell').style.color = "black";
-            document.getElementById('accLastIntCell2').style.color = "black";
-            document.getElementById('accSpinnerInt').style.visibility = "hidden";
-            document.getElementById('accNotSpinnerInt').style.visibility = "visible";
-        }
+        // }
+        // else {
+        //     document.getElementById('accLastIntCell').style.color = "black";
+        //     document.getElementById('accLastIntCell2').style.color = "black";
+        //     document.getElementById('accSpinnerInt').style.visibility = "hidden";
+        //     document.getElementById('accNotSpinnerInt').style.visibility = "visible";
+        // }
 
         app.update_time_ago();
 
