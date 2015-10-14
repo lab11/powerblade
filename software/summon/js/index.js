@@ -14,9 +14,9 @@ var last_update = 0;
 
 var switch_visibility_console_check = "visible";
 var switch_visibility_steadyscan_check = "visible";
-var steadyscan_on = true;
-var deviceId = "C0:98:E5:70:00:02";
-
+var deviceId = "C0:98:E5:70:00:03";
+var adata;
+var paused = false;
 // Load the swipe pane
 $(document).on('pageinit',function(){
     $("#main_view").on("swipeleft",function(){
@@ -30,45 +30,34 @@ var app = {
         document.addEventListener("deviceready", app.onAppReady, false);
         document.addEventListener("resume", app.onAppReady, false);
         document.addEventListener("pause", app.onPause, false);
-        // toggleOff.addEventListener('touchend', app.onTouchToggleOff, false);
-    },
-    onStartTimer: function(device){
-        connection_toggle = false;
-        timer = setTimeout(app.onLongPress, touchduration);
-    },
-    onLongPress: function(){
-        app.log("timer expired");
-        connection_toggle = true;
     },
     // App Ready Event Handler
     onAppReady: function() {
-        app.log("amihere");
-
         // Setup update for last data time
-        setInterval(app.update_time_ago, 5000);
+        // setInterval(app.update_time_ago, 5000);
 
         if (typeof window.gateway != "undefined") {                               // if UI opened through Summon,
             deviceId = window.gateway.getDeviceId();                                // get device ID from Summon
             deviceName = window.gateway.getDeviceName();                            // get device name from Summon
             app.log("Opened via Summon..");
         }
-        app.log("Opened via Summon...");
         document.getElementById("title").innerHTML = String(deviceId);
         app.log("Checking if ble is enabled...");
+        paused=false;
         ble.isEnabled(app.onEnable);                                                // if BLE enabled, goto: onEnable
-        app.onEnable();
     },
     // App Paused Event Handler
     onPause: function() {
         app.log("on Pause");                                                           // if user leaves app, stop BLE
-        //ble.disconnect(deviceId);
         ble.stopScan();
+        paused=true;
     },
     // Bluetooth Enabled Callback
     onEnable: function() {
-        //app.log("onEnable");
-        app.onPause();                                                              // halt any previously running BLE processes
-        ble.startScan([], app.onDiscover, app.onAppReady);                          // start BLE scan; if device discovered, goto: onDiscover
+        ble.stopScan(function(){
+            ble.startScan([],app.onDiscover,function(e){console.log(e)});
+            setTimeout(function(){if (!paused) app.onEnable()},1000);
+        },app.onAppReady);
         app.log("Searching for (" + deviceId + ").");
     },
     // BLE Device Discovered Callback
@@ -77,179 +66,56 @@ var app = {
         if (device.id == deviceId) {
             app.log("Found (" + deviceId + ")!");
             app.onParseAdvData(device);
-            console.log("Yay!");
-            //app.onStartConnection(device);
-        }
-    },
-    onStopScan: function(device) {
-        //app.log("stopped scanning");
-    },
-    onTouchToggleOff: function(device) {
-        document.getElementById('toggleOff').style.visibility = "hidden";
-        document.getElementById('toggleOn').style.visibility = "visible";
-        document.getElementById('connection_status').innerHTML = " Connected";
-        app.log("Connecting to BLEES device!");
-        ble.stopScan();
-        app.onStartConnection(device);
-
-    },
-    onTouchToggleOn: function() {
-        /*
-        document.getElementById('toggleOff').style.visibility = "visible";
-        document.getElementById('toggleOn').style.visibility = "hidden";
-        app.onPause();
-        app.onAppReady();
-        */
-    },
-    onDiscoverDescriptors: function(char_Uuid) {
-
-        bluetoothle.readDescriptor(app.readSuccess, app.onError, {
-              "address": deviceId,
-              "serviceUuid": serviceUuid,
-              "characteristicUuid": char_Uuid,
-              "descriptorUuid": essdescriptorUuid
-        });
-
-    },
-    ondisconnectsuccess: function() {
-        app.log("disconnected success!");
-    },
-    onPleaseConnect: function(){
-        app.log("Please connect to use this feature");
-    },
-    onTouchConsoleCheck: function(){
-        app.log("check");
-        document.querySelector("#show_console_check").style.visibility = switch_visibility_console_check;
-        document.querySelector("#console").style.visibility = switch_visibility_console_check;
-        if(switch_visibility_console_check == "visible") {
-            switch_visibility_console_check = "hidden";
-        }
-        else{
-            switch_visibility_console_check = "visible";
-        }
-    },
-    onTouchSteadyScanCheck: function(){
-        app.log("check2");
-        document.querySelector("#show_steadyscan_check").style.visibility = switch_visibility_steadyscan_check;
-        if(switch_visibility_steadyscan_check == "visible") {
-            switch_visibility_steadyscan_check = "hidden";
-            steadyscan_on = true;
-            app.onEnable();
-        }
-        else{
-            switch_visibility_steadyscan_check = "visible";
-            steadyscan_on = false;
         }
     },
     onParseAdvData: function(device){
         //Parse Advertised Data
-        var adData = new Uint8Array(device.advertising);
-	
-        /*
-        if ((adData[12] != 0x1A) || (adData[13] != 0x18)){
-            app.log("not right");
-            app.onEnable();
-            return;
+        scanRecord = new Uint8Array(device.advertising);
+        index = 0;
+        data = null;
+        while (index < scanRecord.length) {
+            length = scanRecord[index++];
+            if (length == 0) break; //Done once we run out of records
+            type = scanRecord[index];
+            if (type == 0) break; //Done if our record isn't a valid type
+            adData = scanRecord.subarray(index + 1, index + length);
+            if (type==0xFF && length>4 && adData[1]==0x49 && adData[0]==0x08) data=adData.slice(2);
+            index += length; //Advance
         }
+        if (data==null) return;
 
-        else{
-            ble.stopScan(app.onStopScan, app.onError);
-        }
-        */   
+        adata = data;
 
-        // Save when we got this.
-        last_update = Date.now();
-       
-	/* 
-	var recv_time = (new Date).getTime()/1000;
-        var powerblade_id = BitArray.fromBuffer(data.slice(0,1)).toNumber();
-        var sequence_num = BitArray.fromBuffer(data.slice(1,5)).toNumber();
-        var pscale = BitArray.fromBuffer(data.slice(7,9)).toNumber();
-        var vscale = BitArray.fromBuffer(data.slice(6,7)).toNumber();
-        var whscale = BitArray.fromBuffer(data.slice(5,6)).toNumber();
-        var v_rms = BitArray.fromBuffer(data.slice(9,10)).toNumber();
-        var true_power = BitArray.fromBuffer(data.slice(10,12)).toNumber();
-        var apparent_power = BitArray.fromBuffer(data.slice(12,14)).toNumber();
-        var watt_hours = BitArray.fromBuffer(data.slice(14,18)).toNumber();
-        var flags = BitArray.fromBuffer(data.slice(18,19)).toNumber();
-        var num_connections = BitArray.fromBuffer(data.slice(19,20)).toNumber();
-        var volt_scale = vscale / 50;
-        var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
-        var wh_shift = whscale;
-        var v_rms_disp = v_rms*volt_scale;
-        var true_power_disp = true_power*power_scale;
-        var app_power_disp = apparent_power*power_scale;
-        if(volt_scale > 0) {
-          var watt_hours_disp = (watt_hours << wh_shift)*(power_scale/3600);
-        }
-        else {
-          var watt_hours_disp = watt_hours;
-        }
-        var pf_disp = true_power_disp / app_power_disp;
-	
-	document.getElementById("timeLastRecievedVal").innerHTML = String(last_update);
-        document.getElementById("rmsVoltageVal").innerHTML = String(v_rms_disp);
-        document.getElementById("truePowerVal").innerHTML = String(true_power_disp);
-        document.getElementById("apparentPowerVal").innerHTML = String(app_power_disp);
-        document.getElementById("wattHoursVal").innerHTML = String(watt_hours_disp);
-        document.getElementById("powerFactorVal").innerHTML = String(pf_disp);
-	*/
+        console.log( Array.prototype.map.call(new Uint8Array(data),function(m){return ("0"+m.toString(16)).substr(-2);}).join(' ') );
 
-        // if (intAcc) {
-        //     document.getElementById('accLastIntCell').style.color = "#ED97B9";
-        //     document.getElementById('accLastIntCell2').style.color = "#ED97B9";
-        //     document.getElementById('accSpinnerInt').style.visibility = "visible";
-        //     document.getElementById('accNotSpinnerInt').style.visibility = "hidden";
+        pscale          = (new Uint16Array(data.slice( 7, 9).buffer))[0];
+        vscale          = (new Uint8Array (data.slice( 6, 7).buffer))[0];
+        whscale         = (new Uint8Array (data.slice( 5, 6).buffer))[0];
+        v_rms           = (new Uint8Array (data.slice( 9,10).buffer))[0];
+        true_power      = (new Uint16Array(data.slice(10,12).buffer))[0];
+        apparent_power  = (new Uint16Array(data.slice(12,14).buffer))[0];
+        watt_hours      = (new Uint32Array(data.slice(14,18).buffer))[0];
 
-        // }
-        // else {
-        //     document.getElementById('accLastIntCell').style.color = "black";
-        //     document.getElementById('accLastIntCell2').style.color = "black";
-        //     document.getElementById('accSpinnerInt').style.visibility = "hidden";
-        //     document.getElementById('accNotSpinnerInt').style.visibility = "visible";
-        // }
+        volt_scale      = vscale / 50;
+        power_scale     = (pscale & 0x0FFF) * Math.pow(10, -1 * ((pscale & 0xF000) >> 12));
+    
+        v_rms_disp      = v_rms * volt_scale;
+        true_power_disp = true_power * power_scale;
+        app_power_disp  = apparent_power * power_scale;
+        watt_hours_disp = (volt_scale > 0) ? (watt_hours << whscale) * (power_scale / 3600) : watt_hours;
+        pf_disp         = true_power_disp / app_power_disp;
 
-        app.update_time_ago();
+        document.getElementById("timeLastRecievedVal").innerHTML = (new Date()).toLocaleTimeString();
+        document.getElementById("rmsVoltageVal").innerHTML       = v_rms_disp.toFixed(2) + " V";
+        document.getElementById("truePowerVal").innerHTML        = true_power_disp.toFixed(2) + " W";
+        document.getElementById("apparentPowerVal").innerHTML    = app_power_disp.toFixed(2) + " W";
+        document.getElementById("wattHoursVal").innerHTML        = watt_hours_disp.toFixed(2) + " Wh";
+        document.getElementById("powerFactorVal").innerHTML      = pf_disp.toFixed(2);
 
-        if(steadyscan_on){
-            app.onEnable();
-        }
+        // app.update_time_ago();
 
-    },
-    // BLE Characteristic Write Callback
-    onWrite : function() {
-        app.log("Characeristic Written: " + writeValue);                            // display write success
-    },
-    // BLE Characteristic Read/Write Error Callback
-    onError: function() {                                                           // on error, try restarting BLE
-        app.log("Read/Write Error.")
-        ble.isEnabled(deviceId,function(){},app.onAppReady);
-        ble.isConnected(deviceId,function(){},app.onAppReady);
-    },
-    // Function to Convert String to Bytes (to Write Characteristics)
-    stringToBytes: function(string) {
-        array = new Uint8Array(string.length);
-        for (i = 0, l = string.length; i < l; i++) array[i] = string.charCodeAt(i);
-        return array.buffer;
-    },
-    buffToUInt32Decimal: function(buffer) {
-        var uint32View = new Uint32Array(buffer);
-        return uint32View[0];
-    },
-    buffToUInt16Decimal: function(buffer) {
-        var uint16View = new Uint16Array(buffer);
-        return uint16View[0];
-    },
-    buffToInt16Decimal: function(buffer) {
-        var int16View = new Int16Array(buffer);
-        return int16View[0];
-    },
-    buffToUInt8Decimal: function(buffer) {
-        var uint8View = new Uint8Array(buffer);
-        return uint8View[0];
-    },
-    bytesToString: function(buffer) {
-        return String.fromCharCode.apply(null, new Uint8Array(buffer));
+        // app.onEnable();
+
     },
     update_time_ago: function () {
         if (last_update > 0) {
@@ -281,5 +147,11 @@ var app = {
         document.querySelector("#console").scrollTop = document.querySelector("#console").scrollHeight;
     }
 };
+
+    // fromBuffer: function(buf) {
+    //   var bits = []
+    //   for (var i = 0; i < buf.length; i++) bits = bits.concat(BitArray.from32Integer(buf[i]).toJSON())
+    //   return bits;
+    // }
 
 app.initialize();
