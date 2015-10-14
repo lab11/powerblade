@@ -88,21 +88,21 @@ var app = {
 
         console.log( Array.prototype.map.call(new Uint8Array(data),function(m){return ("0"+m.toString(16)).substr(-2);}).join(' ') );
 
-        pscale          = app.r((new Uint16Array(data.slice( 7, 9).buffer))[0],2);
-        vscale          = app.r((new Uint8Array (data.slice( 6, 7).buffer))[0],1);
-        whscale         = app.r((new Uint8Array (data.slice( 5, 6).buffer))[0],1);
-        v_rms           = app.r((new Uint8Array (data.slice( 9,10).buffer))[0],1);
-        true_power      = app.r((new Uint16Array(data.slice(10,12).buffer))[0],2);
-        apparent_power  = app.r((new Uint16Array(data.slice(12,14).buffer))[0],2);
-        watt_hours      = app.r((new Uint32Array(data.slice(14,18).buffer))[0],4);
+        pscale          = app.r((data[7]<<8)|data[8]);//app.r((new Uint16Array(data.slice( 7, 9).buffer))[0],2);
+        vscale          = app.r(data[6],1);//app.r((new Uint8Array (data.slice( 6, 7).buffer))[0],1);
+        whscale         = app.r(data[5],1);//app.r((new Uint8Array (data.slice( 5, 6).buffer))[0],1);
+        v_rms           = app.r(data[9],1);//app.r((new Uint8Array (data.slice( 9,10).buffer))[0],1);
+        true_power      = app.r((data[10]<<8)|data[11]);//app.r((new Uint16Array(data.slice(10,12).buffer))[0],2);
+        apparent_power  = app.r((data[12]<<8)|data[13]);//app.r((new Uint16Array(data.slice(12,14).buffer))[0],2);
+        watt_hours      = app.r((data[14]<<24)|(data[15]<<16)|(data[16]<<8)|data[17]);//app.r((new Uint32Array(data.slice(14,18).buffer))[0],4);
 
         volt_scale      = vscale / 50;
         power_scale     = ((new Uint16Array([pscale]))[0] & 0x0FFF) * Math.pow(10, -1 * (((new Uint16Array([pscale]))[0] & 0xF000) >> 12));
     
         v_rms_disp      = v_rms * volt_scale;
-        true_power_disp = true_power * power_scale;
-        app_power_disp  = apparent_power * power_scale;
-        watt_hours_disp = (volt_scale > 0) ? (watt_hours << whscale) * (power_scale / 3600) : watt_hours;
+        true_power_disp = true_power * .058;//power_scale;
+        app_power_disp  = apparent_power * .058;//power_scale;
+        watt_hours_disp = watt_hours * .0000161;//(volt_scale > 0) ? (watt_hours << whscale) * (power_scale / 3600) : watt_hours;
         pf_disp         = true_power_disp / app_power_disp;
 
         console.log("pscale: " + pscale.toString(16) + ", vscale: " + vscale.toString(16) + ", whscale: " + whscale.toString(16) + ", v_rms: " + v_rms.toString(16) + ", true_power: " + true_power.toString(16) + ", apparent_power: " + apparent_power.toString(16) + ", watt_hours: " + watt_hours.toString(16));

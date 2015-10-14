@@ -20,6 +20,7 @@ rm index.html
 ln -s ../../css .
 ln -s ../../js .
 ln -s ../../index.html .
+ln -s ../../img .
 
 popd
 
