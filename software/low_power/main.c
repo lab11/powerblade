@@ -53,8 +53,13 @@ uint32_t acc_v_rms;
 uint32_t wattHoursToAverage;
 uint32_t voltAmpsToAverage;
 
+// Near-constants to be transmitted
+// Near-constants
+uint16_t uart_len = 20;
+uint8_t ad_len = 19;
+uint8_t powerblade_id = 1;
+
 // Transmitted values
-uint8_t powerblade_id;
 uint32_t sequence;
 uint32_t time;
 uint8_t Vrms;
@@ -73,7 +78,7 @@ uint8_t getVoltageForPhase(uint8_t head);
 void uart_send(char* buf, unsigned int len);
 char *txBuf;
 unsigned int txLen;
-unsigned int txCt;
+int txCt;
 
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
@@ -164,7 +169,6 @@ int main(void) {
 	voltAmpsToAverage = 0;
 	sequence = 0;
 	time = 0;
-	powerblade_id = 0;
 	flags = 0;
 	agg_current = 0;
 	vbuff_head = 0;
@@ -267,8 +271,9 @@ void uart_send(char* buf, unsigned int len) {
 	txCt = 0;
 
 	UCA0IE |= UCTXIE;
-	if (txCt < txLen) {
-		UCA0TXBUF = buf[txCt++];
+	txCt = txLen - 1;
+	if (txCt >= 0) {
+		UCA0TXBUF = buf[txCt--];
 	}
 }
 
@@ -338,7 +343,7 @@ void transmitTry(void) {
 			wattHoursToAverage = 0;
 			voltAmpsToAverage = 0;
 
-//			ready = 1;
+			ready = 1;
 			if (ready == 1) {
 				SYS_EN_OUT &= ~SYS_EN_PIN;
 				uart_enable(1);
@@ -462,8 +467,8 @@ __interrupt void USCI_A0_ISR(void) {
 	case 2: 								// RX interrupt
 		break;
 	case 4:									// TX interrupt
-		if (txCt < txLen) {
-			UCA0TXBUF = txBuf[txCt++];
+		if (txCt >= 0) {
+			UCA0TXBUF = txBuf[txCt--];
 		} else {
 			UCA0IE &= ~UCTXIE;
 			UCA0IE |= UCTXCPTIE;
