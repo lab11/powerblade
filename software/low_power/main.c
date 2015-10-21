@@ -343,13 +343,14 @@ void transmitTry(void) {
 			wattHoursToAverage = 0;
 			voltAmpsToAverage = 0;
 
-			ready = 1;
+//			ready = 1;
 			if (ready == 1) {
 				SYS_EN_OUT &= ~SYS_EN_PIN;
 				uart_enable(1);
 				__delay_cycles(80000);
-				uart_send((char*) &powerblade_id, sizeof(powerblade_id));
-				data = 8;
+				//uart_send((char*) &powerblade_id, sizeof(powerblade_id));
+				uart_send((char*) &uart_len, sizeof(uart_len));
+				data = NUM_DATA;
 			}
 		}
 	}
@@ -480,6 +481,12 @@ __interrupt void USCI_A0_ISR(void) {
 		UCA0IE &= ~UCTXCPTIE;
 		data--;
 		switch (data) {
+		case 9:
+			uart_send((char*) &ad_len, sizeof(ad_len));
+			break;
+		case 8:
+			uart_send((char*) &powerblade_id, sizeof(powerblade_id));
+			break;
 		case 7:
 			uart_send((char*) &sequence, sizeof(sequence));
 			break;
