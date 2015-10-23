@@ -8,5 +8,8 @@ To rebuild everything:
 
     ./init_cordova.sh
 
+To build and run on attached phone:
+    cd _build/
+    cordova run android
 
 
