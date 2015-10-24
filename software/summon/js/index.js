@@ -102,8 +102,8 @@ var app = {
             deviceId = window.gateway.getDeviceId();                                // get device ID from Summon
             deviceName = window.gateway.getDeviceName();                            // get device name from Summon
             app.log("Opened via Summon..");
-            parse_advertisement(window.gateway.getDeviceAdvertisement());
-            app.log("Updated with initial advertisement");
+            //parse_advertisement(window.gateway.getDeviceAdvertisement());
+            //app.log("Updated with initial advertisement");
         }
         document.getElementById("title").innerHTML = String(deviceId);
         app.log("Checking if ble is enabled...");
