@@ -14,10 +14,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BleService extends Service {
 
@@ -118,200 +117,96 @@ public class BleService extends Service {
     @Override
     public IBinder onBind(Intent intent) { return null; }
 
-    public double fixData(String msg) {
-        Map<String, String> m = new HashMap<String, String>();
-        m.put("0","0000");
-        m.put("1","0001");
-        m.put("2","0010");
-        m.put("3","0011");
-        m.put("4","0100");
-        m.put("5","0101");
-        m.put("6","0110");
-        m.put("7","0111");
-        m.put("8","1000");
-        m.put("9","1001");
-        m.put("A","1010");
-        m.put("B","1011");
-        m.put("C","1100");
-        m.put("D","1101");
-        m.put("E","1110");
-        m.put("F", "1111");
-        System.out.println(msg);
-        String bits = "";
-        for (int i = 0 ; i < msg.length(); i++) {
-            bits += m.get(String.valueOf(msg.charAt(i)));
-        }
-        System.out.println(bits);
-        String reversedbits = "";
-        int index = bits.length();
-        while (index > 0) {
-            index--;
-            reversedbits += bits.substring(index, index+1);
-        }
-        System.out.println(reversedbits);
-        return Long.valueOf(Long.parseLong(reversedbits,2));
-
-    }
-
-
-    public double fixPscale(String msg) {
-        Map<String, String> m = new HashMap<String, String>();
-        m.put("0","0000");
-        m.put("1","0001");
-        m.put("2","0010");
-        m.put("3","0011");
-        m.put("4","0100");
-        m.put("5","0101");
-        m.put("6","0110");
-        m.put("7","0111");
-        m.put("8","1000");
-        m.put("9","1001");
-        m.put("A","1010");
-        m.put("B","1011");
-        m.put("C","1100");
-        m.put("D","1101");
-        m.put("E","1110");
-        m.put("F", "1111");
-        System.out.println(msg);
-        String bits = "";
-        for (int i = 0 ; i < msg.length(); i++) {
-            bits += m.get(String.valueOf(msg.charAt(i)));
-        }
-        System.out.println(bits);
-        String reversedbits = "";
-        int index = bits.length();
-        while (index > 0) {
-            index--;
-            reversedbits += bits.substring(index, index+1);
-        }
-        System.out.println(reversedbits);
-        String number_str = reversedbits.substring(0,11);
-        String exp_str = reversedbits.substring(12,15);
-
-        double number = Double.valueOf(Integer.parseInt(number_str, 2));
-        double exp = -1 * Double.valueOf(Integer.parseInt(exp_str,2));
-        return number * Math.pow(10, exp);
-    }
-
-    public double fixWhScale(String msg) {
-        Map<String, String> m = new HashMap<String, String>();
-        m.put("0","0000");
-        m.put("1","0001");
-        m.put("2","0010");
-        m.put("3","0011");
-        m.put("4","0100");
-        m.put("5","0101");
-        m.put("6","0110");
-        m.put("7","0111");
-        m.put("8","1000");
-        m.put("9","1001");
-        m.put("A","1010");
-        m.put("B","1011");
-        m.put("C","1100");
-        m.put("D","1101");
-        m.put("E","1110");
-        m.put("F", "1111");
-        System.out.println(msg);
-        String bits = "";
-        for (int i = 0 ; i < msg.length(); i++) {
-            bits += m.get(String.valueOf(msg.charAt(i)));
-        }
-        System.out.println(bits);
-        String reversedbits = "";
-        int index = bits.length();
-        while (index > 0) {
-            index--;
-            reversedbits += bits.substring(index, index+1);
-        }
-        double exp = -1 * Double.valueOf(Integer.parseInt(reversedbits,2));
-        return Math.pow(2, exp)/3600;
-    }
-
     public void parseStuff(BluetoothDevice device, int rssi, byte[] scanRecord) {
-        int index = 0;
 
-        while (index < scanRecord.length) {
-            int length = scanRecord[index++];
-            if (length == 0) break; // Done once we run out of records
-            int type = scanRecord[index];
-            if (type == 0) break; // Done if our record isn't a valid type
-            if (type==-1 && scanRecord[index+1]==0x08 && scanRecord[index+2]==0x49) {
-                //System.out.println("Type matched, Parsing : " + device.getAddress());
-                Log.d("NOTE", "HIT");
+        // This is a PowerBlade if:
+        //  packet is long enough
+        //  initial junk is correct
+        //  manufacturer data is the next field
+        //  company ID is 0x4908
+        if (scanRecord.length > 7 &&
+                scanRecord[0] == (byte)0x02 && scanRecord[1] == (byte)0x01 && scanRecord[2] == (byte)0x06 &&
+                scanRecord[4] == (byte)0xFF &&
+                scanRecord[5] == (byte)0x08 && scanRecord[6] == (byte)0x49) {
+            Log.d("NOTE", "Found a PowerBlade!");
 
-
-                byte[] data = Arrays.copyOfRange(scanRecord, index + 3, index + length);
-
-                //because I am completely sick of dealing with this and am hitting bullshit
-                //over and over again, we will be quick about it and use... strings... thats right
-                StringBuilder sb = new StringBuilder();
-                for (byte b : data) {
-                    sb.append(String.format("%02X ", b));
-                }
-                String bytes = sb.toString().replaceAll("\\s+", "");
-                /*
-
-                */
-
-
-
-
-                /*
-                double pbid = fixData(bytes.substring(0, 2));
-                double sequenceNum = fixData(bytes.substring(2, 10));
-                double time = fixData(bytes.substring(10,18));
-                double flags = fixData(bytes.substring(36, 38));
-                double numCmd = fixData(bytes.substring(38, 40));
-
-                double vRMS_scale;
-                double power_scale;
-                double wh_scale;
-                double trup;
-                double appp;
-                double wthr;
-
-                if (pbid == 0) { //HACK for Prabal... remove soon
-                    power_scale = 0.0123;
-                    trup = fixData(bytes.substring(20,24))*0.0646;
-                    appp = fixData(bytes.substring(24,28))*0.0378;
-                    wthr = fixData(bytes.substring(28, 36))*0.0000179;
-                    Log.e("HACK", "PRABAL HACK");
-                } else {
-                    power_scale = 0.058;
-                    trup = fixData(bytes.substring(20,24))*power_scale;
-                    appp = fixData(bytes.substring(24,28))*power_scale;
-                    wh_scale = power_scale/3600;
-                    wthr = fixData(bytes.substring(28, 36))*wh_scale;
-
-                }
-                vRMS_scale = 2.46;
-                double vrms = fixData(bytes.substring(18, 20))*vRMS_scale;
-
-                */
-
-                double pbid = fixData(bytes.substring(0, 2));
-                double sequenceNum = fixData(bytes.substring(2, 10));
-                double whscale = fixWhScale(bytes.substring(10, 12));
-                double vscale = fixData(bytes.substring(12, 14));
-                double pscale = fixPscale(bytes.substring(14, 18));
-                double volt_scale = vscale/50;
-                double vrms = fixData(bytes.substring(18, 20))*volt_scale;
-                double trup = fixData(bytes.substring(20,24))*pscale;
-                double appp = fixData(bytes.substring(24,28))*pscale;
-                double wthr = fixData(bytes.substring(28, 36))*whscale;
-                double pwfr = (trup / appp) * 1.0000000;
-                cur_settings.edit().putString("address",      device.getAddress()).apply();
-                cur_settings.edit().putString("id",             di.format( pbid )).apply();
-                cur_settings.edit().putString("power",          di.format( trup )).apply();
-                cur_settings.edit().putString("v_rms",          df.format( vrms )).apply();
-                cur_settings.edit().putString("true_power",     df.format( trup )).apply();
-                cur_settings.edit().putString("apparent_power", df.format( appp )).apply();
-                cur_settings.edit().putString("watt_hours",     df.format( wthr )).apply();
-                cur_settings.edit().putString("power_factor",   df.format( pwfr )).apply();
-                cur_settings.edit().putLong  ("time",  System.currentTimeMillis()).apply();
+            // check length of packet
+            int data_len = scanRecord[3] - 3;
+            if (data_len + 7 > scanRecord.length) {
+                Log.e("ERROR", "Bad scanRecord");
+                return;
             }
-            index += length; // Advance
+
+            // default values
+            double pbid = 0;
+            double vrms = 0;
+            double reap = 0;
+            double appp = 0;
+            double wthr = 0;
+            double pwfr = 0;
+
+            // get advertisement data
+            byte[] data = Arrays.copyOfRange(scanRecord, 7, 7 + data_len);
+            byte powerblade_version = data[0];
+            pbid = (double)powerblade_version;
+            switch (powerblade_version) {
+
+                case (byte)0x01:
+                    Log.d("NOTE", "PowerBlade version 1");
+
+//                    // print advertisement to console. Good for debugging
+//                    String advdata = "adv data: [";
+//                    for (int i=0; i<scanRecord.length; i++) {
+//                        advdata += String.format("%02X", scanRecord[i]);
+//                        advdata += " ";
+//                    }
+//                    advdata += "]";
+//                    System.out.println(advdata);
+
+                    // get data values
+                    int sequence_num = ByteBuffer.wrap(data,  1, 4).getInt();
+                    int pscale = ByteBuffer.wrap(data,  5, 2).getShort();
+                    double vscale = (double)data[7];
+                    int whscale = (int)data[8];
+                    double v_rms = (double)data[9];
+                    double real_power = (double)ByteBuffer.wrap(data, 10, 2).getShort();
+                    double apparent_power = (double)ByteBuffer.wrap(data, 12, 2).getShort();
+                    int watt_hours = ByteBuffer.wrap(data, 14, 4).getInt();
+                    byte flags = data[18];
+
+                    // apply math
+                    double volt_scale = vscale/50;
+                    double power_scale = (pscale & 0x0FFF) * Math.pow(10.0, -1.0*((pscale & 0xF000) >> 12));
+                    int wh_shift = whscale;
+                    vrms = v_rms*volt_scale;
+                    reap = real_power*power_scale;
+                    appp = apparent_power*power_scale;
+                    if (volt_scale > 0) {
+                        wthr = (watt_hours << wh_shift)*(power_scale/3600.0);
+                    } else {
+                        wthr = (double)watt_hours;
+                    }
+                    pwfr = reap/appp;
+
+                    break;
+
+                default:
+                    Log.d("NOTE", "Can't handle PowerBlade version " + String.valueOf(powerblade_version));
+                    break;
+            }
+
+            // Set magic string values that somehow update the GUI
+            cur_settings.edit().putString("address",      device.getAddress()).apply();
+            cur_settings.edit().putString("id",             di.format( pbid )).apply();
+            cur_settings.edit().putString("power",          di.format( reap )).apply();
+            cur_settings.edit().putString("v_rms",          df.format( vrms )).apply();
+            cur_settings.edit().putString("true_power",     df.format( reap )).apply();
+            cur_settings.edit().putString("apparent_power", df.format( appp )).apply();
+            cur_settings.edit().putString("watt_hours",     df.format( wthr )).apply();
+            cur_settings.edit().putString("power_factor",   df.format( pwfr )).apply();
+            cur_settings.edit().putLong  ("time",  System.currentTimeMillis()).apply();
         }
+
     }
 
 }
