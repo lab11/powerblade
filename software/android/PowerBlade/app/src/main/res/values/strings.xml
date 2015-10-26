@@ -4,11 +4,11 @@
 
     <string name="row0">POWER</string>
     <string name="row1">BLE Address</string>
-    <string name="row2">PowerBlade ID</string>
+    <string name="row2">PowerBlade Version</string>
     <string name="row3">Sequence Number</string>
     <string name="row4">Time</string>
     <string name="row5">RMS Voltage</string>
-    <string name="row6">True Power</string>
+    <string name="row6">Real Power</string>
     <string name="row7">Apparent Power</string>
     <string name="row8">Cumulative Energy</string>
     <string name="row9">Power Factor</string>
