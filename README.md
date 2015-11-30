@@ -21,3 +21,45 @@ significantly lower), as well as safety.
 ![pb](https://raw.github.com/lab11/powerblade/master/images/powerblade.png)
 ](https://raw.github.com/lab11/powerblade/master/images/powerblade.png)
 
+
+Applications
+------------
+Example applications to collect PowerBlade data are located in https://github.com/lab11/powerblade/tree/master/software/ble
+To run:
+```
+sudo node powerblade_data.js
+```
+
+Installation
+------------
+### Pre-reqs for Noble
+
+Install [Node.js](https://nodejs.org/en/download/package-manager/)
+
+#### OS X
+ * install [Xcode](https://itunes.apple.com/ca/app/xcode/id497799835?mt=12)
+
+#### Linux
+ * Kernel version 3.6 or above
+ * ```libbluetooth-dev```
+
+##### Ubuntu/Debian/Raspbian
+```sh
+sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+```
+
+##### Fedora / Other-RPM based
+```sh
+sudo yum install bluez bluez-libs bluez-libs-devel
+```
+
+##### Intel Edison
+See [Configure Intel Edison for Bluetooth LE (Smart) Development](http://rexstjohn.com/configure-intel-edison-for-bluetooth-le-smart-development/)
+
+
+### Pre-reqs for Node applications
+Requirements are already listed in package.json.
+```
+npm install
+```
+
