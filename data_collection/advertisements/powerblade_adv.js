@@ -154,7 +154,7 @@ noble.on('discover', function(peripheral) {
       console.log('    Average Power (10): ' + averagePower.toFixed(2));
       console.log('   Apparent Power (10): ' + appPower.toFixed(2));
       console.log('Watt Hours Since Start: ' + watt_hours_tot.toFixed(2));
-      console.log('                ElTime: ' + timeDiff.toFixed(2));
+      console.log('Time Since Last Packet: ' + timeDiff.toFixed(2));
       console.log('   Packets in last 30s: ' + packetCount.toFixed(2));
 
     }
