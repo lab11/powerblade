@@ -30,9 +30,9 @@ parse all of the metering data from them.
 
 To run:
 ```
-cd software/ble
+cd data_collection/advertisements/
 npm install
-sudo node powerblade_data.js
+sudo node powerblade_adv.js
 ```
 
 This requires that you have support for running as a BLE

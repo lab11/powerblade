@@ -1,7 +1,9 @@
 # BLE Data Gathering
 Gathers data from a powerblade over advertisements
 
+To run:
 ```
-sudo node powerblade_data.js
+npm install
+sudo node powerblade_adv.js
 ```
 
