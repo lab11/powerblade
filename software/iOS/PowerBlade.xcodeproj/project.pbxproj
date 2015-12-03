@@ -1,0 +1,530 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4354020B1AEA4A6F0072BDC9 /* Commom.m in Sources */ = {isa = PBXBuildFile; fileRef = 4354020A1AEA4A6F0072BDC9 /* Commom.m */; };
+		437054AB1AF70F5B004A6169 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 437054AA1AF70F5B004A6169 /* MBProgressHUD.m */; };
+		437054B11AF74C7B004A6169 /* CharacteristicInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 437054B01AF74C7B004A6169 /* CharacteristicInfoViewController.m */; };
+		7AEA7AB11B7AD88A00023DC2 /* powerblade.png in Resources */ = {isa = PBXBuildFile; fileRef = 7AEA7AB31B7AD88A00023DC2 /* powerblade.png */; };
+		96A939311AE0B4AA007345EF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 96A939301AE0B4AA007345EF /* main.m */; };
+		96A939341AE0B4AA007345EF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 96A939331AE0B4AA007345EF /* AppDelegate.m */; };
+		96A939371AE0B4AA007345EF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 96A939361AE0B4AA007345EF /* ViewController.m */; };
+		96A9393A1AE0B4AA007345EF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96A939381AE0B4AA007345EF /* Main.storyboard */; };
+		96A9393C1AE0B4AA007345EF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96A9393B1AE0B4AA007345EF /* Images.xcassets */; };
+		96A9393F1AE0B4AA007345EF /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 96A9393D1AE0B4AA007345EF /* LaunchScreen.xib */; };
+		96A9394B1AE0B4AA007345EF /* BLE4_0DemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 96A9394A1AE0B4AA007345EF /* BLE4_0DemoTests.m */; };
+		96A939561AE0B83C007345EF /* BLEmanager.m in Sources */ = {isa = PBXBuildFile; fileRef = 96A939551AE0B83C007345EF /* BLEmanager.m */; };
+		96A939591AE0D690007345EF /* BlePeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = 96A939581AE0D690007345EF /* BlePeripheral.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		96A939451AE0B4AA007345EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96A939231AE0B4AA007345EF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 96A9392A1AE0B4AA007345EF;
+			remoteInfo = BLE4.0Demo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		435402091AEA4A6F0072BDC9 /* Commom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Commom.h; sourceTree = "<group>"; };
+		4354020A1AEA4A6F0072BDC9 /* Commom.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Commom.m; sourceTree = "<group>"; };
+		4354020C1AEA4B190072BDC9 /* Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Header.h; sourceTree = "<group>"; };
+		437054A91AF70F5B004A6169 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		437054AA1AF70F5B004A6169 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		437054AF1AF74C7B004A6169 /* CharacteristicInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharacteristicInfoViewController.h; path = ../CharacteristicInfoViewController.h; sourceTree = "<group>"; };
+		437054B01AF74C7B004A6169 /* CharacteristicInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CharacteristicInfoViewController.m; path = ../CharacteristicInfoViewController.m; sourceTree = "<group>"; };
+		7AEA7AB21B7AD88A00023DC2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Base; path = Base.lproj/powerblade.png; sourceTree = "<group>"; };
+		96A9392B1AE0B4AA007345EF /* PowerBlade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PowerBlade.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		96A9392F1AE0B4AA007345EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		96A939301AE0B4AA007345EF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		96A939321AE0B4AA007345EF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		96A939331AE0B4AA007345EF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		96A939351AE0B4AA007345EF /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		96A939361AE0B4AA007345EF /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		96A939391AE0B4AA007345EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		96A9393B1AE0B4AA007345EF /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		96A9393E1AE0B4AA007345EF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		96A939441AE0B4AA007345EF /* PowerBladeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PowerBladeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		96A939491AE0B4AA007345EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		96A9394A1AE0B4AA007345EF /* BLE4_0DemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BLE4_0DemoTests.m; sourceTree = "<group>"; };
+		96A939541AE0B83C007345EF /* BLEmanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEmanager.h; sourceTree = "<group>"; };
+		96A939551AE0B83C007345EF /* BLEmanager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEmanager.m; sourceTree = "<group>"; };
+		96A939571AE0D690007345EF /* BlePeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlePeripheral.h; sourceTree = "<group>"; };
+		96A939581AE0D690007345EF /* BlePeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlePeripheral.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		96A939281AE0B4AA007345EF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		96A939411AE0B4AA007345EF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		434A8DD71AE9D18F008C4C7C /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				96A939351AE0B4AA007345EF /* ViewController.h */,
+				96A939361AE0B4AA007345EF /* ViewController.m */,
+				437054AF1AF74C7B004A6169 /* CharacteristicInfoViewController.h */,
+				437054B01AF74C7B004A6169 /* CharacteristicInfoViewController.m */,
+			);
+			name = ViewController;
+			sourceTree = "<group>";
+		};
+		434A8DD81AE9D1B6008C4C7C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				437054A81AF70F5B004A6169 /* HUD */,
+				96A939541AE0B83C007345EF /* BLEmanager.h */,
+				96A939551AE0B83C007345EF /* BLEmanager.m */,
+				96A939571AE0D690007345EF /* BlePeripheral.h */,
+				96A939581AE0D690007345EF /* BlePeripheral.m */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		435402081AEA4A0B0072BDC9 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				435402091AEA4A6F0072BDC9 /* Commom.h */,
+				4354020A1AEA4A6F0072BDC9 /* Commom.m */,
+			);
+			name = common;
+			sourceTree = "<group>";
+		};
+		437054A81AF70F5B004A6169 /* HUD */ = {
+			isa = PBXGroup;
+			children = (
+				437054A91AF70F5B004A6169 /* MBProgressHUD.h */,
+				437054AA1AF70F5B004A6169 /* MBProgressHUD.m */,
+			);
+			path = HUD;
+			sourceTree = "<group>";
+		};
+		96A939221AE0B4AA007345EF = {
+			isa = PBXGroup;
+			children = (
+				4354020C1AEA4B190072BDC9 /* Header.h */,
+				96A9392D1AE0B4AA007345EF /* PowerBlade */,
+				96A939471AE0B4AA007345EF /* PowerBladeTests */,
+				96A9392C1AE0B4AA007345EF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		96A9392C1AE0B4AA007345EF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				96A9392B1AE0B4AA007345EF /* PowerBlade.app */,
+				96A939441AE0B4AA007345EF /* PowerBladeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		96A9392D1AE0B4AA007345EF /* PowerBlade */ = {
+			isa = PBXGroup;
+			children = (
+				435402081AEA4A0B0072BDC9 /* common */,
+				434A8DD81AE9D1B6008C4C7C /* Model */,
+				434A8DD71AE9D18F008C4C7C /* ViewController */,
+				96A9392E1AE0B4AA007345EF /* Supporting Files */,
+			);
+			path = PowerBlade;
+			sourceTree = "<group>";
+		};
+		96A9392E1AE0B4AA007345EF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				7AEA7AB31B7AD88A00023DC2 /* powerblade.png */,
+				96A939321AE0B4AA007345EF /* AppDelegate.h */,
+				96A939331AE0B4AA007345EF /* AppDelegate.m */,
+				96A939381AE0B4AA007345EF /* Main.storyboard */,
+				96A9393B1AE0B4AA007345EF /* Images.xcassets */,
+				96A9393D1AE0B4AA007345EF /* LaunchScreen.xib */,
+				96A9392F1AE0B4AA007345EF /* Info.plist */,
+				96A939301AE0B4AA007345EF /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		96A939471AE0B4AA007345EF /* PowerBladeTests */ = {
+			isa = PBXGroup;
+			children = (
+				96A9394A1AE0B4AA007345EF /* BLE4_0DemoTests.m */,
+				96A939481AE0B4AA007345EF /* Supporting Files */,
+			);
+			path = PowerBladeTests;
+			sourceTree = "<group>";
+		};
+		96A939481AE0B4AA007345EF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				96A939491AE0B4AA007345EF /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		96A9392A1AE0B4AA007345EF /* PowerBlade */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 96A9394E1AE0B4AA007345EF /* Build configuration list for PBXNativeTarget "PowerBlade" */;
+			buildPhases = (
+				96A939271AE0B4AA007345EF /* Sources */,
+				96A939281AE0B4AA007345EF /* Frameworks */,
+				96A939291AE0B4AA007345EF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PowerBlade;
+			productName = BLE4.0Demo;
+			productReference = 96A9392B1AE0B4AA007345EF /* PowerBlade.app */;
+			productType = "com.apple.product-type.application";
+		};
+		96A939431AE0B4AA007345EF /* PowerBladeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 96A939511AE0B4AA007345EF /* Build configuration list for PBXNativeTarget "PowerBladeTests" */;
+			buildPhases = (
+				96A939401AE0B4AA007345EF /* Sources */,
+				96A939411AE0B4AA007345EF /* Frameworks */,
+				96A939421AE0B4AA007345EF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				96A939461AE0B4AA007345EF /* PBXTargetDependency */,
+			);
+			name = PowerBladeTests;
+			productName = BLE4.0DemoTests;
+			productReference = 96A939441AE0B4AA007345EF /* PowerBladeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		96A939231AE0B4AA007345EF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0700;
+				ORGANIZATIONNAME = szvson;
+				TargetAttributes = {
+					96A9392A1AE0B4AA007345EF = {
+						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = NBN9923KFF;
+					};
+					96A939431AE0B4AA007345EF = {
+						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = NBN9923KFF;
+						TestTargetID = 96A9392A1AE0B4AA007345EF;
+					};
+				};
+			};
+			buildConfigurationList = 96A939261AE0B4AA007345EF /* Build configuration list for PBXProject "PowerBlade" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 96A939221AE0B4AA007345EF;
+			productRefGroup = 96A9392C1AE0B4AA007345EF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				96A9392A1AE0B4AA007345EF /* PowerBlade */,
+				96A939431AE0B4AA007345EF /* PowerBladeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		96A939291AE0B4AA007345EF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96A9393A1AE0B4AA007345EF /* Main.storyboard in Resources */,
+				96A9393F1AE0B4AA007345EF /* LaunchScreen.xib in Resources */,
+				7AEA7AB11B7AD88A00023DC2 /* powerblade.png in Resources */,
+				96A9393C1AE0B4AA007345EF /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		96A939421AE0B4AA007345EF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		96A939271AE0B4AA007345EF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96A939371AE0B4AA007345EF /* ViewController.m in Sources */,
+				96A939561AE0B83C007345EF /* BLEmanager.m in Sources */,
+				4354020B1AEA4A6F0072BDC9 /* Commom.m in Sources */,
+				437054AB1AF70F5B004A6169 /* MBProgressHUD.m in Sources */,
+				96A939341AE0B4AA007345EF /* AppDelegate.m in Sources */,
+				437054B11AF74C7B004A6169 /* CharacteristicInfoViewController.m in Sources */,
+				96A939311AE0B4AA007345EF /* main.m in Sources */,
+				96A939591AE0D690007345EF /* BlePeripheral.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		96A939401AE0B4AA007345EF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96A9394B1AE0B4AA007345EF /* BLE4_0DemoTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		96A939461AE0B4AA007345EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 96A9392A1AE0B4AA007345EF /* PowerBlade */;
+			targetProxy = 96A939451AE0B4AA007345EF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		7AEA7AB31B7AD88A00023DC2 /* powerblade.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7AEA7AB21B7AD88A00023DC2 /* Base */,
+			);
+			name = powerblade.png;
+			sourceTree = "<group>";
+		};
+		96A939381AE0B4AA007345EF /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				96A939391AE0B4AA007345EF /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		96A9393D1AE0B4AA007345EF /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				96A9393E1AE0B4AA007345EF /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		96A9394C1AE0B4AA007345EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Noah Klugman (Y584AHQMJP)";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		96A9394D1AE0B4AA007345EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Noah Klugman (Y584AHQMJP)";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		96A9394F1AE0B4AA007345EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = PowerBlade/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = lab11.eecs.umich.edu.PowerBlade;
+				PRODUCT_NAME = PowerBlade;
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		96A939501AE0B4AA007345EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = PowerBlade/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = lab11.eecs.umich.edu.PowerBlade;
+				PRODUCT_NAME = PowerBlade;
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		96A939521AE0B4AA007345EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = BLE4.0DemoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "szvson.com.cn.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = PowerBladeTests;
+				PROVISIONING_PROFILE = "";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BLE4.0Demo.app/BLE4.0Demo";
+			};
+			name = Debug;
+		};
+		96A939531AE0B4AA007345EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = BLE4.0DemoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "szvson.com.cn.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = PowerBladeTests;
+				PROVISIONING_PROFILE = "";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BLE4.0Demo.app/BLE4.0Demo";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		96A939261AE0B4AA007345EF /* Build configuration list for PBXProject "PowerBlade" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96A9394C1AE0B4AA007345EF /* Debug */,
+				96A9394D1AE0B4AA007345EF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		96A9394E1AE0B4AA007345EF /* Build configuration list for PBXNativeTarget "PowerBlade" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96A9394F1AE0B4AA007345EF /* Debug */,
+				96A939501AE0B4AA007345EF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		96A939511AE0B4AA007345EF /* Build configuration list for PBXNativeTarget "PowerBladeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96A939521AE0B4AA007345EF /* Debug */,
+				96A939531AE0B4AA007345EF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 96A939231AE0B4AA007345EF /* Project object */;
+}
