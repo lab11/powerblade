@@ -21,6 +21,11 @@ significantly lower), as well as safety.
 ![pb](https://raw.github.com/lab11/powerblade/master/images/powerblade.png)
 ](https://raw.github.com/lab11/powerblade/master/images/powerblade.png)
 
+<center>
+[
+![pb](https://raw.github.com/lab11/powerblade/master/images/powerblade_plug_profile_1000x423.jpg)
+](https://raw.github.com/lab11/powerblade/master/images/powerblade_plug_profile_1000x423.jpg)
+</center>
 
 Applications
 ------------
