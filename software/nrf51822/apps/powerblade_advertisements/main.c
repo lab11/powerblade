@@ -49,8 +49,10 @@ APP_TIMER_DEF(start_manufdata_timer);
 #define PHYSWEB_URL "goo.gl/jEKPu9"
 
 #define POWERBLADE_ADV_DATA_LEN 0x13
-static uint8_t powerblade_adv_data[POWERBLADE_ADV_DATA_LEN];
-static uint8_t adv_index = 0;
+// maximum manufacturer specific advertisement data size is 24
+#define POWERBLADE_ADV_DATA_MAX_LEN 24
+static uint8_t powerblade_adv_data[POWERBLADE_ADV_DATA_MAX_LEN];
+static uint8_t powerblade_adv_data_len;
 
 void start_eddystone_adv (void) {
     uint32_t err_code;
@@ -101,7 +103,7 @@ void start_manufdata_adv (void) {
     ble_advdata_manuf_data_t manuf_specific_data;
     manuf_specific_data.company_identifier = APP_COMPANY_IDENTIFIER;
     manuf_specific_data.data.p_data = powerblade_adv_data;
-    manuf_specific_data.data.size   = POWERBLADE_ADV_DATA_LEN;
+    manuf_specific_data.data.size   = powerblade_adv_data_len;
     simple_adv_manuf_data(&manuf_specific_data);
 
     err_code = app_timer_start(start_eddystone_timer, MANUFDATA_ADV_DURATION, NULL);
@@ -137,14 +139,45 @@ void uart_init (void) {
 }
 
 void UART0_IRQHandler (void) {
-    // data is available. Store in adv data array
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
-    powerblade_adv_data[adv_index] = nrf_uart_rxd_get(NRF_UART0);
-    adv_index++;
+    static uint16_t uart_len = 0;
+    static uint16_t uart_index = 0;
+    static uint8_t adv_len = 0;
 
-    // if entire packet is available, update advertisement
-    if (adv_index >= POWERBLADE_ADV_DATA_LEN) {
-        adv_index = 0;
+    // data is available
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
+    uint8_t uart_data = nrf_uart_rxd_get(NRF_UART0);
+
+    // parse data from MSP430 based on index
+    if (uart_index == 0) {
+        // UART len MSB
+        uart_len = (uart_data << 8 | 0x00);
+
+    } else if (uart_index == 1) {
+        // UART len LSB
+        uart_len |= uart_data;
+
+    } else if (uart_index == 2) {
+        // ADV len
+        adv_len = uart_data;
+        powerblade_adv_data_len = adv_len;
+
+    } else if (adv_len > 0 && (uart_index-3) < adv_len) {
+        // Advertisement data
+        uint8_t adv_index = uart_index-3;
+        if (adv_index < POWERBLADE_ADV_DATA_MAX_LEN) {
+            // only record the data that fits
+            powerblade_adv_data[adv_index] = uart_data;
+        }
+
+    } else if ((uart_len-1-adv_len) > 0 && uart_index < (uart_len+2)) {
+        // Additional UART data
+        // Do nothing with data for now
+    }
+
+    uart_index++;
+    if (uart_index >= 3 && uart_index >= (uart_len+2)) {
+        // UART data is finished when we have received the whole header, plus
+        //  whatever Advertisement and Additional data exists
 
         // turn off UART until next window
         uart_disable();
@@ -157,6 +190,10 @@ void UART0_IRQHandler (void) {
         //  If called during Eddystone, timing is screwed up, but it'll fix
         //  itself within one cycle
         start_manufdata_adv();
+
+        uart_len = 0;
+        uart_index = 0;
+        adv_len = 0;
     }
 }
 
