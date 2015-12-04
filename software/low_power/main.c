@@ -206,7 +206,7 @@ int main(void) {
 	ADC10CTL0 |= ADC10ON;                  // + ADC10MSC;          	// ADC10ON
 	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3; // rpt series of ch; TA0.1 trig sample start
 	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
-	ADC10MCTL0 |= ADC10INCH_5 + ADC10SREF_0; // A3,4,5 ADC input select; Vref=AVCC
+	ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0; // A3,4,5 ADC input select; Vref=AVCC
 
 	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
 	ADC10IE |= ADC10IE0;                   // Enable ADC conv complete interrupt
@@ -244,6 +244,12 @@ __interrupt void TIMERA0_ISR(void) {
 		delay_count--;
 		__bic_SR_register_on_exit(LPM3_bits);
 	} else {
+		// Start with VCC_SENSE
+#if defined (VERSION0) | defined (VERSION1)
+		ADC10MCTL0 = ADC10INCH_3 + ADC10SREF_0;
+#else
+		ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0;
+#endif
 		ADC10CTL0 += ADC10SC;
 	}
 }
@@ -383,7 +389,7 @@ __interrupt void ADC10_ISR(void) {
 		case 4:	// I_SENSE
 #elif defined (VERSION31)
 		case 5:	// I_SENSE (A0) (case 0 for filt, 5 for isense)
-#elif defined (VERSION32)
+#elif defined (VERSION32) | defined (VERSION33)
 		case 3:	// I_SENSE
 #endif
 		{
@@ -398,7 +404,7 @@ __interrupt void ADC10_ISR(void) {
 			transmitTry();
 			break;
 		}
-#if defined (VERSION32)
+#if defined (VERSION32) | defined (VERSION33)
 		case 5:	// V_SENSE
 #else
 		case 3:	// V_SENSE (same in versions 0, 1, and 3.1)
@@ -418,12 +424,20 @@ __interrupt void ADC10_ISR(void) {
 			}
 
 			// Enable next sample
+			// After V_SENSE do I_SENSE
+#if defined (VERSION0) | defined (VERSION1)
+			ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0;
+#elif defined (VERSION31)
+			ADC10MCTL0 = ADC10INCH_0 + ADC10SREF_0;
+#elif defined (VERSION32) | defined (VERSION33)
+			ADC10MCTL0 = ADC10INCH_4 + ADC10SREF_0;
+#endif
 			ADC10CTL0 += ADC10SC;
 			break;
 		}
 #if defined (VERSION0) | defined (VERSION1)
 			case 2:	// VCC_SENSE
-#elif defined (VERSION31) | defined (VERSION32)
+#else
 		case 4:	// VCC_SENSE
 #endif
 			// Set debug pin
@@ -444,6 +458,12 @@ __interrupt void ADC10_ISR(void) {
 			}
 
 			// Enable next sample
+			// After VCC_SENSE do V_SENSE
+#if defined (VERSION32) | defined (VERSION33)
+			ADC10MCTL0 = ADC10INCH_0 + ADC10SREF_0;
+#else
+			ADC10MCTL0 = ADC10INCH_4 + ADC10SREF_0;
+#endif
 			ADC10CTL0 += ADC10SC;
 			break;
 		default: // ADC Reset condition

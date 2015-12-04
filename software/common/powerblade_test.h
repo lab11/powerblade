@@ -18,7 +18,7 @@
 	#define SYS_EN_OUT	P2OUT
 	#define SYS_EN_PIN	BIT2
 #endif
-#if defined (VERSION31) | defined (VERSION32)
+#if defined (VERSION31) | defined (VERSION32) | defined (VERSION33)
 	#define SYS_EN_DIR	P1DIR
 	#define SYS_EN_OUT	P1OUT
 	#define SYS_EN_PIN	BIT6
@@ -32,7 +32,7 @@
 	#define SEN_EN_OUT	P1OUT
 	#define SEN_EN_PIN	BIT7
 #endif
-#if defined (VERSION31) | defined (VERSION32)
+#if defined (VERSION31) | defined (VERSION32) | defined (VERSION33)
 	#define SEN_EN_DIR	P2DIR
 	#define SEN_EN_OUT	P2OUT
 	#define SEN_EN_PIN	BIT2
@@ -67,15 +67,20 @@
 /**************************************************************************
    SENSING CONSTANTS SECTION
  **************************************************************************/
-//#define CUROFF		27
+#if defined (VERSION32)
 #define CUROFF		88
-#define PHASEOFF	1	// zero for in-phase
+#elif defined (VERSION33)
+#define CUROFF		88
+#else
+#define CUROFF		27
+#endif
+
+#define PHASEOFF	0	// zero for in-phase
 #define SAMCOUNT	42
 
 /**************************************************************************
    SCALING CONSTANTS SECTION
  **************************************************************************/
-
 //#define PSCALE		0x424A
 #define PSCALE		0x423E
 #define VSCALE		0x7B
