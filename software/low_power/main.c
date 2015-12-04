@@ -23,6 +23,7 @@
 #include "powerblade_test.h"
 
 //#define CALIBRATE
+//#define NORDICDEBUG
 
 // Transmission variables
 bool ready;
@@ -349,7 +350,9 @@ void transmitTry(void) {
 			wattHoursToAverage = 0;
 			voltAmpsToAverage = 0;
 
-//			ready = 1;
+#if defined (NORDICDEBUG)
+			ready = 1;
+#endif
 			if (ready == 1) {
 				SYS_EN_OUT &= ~SYS_EN_PIN;
 				uart_enable(1);
@@ -445,9 +448,11 @@ __interrupt void ADC10_ISR(void) {
 
 			// Perform Vcap measurements
 			if (ADC_Result < ADC_VMIN) {
+#if !defined (NORDICDEBUG)
 				uart_enable(0);
 				SYS_EN_OUT |= SYS_EN_PIN;
 				ready = 0;
+#endif
 			} else if (ready == 0) {
 				if (ADC_Result > ADC_VCHG) {
 					SEN_EN_OUT |= SEN_EN_PIN;
