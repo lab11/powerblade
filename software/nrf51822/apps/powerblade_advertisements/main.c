@@ -27,16 +27,9 @@
 
 static ble_app_t app;
 
-// Intervals for advertising and connections
-static const simple_ble_config_t ble_config = {
-    .platform_id       = PLATFORM_ID_BYTE,  // used as 4th octet in device BLE address
-    .device_id         = DEVICE_ID_DEFAULT, // 5th and 6th octet in device BLE address
-    .adv_name          = DEVICE_NAME,       // used in advertisements if there is room
-    .adv_interval      = MSEC_TO_UNITS(200, UNIT_0_625_MS),
-    .min_conn_interval = 6,                 // units 1.250 ms = 7.5
-    .max_conn_interval = MSEC_TO_UNITS(20, UNIT_1_25_MS),
-};
+#define PHYSWEB_URL "goo.gl/jEKPu9"
 
+// timer configuration
 #define TIMER_PRESCALER     0
 #define TIMER_OP_QUEUE_SIZE 4
 APP_TIMER_DEF(enable_uart_timer);
@@ -46,11 +39,9 @@ APP_TIMER_DEF(start_manufdata_timer);
 #define MANUFDATA_ADV_DURATION APP_TIMER_TICKS(800, TIMER_PRESCALER)
 #define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, TIMER_PRESCALER)
 
-#define PHYSWEB_URL "goo.gl/jEKPu9"
-
+// advertisement data collected from UART
 #define POWERBLADE_ADV_DATA_LEN 0x13
-// maximum manufacturer specific advertisement data size is 24
-#define POWERBLADE_ADV_DATA_MAX_LEN 24
+#define POWERBLADE_ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
 static uint8_t powerblade_adv_data[POWERBLADE_ADV_DATA_MAX_LEN];
 static uint8_t powerblade_adv_data_len;
 
