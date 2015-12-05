@@ -27,18 +27,18 @@ Emoncms Installation
     Run for testing
     ```bash
     docker run -it -p 80:80 \
-    -v /home/core/git/emoncms/emoncms:/var/www/emoncms \ 
-    -v /home/core/git/emoncms/mysql:/var/lib/mysql \
-    -v /home/core/git/emoncms/phpfiwa:/var/lib/phpfiwa \
-    -v /home/core/git/emoncms/phpfina:/var/lib/phpfina \
-    -v /home/core/git/emoncms/phptimeseries:/var/lib/phptimeseries \
-    -v /home/core/git/emoncms/sessions:/var/lib/php5/sessions \
-    -v /home/core/git/emoncms/supervisor:/etc/supervisor/conf.d \
+    -v /opt/emoncms/emoncms:/var/www/emoncms \ 
+    -v /opt/emoncms/mysql:/var/lib/mysql \
+    -v /opt/emoncms/phpfiwa:/var/lib/phpfiwa \
+    -v /opt/emoncms/phpfina:/var/lib/phpfina \
+    -v /opt/emoncms/phptimeseries:/var/lib/phptimeseries \
+    -v /opt/emoncms/sessions:/var/lib/php5/sessions \
+    -v /opt/emoncms/supervisor:/etc/supervisor/conf.d \
     yourname/emoncms /bin/bash 
     ```
 
     Run in production
     ```bash
-    /usr/bin/docker run -p 80:80 -v /home/core/git/emoncms/emoncms:/var/www/emoncms -v /home/core/git/emoncms/mysql:/var/lib/mysql -v /home/core/git/emoncms/phpfiwa:/var/lib/phpfiwa -v /home/core/git/emoncms/phpfina:/var/lib/phpfina -v /home/core/git/emoncms/phptimeseries:/var/lib/phptimeseries -v /home/core/git/emoncms/sessions:/var/lib/php5/sessions -v /home/core/git/emoncms/supervisor:/etc/supervisor/conf.d yourname/emoncms /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
+    /usr/bin/docker run -p 80:80 -v /opt/emoncms/emoncms:/var/www/emoncms -v /opt/emoncms/mysql:/var/lib/mysql -v /opt/emoncms/phpfiwa:/var/lib/phpfiwa -v /opt/emoncms/phpfina:/var/lib/phpfina -v /opt/emoncms/phptimeseries:/var/lib/phptimeseries -v /opt/emoncms/sessions:/var/lib/php5/sessions -v /opt/emoncms/supervisor:/etc/supervisor/conf.d yourname/emoncms /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
     ```
 
