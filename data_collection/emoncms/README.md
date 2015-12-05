@@ -11,15 +11,16 @@ Emoncms Installation
 
 2. Build the Docker image using [docker-emoncms](https://github.com/mdef/docker-emoncms).
 
-        git clone https://github.com/mdef/docker-emoncms
-        cd docker-emoncms
+        cd /opt
+        sudo git clone https://github.com/mdef/docker-emoncms emoncms
+        sudo chown -R username:username emoncms
+        cd emoncms
         docker build -t yourname/emoncms .
         
     This step will take a minute to create all the required dependencies.
 
 3. Setup the host machine so that we can save persistent data.
 
-        mkdir -p /opt/emoncms
         docker run --rm -v /opt/emoncms:/host yourname/emoncms cp -rp {/var/www/emoncms,/var/lib/mysql,/var/lib/phpfina,/var/lib/phpfiwa,/var/lib/phptimeseries} /host/
 
 4. Run the Docker image of emoncms.
