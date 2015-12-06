@@ -18,6 +18,10 @@ Emoncms Installation
         docker build -t yourname/emoncms .
         
     This step will take a minute to create all the required dependencies.
+    
+    If you want to run the webserver using a domain and not just localhost,
+    you need to edit emoncms.conf (the nginx conf file) to specify the
+    correct `server_name`.
 
 3. Setup the host machine so that we can save persistent data.
 
