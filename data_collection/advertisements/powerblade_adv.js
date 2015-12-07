@@ -80,6 +80,12 @@ noble.on('discover', function (peripheral) {
         } else {
           var watt_hours_disp = watt_hours;
         }
+
+        // Exponential subtraction
+        // 6.6 and 0.015 are hard coded for PB version 1
+        // PB version 2 and greater will transmit device-specific values with each packet
+        real_power_disp = real_power_disp - 6.6*Math.exp(-0.015*real_power_disp)
+
         var pf_disp = real_power_disp / app_power_disp;
 
         // display data to user
