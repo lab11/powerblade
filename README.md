@@ -29,7 +29,7 @@ significantly lower), as well as safety.
 
 Applications
 ------------
-To quicly gather PowerBlade data, you can run a Node.js script
+To quickly gather PowerBlade data, you can run a Node.js script
 that will collect all of the PowerBlade BLE advertisements and
 parse all of the metering data from them.
 
