@@ -89,7 +89,7 @@ noble.on('discover', function(peripheral) {
     var pf_disp = true_power_disp / app_power_disp;
 
     // Exponential scaling
-    //true_power_disp = true_power_disp - 6.6*Math.exp(-0.015*true_power_disp)
+    true_power_disp = true_power_disp - 6.6*Math.exp(-0.015*true_power_disp)
 
     // print unique seq's to user
     var last_seq = peripherals[peripheral_uuid];
