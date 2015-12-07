@@ -120,7 +120,10 @@ noble.on('discover', function (peripheral) {
             if (address != 'unknown') {
                 // Send to emoncms
                 var url = INPUT_URL + '?node=' + address + '&json=' + JSON.stringify(post_data) + '&apikey=' + APIKEY;
-                request.post(url);
+                var p = request.post(url);
+                p.on('error', function (err) {
+                    console.log('Error when posting to emoncms: ' + err);
+                });
             } else {
                 console.log('ERROR - could not send to emoncms because address is unknown.');
             }
