@@ -3,7 +3,7 @@
 import sys
 import statistics
 
-calibrate = 1
+calibrate = 0
 
 infile = sys.argv[1]
 outfile = sys.argv[2]
