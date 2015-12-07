@@ -43,7 +43,7 @@ APP_TIMER_DEF(start_manufdata_timer);
 #define POWERBLADE_ADV_DATA_LEN 0x13
 #define POWERBLADE_ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
 static uint8_t powerblade_adv_data[POWERBLADE_ADV_DATA_MAX_LEN];
-static uint8_t powerblade_adv_data_len;
+static uint8_t powerblade_adv_data_len = 0;
 
 void start_eddystone_adv (void) {
     uint32_t err_code;
@@ -85,6 +85,7 @@ void init_adv_data (void) {
     powerblade_adv_data[17] = 0x0D; // Watt Hours
 
     powerblade_adv_data[18] = 0x00; // Flags
+    powerblade_adv_data_len = 19;
 }
 
 void start_manufdata_adv (void) {

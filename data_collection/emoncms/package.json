@@ -1,0 +1,12 @@
+{
+  "name": "powerblade-emoncms",
+  "version": "1.0.0",
+  "description": "Publish data collected from PowerBlade devices to emoncms",
+  "main": "powerblade_emoncms.js",
+  "author": "Brad Campbell",
+  "dependencies": {
+    "async": "^1.5.0",
+    "noble": "^1.2.1",
+    "request": "^2.67.0"
+  }
+}
