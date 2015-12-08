@@ -94,7 +94,7 @@ noble.on('discover', function (peripheral) {
         console.log('          RMS Voltage: ' + v_rms_disp.toFixed(2) + ' V');
         console.log('           Real Power: ' + real_power_disp.toFixed(2) + ' W');
         console.log('       Apparent Power: ' + app_power_disp.toFixed(2) + ' VA');
-        console.log('Cumulative Energy Use: ' + watt_hours_disp.toFixed(2) + ' kWh');
+        console.log('Cumulative Energy Use: ' + watt_hours_disp.toFixed(2) + ' Wh');
         console.log('         Power Factor: ' + pf_disp.toFixed(2));
         console.log('');
     }
