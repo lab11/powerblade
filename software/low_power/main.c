@@ -420,11 +420,11 @@ __interrupt void ADC10_ISR(void) {
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			// Store and account for phase offset
-			vbuff[vbuff_head++] = voltage;
-			voltage = vbuff[getVoltageForPhase(vbuff_head)];
-			if (vbuff_head == SAMCOUNT) {
-				vbuff_head = 0;
-			}
+//			vbuff[vbuff_head++] = voltage;
+//			voltage = vbuff[getVoltageForPhase(vbuff_head)];
+//			if (vbuff_head == SAMCOUNT) {
+//				vbuff_head = 0;
+//			}
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
