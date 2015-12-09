@@ -70,7 +70,7 @@
 #if defined (VERSION32)
 #define CUROFF		88
 #elif defined (VERSION33)
-#define CUROFF		27
+#define CUROFF		108
 #else
 #define CUROFF		27
 #endif
@@ -81,8 +81,9 @@
 /**************************************************************************
    SCALING CONSTANTS SECTION
  **************************************************************************/
+//#define PSCALE		0x0001
 //#define PSCALE		0x41F4
-#define PSCALE		0x4278
+#define PSCALE		0x428F
 #define VSCALE		0x7B
 #define WHSCALE		0x09
 
