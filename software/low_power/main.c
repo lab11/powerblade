@@ -294,20 +294,20 @@ void transmitTry(void) {
 	// Subtract offset, if not in calibration mode
 #ifndef CALIBRATE
 	int32_t new_current;
-	if(agg_current > 0) {
-		new_current = agg_current - CUROFF;
-	}
-	else {
-		new_current = agg_current + CUROFF;
-	}
+	//if(agg_current > 0) {
+	new_current = agg_current + CUROFF;
+//	}
+//	else {
+//		new_current = agg_current + CUROFF;
+//	}
 #else
 	int32_t new_current = agg_current;
 #endif
 
 	// Perform calculations for I^2, V^2, and P
-	new_current = agg_current;
-	acc_i_rms += new_current * new_current;
-	acc_p_ave += voltage * new_current;
+	//int32_t new_current = agg_current;
+	acc_i_rms += (new_current * new_current);// - 2*new_current*CUROFF - 5625;
+	acc_p_ave += (voltage * new_current);// - CUROFF;
 	acc_v_rms += voltage * voltage;
 
 	// Set side channel output
