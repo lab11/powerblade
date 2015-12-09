@@ -3,7 +3,7 @@
 import sys
 import statistics
 
-calibrate = 1
+calibrate = 0
 
 infile = sys.argv[1]
 outfile = sys.argv[2]
@@ -59,6 +59,7 @@ if calibrate == 1:
 	print('Variance: ' + str(statistics.variance(wattHours)))
 else:
 	print 'True Power: ' + str(sum(powers)/len(powers))
+	print 'App Power: ' + str(sum(appPowers)/len(appPowers))
 	print 'Power Factor: ' + str(sum(pfs)/len(pfs))
 	print('Variance in TP: ' + str(statistics.variance(powers)))
 
