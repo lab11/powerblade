@@ -42,7 +42,7 @@ nohup.out
 # CMAKE 
 CMakeCache.txt
 CMakeFiles
-Makefile
+#Makefile
 cmake_install.cmake
 install_manifest.txt
 
