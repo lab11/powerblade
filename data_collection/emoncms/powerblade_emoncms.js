@@ -103,7 +103,7 @@ noble.on('discover', function (peripheral) {
                 v_rms.toFixed(2)+'V '  + 
                  real_power.toFixed(2) + 'W ' +
                  app_power.toFixed(2) + 'VA ' +
-                watt_hours.toFixed(2) + 'kWh ' +
+                watt_hours.toFixed(2) + 'Wh ' +
                 pf.toFixed(2));
 
             // Generate the object we send to emoncms
