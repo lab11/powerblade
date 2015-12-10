@@ -28,7 +28,6 @@
 
 // Transmission variables
 bool ready;
-uint8_t data;
 
 // Delay (used at startup)
 uint16_t delay_count;
@@ -56,7 +55,6 @@ uint32_t wattHoursToAverage;
 uint32_t voltAmpsToAverage;
 
 // Near-constants to be transmitted
-// Near-constants
 uint16_t uart_len = UARTLEN;
 uint8_t ad_len = 19;
 uint8_t powerblade_id = 1;
@@ -297,18 +295,13 @@ void uart_stuff(char* destbuf, unsigned int *offset, char* srcbuf, unsigned int 
 
 //void uart_send(char* buf, unsigned int len) {
 void uart_send() {
-	//txBuf = buf;
-	//txLen = len;
-	//txCt = 0;
-
+	// Calculate checksum and append to buffer
 	txBuf[UARTLEN-1] = additive_checksum((uint8_t*)txBuf, UARTLEN-1);
 
+	// Enable interrupt and transmit
 	UCA0IE |= UCTXIE;
-	//txCt = txLen - 1;
 	txCt = 0;
-	//if (txCt >= 0) {
 	UCA0TXBUF = txBuf[txCt++];
-	//}
 }
 
 void processMessage(void) {
@@ -320,13 +313,9 @@ void processMessage(void) {
 		return;
 	}
 
-	//sequence = rxBuf[rxLen - 1];
-	//sequence += (additive_checksum((uint8_t const*)rxBuf, rxLen - 1) << 8);
-
 	int rxIndex;
 	capCt = 0;
-	char tempVal = additive_checksum((uint8_t*)rxBuf, rxLen - 1);
-	if(tempVal == rxBuf[rxLen - 1]){
+	if(additive_checksum((uint8_t*)rxBuf, rxLen - 1) == rxBuf[rxLen - 1]){
 
 		// Get all bytes but checksum
 		for(rxIndex = 2; rxIndex < (rxLen-1); rxIndex++){
@@ -438,7 +427,6 @@ void transmitTry(void) {
 				uart_stuff(txBuf, &offset, (char*) &flags, sizeof(flags));
 
 				uart_send();
-				data = 1;//NUM_DATA;
 			}
 		}
 	}
@@ -584,44 +572,7 @@ __interrupt void USCI_A0_ISR(void) {
 		break;								// Start bit received
 	case 8: 								// Transmit complete
 		UCA0IE &= ~UCTXCPTIE;
-		data--;
-//		switch (data) {
-//		case 9:
-//			uart_send((char*) &ad_len, sizeof(ad_len));
-//			break;
-//		case 8:
-//			uart_send((char*) &powerblade_id, sizeof(powerblade_id));
-//			break;
-//		case 7:
-//			uart_send((char*) &sequence, sizeof(sequence));
-//			break;
-//		case 6:
-//			uart_send((char*)&time, sizeof(time));
-//			break;
-//		case 5:
-//			uart_send((char*) &Vrms, sizeof(Vrms));
-//			break;
-//		case 4:
-//			uart_send((char*) &truePower, sizeof(truePower));
-//			break;
-//		case 3:
-//			uart_send((char*) &apparentPower, sizeof(apparentPower));
-//			break;
-//		case 2:
-//#ifdef CALIBRATE
-//			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
-//#else
-//			wattHoursSend = (uint32_t)(wattHours >> 9);
-//			uart_send((char*) &wattHoursSend, sizeof(wattHoursSend));
-//#endif
-//			break;
-//		case 1:
-//			uart_send((char*) &flags, sizeof(flags));
-//			break;
-//		default:
-//			break;
-//		}
-//		break;
+		break;
 	default:
 		break;
 	}
