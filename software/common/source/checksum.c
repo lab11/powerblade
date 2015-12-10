@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "checksum.h"
 
-uint8_t additive_checksum(uint8_t const* data, uint16_t len) {
+uint8_t additive_checksum(uint8_t* data, uint16_t len) {
     uint16_t sum = 0;
     uint16_t index = 0;
 
