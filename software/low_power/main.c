@@ -81,6 +81,9 @@ char *txBuf;
 unsigned int txLen;
 int txCt;
 
+char rxBuf[RXLEN];
+int rxCt;
+
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
 	uint32_t res = 0;
@@ -173,6 +176,8 @@ int main(void) {
 	flags = 0;
 	agg_current = 0;
 	vbuff_head = 0;
+
+	rxCt = 0;
 
 	// Set SYS_EN to output and disable (PMOS)
 	SYS_EN_OUT |= SYS_EN_PIN;
@@ -491,6 +496,7 @@ __interrupt void USCI_A0_ISR(void) {
 	case 0:
 		break;								// No interrupt
 	case 2: 								// RX interrupt
+
 		break;
 	case 4:									// TX interrupt
 		if (txCt >= 0) {
