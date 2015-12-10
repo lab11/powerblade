@@ -21,6 +21,7 @@
 #include <math.h>
 
 #include "powerblade_test.h"
+#include "checksum.h"
 
 //#define CALIBRATE
 //#define NORDICDEBUG
@@ -56,7 +57,7 @@ uint32_t voltAmpsToAverage;
 
 // Near-constants to be transmitted
 // Near-constants
-uint16_t uart_len = 20;
+uint16_t uart_len = UARTLEN;
 uint8_t ad_len = 19;
 uint8_t powerblade_id = 1;
 
@@ -76,13 +77,15 @@ int8_t vbuff[SAMCOUNT];
 volatile uint8_t vbuff_head;
 uint8_t getVoltageForPhase(uint8_t head);
 
-void uart_send(char* buf, unsigned int len);
-char *txBuf;
+//void uart_send(char* buf, unsigned int len);
+char txBuf[UARTLEN];
 unsigned int txLen;
 int txCt;
 
 char rxBuf[RXLEN];
+char captureBuf[RXLEN - 3];
 int rxCt;
+int capCt;
 
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
@@ -178,6 +181,14 @@ int main(void) {
 	vbuff_head = 0;
 
 	rxCt = 0;
+
+#ifdef CALIBRATE
+	time = 0;
+#else
+	time = PSCALE;
+	time = (time<<8)+VSCALE;
+	time = (time<<8)+WHSCALE;
+#endif
 
 	// Set SYS_EN to output and disable (PMOS)
 	SYS_EN_OUT |= SYS_EN_PIN;
@@ -277,16 +288,55 @@ void uart_enable(bool enable) {
 	}
 }
 
-void uart_send(char* buf, unsigned int len) {
-	txBuf = buf;
-	txLen = len;
-	txCt = 0;
+void uart_stuff(char* destbuf, unsigned int *offset, char* srcbuf, unsigned int len) {
+	int tempCt = len - 1;
+	while(tempCt >= 0) {
+		destbuf[(*offset)++] = srcbuf[tempCt--];
+	}
+}
+
+//void uart_send(char* buf, unsigned int len) {
+void uart_send() {
+	//txBuf = buf;
+	//txLen = len;
+	//txCt = 0;
+
+	txBuf[UARTLEN-1] = additive_checksum((uint8_t*)txBuf, UARTLEN-1);
 
 	UCA0IE |= UCTXIE;
-	txCt = txLen - 1;
-	if (txCt >= 0) {
-		UCA0TXBUF = buf[txCt--];
+	//txCt = txLen - 1;
+	txCt = 0;
+	//if (txCt >= 0) {
+	UCA0TXBUF = txBuf[txCt++];
+	//}
+}
+
+void processMessage(void) {
+	// Capture rx length
+	int rxLen = (rxBuf[0] << 8) + rxBuf[1];
+
+	// Check if we have received the entire message
+	if(rxLen > rxCt) {
+		return;
 	}
+
+	//sequence = rxBuf[rxLen - 1];
+	//sequence += (additive_checksum((uint8_t const*)rxBuf, rxLen - 1) << 8);
+
+	int rxIndex;
+	capCt = 0;
+	char tempVal = additive_checksum((uint8_t*)rxBuf, rxLen - 1);
+	if(tempVal == rxBuf[rxLen - 1]){
+
+		// Get all bytes but checksum
+		for(rxIndex = 2; rxIndex < (rxLen-1); rxIndex++){
+			captureBuf[capCt++] = rxBuf[rxIndex];
+		}
+
+		// XXX temporary: testing UART by setting sequence to the received byte
+		sequence = (uint32_t)captureBuf[0];
+	}
+	rxCt = 0;
 }
 
 void transmitTry(void) {
@@ -342,8 +392,13 @@ void transmitTry(void) {
 		if (measCount >= 60) { // Another second has passed
 			measCount = 0;
 
+			// Process any UART bytes
+			if(rxCt > 2) {	// Message is only valid with two uart length bytes and at least one more data byte
+				processMessage();
+			}
+
 			sequence++;
-			time++;
+			//time++;
 
 #ifdef CALIBRATE
 			tx_i_ave = (uint32_t) Irms;
@@ -363,8 +418,27 @@ void transmitTry(void) {
 				uart_enable(1);
 				__delay_cycles(80000);
 				//uart_send((char*) &powerblade_id, sizeof(powerblade_id));
-				uart_send((char*) &uart_len, sizeof(uart_len));
-				data = NUM_DATA;
+
+				// Stuff data into txBuf
+				unsigned int offset = 0;
+				uart_stuff(txBuf, &offset, (char*) &uart_len, sizeof(uart_len));
+				uart_stuff(txBuf, &offset, (char*) &ad_len, sizeof(ad_len));
+				uart_stuff(txBuf, &offset, (char*) &powerblade_id, sizeof(powerblade_id));
+				uart_stuff(txBuf, &offset, (char*) &sequence, sizeof(sequence));
+				uart_stuff(txBuf, &offset, (char*) &time, sizeof(time));
+				uart_stuff(txBuf, &offset, (char*) &Vrms, sizeof(Vrms));
+				uart_stuff(txBuf, &offset, (char*) &truePower, sizeof(truePower));
+				uart_stuff(txBuf, &offset, (char*) &apparentPower, sizeof(apparentPower));
+#ifdef CALIBRATE
+				uart_stuff(txBuf, &offset, (char*) &tx_i_ave, sizeof(tx_i_ave));
+#else
+				wattHoursSend = (uint32_t)(wattHours >> 9);
+				uart_stuff(txBuf, &offset, (char*) &wattHoursSend, sizeof(wattHoursSend));
+#endif
+				uart_stuff(txBuf, &offset, (char*) &flags, sizeof(flags));
+
+				uart_send();
+				data = 1;//NUM_DATA;
 			}
 		}
 	}
@@ -496,11 +570,11 @@ __interrupt void USCI_A0_ISR(void) {
 	case 0:
 		break;								// No interrupt
 	case 2: 								// RX interrupt
-
+		rxBuf[rxCt++] = UCA0RXBUF;
 		break;
 	case 4:									// TX interrupt
-		if (txCt >= 0) {
-			UCA0TXBUF = txBuf[txCt--];
+		if (txCt < UARTLEN) {
+			UCA0TXBUF = txBuf[txCt++];
 		} else {
 			UCA0IE &= ~UCTXIE;
 			UCA0IE |= UCTXCPTIE;
@@ -511,50 +585,43 @@ __interrupt void USCI_A0_ISR(void) {
 	case 8: 								// Transmit complete
 		UCA0IE &= ~UCTXCPTIE;
 		data--;
-		switch (data) {
-		case 9:
-			uart_send((char*) &ad_len, sizeof(ad_len));
-			break;
-		case 8:
-			uart_send((char*) &powerblade_id, sizeof(powerblade_id));
-			break;
-		case 7:
-			uart_send((char*) &sequence, sizeof(sequence));
-			break;
-		case 6:
-#ifdef CALIBRATE
-			time = 0;
-#else
-			time = PSCALE;
-			time = (time<<8)+VSCALE;
-			time = (time<<8)+WHSCALE;
-#endif
-			uart_send((char*)&time, sizeof(time));
-			break;
-		case 5:
-			uart_send((char*) &Vrms, sizeof(Vrms));
-			break;
-		case 4:
-			uart_send((char*) &truePower, sizeof(truePower));
-			break;
-		case 3:
-			uart_send((char*) &apparentPower, sizeof(apparentPower));
-			break;
-		case 2:
-#ifdef CALIBRATE
-			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
-#else
-			wattHoursSend = (uint32_t)(wattHours >> 9);
-			uart_send((char*) &wattHoursSend, sizeof(wattHoursSend));
-#endif
-			break;
-		case 1:
-			uart_send((char*) &flags, sizeof(flags));
-			break;
-		default:
-			break;
-		}
-		break;
+//		switch (data) {
+//		case 9:
+//			uart_send((char*) &ad_len, sizeof(ad_len));
+//			break;
+//		case 8:
+//			uart_send((char*) &powerblade_id, sizeof(powerblade_id));
+//			break;
+//		case 7:
+//			uart_send((char*) &sequence, sizeof(sequence));
+//			break;
+//		case 6:
+//			uart_send((char*)&time, sizeof(time));
+//			break;
+//		case 5:
+//			uart_send((char*) &Vrms, sizeof(Vrms));
+//			break;
+//		case 4:
+//			uart_send((char*) &truePower, sizeof(truePower));
+//			break;
+//		case 3:
+//			uart_send((char*) &apparentPower, sizeof(apparentPower));
+//			break;
+//		case 2:
+//#ifdef CALIBRATE
+//			uart_send((char*) &tx_i_ave, sizeof(tx_i_ave));
+//#else
+//			wattHoursSend = (uint32_t)(wattHours >> 9);
+//			uart_send((char*) &wattHoursSend, sizeof(wattHoursSend));
+//#endif
+//			break;
+//		case 1:
+//			uart_send((char*) &flags, sizeof(flags));
+//			break;
+//		default:
+//			break;
+//		}
+//		break;
 	default:
 		break;
 	}
