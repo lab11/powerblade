@@ -264,11 +264,11 @@ __interrupt void TIMERA1_ISR(void) {
 
 void uart_enable(bool enable) {
 	if (enable) {
-		P2SEL0 &= ~(BIT0);        	// + BIT1);
-		P2SEL1 |= BIT0;        	// + BIT1;
+		P2SEL0 &= ~(BIT0 + BIT1);
+		P2SEL1 |= BIT0 + BIT1;
 	} else {
 		//P2SEL0 |= BIT0;
-		P2SEL1 &= ~BIT0;
+		P2SEL1 &= ~(BIT0 + BIT1);
 	}
 }
 
