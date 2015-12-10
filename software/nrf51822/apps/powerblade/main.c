@@ -24,6 +24,7 @@
 #include "simple_ble.h"
 #include "simple_adv.h"
 #include "eddystone.h"
+#include "checksum.h"
 
 static ble_app_t app;
 
@@ -45,6 +46,107 @@ APP_TIMER_DEF(start_manufdata_timer);
 static uint8_t powerblade_adv_data[POWERBLADE_ADV_DATA_MAX_LEN];
 static uint8_t powerblade_adv_data_len = 0;
 
+// uart control
+static bool uart_rxing = false;
+static bool uart_txing = false;
+static uint8_t* tx_data;
+static uint16_t tx_data_len = 0;
+#define UART_BUF_MAX_LEN 50
+static uint8_t uart_buf[UART_BUF_MAX_LEN];
+
+static void uart_rx_disable(void) {
+    // stop receiving, disable module if not still in use
+    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STOPRX);
+    uart_rxing = false;
+
+    if (!uart_txing && !uart_rxing) {
+        nrf_uart_disable(NRF_UART0);
+    }
+}
+
+static void uart_tx_disable(void) {
+    // stop transmitting, disable module if not still in use
+    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STOPTX);
+    uart_txing = false;
+
+    if (!uart_txing && !uart_rxing) {
+        nrf_uart_disable(NRF_UART0);
+    }
+}
+
+static void uart_rx_enable(void) {
+    // clear events, start receiving
+    uart_rxing = true;
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_ERROR);
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
+    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STARTRX);
+
+    // enable interrupts on UART RX
+    nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_RXDRDY);
+
+    // enable module
+    nrf_uart_enable(NRF_UART0);
+}
+
+static void uart_tx_enable(void) {
+    // clear events, start transmitting
+    uart_txing = true;
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_ERROR);
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_TXDRDY);
+    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STARTTX);
+
+    // enable interrupts on UART TX
+    nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_TXDRDY);
+
+    // enable module
+    nrf_uart_enable(NRF_UART0);
+}
+
+void uart_init (void) {
+    // apply config
+    nrf_gpio_cfg_input(UART_RX_PIN, NRF_GPIO_PIN_NOPULL);
+    nrf_gpio_cfg_output(UART_TX_PIN);
+    nrf_gpio_pin_set(UART_TX_PIN);
+    nrf_uart_txrx_pins_set(NRF_UART0, UART_TX_PIN, UART_RX_PIN);
+    nrf_uart_baudrate_set(NRF_UART0, UART_BAUDRATE_BAUDRATE_Baud115200);
+    nrf_uart_configure(NRF_UART0, NRF_UART_PARITY_EXCLUDED, NRF_UART_HWFC_DISABLED);
+
+    // interrupts enable
+    nrf_drv_common_irq_enable(UART0_IRQn, APP_IRQ_PRIORITY_LOW);
+}
+
+void uart_tx_handler (void) {
+    static uint16_t tx_index = 0;
+
+    // clear event
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_TXDRDY);
+
+    // check if there is more data to send
+    if (tx_index < tx_data_len) {
+        nrf_uart_txd_set(NRF_UART0, tx_data[tx_index]);
+        tx_index++;
+    } else {
+        tx_index = 0;
+        uart_tx_disable();
+    }
+}
+
+int8_t uart_send (uint8_t* data, uint16_t len) {
+    // don't start a transaction if there is still one ongoing
+    if (uart_txing) {
+        return -1;
+    }
+
+    // setup data
+    tx_data = data;
+    tx_data_len = len;
+
+    // begin sending data
+    uart_tx_enable();
+    uart_tx_handler();
+    return 0;
+}
+
 void start_eddystone_adv (void) {
     uint32_t err_code;
 
@@ -53,15 +155,26 @@ void start_eddystone_adv (void) {
 
     err_code = app_timer_start(start_manufdata_timer, EDDYSTONE_ADV_DURATION, NULL);
     APP_ERROR_CHECK(err_code);
+
+
+    //XXX: TESTING
+    // once only send TX data to the NRF
+    static bool already_sent = false;
+    static uint8_t buf[4] = {0, 4, 150, 0};
+    if (!already_sent) {
+        buf[3] = additive_checksum(buf, 3);
+        uart_send(buf, 4);
+        already_sent = true;
+    }
 }
 
 void init_adv_data (void) {
     // Default values, helpful for debugging
     powerblade_adv_data[0] = 0x01; // Version
     
-    powerblade_adv_data[1] = 0x00;
-    powerblade_adv_data[2] = 0x00;
-    powerblade_adv_data[3] = 0x00;
+    powerblade_adv_data[1] = 0x01;
+    powerblade_adv_data[2] = 0x01;
+    powerblade_adv_data[3] = 0x01;
     powerblade_adv_data[4] = 0x01; // Sequence
 
     powerblade_adv_data[5] = 0x42;
@@ -102,56 +215,35 @@ void start_manufdata_adv (void) {
     APP_ERROR_CHECK(err_code);
 }
 
-static void uart_disable(void) {
-    // stop receiving, disable module
-    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STOPRX);
-    nrf_uart_disable(NRF_UART0);
-}
-
-static void uart_enable(void) {
-    // enable module, clear events, start receiving
-    nrf_uart_enable(NRF_UART0);
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_ERROR);
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
-    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STARTRX);
-
-    // enable interrupts on UART RX
-    nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_RXDRDY);
-}   
-
-void uart_init (void) {
-    // apply config
-    nrf_gpio_cfg_input(UART_RX_PIN, NRF_GPIO_PIN_NOPULL);
-    nrf_uart_txrx_pins_set(NRF_UART0, 0, UART_RX_PIN);
-    nrf_uart_baudrate_set(NRF_UART0, UART_BAUDRATE_BAUDRATE_Baud38400);
-    nrf_uart_configure(NRF_UART0, NRF_UART_PARITY_EXCLUDED, NRF_UART_HWFC_DISABLED);
-
-    // interrupts enable
-    nrf_drv_common_irq_enable(UART0_IRQn, APP_IRQ_PRIORITY_LOW);
-}
-
-void UART0_IRQHandler (void) {
+void uart_rx_handler (void) {
     static uint16_t uart_len = 0;
     static uint16_t uart_index = 0;
     static uint8_t adv_len = 0;
+    static uint8_t additional_len = 0;
+    static uint8_t checksum = 0;
 
     // data is available
     nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
     uint8_t uart_data = nrf_uart_rxd_get(NRF_UART0);
+    uart_buf[uart_index] = uart_data;
 
     // parse data from MSP430 based on index
     if (uart_index == 0) {
-        // UART len MSB
+        // UART length MSB
         uart_len = (uart_data << 8 | 0x00);
 
     } else if (uart_index == 1) {
-        // UART len LSB
+        // UART length LSB
         uart_len |= uart_data;
 
     } else if (uart_index == 2) {
-        // ADV len
+        // Advertisement length
         adv_len = uart_data;
         powerblade_adv_data_len = adv_len;
+
+        // Additional length is known also
+        //  Total - length bytes - adv length - checksum byte
+        additional_len = (uart_len - 3 - adv_len - 1);
 
     } else if (adv_len > 0 && (uart_index-3) < adv_len) {
         // Advertisement data
@@ -161,31 +253,49 @@ void UART0_IRQHandler (void) {
             powerblade_adv_data[adv_index] = uart_data;
         }
 
-    } else if ((uart_len-1-adv_len) > 0 && uart_index < (uart_len+2)) {
+    } else if (additional_len > 0 && uart_index < (uart_len-1)) {
         // Additional UART data
         // Do nothing with data for now
+
+    } else if (uart_index == (uart_len-1)) {
+        // Checksum byte
+        checksum = uart_data;
     }
 
     uart_index++;
-    if (uart_index >= 3 && uart_index >= (uart_len+2)) {
+    if (uart_index >= 4 && (uart_index >= uart_len || uart_index == UART_BUF_MAX_LEN)) {
         // UART data is finished when we have received the whole header, plus
-        //  whatever Advertisement and Additional data exists
+        //  whatever Advertisement and Additional data exists, plus checksum
 
         // turn off UART until next window
-        uart_disable();
+        uart_rx_disable();
         app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
 
-        // update advertisement
-        //NOTE: this is safe to call no matter where in the
-        //  Eddystone/Manuf Data we are. If called during Manuf Data,
-        //  nothing changes (second call to timer_start does nothing).
-        //  If called during Eddystone, timing is screwed up, but it'll fix
-        //  itself within one cycle
-        start_manufdata_adv();
+        // validate data
+        if (additive_checksum(uart_buf, uart_index-1) == checksum) {
+
+            // update advertisement
+            //NOTE: this is safe to call no matter where in the
+            //  Eddystone/Manuf Data we are. If called during Manuf Data,
+            //  nothing changes (second call to timer_start does nothing).
+            //  If called during Eddystone, timing is screwed up, but it'll fix
+            //  itself within one cycle
+            start_manufdata_adv();
+        }
 
         uart_len = 0;
         uart_index = 0;
         adv_len = 0;
+    }
+}
+
+void UART0_IRQHandler (void) {
+    if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_ERROR)) {
+        //TODO
+    } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_RXDRDY)) {
+        uart_rx_handler();
+    } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_TXDRDY)) {
+        uart_tx_handler();
     }
 }
 
@@ -194,7 +304,7 @@ void timers_init (void) {
 
     APP_TIMER_INIT(TIMER_PRESCALER, TIMER_OP_QUEUE_SIZE, false);
 
-    err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_enable);
+    err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_rx_enable);
     APP_ERROR_CHECK(err_code);
 
     err_code = app_timer_create(&start_eddystone_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)start_eddystone_adv);
@@ -213,7 +323,7 @@ int main(void) {
 
     // Initialization complete
     start_manufdata_adv();
-    uart_enable();
+    uart_rx_enable();
 
     while (1) {
         power_manage();
