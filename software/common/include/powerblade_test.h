@@ -93,4 +93,6 @@
 #define UARTLEN		23
 #define RXLEN		30
 
+#define ICASE		3
+
 #endif
