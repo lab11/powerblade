@@ -418,13 +418,7 @@ __interrupt void ADC10_ISR(void) {
 		ADC_Result = ADC10MEM0;
 		ADC_Channel = ADC10MCTL0 & ADC10INCH_7;
 		switch (ADC_Channel) {
-#if defined (VERSION0) | defined (VERSION1)
-		case 4:	// I_SENSE
-#elif defined (VERSION31)
-		case 5:	// I_SENSE (A0) (case 0 for filt, 5 for isense)
-#elif defined (VERSION32) | defined (VERSION33)
-		case ICASE:	// I_SENSE
-#endif
+		case ICASE:								// I_SENSE
 		{
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
@@ -433,32 +427,18 @@ __interrupt void ADC10_ISR(void) {
 			transmitTry();
 			break;
 		}
-#if defined (VERSION32) | defined (VERSION33)
-		case 5:	// V_SENSE
-#else
-		case 3:	// V_SENSE (same in versions 0, 1, and 3.1)
-#endif
+		case VCASE:								// V_SENSE
 		{
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
-#if defined (VERSION0) | defined (VERSION1)
-			ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0;
-#elif defined (VERSION31)
-			ADC10MCTL0 = ADC10INCH_0 + ADC10SREF_0;
-#elif defined (VERSION32) | defined (VERSION33)
-			ADC10MCTL0 = ADC10INCH_4 + ADC10SREF_0;
-#endif
+			ADC10MCTL0 = IMCTL0;
 			ADC10CTL0 += ADC10SC;
 			break;
 		}
-#if defined (VERSION0) | defined (VERSION1)
-			case 2:	// VCC_SENSE
-#else
-		case 4:	// VCC_SENSE
-#endif
+		case VCCCASE:	// VCC_SENSE
 			// Perform Vcap measurements
 			if (ADC_Result < ADC_VMIN) {
 #if !defined (NORDICDEBUG)
@@ -477,11 +457,7 @@ __interrupt void ADC10_ISR(void) {
 
 			// Enable next sample
 			// After VCC_SENSE do V_SENSE
-#if defined (VERSION32) | defined (VERSION33)
-			ADC10MCTL0 = ADC10INCH_0 + ADC10SREF_0;
-#else
-			ADC10MCTL0 = ADC10INCH_4 + ADC10SREF_0;
-#endif
+			ADC10MCTL0 = VMCTL0;
 			ADC10CTL0 += ADC10SC;
 			break;
 		default: // ADC Reset condition
