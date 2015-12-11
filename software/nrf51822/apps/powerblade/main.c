@@ -40,6 +40,9 @@ void process_rx_packet(uint16_t packet_len);
 void uart_tx_handler(void);
 void uart_send(uint8_t* data, uint16_t len);
 
+void services_init(void);
+void ble_evt_write (ble_evt_t* p_ble_evt);
+
 void timers_init(void);
 int main(void);
 
@@ -85,17 +88,6 @@ void start_eddystone_adv (void) {
 
     err_code = app_timer_start(start_manufdata_timer, EDDYSTONE_ADV_DURATION, NULL);
     APP_ERROR_CHECK(err_code);
-
-
-    //XXX: TESTING
-    // once only send TX data to the NRF
-    static bool already_sent = false;
-    static uint8_t buf[4] = {0, 4, 150, 0};
-    if (!already_sent) {
-        buf[3] = additive_checksum(buf, 3);
-        uart_send(buf, 4);
-        already_sent = true;
-    }
 }
 
 void init_adv_data (void) {
@@ -150,9 +142,7 @@ void start_manufdata_adv (void) {
  **************************************************/
 
 void UART0_IRQHandler (void) {
-    if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_ERROR)) {
-        //TODO
-    } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_RXDRDY)) {
+    if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_RXDRDY)) {
         uart_rx_handler();
     } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_TXDRDY)) {
         uart_tx_handler();
@@ -245,6 +235,112 @@ void uart_send (uint8_t* data, uint16_t len) {
     uart_tx_enable();
     uart_tx_handler();
 }
+
+/**************************************************
+ * Services
+ **************************************************/
+
+// Randomly generated UUID
+const ble_uuid128_t calibrate_uuid128 = {
+    {0x99, 0xf9, 0xac, 0xe5, 0x57, 0xb9, 0x43, 0xec,
+     0x88, 0xf8, 0x88, 0xb9, 0x4d, 0xa1, 0x80, 0x50}
+};
+ble_uuid_t calibrate_uuid;
+
+#define CALIBRATE_SHORT_UUID            0x57B9
+#define CALIBRATE_CHAR_BEGIN_SHORT_UUID 0x57BA
+#define CALIBRATE_CHAR_WATTS_SHORT_UUID 0x57BB
+#define CALIBRATE_CHAR_NEXT_SHORT_UUID  0x57BC
+#define CALIBRATE_CHAR_DONE_SHORT_UUID  0x57BD
+
+void services_init (void) {
+
+    // Add main app upload service
+    app.calibrate_service_handle = simple_ble_add_service(&calibrate_uuid128,
+                                                &calibrate_uuid,
+                                                CALIBRATE_SHORT_UUID);
+
+    // Add the characteristic to write current watt setting
+    app.begin_calibration = false;
+    simple_ble_add_characteristic(0, 1, 0, // read, write, notify
+                                  calibrate_uuid.type,
+                                  CALIBRATE_CHAR_BEGIN_SHORT_UUID,
+                                  1, (uint8_t*)&app.begin_calibration,
+                                  app.calibrate_service_handle,
+                                  &app.calibrate_char_begin_handle);
+
+    // Add the characteristic to write current watt setting
+    app.ground_truth_watts = -1;
+    simple_ble_add_characteristic(0, 1, 0, // read, write, notify
+                                  calibrate_uuid.type,
+                                  CALIBRATE_CHAR_WATTS_SHORT_UUID,
+                                  2, (uint8_t*)&app.ground_truth_watts,
+                                  app.calibrate_service_handle,
+                                  &app.calibrate_char_watts_handle);
+
+    // Add the characteristic to write current watt setting
+    app.next_wattage = false;
+    simple_ble_add_characteristic(1, 0, 1, // read, write, notify
+                                  calibrate_uuid.type,
+                                  CALIBRATE_CHAR_NEXT_SHORT_UUID,
+                                  1, (uint8_t*)&app.next_wattage,
+                                  app.calibrate_service_handle,
+                                  &app.calibrate_char_next_handle);
+
+    // Add the characteristic to write current watt setting
+    app.done_calibrating = false;
+    simple_ble_add_characteristic(1, 0, 1, // read, write, notify
+                                  calibrate_uuid.type,
+                                  CALIBRATE_CHAR_DONE_SHORT_UUID,
+                                  1, (uint8_t*)&app.done_calibrating,
+                                  app.calibrate_service_handle,
+                                  &app.calibrate_char_done_handle);
+}
+
+static bool calibration_mode = false;
+static uint8_t tx_buffer[10];
+
+void ble_evt_write (ble_evt_t* p_ble_evt) {
+    ble_gatts_evt_write_t* p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
+
+    if (p_evt_write->handle == app.calibrate_char_begin_handle.value_handle) {
+        // copy over data, single byte
+        if (app.begin_calibration) {
+            calibration_mode = true;
+
+            // send start calibration message to MSP430
+            uint16_t length = 2+2+1+1; // length, short UUID, value, checksum
+            tx_buffer[0] = (length >> 8);
+            tx_buffer[1] = (length & 0xFF);
+            tx_buffer[2] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID >> 8);
+            tx_buffer[3] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID & 0xFF);
+            tx_buffer[4] = (uint8_t)true;
+            tx_buffer[5] = additive_checksum(tx_buffer, length-1);
+            uart_send(tx_buffer, length);
+        }
+
+    } else if (p_evt_write->handle == app.calibrate_char_watts_handle.value_handle) {
+        // correct upper bits if user only wrote a single byte
+        //  It's reasonable to assume the user will only write unsigned data
+        if (p_evt_write->len == 1) {
+            app.ground_truth_watts = (0x0000 | (uint8_t)p_evt_write->data[0]);
+        }
+
+        if (calibration_mode) {
+            // send ground truth wattage to MSP430
+            uint16_t length = 2+2+2+1; // length, short UUID, value, checksum
+            tx_buffer[0] = (length >> 8);
+            tx_buffer[1] = (length & 0xFF);
+            tx_buffer[2] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID >> 8);
+            tx_buffer[3] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID & 0xFF);
+            tx_buffer[4] = (app.ground_truth_watts >> 8);
+            tx_buffer[5] = (app.ground_truth_watts & 0xFF);
+            tx_buffer[6] = additive_checksum(tx_buffer, length-1);
+            uart_send(tx_buffer, length);
+        }
+    }
+}
+
 
 /**************************************************
  * Initialization
