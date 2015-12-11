@@ -200,8 +200,7 @@ int main(void) {
 	// XXX do we need CONSEQ_3?
 	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3; // ADC10SC source select, sampling timer
 	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
-	// XXX is the first input set to A4 or A5?
-	ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0; 	// Reference set to VCC & VSS, first input set to A4
+	ADC10MCTL0 = VCCMCTL0; 						// Reference set to VCC & VSS, first input set to VCC_SENSE
 	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
 	ADC10IE |= ADC10IE0;                   		// Enable ADC conv complete interrupt
 
@@ -241,11 +240,7 @@ __interrupt void TIMERA0_ISR(void) {
 		__bic_SR_register_on_exit(LPM3_bits);
 	} else {
 		// Start with VCC_SENSE
-#if defined (VERSION0) | defined (VERSION1)
-		ADC10MCTL0 = ADC10INCH_3 + ADC10SREF_0;
-#else
-		ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0;
-#endif
+		ADC10MCTL0 = VCCMCTL0;
 		ADC10CTL0 += ADC10SC;
 	}
 }

@@ -65,8 +65,10 @@
 // VCC Sense
 #if defined (VERSION0) | defined (VERSION1)
 	#define VCCCASE		2
+	#define VCCMCTL0	ADC10INCH_3 + ADC10SREF_0
 #else
 	#define VCCCASE		4
+	#define VCCMCTL0	ADC10INCH_5 + ADC10SREF_0
 #endif
 
 /**************************************************************************
