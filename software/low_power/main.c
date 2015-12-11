@@ -211,17 +211,19 @@ int main(void) {
 	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
 	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// TA0 set to ACLK (32kHz), up mode
 
+#if defined (SIDEDATA)
 	// Set up PWM for side channel data
-  	P1DIR |= BIT2 + BIT3;
-  	P1SEL0 |= BIT2 + BIT3;
-  	TA1CCR0 = 1572;
-  	TA1CCR1 = 100;
-  	TA1CCR2 = 100;
-  	pwm_duty = 100;
+  	P1DIR |= BIT2 + BIT3;						// Set up P1.2 & P1.3 as timer
+  	P1SEL0 |= BIT2 + BIT3;						// output pins
+  	TA1CCR0 = 1572;								// Period set to 393 us
+  	pwm_duty = 100;								// Initialize both current and voltage to 100
   	voltage_duty = 100;
-  	TA1CCTL1 = OUTMOD_7;
+  	TA1CCR1 = pwm_duty;
+  	TA1CCR2 = voltage_duty;
+  	TA1CCTL1 = OUTMOD_7;						// Set current and voltage to RST/SET
   	TA1CCTL2 = OUTMOD_7;
-  	TA1CTL = TASSEL_2 + MC_1 + TAIE + TACLR;
+  	TA1CTL = TASSEL_2 + MC_1 + TAIE + TACLR;	// SMCLK, up to TA1R0, enable overflow int
+#endif
 
 	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
@@ -257,10 +259,8 @@ __interrupt void TIMERA1_ISR(void) {
 
 void uart_enable(bool enable) {
 	if (enable) {
-		P2SEL0 &= ~(BIT0 + BIT1);
 		P2SEL1 |= BIT0 + BIT1;
 	} else {
-		//P2SEL0 |= BIT0;
 		P2SEL1 &= ~(BIT0 + BIT1);
 	}
 }
@@ -316,33 +316,29 @@ void transmitTry(void) {
 
 	// Subtract offset, if not in calibration mode
 #ifndef CALIBRATE
-	int32_t new_current;
-	//if(agg_current > 0) {
-	new_current = agg_current + CUROFF;
-//	}
-//	else {
-//		new_current = agg_current + CUROFF;
-//	}
+	 int32_t new_current = agg_current + CUROFF;
 #else
 	int32_t new_current = agg_current;
 #endif
 
 	// Perform calculations for I^2, V^2, and P
-	//int32_t new_current = agg_current;
-	acc_i_rms += (new_current * new_current);// - 2*new_current*CUROFF - 5625;
-	acc_p_ave += (voltage * new_current);// - CUROFF;
+	acc_i_rms += (new_current * new_current);
+	acc_p_ave += (voltage * new_current);
 	acc_v_rms += voltage * voltage;
 
+#if defined (SIDEDATA)
 	// Set side channel output
 	pwm_duty = (agg_current >> 3) + 786;
 	voltage_duty = voltage + 786;
+#endif
 
 	sampleCount++;
-	if (sampleCount == SAMCOUNT) { // Entire AC wave sampled (60 Hz)
+	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 		// Reset sampleCount once per wave
 		sampleCount = 0;
 
 		// Increment energy calc and reset accumulator
+		// XXX should we be doing this?
 		if (acc_p_ave < 0) {
 			acc_p_ave = 0;
 		}
@@ -357,16 +353,16 @@ void transmitTry(void) {
 		voltAmpsToAverage += (uint32_t) (Irms * Vrms);
 
 		measCount++;
-		if (measCount >= 60) { // Another second has passed
+		if (measCount >= 60) { 					// Another second has passed
 			measCount = 0;
 
 			// Process any UART bytes
-			if(rxCt > 2) {	// Message is only valid with two uart length bytes and at least one more data byte
-				processMessage();
+			if(rxCt > 2) {						// Message is only valid with two uart length
+				processMessage();				// bytes and at least one more data byte
 			}
 
+			// Increment sequence number for transmission
 			sequence++;
-			//time++;
 
 #ifdef CALIBRATE
 			tx_i_ave = (uint32_t) Irms;
@@ -384,8 +380,8 @@ void transmitTry(void) {
 			if (ready == 1) {
 				SYS_EN_OUT &= ~SYS_EN_PIN;
 				uart_enable(1);
+				// XXX do we still need this delay?
 				__delay_cycles(80000);
-				//uart_send((char*) &powerblade_id, sizeof(powerblade_id));
 
 				// Stuff data into txBuf
 				unsigned int offset = 0;
@@ -418,18 +414,6 @@ __interrupt void ADC10_ISR(void) {
 	unsigned char ADC_Channel;
 
 	switch (__even_in_range(ADC10IV, 12)) {
-	case 0:
-		break;                          // No interrupt
-	case 2:
-		break;                          // conversion result overflow
-	case 4:
-		break;                          // conversion time overflow
-	case 6:
-		break;                          // ADC10HI
-	case 8:
-		break;                          // ADC10LO
-	case 10:
-		break;                          // ADC10IN
 	case 12:
 		ADC_Result = ADC10MEM0;
 		ADC_Channel = ADC10MCTL0 & ADC10INCH_7;
@@ -439,14 +423,13 @@ __interrupt void ADC10_ISR(void) {
 #elif defined (VERSION31)
 		case 5:	// I_SENSE (A0) (case 0 for filt, 5 for isense)
 #elif defined (VERSION32) | defined (VERSION33)
-		case 3:	// I_SENSE
+		case ICASE:	// I_SENSE
 #endif
 		{
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
 
-			// Enable next sample
-			//ADC10CTL0 += ADC10SC;
+			// Current is the last measurement, attempt transmission
 			transmitTry();
 			break;
 		}
@@ -458,13 +441,6 @@ __interrupt void ADC10_ISR(void) {
 		{
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
-
-			// Store and account for phase offset
-//			vbuff[vbuff_head++] = voltage;
-//			voltage = vbuff[getVoltageForPhase(vbuff_head)];
-//			if (vbuff_head == SAMCOUNT) {
-//				vbuff_head = 0;
-//			}
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
