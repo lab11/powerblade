@@ -39,6 +39,37 @@
 #endif
 
 /**************************************************************************
+   ADC ORDERING SECTION
+ **************************************************************************/
+// Current
+#if defined (VERSION0) | defined (VERSION1)
+	#define ICASE		4
+	#define IMCTL0	ADC10INCH_5 + ADC10SREF_0;
+#elif defined (VERSION31)
+	#define ICASE		5
+	#define IMCTL0	ADC10INCH_0 + ADC10SREF_0
+#elif defined (VERSION32) | defined (VERSION33)
+	#define ICASE		3
+	#define IMCTL0		ADC10INCH_4 + ADC10SREF_0
+#endif
+
+// Voltage
+#if defined (VERSION32) | defined (VERSION33)
+	#define VCASE		5
+	#define VMCTL0		ADC10INCH_0 + ADC10SREF_0
+#else
+	#define VCASE		3
+	#define VMCTL0		ADC10INCH_4 + ADC10SREF_0
+#endif
+
+// VCC Sense
+#if defined (VERSION0) | defined (VERSION1)
+	#define VCCCASE		2
+#else
+	#define VCCCASE		4
+#endif
+
+/**************************************************************************
    ANALOG SECTION
  **************************************************************************/
 /* Supply cutoff information
@@ -92,7 +123,5 @@
  **************************************************************************/
 #define UARTLEN		23
 #define RXLEN		30
-
-#define ICASE		3
 
 #endif
