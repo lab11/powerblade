@@ -6,11 +6,9 @@ APPLICATION_SRCS += ble_advdata.c
 APPLICATION_SRCS += ble_conn_params.c
 APPLICATION_SRCS += ble_srv_common.c
 APPLICATION_SRCS += app_timer.c
-#APPLICATION_SRCS += app_uart.c
 APPLICATION_SRCS += app_util_platform.c
 APPLICATION_SRCS += nrf_delay.c
 APPLICATION_SRCS += nrf_drv_common.c
-#APPLICATION_SRCS += nrf_drv_uart.c
 
 APPLICATION_SRCS += checksum.c
 

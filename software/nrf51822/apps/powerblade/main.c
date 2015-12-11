@@ -13,18 +13,40 @@
 #include "ble_advdata.h"
 #include "app_timer.h"
 #include "app_util_platform.h"
-//#include "app_uart.h"
 #include "nrf_uart.h"
 #include "nrf_drv_common.h"
 
-// Platform, Peripherals, Devices, Services
+// Platform, Peripherals, Devices, & Services
 #include "ble_config.h"
+#include "uart.h"
 #include "powerblade.h"
 #include "led.h"
 #include "simple_ble.h"
 #include "simple_adv.h"
 #include "eddystone.h"
 #include "checksum.h"
+
+
+/**************************************************
+ * Function Protoypes
+ **************************************************/
+void start_eddystone_adv(void);
+void init_adv_data(void);
+void start_manufdata_adv(void);
+
+void UART0_IRQHandler(void);
+void uart_rx_handler(void);
+void process_rx_packet(uint16_t packet_len);
+void uart_tx_handler(void);
+void uart_send(uint8_t* data, uint16_t len);
+
+void timers_init(void);
+int main(void);
+
+
+/**************************************************
+ * Define and Globals
+ **************************************************/
 
 static ble_app_t app;
 
@@ -45,107 +67,15 @@ APP_TIMER_DEF(start_manufdata_timer);
 static uint8_t powerblade_adv_data[ADV_DATA_MAX_LEN];
 static uint8_t powerblade_adv_data_len = 0;
 
-// uart control
-static bool uart_rxing = false;
-static bool uart_txing = false;
-static uint8_t* tx_data;
-static uint16_t tx_data_len = 0;
+// uart buffers
 #define RX_DATA_MAX_LEN 50
 static uint8_t rx_data[RX_DATA_MAX_LEN];
+static uint8_t* tx_data;
+static uint16_t tx_data_len = 0;
 
-
-static void uart_rx_disable(void) {
-    // stop receiving, disable module if not still in use
-    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STOPRX);
-    uart_rxing = false;
-
-    if (!uart_txing && !uart_rxing) {
-        nrf_uart_disable(NRF_UART0);
-    }
-}
-
-static void uart_tx_disable(void) {
-    // stop transmitting, disable module if not still in use
-    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STOPTX);
-    uart_txing = false;
-
-    if (!uart_txing && !uart_rxing) {
-        nrf_uart_disable(NRF_UART0);
-    }
-}
-
-static void uart_rx_enable(void) {
-    // clear events, start receiving
-    uart_rxing = true;
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_ERROR);
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
-    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STARTRX);
-
-    // enable interrupts on UART RX
-    nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_RXDRDY);
-
-    // enable module
-    nrf_uart_enable(NRF_UART0);
-}
-
-static void uart_tx_enable(void) {
-    // clear events, start transmitting
-    uart_txing = true;
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_ERROR);
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_TXDRDY);
-    nrf_uart_task_trigger(NRF_UART0, NRF_UART_TASK_STARTTX);
-
-    // enable interrupts on UART TX
-    nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_TXDRDY);
-
-    // enable module
-    nrf_uart_enable(NRF_UART0);
-}
-
-void uart_init (void) {
-    // apply config
-    nrf_gpio_cfg_input(UART_RX_PIN, NRF_GPIO_PIN_NOPULL);
-    nrf_gpio_cfg_output(UART_TX_PIN);
-    nrf_gpio_pin_set(UART_TX_PIN);
-    nrf_uart_txrx_pins_set(NRF_UART0, UART_TX_PIN, UART_RX_PIN);
-    nrf_uart_baudrate_set(NRF_UART0, UART_BAUDRATE_BAUDRATE_Baud115200);
-    nrf_uart_configure(NRF_UART0, NRF_UART_PARITY_EXCLUDED, NRF_UART_HWFC_DISABLED);
-
-    // interrupts enable
-    nrf_drv_common_irq_enable(UART0_IRQn, APP_IRQ_PRIORITY_LOW);
-}
-
-void uart_tx_handler (void) {
-    static uint16_t tx_index = 0;
-
-    // clear event
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_TXDRDY);
-
-    // check if there is more data to send
-    if (tx_index < tx_data_len) {
-        nrf_uart_txd_set(NRF_UART0, tx_data[tx_index]);
-        tx_index++;
-    } else {
-        tx_index = 0;
-        uart_tx_disable();
-    }
-}
-
-int8_t uart_send (uint8_t* data, uint16_t len) {
-    // don't start a transaction if there is still one ongoing
-    if (uart_txing) {
-        return -1;
-    }
-
-    // setup data
-    tx_data = data;
-    tx_data_len = len;
-
-    // begin sending data
-    uart_tx_enable();
-    uart_tx_handler();
-    return 0;
-}
+/**************************************************
+ * Advertisements
+ **************************************************/
 
 void start_eddystone_adv (void) {
     uint32_t err_code;
@@ -215,6 +145,47 @@ void start_manufdata_adv (void) {
     APP_ERROR_CHECK(err_code);
 }
 
+/**************************************************
+ * UART
+ **************************************************/
+
+void UART0_IRQHandler (void) {
+    if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_ERROR)) {
+        //TODO
+    } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_RXDRDY)) {
+        uart_rx_handler();
+    } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_TXDRDY)) {
+        uart_tx_handler();
+    }
+}
+
+void uart_rx_handler (void) {
+    static uint16_t packet_len = 0;
+    static uint16_t rx_index = 0;
+
+    // data is available
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
+    rx_data[rx_index] = nrf_uart_rxd_get(NRF_UART0);
+    rx_index++;
+
+    // check if we have received the entire packet
+    //  This can't occur until we have length, adv length, and checksum
+    if (rx_index >= 4) {
+
+        // parse out expected packet length
+        if (packet_len == 0) {
+            packet_len = (rx_data[0] << 8 | rx_data[1]);
+        }
+
+        // process packet if we have all of it
+        if (rx_index >= packet_len || rx_index >= RX_DATA_MAX_LEN) {
+            process_rx_packet(packet_len);
+            packet_len = 0;
+            rx_index = 0;
+        }
+    }
+}
+
 void process_rx_packet(uint16_t packet_len) {
 
     // turn off UART until next window
@@ -249,42 +220,35 @@ void process_rx_packet(uint16_t packet_len) {
     }
 }
 
-void uart_rx_handler (void) {
-    static uint16_t packet_len = 0;
-    static uint16_t rx_index = 0;
+void uart_tx_handler (void) {
+    static uint16_t tx_index = 0;
 
-    // data is available
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
-    rx_data[rx_index] = nrf_uart_rxd_get(NRF_UART0);
-    rx_index++;
+    // clear event
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_TXDRDY);
 
-    // check if we have received the entire packet
-    //  This can't occur until we have length, adv length, and checksum
-    if (rx_index >= 4) {
-
-        // parse out expected packet length
-        if (packet_len == 0) {
-            packet_len = (rx_data[0] << 8 | rx_data[1]);
-        }
-
-        // process packet if we have all of it
-        if (rx_index >= packet_len || rx_index >= RX_DATA_MAX_LEN) {
-            process_rx_packet(packet_len);
-            packet_len = 0;
-            rx_index = 0;
-        }
+    // check if there is more data to send
+    if (tx_index < tx_data_len) {
+        nrf_uart_txd_set(NRF_UART0, tx_data[tx_index]);
+        tx_index++;
+    } else {
+        tx_index = 0;
+        uart_tx_disable();
     }
 }
 
-void UART0_IRQHandler (void) {
-    if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_ERROR)) {
-        //TODO
-    } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_RXDRDY)) {
-        uart_rx_handler();
-    } else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_TXDRDY)) {
-        uart_tx_handler();
-    }
+void uart_send (uint8_t* data, uint16_t len) {
+    // setup data
+    tx_data = data;
+    tx_data_len = len;
+
+    // begin sending data
+    uart_tx_enable();
+    uart_tx_handler();
 }
+
+/**************************************************
+ * Initialization
+ **************************************************/
 
 void timers_init (void) {
     uint32_t err_code;
@@ -300,6 +264,7 @@ void timers_init (void) {
     err_code = app_timer_create(&start_manufdata_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)start_manufdata_adv);
     APP_ERROR_CHECK(err_code);
 }
+
 
 int main(void) {
     // Initialization
