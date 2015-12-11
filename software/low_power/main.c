@@ -22,10 +22,11 @@
 
 #include "powerblade_test.h"
 #include "checksum.h"
+#include "uart.h"
 
 //#define CALIBRATE
 //#define NORDICDEBUG
-//#define SIDEDATA
+#define SIDEDATA
 
 // Transmission variables
 bool ready;
@@ -69,18 +70,6 @@ uint16_t apparentPower;
 uint64_t wattHours;
 uint32_t wattHoursSend;
 uint8_t flags;
-
-//void uart_send(char* buf, unsigned int len);
-char txBuf[UARTLEN];
-unsigned int txLen;
-int txCt;
-
-char rxBuf[RXLEN];
-char captureBuf[RXLEN - 3];
-int rxCt;
-int capCt;
-
-void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len);
 
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
@@ -174,9 +163,6 @@ int main(void) {
 	uart_stuff(OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
 	uart_stuff(OFFSET_FLAGS, (char*) &flags, sizeof(flags));
 
-	// Initialize UART receive count
-	rxCt = 0;
-
 	// Set SEN_EN to output and disable (~200uA)
 	SEN_EN_OUT &= ~SEN_EN_PIN;
 	SEN_EN_DIR |= SEN_EN_PIN;
@@ -187,16 +173,7 @@ int main(void) {
 	SYS_EN_DIR |= SYS_EN_PIN;
 
 	// Set up UART
-	UCA0CTL1 |= UCSWRST;						// Put UART into reset
-	UCA0CTL1 |= UCSSEL_2;						// Set to SMCLK
-//    UCA0BR0 = 52;								// Baud configuration for 38400
-//    UCA0BR1 = 0;
-//    UCA0MCTLW = 0x0200;
-	UCA0BR0 = 34;								// Baud configuration for 115200
-	UCA0BR1 = 0;
-	UCA0MCTLW = 0xBB00;
-	UCA0CTL1 &= ~UCSWRST;						// Take UART out of reset
-	UCA0IE |= UCRXIE + UCTXCPTIE;				// Enable RX, TX Complete interrupts
+	uart_init();
 
 	// Set up ADC
 	// Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
@@ -260,56 +237,6 @@ __interrupt void TIMERA1_ISR(void) {
 	TA1CCR2 = voltage_duty;
 }
 
-void uart_enable(bool enable) {
-	if (enable) {
-		P2SEL1 |= BIT0 + BIT1;
-	} else {
-		P2SEL1 &= ~(BIT0 + BIT1);
-	}
-}
-
-void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len) {
-	// XXX can i just use len (without tempCt)?
-	int tempCt = len - 1;
-	while(tempCt >= 0) {
-		txBuf[offset++] = srcbuf[tempCt--];
-	}
-}
-
-void uart_send() {
-	// Calculate checksum and append to buffer
-	txBuf[UARTLEN-1] = additive_checksum((uint8_t*)txBuf, UARTLEN-1);
-
-	// Enable interrupt and transmit
-	UCA0IE |= UCTXIE;
-	txCt = 0;
-	UCA0TXBUF = txBuf[txCt++];
-}
-
-void processMessage(void) {
-	// Capture rx length
-	int rxLen = (rxBuf[0] << 8) + rxBuf[1];
-
-	// Check if we have received the entire message
-	if(rxLen > rxCt) {
-		return;
-	}
-
-	int rxIndex;
-	capCt = 0;
-	if(additive_checksum((uint8_t*)rxBuf, rxLen - 1) == rxBuf[rxLen - 1]){
-
-		// Get all bytes but checksum
-		for(rxIndex = 2; rxIndex < (rxLen-1); rxIndex++){
-			captureBuf[capCt++] = rxBuf[rxIndex];
-		}
-
-		// XXX temporary: testing UART by setting sequence to the received byte
-		sequence = (uint32_t)captureBuf[0];
-	}
-	rxCt = 0;
-}
-
 void transmitTry(void) {
 
 	// Integrate current
@@ -360,8 +287,9 @@ void transmitTry(void) {
 			measCount = 0;
 
 			// Process any UART bytes
-			if(rxCt > 2) {						// Message is only valid with two uart length
-				processMessage();				// bytes and at least one more data byte
+			int receivedCount = processMessage();
+			if(receivedCount > 0) {
+				sequence = captureBuf[0];
 			}
 
 			// Increment sequence number for transmission
@@ -468,37 +396,5 @@ __interrupt void ADC10_ISR(void) {
 	}
 }
 
-#pragma vector=USCI_A0_VECTOR
-__interrupt void USCI_A0_ISR(void) {
-	switch (__even_in_range(UCA0IV, 8)) {
-	case 0:
-		break;								// No interrupt
-	case 2: 								// RX interrupt
-		rxBuf[rxCt++] = UCA0RXBUF;
-		break;
-	case 4:									// TX interrupt
-		if (txCt < UARTLEN) {
-			UCA0TXBUF = txBuf[txCt++];
-		} else {
-			UCA0IE &= ~UCTXIE;
-			UCA0IE |= UCTXCPTIE;
-		}
-		break;
-	case 6:
-		break;								// Start bit received
-	case 8: 								// Transmit complete
-		UCA0IE &= ~UCTXCPTIE;
-		break;
-	default:
-		break;
-	}
-}
 
-uint8_t getVoltageForPhase(uint8_t head) {
-	if (head > PHASEOFF) {
-		return head - PHASEOFF - 1;
-	} else {
-		return SAMCOUNT + head - PHASEOFF - 1;
-	}
-}
 
