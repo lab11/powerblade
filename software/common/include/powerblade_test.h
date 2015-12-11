@@ -72,6 +72,20 @@
 #endif
 
 /**************************************************************************
+   PACKET STRUCTURE SECTION
+ **************************************************************************/
+#define OFFSET_UARTLEN	0
+#define OFFSET_ADLEN	2
+#define OFFSET_PBID		3
+#define OFFSET_SEQ		4
+#define OFFSET_SCALE	8
+#define OFFSET_VRMS		12
+#define OFFSET_TP		13
+#define OFFSET_AP		15
+#define OFFSET_WH		17
+#define OFFSET_FLAGS	21
+
+/**************************************************************************
    ANALOG SECTION
  **************************************************************************/
 /* Supply cutoff information
