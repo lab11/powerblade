@@ -88,10 +88,9 @@
 #define WHSCALE		0x09
 
 /**************************************************************************
-   SCALING CONSTANTS SECTION
+   UART CONSTANTS SECTION
  **************************************************************************/
 #define UARTLEN		23
 #define RXLEN		30
-#define NUM_DATA	10
 
 #endif

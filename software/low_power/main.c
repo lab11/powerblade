@@ -25,6 +25,7 @@
 
 //#define CALIBRATE
 //#define NORDICDEBUG
+#define SIDEDATA
 
 // Transmission variables
 bool ready;
@@ -69,12 +70,6 @@ uint64_t wattHours;
 uint32_t wattHoursSend;
 uint8_t flags;
 
-// Buffer to hold old voltage measurements
-// This is used to account for a phase delay between current and voltage
-int8_t vbuff[SAMCOUNT];
-volatile uint8_t vbuff_head;
-uint8_t getVoltageForPhase(uint8_t head);
-
 //void uart_send(char* buf, unsigned int len);
 char txBuf[UARTLEN];
 unsigned int txLen;
@@ -110,46 +105,37 @@ uint32_t SquareRoot(uint32_t a_nInput) {
  * main.c
  */
 int main(void) {
-	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
 
 	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-	TA0CCR0 = 12;						// PWM Period
-	TA0CCR1 = 2;                     	// TA0.1 ADC trigger
-	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
+	TA0CCR0 = 12;								// PWM Period
+	TA0CCR1 = 2;                     			// TA0.1 ADC trigger
+	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
 	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
 	delay_count = 1250;
 	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 	TA0CTL = 0;
 
-	// XT1 Setup
-	PJSEL0 |= BIT4 + BIT5;
-
-	CSCTL0_H = 0xA5;
-	CSCTL1 = DCOFSEL0 + DCOFSEL1;             // Set max. DCO setting
-	CSCTL2 = SELA_0 + SELS_3 + SELM_3;        // set ACLK = XT1; MCLK = DCO
-	CSCTL3 = DIVA_0 + DIVS_1 + DIVM_1;        // set all dividers
-	CSCTL4 |= XT1DRIVE_0;
-	CSCTL4 &= ~XT1OFF;
-
-	do {
-		CSCTL5 &= ~XT1OFFG;					  // Clear XT1 fault flag
+	// Clock Setup
+	PJSEL0 |= BIT4 + BIT5;						// XIN, XOUT on PJ4, PJ5 with external crystal
+	CSCTL0_H = 0xA5;							// Input CSKEY password to change clock settings
+	CSCTL1 = DCOFSEL0 + DCOFSEL1;             	// Set DCO to 8MHz
+	CSCTL2 = SELA_0 + SELS_3 + SELM_3;        	// Set ACLK = XT1, SMCLK = MCLK = DCO
+	CSCTL3 = DIVA_0 + DIVS_1 + DIVM_1;        	// Set ACLK = XT1/1 (32768Hz), SMCLK = MCLK = DCO/2 (4MHz)
+	CSCTL4 |= XT1DRIVE_0;						// Set XT1 LF, lowest current consumption
+	CSCTL4 &= ~XT1OFF;							// Turn on XT1
+	do {										// Test XT1 for correct initialization
+		CSCTL5 &= ~XT1OFFG;					  	// Clear XT1 fault flags
 		SFRIFG1 &= ~OFIFG;
-	} while (SFRIFG1 & OFIFG);                   // Test oscillator fault flag
-
-//  	__bis_SR_register(LPM3_bits);        	// Enter LPM3 w/ interrupts
+	} while (SFRIFG1 & OFIFG);              	// Test oscillator fault flag
+	// XT1 test passed
 
 	// Low power in port J
 	PJDIR = 0;
 	PJOUT = 0;
 	PJREN = 0xFF;
 
-	// Output ACLK
-//    PJDIR |= BIT2;
-//    PJSEL1 &= ~BIT2;
-//    PJSEL0 |= BIT2;
-
 	// Low power in port 1
-//    P1DIR = BIT2 + BIT3;
 	P1DIR = 0;
 	P1OUT = 0;
 	P1REN = 0xFF;
@@ -158,10 +144,6 @@ int main(void) {
 	P2DIR = 0;
 	P2OUT = 0;
 	P2REN = 0xFF;
-
-	// Set SEN_EN to output and disable (~200uA)
-	SEN_EN_OUT &= ~SEN_EN_PIN;
-	SEN_EN_DIR |= SEN_EN_PIN;
 
 	// Zero all sensing values
 	sampleCount = 0;
@@ -172,14 +154,9 @@ int main(void) {
 	wattHours = 0;
 	wattHoursToAverage = 0;
 	voltAmpsToAverage = 0;
+
+	// Initialize remaining transmitted values
 	sequence = 0;
-	time = 0;
-	flags = 0;
-	agg_current = 0;
-	vbuff_head = 0;
-
-	rxCt = 0;
-
 #ifdef CALIBRATE
 	time = 0;
 #else
@@ -187,50 +164,52 @@ int main(void) {
 	time = (time<<8)+VSCALE;
 	time = (time<<8)+WHSCALE;
 #endif
+	flags = 0;
 
-	// Set SYS_EN to output and disable (PMOS)
+	// Initialize UART receive count
+	rxCt = 0;
+
+	// Set SEN_EN to output and disable (~200uA)
+	SEN_EN_OUT &= ~SEN_EN_PIN;
+	SEN_EN_DIR |= SEN_EN_PIN;
+
+	// Set SYS_EN (radio control) to output and disable (PMOS)
+	ready = 0;
 	SYS_EN_OUT |= SYS_EN_PIN;
 	SYS_EN_DIR |= SYS_EN_PIN;
-	ready = 0;
 
 	// Set up UART
-//    P2SEL0 &= ~(BIT0);// + BIT1);
-//    P2SEL1 |= BIT0;// + BIT1;
-//    P2DIR |= BIT1;
-//    P2OUT |= BIT1;
-//    P1DIR |= BIT6;
-//    P1OUT |= BIT6;
-	UCA0CTL1 |= UCSWRST;
-	UCA0CTL1 |= UCSSEL_2;
-//    UCA0BR0 = 52;
+	UCA0CTL1 |= UCSWRST;						// Put UART into reset
+	UCA0CTL1 |= UCSSEL_2;						// Set to SMCLK
+//    UCA0BR0 = 52;								// Baud configuration for 38400
 //    UCA0BR1 = 0;
 //    UCA0MCTLW = 0x0200;
-	UCA0BR0 = 34;
+	UCA0BR0 = 34;								// Baud configuration for 115200
 	UCA0BR1 = 0;
 	UCA0MCTLW = 0xBB00;
-	UCA0CTL1 &= ~UCSWRST;
-	UCA0IE |= UCRXIE + UCTXCPTIE;
+	UCA0CTL1 &= ~UCSWRST;						// Take UART out of reset
+	UCA0IE |= UCRXIE + UCTXCPTIE;				// Enable RX, TX Complete interrupts
 
+	// Set up ADC
 	// Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
-	P1SEL1 |= BIT0 + BIT1 + BIT4 + BIT5;
+	P1SEL1 |= BIT0 + BIT1 + BIT4 + BIT5;		// Set up ADC on A0, A1, A4, & A5
 	P1SEL0 |= BIT0 + BIT1 + BIT4 + BIT5;
-//    P1DIR |= BIT4 + BIT5;
-//    P1OUT |= BIT4 + BIT5;
-	P1DIR |= BIT4 + BIT0;
+	P1DIR |= BIT4 + BIT0;						// Not sure what this does
 	P1OUT |= BIT4 + BIT0;
-	ADC10CTL0 |= ADC10ON;                  // + ADC10MSC;          	// ADC10ON
-	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3; // rpt series of ch; TA0.1 trig sample start
+	ADC10CTL0 |= ADC10ON;                  		// Turn ADC on (ADC10ON), no multiple sample (ADC10MSC)
+	// XXX do we need CONSEQ_3?
+	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3; // ADC10SC source select, sampling timer
 	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
-	ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0; // A3,4,5 ADC input select; Vref=AVCC
-
+	// XXX is the first input set to A4 or A5?
+	ADC10MCTL0 = ADC10INCH_5 + ADC10SREF_0; 	// Reference set to VCC & VSS, first input set to A4
 	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
-	ADC10IE |= ADC10IE0;                   // Enable ADC conv complete interrupt
+	ADC10IE |= ADC10IE0;                   		// Enable ADC conv complete interrupt
 
 	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-	TA0CCR0 = 12;						// PWM Period
-	TA0CCR1 = 2;                     	// TA0.1 ADC trigger
-	TA0CCTL1 = OUTMOD_7 + CCIE;                       	// TA0CCR0 toggle
-	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
+	TA0CCR0 = 12;								// PWM Period
+	TA0CCR1 = 2;                     			// TA0.1 ADC trigger
+	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
+	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// TA0 set to ACLK (32kHz), up mode
 
 	// Set up PWM for side channel data
   	P1DIR |= BIT2 + BIT3;
@@ -463,9 +442,6 @@ __interrupt void ADC10_ISR(void) {
 		case 3:	// I_SENSE
 #endif
 		{
-			// Set debug pin
-			//P1OUT |= BIT2;
-
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
 
@@ -480,9 +456,6 @@ __interrupt void ADC10_ISR(void) {
 		case 3:	// V_SENSE (same in versions 0, 1, and 3.1)
 #endif
 		{
-			// Set debug pin
-			//P1OUT |= BIT2;
-
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
@@ -510,9 +483,6 @@ __interrupt void ADC10_ISR(void) {
 #else
 		case 4:	// VCC_SENSE
 #endif
-			// Set debug pin
-			//P1OUT |= BIT2;
-
 			// Perform Vcap measurements
 			if (ADC_Result < ADC_VMIN) {
 #if !defined (NORDICDEBUG)
@@ -539,9 +509,6 @@ __interrupt void ADC10_ISR(void) {
 			ADC10CTL0 += ADC10SC;
 			break;
 		default: // ADC Reset condition
-			// Set debug pin
-			//P1OUT |= BIT3;
-
 			ADC10CTL0 += ADC10SC;
 			break;
 		}
@@ -549,7 +516,6 @@ __interrupt void ADC10_ISR(void) {
 	default:
 		break;
 	}
-	//P1OUT &= ~(BIT3 + BIT2);
 }
 
 #pragma vector=USCI_A0_VECTOR
