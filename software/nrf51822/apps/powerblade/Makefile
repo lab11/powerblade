@@ -6,19 +6,19 @@ APPLICATION_SRCS += ble_advdata.c
 APPLICATION_SRCS += ble_conn_params.c
 APPLICATION_SRCS += ble_srv_common.c
 APPLICATION_SRCS += app_timer.c
-#APPLICATION_SRCS += app_uart.c
 APPLICATION_SRCS += app_util_platform.c
 APPLICATION_SRCS += nrf_delay.c
 APPLICATION_SRCS += nrf_drv_common.c
-#APPLICATION_SRCS += nrf_drv_uart.c
+
+APPLICATION_SRCS += checksum.c
 
 APPLICATION_SRCS += led.c
 APPLICATION_SRCS += simple_ble.c
 APPLICATION_SRCS += simple_adv.c
 APPLICATION_SRCS += eddystone.c
 
-LIBRARY_PATHS += ./ ../../platform/
-SOURCE_PATHS += ./ ../../platform/
+LIBRARY_PATHS += ./ ../../platform/ ../../../common/include/
+SOURCE_PATHS += ./ ../../platform/ ../../../common/source/
 
 NRF_MODEL          = nrf51
 NRF_IC             = nrf51822
