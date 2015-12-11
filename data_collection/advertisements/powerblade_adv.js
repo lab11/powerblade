@@ -2,6 +2,11 @@
 
 var noble = require('noble');
 
+var dedup = true;
+if (process.argv.length >= 3 && process.argv[2] == "--all") {
+    dedup = false;
+}
+
 var POWERBLADE_MANUF_ID = 0x4908;
 
 // {BLE Address: Most recent sequence number} for each PowerBlade
@@ -50,7 +55,7 @@ noble.on('discover', function (peripheral) {
         if (!(address in powerblade_sequences)) {
             powerblade_sequences[address] = -1;
         }
-        if (powerblade_sequences[address] == sequence_num) {
+        if (dedup && powerblade_sequences[address] == sequence_num) {
             // duplicate advertisement. Don't display
             return;
         }
