@@ -6,7 +6,7 @@
  * Reported values at 1Hz:
  * 	   PowerBlade ID:	1 byte
  * 	        sequence:	4 bytes		(since power on)
- * 	            time:	4 bytes		(since data confirmation)
+ * 	           scale:	4 bytes		(since data confirmation)
  * 	            Vrms:	1 byte		(over last 1s)
  * 	      true_power: 	2 bytes		(over last 1s)
  * 	  apparent_power:	2 bytes		(over last 1s)
@@ -25,7 +25,7 @@
 
 //#define CALIBRATE
 //#define NORDICDEBUG
-#define SIDEDATA
+//#define SIDEDATA
 
 // Transmission variables
 bool ready;
@@ -62,7 +62,7 @@ uint8_t powerblade_id = 1;
 
 // Transmitted values
 uint32_t sequence;
-uint32_t time;
+uint32_t scale;
 uint8_t Vrms;
 uint16_t truePower;
 uint16_t apparentPower;
@@ -79,6 +79,8 @@ char rxBuf[RXLEN];
 char captureBuf[RXLEN - 3];
 int rxCt;
 int capCt;
+
+void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len);
 
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
@@ -158,13 +160,19 @@ int main(void) {
 	// Initialize remaining transmitted values
 	sequence = 0;
 #ifdef CALIBRATE
-	time = 0;
+	scale = 0;
 #else
-	time = PSCALE;
-	time = (time<<8)+VSCALE;
-	time = (time<<8)+WHSCALE;
+	scale = PSCALE;
+	scale = (scale<<8)+VSCALE;
+	scale = (scale<<8)+WHSCALE;
 #endif
 	flags = 0;
+
+	// Stuff the transmit buffer with constants
+	uart_stuff(OFFSET_UARTLEN, (char*) &uart_len, sizeof(uart_len));
+	uart_stuff(OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
+	uart_stuff(OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
+	uart_stuff(OFFSET_FLAGS, (char*) &flags, sizeof(flags));
 
 	// Initialize UART receive count
 	rxCt = 0;
@@ -260,14 +268,14 @@ void uart_enable(bool enable) {
 	}
 }
 
-void uart_stuff(char* destbuf, unsigned int *offset, char* srcbuf, unsigned int len) {
+void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len) {
+	// XXX can i just use len (without tempCt)?
 	int tempCt = len - 1;
 	while(tempCt >= 0) {
-		destbuf[(*offset)++] = srcbuf[tempCt--];
+		txBuf[offset++] = srcbuf[tempCt--];
 	}
 }
 
-//void uart_send(char* buf, unsigned int len) {
 void uart_send() {
 	// Calculate checksum and append to buffer
 	txBuf[UARTLEN-1] = additive_checksum((uint8_t*)txBuf, UARTLEN-1);
@@ -379,22 +387,17 @@ void transmitTry(void) {
 				__delay_cycles(80000);
 
 				// Stuff data into txBuf
-				unsigned int offset = 0;
-				uart_stuff(txBuf, &offset, (char*) &uart_len, sizeof(uart_len));
-				uart_stuff(txBuf, &offset, (char*) &ad_len, sizeof(ad_len));
-				uart_stuff(txBuf, &offset, (char*) &powerblade_id, sizeof(powerblade_id));
-				uart_stuff(txBuf, &offset, (char*) &sequence, sizeof(sequence));
-				uart_stuff(txBuf, &offset, (char*) &time, sizeof(time));
-				uart_stuff(txBuf, &offset, (char*) &Vrms, sizeof(Vrms));
-				uart_stuff(txBuf, &offset, (char*) &truePower, sizeof(truePower));
-				uart_stuff(txBuf, &offset, (char*) &apparentPower, sizeof(apparentPower));
+				uart_stuff(OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
+				uart_stuff(OFFSET_SCALE, (char*) &scale, sizeof(scale));
+				uart_stuff(OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
+				uart_stuff(OFFSET_TP, (char*) &truePower, sizeof(truePower));
+				uart_stuff(OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 #ifdef CALIBRATE
-				uart_stuff(txBuf, &offset, (char*) &tx_i_ave, sizeof(tx_i_ave));
+				uart_stuff(OFFSET_WH, (char*) &tx_i_ave, sizeof(tx_i_ave));
 #else
 				wattHoursSend = (uint32_t)(wattHours >> 9);
-				uart_stuff(txBuf, &offset, (char*) &wattHoursSend, sizeof(wattHoursSend));
+				uart_stuff(OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
 #endif
-				uart_stuff(txBuf, &offset, (char*) &flags, sizeof(flags));
 
 				uart_send();
 			}
