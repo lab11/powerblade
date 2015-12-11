@@ -41,9 +41,8 @@ APP_TIMER_DEF(start_manufdata_timer);
 #define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, TIMER_PRESCALER)
 
 // advertisement data collected from UART
-#define POWERBLADE_ADV_DATA_LEN 0x13
-#define POWERBLADE_ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
-static uint8_t powerblade_adv_data[POWERBLADE_ADV_DATA_MAX_LEN];
+#define ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
+static uint8_t powerblade_adv_data[ADV_DATA_MAX_LEN];
 static uint8_t powerblade_adv_data_len = 0;
 
 // uart control
@@ -51,8 +50,9 @@ static bool uart_rxing = false;
 static bool uart_txing = false;
 static uint8_t* tx_data;
 static uint16_t tx_data_len = 0;
-#define UART_BUF_MAX_LEN 50
-static uint8_t uart_buf[UART_BUF_MAX_LEN];
+#define RX_DATA_MAX_LEN 50
+static uint8_t rx_data[RX_DATA_MAX_LEN];
+
 
 static void uart_rx_disable(void) {
     // stop receiving, disable module if not still in use
@@ -215,64 +215,23 @@ void start_manufdata_adv (void) {
     APP_ERROR_CHECK(err_code);
 }
 
-void uart_rx_handler (void) {
-    static uint16_t uart_len = 0;
-    static uint16_t uart_index = 0;
-    static uint8_t adv_len = 0;
-    static uint8_t additional_len = 0;
-    static uint8_t checksum = 0;
+void process_rx_packet(uint16_t packet_len) {
 
-    // data is available
-    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
-    uint8_t uart_data = nrf_uart_rxd_get(NRF_UART0);
-    uart_buf[uart_index] = uart_data;
+    // turn off UART until next window
+    uart_rx_disable();
+    app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
 
-    // parse data from MSP430 based on index
-    if (uart_index == 0) {
-        // UART length MSB
-        uart_len = (uart_data << 8 | 0x00);
+    // check CRC
+    if (additive_checksum(rx_data, packet_len-1) == rx_data[packet_len-1]) {
 
-    } else if (uart_index == 1) {
-        // UART length LSB
-        uart_len |= uart_data;
+        // check validity of advertisement length
+        uint8_t adv_len = rx_data[2];
+        if (4+adv_len <= packet_len) {
 
-    } else if (uart_index == 2) {
-        // Advertisement length
-        adv_len = uart_data;
-        powerblade_adv_data_len = adv_len;
-
-        // Additional length is known also
-        //  Total - length bytes - adv length - checksum byte
-        additional_len = (uart_len - 3 - adv_len - 1);
-
-    } else if (adv_len > 0 && (uart_index-3) < adv_len) {
-        // Advertisement data
-        uint8_t adv_index = uart_index-3;
-        if (adv_index < POWERBLADE_ADV_DATA_MAX_LEN) {
-            // only record the data that fits
-            powerblade_adv_data[adv_index] = uart_data;
-        }
-
-    } else if (additional_len > 0 && uart_index < (uart_len-1)) {
-        // Additional UART data
-        // Do nothing with data for now
-
-    } else if (uart_index == (uart_len-1)) {
-        // Checksum byte
-        checksum = uart_data;
-    }
-
-    uart_index++;
-    if (uart_index >= 4 && (uart_index >= uart_len || uart_index == UART_BUF_MAX_LEN)) {
-        // UART data is finished when we have received the whole header, plus
-        //  whatever Advertisement and Additional data exists, plus checksum
-
-        // turn off UART until next window
-        uart_rx_disable();
-        app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
-
-        // validate data
-        if (additive_checksum(uart_buf, uart_index-1) == checksum) {
+            // limit to valid advertisement length
+            if (adv_len > ADV_DATA_MAX_LEN) {
+                adv_len = ADV_DATA_MAX_LEN;
+            }
 
             // update advertisement
             //NOTE: this is safe to call no matter where in the
@@ -280,12 +239,40 @@ void uart_rx_handler (void) {
             //  nothing changes (second call to timer_start does nothing).
             //  If called during Eddystone, timing is screwed up, but it'll fix
             //  itself within one cycle
+            powerblade_adv_data_len = adv_len;
+            memcpy(powerblade_adv_data, &(rx_data[3]), adv_len);
             start_manufdata_adv();
         }
 
-        uart_len = 0;
-        uart_index = 0;
-        adv_len = 0;
+        // handle additional UART data
+        // Do nothing for now
+    }
+}
+
+void uart_rx_handler (void) {
+    static uint16_t packet_len = 0;
+    static uint16_t rx_index = 0;
+
+    // data is available
+    nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
+    rx_data[rx_index] = nrf_uart_rxd_get(NRF_UART0);
+    rx_index++;
+
+    // check if we have received the entire packet
+    //  This can't occur until we have length, adv length, and checksum
+    if (rx_index >= 4) {
+
+        // parse out expected packet length
+        if (packet_len == 0) {
+            packet_len = (rx_data[0] << 8 | rx_data[1]);
+        }
+
+        // process packet if we have all of it
+        if (rx_index >= packet_len || rx_index >= RX_DATA_MAX_LEN) {
+            process_rx_packet(packet_len);
+            packet_len = 0;
+            rx_index = 0;
+        }
     }
 }
 
