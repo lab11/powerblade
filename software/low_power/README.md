@@ -29,3 +29,6 @@ MSP430 platforms. The install process took a while for me (10 minutes).
 
 7. Build should work.
 
+8. Some amount of clicking on run debug should get it to try to flash
+using the msp-fet430uif.
+
