@@ -46,9 +46,10 @@ void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len) {
 	}
 }
 
-void uart_send(void) {
+void uart_send(uint16_t uart_len) {
 	// Calculate checksum and append to buffer
-	txBuf[UARTLEN-1] = additive_checksum((uint8_t*)txBuf, UARTLEN-1);
+	txLen = uart_len;
+	txBuf[txLen-1] = additive_checksum((uint8_t*)txBuf, txLen-1);
 
 	// Enable interrupt and transmit
 	UCA0IE |= UCTXIE;
@@ -96,7 +97,7 @@ __interrupt void USCI_A0_ISR(void) {
 		rxBuf[rxCt++] = UCA0RXBUF;
 		break;
 	case 4:									// TX interrupt
-		if (txCt < UARTLEN) {
+		if (txCt < txLen) {
 			UCA0TXBUF = txBuf[txCt++];
 		} else {
 			UCA0IE &= ~UCTXIE;
