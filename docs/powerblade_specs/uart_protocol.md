@@ -42,10 +42,10 @@ Example UART packet with advertisement data but no additional data. Advertisemen
 
 The additional data field can be used to transfer non-advertisement data to the nRF. This can include additional fine-grained power data or information on the device's current state.
 
-| **Field**           | Add Data Length | Add Data Type | Add Data Values   |
-|:-------------------:|:---------------:|:-------------:|:-----------------:|
-| **Number of Bytes** | 2               | 1             | `Add Data Length` |
-| **Byte Index**      | 0-1             | 2             | 3-                |
+| **Field**           | Add Data Type | Add Data Values   |
+|:-------------------:|:-------------:|:-----------------:|
+| **Number of Bytes** | 1             | `Add Data Length` |
+| **Byte Index**      | 0             | 1-                |
 
  * **Add Data Length**: Length of the additional data, including itself
  * **Add Data Type**: Type of data. Informs nRF how to interpret the data. See below
@@ -86,7 +86,6 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 
 | Value | Name |
 |:------|:-----|
-| 0x00	| Set Sequence |
 | 0x10  | Calibration State |
 | 0x11  | Ground Truth Watts |
 | 0x12  | Get CUROFF |
@@ -97,6 +96,7 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x17  | Set V_scale |
 | 0x18  | Get WH_scale |
 | 0x19  | Set WH_scale |
+| 0x1A	| Set Sequence |
 | 0x20  | Get Sample Data |
 
  * **Set Sequence**: Set the sequence number to be included in future packets
