@@ -92,6 +92,8 @@ uint32_t SquareRoot(uint32_t a_nInput) {
 	return res;
 }
 
+void transmitTry(void);
+
 /*
  * main.c
  */
@@ -211,7 +213,10 @@ int main(void) {
 
 	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
-	return 0;
+	while(1) {
+		transmitTry();
+		__bis_SR_register(LPM3_bits + GIE);
+	}
 }
 
 #pragma vector=TIMER0_A1_VECTOR
@@ -356,7 +361,8 @@ __interrupt void ADC10_ISR(void) {
 			current = (int8_t) (ADC_Result - I_VCC2);
 
 			// Current is the last measurement, attempt transmission
-			transmitTry();
+			//transmitTry();
+			__bic_SR_register_on_exit(LPM3_bits);
 			break;
 		}
 		case VCASE:								// V_SENSE
