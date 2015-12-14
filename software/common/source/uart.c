@@ -75,17 +75,16 @@ int processMessage(void) {
 	capCt = 0;
 	if(additive_checksum((uint8_t*)rxBuf, rxLen - 1) == rxBuf[rxLen - 1]){
 
+		captureType = rxBuf[2];
+
 		// Get all bytes but checksum
-		for(rxIndex = 2; rxIndex < (rxLen-1); rxIndex++){
+		for(rxIndex = 3; rxIndex < (rxLen-1); rxIndex++){
 			captureBuf[capCt++] = rxBuf[rxIndex];
 		}
-
-		// XXX temporary: testing UART by setting sequence to the received byte
-		//sequence = (uint32_t)captureBuf[0];
 	}
 	rxCt = 0;
 
-	return capCt;
+	return capCt + 1;
 }
 
 #pragma vector=USCI_A0_VECTOR

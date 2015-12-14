@@ -3,7 +3,8 @@
 
 #include "powerblade_test.h"
 
-char captureBuf[RXLEN - 3];
+char captureType;
+char captureBuf[RXLEN - 4];
 
 void uart_init(void);
 void uart_enable(bool enable);
