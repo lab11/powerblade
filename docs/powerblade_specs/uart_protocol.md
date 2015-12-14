@@ -47,7 +47,6 @@ The additional data field can be used to transfer non-advertisement data to the 
 | **Number of Bytes** | 1             | `Add Data Length` |
 | **Byte Index**      | 0             | 1-                |
 
- * **Add Data Length**: Length of the additional data, including itself
  * **Add Data Type**: Type of data. Informs nRF how to interpret the data. See below
  * **Add Data Values**: Data elements. Length and interpretation depend on `Add Data Type`
 
