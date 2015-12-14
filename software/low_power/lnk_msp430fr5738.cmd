@@ -159,7 +159,7 @@ SECTIONS
     .bslsignature  : {} > BSLSIGNATURE    /* BSL SIGNATURE                     */
     .jtagpassword                         /* JTAG PASSWORD                     */
 
-    .bss        : {} > RAM                /* GLOBAL & STATIC VARS              */
+    .bss        : {} > FRAM                /* GLOBAL & STATIC VARS              */
     .data       : {} > RAM                /* GLOBAL & STATIC VARS              */
     .TI.noinit  : {} > RAM                /* For #pragma NOINIT                */
     .stack      : {} > RAM (HIGH)         /* SOFTWARE SYSTEM STACK             */
