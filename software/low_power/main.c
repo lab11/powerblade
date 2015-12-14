@@ -182,8 +182,7 @@ int main(void) {
 	P1DIR |= BIT4 + BIT0;						// Not sure what this does
 	P1OUT |= BIT4 + BIT0;
 	ADC10CTL0 |= ADC10ON;                  		// Turn ADC on (ADC10ON), no multiple sample (ADC10MSC)
-	// XXX do we need CONSEQ_3?
-	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP + ADC10CONSEQ_3; // ADC10SC source select, sampling timer
+	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP;			// ADC10SC source select, sampling timer
 	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
 	ADC10MCTL0 = VCCMCTL0; 						// Reference set to VCC & VSS, first input set to VCC_SENSE
 	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
@@ -195,17 +194,18 @@ int main(void) {
 	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
 	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// TA0 set to ACLK (32kHz), up mode
 
+	P1DIR |= BIT2 + BIT3;
 #if defined (SIDEDATA)
 	// Set up PWM for side channel data
-  	P1DIR |= BIT2 + BIT3;						// Set up P1.2 & P1.3 as timer
-  	P1SEL0 |= BIT2 + BIT3;						// output pins
-  	TA1CCR0 = 1572;								// Period set to 393 us
-  	pwm_duty = 100;								// Initialize both current and voltage to 100
-  	voltage_duty = 100;
-  	TA1CCR1 = pwm_duty;
-  	TA1CCR2 = voltage_duty;
-  	TA1CCTL1 = OUTMOD_7;						// Set current and voltage to RST/SET
-  	TA1CCTL2 = OUTMOD_7;
+//  	P1DIR |= BIT2 + BIT3;						// Set up P1.2 & P1.3 as timer
+//  	//P1SEL0 |= BIT2 + BIT3;						// output pins
+//  	TA1CCR0 = 1572;								// Period set to 393 us
+//  	pwm_duty = 100;								// Initialize both current and voltage to 100
+//  	voltage_duty = 100;
+//  	TA1CCR1 = pwm_duty;
+//  	TA1CCR2 = voltage_duty;
+//  	TA1CCTL1 = OUTMOD_7;						// Set current and voltage to RST/SET
+//  	TA1CCTL2 = OUTMOD_7;
   	TA1CTL = TASSEL_2 + MC_1 + TAIE + TACLR;	// SMCLK, up to TA1R0, enable overflow int
 #endif
 
@@ -217,7 +217,7 @@ int main(void) {
 #pragma vector=TIMER0_A1_VECTOR
 __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL1 &= ~CCIFG;
-	//P2OUT ^= BIT0;
+//	P1OUT |= BIT2;
 	if (delay_count > 1) {
 		delay_count--;
 	} else if (delay_count == 1) {
@@ -225,17 +225,22 @@ __interrupt void TIMERA0_ISR(void) {
 		__bic_SR_register_on_exit(LPM3_bits);
 	} else {
 		// Start with VCC_SENSE
+		ADC10CTL0 &= ~ADC10ENC;
 		ADC10MCTL0 = VCCMCTL0;
+		ADC10CTL0 |= ADC10ENC;
 		ADC10CTL0 += ADC10SC;
 	}
+//	P1OUT &= ~BIT2;
 }
 
-#pragma vector=TIMER1_A1_VECTOR
-__interrupt void TIMERA1_ISR(void) {
-	TA1CTL &= ~TAIFG;
-	TA1CCR1 = pwm_duty;
-	TA1CCR2 = voltage_duty;
-}
+//#pragma vector=TIMER1_A1_VECTOR
+//__interrupt void TIMERA1_ISR(void) {
+//	TA1CTL &= ~TAIFG;
+//	P1OUT |= BIT3;
+//	TA1CCR1 = pwm_duty;
+//	TA1CCR2 = voltage_duty;
+//	P1OUT &= ~BIT3;
+//}
 
 void transmitTry(void) {
 
@@ -256,11 +261,11 @@ void transmitTry(void) {
 	acc_p_ave += (voltage * new_current);
 	acc_v_rms += voltage * voltage;
 
-#if defined (SIDEDATA)
-	// Set side channel output
-	pwm_duty = (agg_current >> 3) + 786;
-	voltage_duty = voltage + 786;
-#endif
+//#if defined (SIDEDATA)
+//	// Set side channel output
+//	pwm_duty = (agg_current >> 3) + 786;
+//	voltage_duty = voltage + 786;
+//#endif
 
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
@@ -346,6 +351,7 @@ __interrupt void ADC10_ISR(void) {
 		switch (ADC_Channel) {
 		case ICASE:								// I_SENSE
 		{
+			P1OUT |= BIT3;
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
 
@@ -355,16 +361,20 @@ __interrupt void ADC10_ISR(void) {
 		}
 		case VCASE:								// V_SENSE
 		{
+			P1OUT |= BIT3;
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
+			ADC10CTL0 &= ~ADC10ENC;
 			ADC10MCTL0 = IMCTL0;
+			ADC10CTL0 |= ADC10ENC;
 			ADC10CTL0 += ADC10SC;
 			break;
 		}
 		case VCCCASE:	// VCC_SENSE
+			P1OUT |= BIT3 + BIT2;
 			// Perform Vcap measurements
 			if (ADC_Result < ADC_VMIN) {
 #if !defined (NORDICDEBUG)
@@ -383,10 +393,13 @@ __interrupt void ADC10_ISR(void) {
 
 			// Enable next sample
 			// After VCC_SENSE do V_SENSE
+			ADC10CTL0 &= ~ADC10ENC;
 			ADC10MCTL0 = VMCTL0;
+			ADC10CTL0 |= ADC10ENC;
 			ADC10CTL0 += ADC10SC;
 			break;
 		default: // ADC Reset condition
+			P1OUT |= BIT2;
 			ADC10CTL0 += ADC10SC;
 			break;
 		}
@@ -394,6 +407,7 @@ __interrupt void ADC10_ISR(void) {
 	default:
 		break;
 	}
+	P1OUT &= ~(BIT2 + BIT3);
 }
 
 
