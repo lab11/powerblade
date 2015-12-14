@@ -65,7 +65,7 @@ Each additional data field has only a single `Add Data Type`. If the MSP430 has 
 
 ## nRF to MSP Packet Specification
 
-Packets are sent from the nRF to the MSP430 asynchronously based on interactions with the user over BLE. Packets include information such as changes to device state (e.g. enter calibration mode) or parameter changes to the device.
+Packets are sent from the nRF to the MSP430 asynchronously based on interactions with the user over BLE, only one nRF to MSP430 packet may be sent per second. Packets include information such as changes to device state (e.g. enter calibration mode) or parameter changes to the device.
 
 ### Packet Format
 
@@ -96,13 +96,16 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x18  | Get WH_scale |
 | 0x19  | Set WH_scale |
 | 0x1A	| Set Sequence |
-| 0x20  | Get Sample Data |
+| 0x20  | Start Sample Data Download |
+| 0x21	| Continue Sample Data Download |
+| 0xFF	| NAK (Checksum failed) |
 
  * **Set Sequence**: Set the sequence number to be included in future packets
  * **Calibration State**: Set current state of device calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Ground Truth Watts**: Active real power that the system should register. Used for calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Get/Set X**: Getters and Setters for various calibration values
  * **Get Sample Data**: Get individual samples from one second of power sampling
+ * **NAK**: nRF indicating checksum of previous message failed
 
 #### Example Packet
 
