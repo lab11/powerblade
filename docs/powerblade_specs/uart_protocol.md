@@ -86,6 +86,7 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 
 | Value | Name |
 |:------|:-----|
+| 0x00	| Set Sequence |
 | 0x10  | Calibration State |
 | 0x11  | Ground Truth Watts |
 | 0x12  | Get CUROFF |
@@ -98,6 +99,7 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x19  | Set WH_scale |
 | 0x20  | Get Sample Data |
 
+ * **Set Sequence**: Set the sequence number to be included in future packets
  * **Calibration State**: Set current state of device calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Ground Truth Watts**: Active real power that the system should register. Used for calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Get/Set X**: Getters and Setters for various calibration values
