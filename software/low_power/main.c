@@ -21,6 +21,7 @@
 #include <math.h>
 
 #include "powerblade_test.h"
+#include "uart_types.h"
 #include "checksum.h"
 #include "uart.h"
 
@@ -296,10 +297,20 @@ void transmitTry(void) {
 		if (measCount >= 60) { 					// Another second has passed
 			measCount = 0;
 
+			tx_type_t tx_type = TXNORMAL;
+
 			// Process any UART bytes
 			int receivedCount = processMessage();
 			if(receivedCount > 0) {
-				sequence = captureBuf[0];
+				switch(captureType) {
+				case SET_SEQ:
+					sequence = captureBuf[0];
+					break;
+				case START_SAMDATA:
+					tx_type = TXSAMPLE;
+				default:
+					break;
+				}
 			}
 
 			// Increment sequence number for transmission
@@ -337,7 +348,14 @@ void transmitTry(void) {
 				uart_stuff(OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
 #endif
 
-				uart_send();
+				switch(tx_type) {
+				case TXNORMAL:
+					uart_send(23);
+					break;
+				case TXSAMPLE:
+					uart_send(528);
+					break;
+				}
 			}
 		}
 	}
