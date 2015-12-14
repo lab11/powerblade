@@ -140,4 +140,17 @@
 #define UARTLEN		23
 #define RXLEN		30
 
+/**************************************************************************
+   STATE MACHINE SECTION
+ **************************************************************************/
+typedef enum {
+	tx_normal,
+	tx_sample
+} tx_type_t;
+
+typedef enum {
+	pb_normal,
+	pb_data
+} pb_state_t;
+
 #endif

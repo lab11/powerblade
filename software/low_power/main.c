@@ -72,6 +72,10 @@ uint64_t wattHours;
 uint32_t wattHoursSend;
 uint8_t flags;
 
+// PowerBlade state (used for downloading data)
+pb_state_t pb_state;
+int txIndex;
+
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
 	uint32_t res = 0;
@@ -138,6 +142,9 @@ int main(void) {
 	P2DIR = 0;
 	P2OUT = 0;
 	P2REN = 0xFF;
+
+	// Initialize system state
+	pb_state = pb_normal;
 
 	// Zero all sensing values
 	sampleCount = 0;
@@ -297,7 +304,7 @@ void transmitTry(void) {
 		if (measCount >= 60) { 					// Another second has passed
 			measCount = 0;
 
-			tx_type_t tx_type = TXNORMAL;
+			tx_type_t tx_type = tx_normal;
 
 			// Process any UART bytes
 			int receivedCount = processMessage();
@@ -306,9 +313,36 @@ void transmitTry(void) {
 				case SET_SEQ:
 					sequence = captureBuf[0];
 					break;
-				case START_SAMDATA:
-					tx_type = TXSAMPLE;
 				default:
+					switch(pb_state) {
+
+					case pb_normal:
+						switch(captureType) {
+						case START_SAMDATA:
+							tx_type = tx_sample;
+							pb_state = pb_data;
+							txIndex = 0;
+							break;
+						default:
+							break;
+						}
+						break;
+
+					case pb_data:
+						switch(captureType) {
+						case CONT_SAMDATA:
+							tx_type = tx_sample;
+							txIndex++;
+							break;
+						case UART_NAK:
+							tx_type = tx_sample;
+							break;
+						default:
+							break;
+						}
+						break;
+
+					}
 					break;
 				}
 			}
@@ -349,10 +383,10 @@ void transmitTry(void) {
 #endif
 
 				switch(tx_type) {
-				case TXNORMAL:
+				case tx_normal:
 					uart_send(23);
 					break;
-				case TXSAMPLE:
+				case tx_sample:
 					uart_send(528);
 					break;
 				}
