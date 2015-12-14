@@ -23,12 +23,4 @@
 #define CONT_SAMDATA	0x21
 #define UART_NAK		0xFF
 
-/**************************************************************************
-   STATE MACHINE SECTION
- **************************************************************************/
-typedef enum {
-	TXNORMAL,
-	TXSAMPLE,
-} tx_type_t;
-
 #endif
