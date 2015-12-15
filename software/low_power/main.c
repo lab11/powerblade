@@ -58,8 +58,8 @@ uint32_t wattHoursToAverage;
 uint32_t voltAmpsToAverage;
 
 // Near-constants to be transmitted
-uint16_t uart_len = UARTLEN;
-uint8_t ad_len = 19;
+uint16_t uart_len;
+uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 1;
 
 // Transmitted values
@@ -73,8 +73,10 @@ uint32_t wattHoursSend;
 uint8_t flags;
 
 // PowerBlade state (used for downloading data)
+int dataIndex;
 pb_state_t pb_state;
 int txIndex;
+bool dataComplete;
 
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
@@ -166,12 +168,7 @@ int main(void) {
 	scale = (scale<<8)+WHSCALE;
 #endif
 	flags = 0;
-
-	// Stuff the transmit buffer with constants
-	uart_stuff(OFFSET_UARTLEN, (char*) &uart_len, sizeof(uart_len));
-	uart_stuff(OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
-	uart_stuff(OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
-	uart_stuff(OFFSET_FLAGS, (char*) &flags, sizeof(flags));
+	txIndex = 0;
 
 	// Set SEN_EN to output and disable (~200uA)
 	SEN_EN_OUT &= ~SEN_EN_PIN;
@@ -304,11 +301,15 @@ void transmitTry(void) {
 		if (measCount >= 60) { 					// Another second has passed
 			measCount = 0;
 
-			tx_type_t tx_type = tx_normal;
+			uart_len = ADLEN + UARTOVHD;
 
 			// Process any UART bytes
-			int receivedCount = processMessage();
-			if(receivedCount > 0) {
+			if(pb_state == pb_capture) {
+				uart_len = UARTBLOCK;
+				pb_state = pb_data;
+				dataIndex = 0;
+			}
+			else if(processMessage() > 0) {
 				switch(captureType) {
 				case SET_SEQ:
 					sequence = captureBuf[0];
@@ -319,9 +320,7 @@ void transmitTry(void) {
 					case pb_normal:
 						switch(captureType) {
 						case START_SAMDATA:
-							tx_type = tx_sample;
-							pb_state = pb_data;
-							txIndex = 0;
+							pb_state = pb_capture;
 							break;
 						default:
 							break;
@@ -331,11 +330,24 @@ void transmitTry(void) {
 					case pb_data:
 						switch(captureType) {
 						case CONT_SAMDATA:
-							tx_type = tx_sample;
-							txIndex++;
+							if(dataComplete) {
+								uart_len += 1;
+								txIndex = 0;
+								pb_state = pb_normal;
+								dataComplete = 0;
+								char data_type = DONE_SAMDATA;
+								uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
+							}
+							else {
+								uart_len = UARTBLOCK;
+								txIndex++;
+								if(txIndex == 9) {
+									dataComplete = 1;
+								}
+							}
 							break;
 						case UART_NAK:
-							tx_type = tx_sample;
+							uart_len = UARTBLOCK;
 							break;
 						default:
 							break;
@@ -370,26 +382,24 @@ void transmitTry(void) {
 				__delay_cycles(80000);
 
 				// Stuff data into txBuf
-				uart_stuff(OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
-				uart_stuff(OFFSET_SCALE, (char*) &scale, sizeof(scale));
-				uart_stuff(OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
-				uart_stuff(OFFSET_TP, (char*) &truePower, sizeof(truePower));
-				uart_stuff(OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
+				int blockOffset = txIndex * UARTBLOCK;
+				uart_stuff(blockOffset + OFFSET_UARTLEN, (char*) &uart_len, sizeof(uart_len));
+				uart_stuff(blockOffset + OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
+				uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
+				uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
+				uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
+				uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
+				uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
+				uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 #ifdef CALIBRATE
-				uart_stuff(OFFSET_WH, (char*) &tx_i_ave, sizeof(tx_i_ave));
+				uart_stuff(blockOffset + OFFSET_WH, (char*) &tx_i_ave, sizeof(tx_i_ave));
 #else
 				wattHoursSend = (uint32_t)(wattHours >> 9);
-				uart_stuff(OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
+				uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
 #endif
+				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
 
-				switch(tx_type) {
-				case tx_normal:
-					uart_send(23);
-					break;
-				case tx_sample:
-					uart_send(528);
-					break;
-				}
+				uart_send(uart_len);
 			}
 		}
 	}
@@ -400,6 +410,12 @@ __interrupt void ADC10_ISR(void) {
 
 	uint8_t ADC_Result;
 	unsigned char ADC_Channel;
+
+	int arrayIndex;
+	if(pb_state == pb_capture) {
+		arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
+		dataIndex++;
+	}
 
 	switch (__even_in_range(ADC10IV, 12)) {
 	case 12:
@@ -412,6 +428,10 @@ __interrupt void ADC10_ISR(void) {
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
 
+			if(pb_state == pb_capture) {
+				uart_stuff(arrayIndex, (char*) &current, sizeof(current));
+			}
+
 			// Current is the last measurement, attempt transmission
 			//transmitTry();
 			__bic_SR_register_on_exit(LPM3_bits);
@@ -422,6 +442,10 @@ __interrupt void ADC10_ISR(void) {
 			P1OUT |= BIT3;
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
+
+			if(pb_state == pb_capture) {
+				uart_stuff(arrayIndex, (char*) &current, sizeof(current));
+			}
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
