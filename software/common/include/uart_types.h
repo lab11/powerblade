@@ -21,6 +21,7 @@
 #define SET_SEQ			0x1A
 #define START_SAMDATA	0x20
 #define CONT_SAMDATA	0x21
+#define DONE_SAMDATA	0x22
 #define UART_NAK		0xFF
 
 #endif
