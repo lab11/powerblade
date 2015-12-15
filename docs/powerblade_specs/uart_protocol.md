@@ -58,6 +58,7 @@ Each additional data field has only a single `Add Data Type`. If the MSP430 has 
 |:------|:-----|
 | 0x10  | Calibration State |
 | 0x20  | Sample Data |
+| 0x22	| Send data done (MSP to nRF) |
 
  * **Calibration State**: Current state of device calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Sample Data**: Individual samples from one second of power sampling
@@ -98,7 +99,6 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x1A	| Set Sequence |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
-| 0x22	| Send data done (MSP to nRF) |
 | 0xFF	| NAK (Checksum failed) |
 
  * **Set Sequence**: Set the sequence number to be included in future packets
