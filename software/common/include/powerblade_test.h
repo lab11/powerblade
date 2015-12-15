@@ -84,6 +84,7 @@
 #define OFFSET_AP		15
 #define OFFSET_WH		17
 #define OFFSET_FLAGS	21
+#define OFFSET_DATATYPE	22
 
 /**************************************************************************
    ANALOG SECTION
@@ -137,19 +138,18 @@
 /**************************************************************************
    UART CONSTANTS SECTION
  **************************************************************************/
-#define UARTLEN		23
+#define UARTLEN		5280
+#define UARTBLOCK	528
+#define ADLEN		19
+#define UARTOVHD	4
 #define RXLEN		30
 
 /**************************************************************************
    STATE MACHINE SECTION
  **************************************************************************/
 typedef enum {
-	tx_normal,
-	tx_sample
-} tx_type_t;
-
-typedef enum {
 	pb_normal,
+	pb_capture,
 	pb_data
 } pb_state_t;
 
