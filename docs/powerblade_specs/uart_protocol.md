@@ -98,6 +98,7 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x1A	| Set Sequence |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
+| 0x22	| Send data done (MSP to nRF) |
 | 0xFF	| NAK (Checksum failed) |
 
  * **Set Sequence**: Set the sequence number to be included in future packets
