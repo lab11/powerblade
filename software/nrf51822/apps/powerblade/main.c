@@ -139,8 +139,9 @@ void start_eddystone_adv (void) {
     //XXX: TESTING
     static uint8_t type = DONE_SAMDATA;
     static uint8_t counter = 0;
-    if ((counter++)%3 == 0) {
+    if ((counter++)%10 == 0) {
         on_receive_message(&type, 1);
+        already_transmitted = false;
     }
 }
 
@@ -392,9 +393,11 @@ void services_init (void) {
         simple_ble_add_vlen_characteristic(1, 0, 0, // read, write, notify
                                       rawSample_uuid.type,
                                       RAWSAMPLE_CHAR_DATA_SHORT_UUID,
-                                      1, (uint8_t*)app.raw_sample_data,
+                                      SAMDATA_MAX_LEN, (uint8_t*)app.raw_sample_data,
                                       app.rawSample_service_handle,
                                       &app.rawSample_char_data_handle);
+        // must initialize to maximum valid length. Now reset down to 1
+        simple_ble_update_char_len(&app.rawSample_char_data_handle, 1);
 
         // Add the characteristic to provide raw samples
         app.rawSample_status = 0;
@@ -509,11 +512,17 @@ int main(void) {
     start_manufdata_adv();
     uart_rx_enable();
 
+    //XXX:TESTING
+    led_init(25);
+    led_on(25);
+
     while (1) {
         power_manage();
 
         // state machine. Only send one message per second
         if (!already_transmitted) {
+            //XXX: TESTING
+            led_toggle(25);
             transmit_message();
         }
     }
@@ -546,6 +555,9 @@ void transmit_message(void) {
             tx_buffer[3] = additive_checksum(tx_buffer, length-1);
             uart_send(tx_buffer, length);
             rawSample_state = RS_WAIT_START;
+            //XXX:TESTING
+            memset(app.raw_sample_data, 0x23, 200);
+            simple_ble_update_char_len(&app.rawSample_char_data_handle, 234);
         } else if (rawSample_state == RS_NEXT) {
             // send next data message to MSP
             uint16_t length = 2+1+1; // length (x2), type, checksum
@@ -612,6 +624,11 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
                 app.begin_rawSample = false;
                 app.rawSample_status = 2;
                 simple_ble_notify_char(&app.rawSample_char_status_handle, 1);
+
+                // reset data
+                memset(app.raw_sample_data, 0x00, SAMDATA_MAX_LEN);
+                simple_ble_update_char_len(&app.rawSample_char_data_handle, 1);
+
                 rawSample_state = RS_NONE;
                 break;
             default:
