@@ -29,6 +29,7 @@ SOFTDEVICE_MODEL   = s110
 SOFTDEVICE_VERSION = 8.0.0
 
 CFLAGS = -Os
+LDFLAGS = --specs=nano.specs
 
 NRF_BASE_PATH ?= ../../nrf5x-base/
 include $(NRF_BASE_PATH)/make/Makefile
