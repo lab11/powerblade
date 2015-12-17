@@ -26,7 +26,7 @@
 #include "uart.h"
 
 //#define CALIBRATE
-#define NORDICDEBUG
+//#define NORDICDEBUG
 #define SIDEDATA
 
 // Transmission variables
