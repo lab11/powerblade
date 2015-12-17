@@ -26,7 +26,7 @@
 #include "uart.h"
 
 //#define CALIBRATE
-//#define NORDICDEBUG
+#define NORDICDEBUG
 #define SIDEDATA
 
 // Transmission variables
@@ -167,7 +167,7 @@ int main(void) {
 	scale = (scale<<8)+VSCALE;
 	scale = (scale<<8)+WHSCALE;
 #endif
-	flags = 0;
+	flags = 0xA5;
 	txIndex = 0;
 
 	// Set SEN_EN to output and disable (~200uA)
@@ -307,7 +307,8 @@ void transmitTry(void) {
 			if(pb_state == pb_capture) {
 				uart_len = UARTBLOCK;
 				pb_state = pb_data;
-				dataIndex = 0;
+				char data_type = CONT_SAMDATA;
+				uart_stuff(OFFSET_DATATYPE+(txIndex*UARTBLOCK), &data_type, sizeof(data_type));
 			}
 			else if(processMessage() > 0) {
 				switch(captureType) {
@@ -320,8 +321,14 @@ void transmitTry(void) {
 					case pb_normal:
 						switch(captureType) {
 						case START_SAMDATA:
+						{
 							pb_state = pb_capture;
+							dataIndex = 0;
+							uart_len += 1;
+							char data_type = START_SAMDATA;
+							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
 							break;
+						}
 						default:
 							break;
 						}
@@ -341,6 +348,8 @@ void transmitTry(void) {
 							else {
 								uart_len = UARTBLOCK;
 								txIndex++;
+								char data_type = CONT_SAMDATA;
+								uart_stuff(OFFSET_DATATYPE+(txIndex*UARTBLOCK), &data_type, sizeof(data_type));
 								if(txIndex == 9) {
 									dataComplete = 1;
 								}
@@ -399,7 +408,7 @@ void transmitTry(void) {
 #endif
 				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
 
-				uart_send(uart_len);
+				uart_send(blockOffset, uart_len);
 			}
 		}
 	}
@@ -428,9 +437,9 @@ __interrupt void ADC10_ISR(void) {
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
 
-			if(pb_state == pb_capture) {
-				uart_stuff(arrayIndex, (char*) &current, sizeof(current));
-			}
+//			if(pb_state == pb_capture) {
+//				uart_stuff(arrayIndex, (char*) &current, sizeof(current));
+//			}
 
 			// Current is the last measurement, attempt transmission
 			//transmitTry();
@@ -443,9 +452,9 @@ __interrupt void ADC10_ISR(void) {
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
-			if(pb_state == pb_capture) {
-				uart_stuff(arrayIndex, (char*) &current, sizeof(current));
-			}
+//			if(pb_state == pb_capture) {
+//				uart_stuff(arrayIndex, (char*) &voltage, sizeof(voltage));
+//			}
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
