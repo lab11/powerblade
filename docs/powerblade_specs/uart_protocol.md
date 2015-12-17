@@ -40,7 +40,7 @@ Example UART packet with advertisement data but no additional data. Advertisemen
 
 #### Additional Data
 
-The additional data field can be used to transfer non-advertisement data to the nRF. This can include additional fine-grained power data or information on the device's current state.
+The additional data field can be used to transfer non-advertisement data to the nRF. This can include additional fine-grained power data or information on the device's current state. The total length of additional data can be up to 505 bytes.
 
 | **Field**           | Add Data Type | Add Data Values   |
 |:-------------------:|:-------------:|:-----------------:|
@@ -57,11 +57,14 @@ Each additional data field has only a single `Add Data Type`. If the MSP430 has 
 | Value | Name |
 |:------|:-----|
 | 0x10  | Calibration State |
-| 0x20  | Sample Data |
-| 0x22	| Send data done (MSP to nRF) |
+| 0x20  | Sample Data Starting |
+| 0x21  | Sample Data Values |
+| 0x22	| Send Data Done |
 
  * **Calibration State**: Current state of device calibration. More details can be found at [Calibration Protocol](calibration.md)
- * **Sample Data**: Individual samples from one second of power sampling
+ * **Sample Data Starting**: MSP430 is collecting raw samples
+ * **Sample Data Values**: Data values are raw samples from MSP430
+ * **Sample Data Done**: All raw samples have been collected
 
 
 ## nRF to MSP Packet Specification
@@ -99,13 +102,16 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x1A	| Set Sequence |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
+| 0x22  | Stop Sample Data Download |
 | 0xFF	| NAK (Checksum failed) |
 
  * **Set Sequence**: Set the sequence number to be included in future packets
  * **Calibration State**: Set current state of device calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Ground Truth Watts**: Active real power that the system should register. Used for calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Get/Set X**: Getters and Setters for various calibration values
- * **Get Sample Data**: Get individual samples from one second of power sampling
+ * **Start Sample Data Download**: Get individual samples from one second of power sampling
+ * **Continue Sample Data Download**: Get next set of raw samples from MSP430
+ * **Stop Sample Data Download**: Stop collecting and transmitting raw samples
  * **NAK**: nRF indicating checksum of previous message failed
 
 #### Example Packet

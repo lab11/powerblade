@@ -19,5 +19,9 @@ extern uint8_t MAC_ADDR[6];
 #define UART_RTS_PIN 0
 #define UART_CTS_PIN 0
 
+// LED for debugging
+//  Not actually present on PowerBlade. Exists on squalls
+#define ERROR_LED 13
+
 #endif /*POWERBLADE_H*/
 
