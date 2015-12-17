@@ -94,10 +94,14 @@ function RawSample_status_receive(data, isNotify) {
     console.log("Is notification?: " + isNotify);
 
     // check value for next state
-
-        // read data characteristic if next data is available
-
+    if (data[0] == 1) {
+        // next data is available, read characteristic
+        console.log("New data available. Reading...");
+        rawSample_data_char.read();
+    } else if (data[0] == 2) {
         // finish up and exit if all data is read
+        peripheral.disconnect();
+    }
 }
 
 function RawSample_data_receive(data) {
@@ -106,6 +110,8 @@ function RawSample_data_receive(data) {
     // do something with the data
 
     // write status to request next data
+    console.log("Requesting next data");
+    rawSample_start_char.write(new Buffer([0x01]));
 }
 
 noble.on('disconnect', function () {
