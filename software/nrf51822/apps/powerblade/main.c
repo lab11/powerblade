@@ -400,7 +400,7 @@ void services_init (void) {
         simple_ble_update_char_len(&app.rawSample_char_data_handle, 1);
 
         // Add the characteristic to provide raw samples
-        app.rawSample_status = 0;
+        app.rawSample_status = 2;
         simple_ble_add_characteristic(1, 1, 1, // read, write, notify
                                       rawSample_uuid.type,
                                       RAWSAMPLE_CHAR_STATUS_SHORT_UUID,
@@ -453,14 +453,13 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 
     if (p_evt_write->handle == app.rawSample_char_begin_handle.value_handle) {
         // start or stop collection and transfer of raw samples as appropriate
-        //  Value is irrelevant
-        if (rawSample_state == RS_NONE) {
+        if (rawSample_state == RS_NONE && app.begin_rawSample) {
             // start raw sample collection
             rawSample_state = RS_START;
             app.rawSample_status = 0;
-        } else {
+        } else if (rawSample_state != RS_NONE && !app.begin_rawSample) {
             rawSample_state = RS_QUIT;
-            app.rawSample_status = 0;
+            app.rawSample_status = 255;
         }
 
     } else if (p_evt_write->handle == app.rawSample_char_status_handle.value_handle) {
