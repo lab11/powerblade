@@ -93,3 +93,14 @@ In this example:
 
 
 ## Eddystone Packet Format
+
+PowerBlade utilizes the [Eddystone protocol](https://github.com/google/eddystone) to transmit a URL. The URL points to a [Summon](https://github.com/lab11/summon) user interface that can automatically be pulled up on smartphones in order to interact with the device.
+
+| **Field**      | Version | Sequence | P_scale | V_scale | WH_scale | V_RMS |
+|:--------------:|:-------:|:--------:|:-------:|:-------:|:--------:|:-----:|
+| **Byte Index** | 0       | 1-4      | 5-6     | 7       | 8        | 9     |
+
+| Real Power | Apparent Power | Energy Use | Flags |
+|:----------:|:--------------:|:----------:|:-----:|
+| 10-11      | 12-13          | 14-17      | 18    |
+#XXX: HERE
