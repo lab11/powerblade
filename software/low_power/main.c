@@ -432,7 +432,7 @@ __interrupt void ADC10_ISR(void) {
 			current = (int8_t) (ADC_Result - I_VCC2);
 
 			if(pb_state == pb_capture) {
-				if(dataIndex < 2520) {
+				if(dataIndex < 5040) {
 					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
 					uart_stuff(arrayIndex, (char*) &current, sizeof(current));
 					dataIndex++;
@@ -451,7 +451,7 @@ __interrupt void ADC10_ISR(void) {
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			if(pb_state == pb_capture) {
-				if(dataIndex < 2520) {
+				if(dataIndex < 5040) {
 					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
 					uart_stuff(arrayIndex, (char*) &voltage, sizeof(voltage));
 					dataIndex++;
