@@ -420,12 +420,6 @@ __interrupt void ADC10_ISR(void) {
 	uint8_t ADC_Result;
 	unsigned char ADC_Channel;
 
-	int arrayIndex;
-	if(pb_state == pb_capture) {
-		arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
-		dataIndex++;
-	}
-
 	switch (__even_in_range(ADC10IV, 12)) {
 	case 12:
 		ADC_Result = ADC10MEM0;
@@ -437,9 +431,13 @@ __interrupt void ADC10_ISR(void) {
 			// Store current value for future calculations
 			current = (int8_t) (ADC_Result - I_VCC2);
 
-//			if(pb_state == pb_capture) {
-//				uart_stuff(arrayIndex, (char*) &current, sizeof(current));
-//			}
+			if(pb_state == pb_capture) {
+				if(dataIndex < 2520) {
+					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
+					uart_stuff(arrayIndex, (char*) &current, sizeof(current));
+					dataIndex++;
+				}
+			}
 
 			// Current is the last measurement, attempt transmission
 			//transmitTry();
@@ -452,9 +450,13 @@ __interrupt void ADC10_ISR(void) {
 			// Store voltage value
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
-//			if(pb_state == pb_capture) {
-//				uart_stuff(arrayIndex, (char*) &voltage, sizeof(voltage));
-//			}
+			if(pb_state == pb_capture) {
+				if(dataIndex < 2520) {
+					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
+					uart_stuff(arrayIndex, (char*) &voltage, sizeof(voltage));
+					dataIndex++;
+				}
+			}
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
