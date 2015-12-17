@@ -9,7 +9,7 @@ char captureBuf[RXLEN - 4];
 void uart_init(void);
 void uart_enable(bool enable);
 void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len);
-void uart_send(uint16_t uart_len);
+void uart_send(int offset, uint16_t uart_len);
 
 int processMessage(void);
 
