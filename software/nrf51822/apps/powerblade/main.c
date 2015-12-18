@@ -136,6 +136,7 @@ void start_eddystone_adv (void) {
         already_sent = true;
     }
 
+    /*
     //XXX: TESTING
     static uint8_t type = DONE_SAMDATA;
     static uint8_t counter = 0;
@@ -143,6 +144,7 @@ void start_eddystone_adv (void) {
         on_receive_message(&type, 1);
         already_transmitted = false;
     }
+    */
 }
 
 void init_adv_data (void) {
@@ -270,6 +272,7 @@ void process_rx_packet(uint16_t packet_len) {
     } else {
         // need to send a nak
         nak_state = NAK_CHECKSUM;
+        app.raw_sample_data[0] = 0xA5;
     }
 }
 
@@ -503,8 +506,9 @@ void ble_error(uint32_t error_code) {
 int main(void) {
     // Initialization
     app.simple_ble_app = simple_ble_init(&ble_config);
-    uart_init();
     timers_init();
+    conn_params_init();
+    uart_init();
     init_adv_data();
 
     // Initialization complete
@@ -512,8 +516,8 @@ int main(void) {
     uart_rx_enable();
 
     //XXX:TESTING
-    led_init(25);
-    led_on(25);
+    //led_init(25);
+    //led_on(25);
 
     while (1) {
         power_manage();
@@ -521,7 +525,7 @@ int main(void) {
         // state machine. Only send one message per second
         if (!already_transmitted) {
             //XXX: TESTING
-            led_toggle(25);
+            //led_toggle(25);
             transmit_message();
         }
     }
@@ -555,8 +559,8 @@ void transmit_message(void) {
             uart_send(tx_buffer, length);
             rawSample_state = RS_WAIT_START;
             //XXX:TESTING
-            memset(app.raw_sample_data, 0x23, 200);
-            simple_ble_update_char_len(&app.rawSample_char_data_handle, 234);
+            //memset(app.raw_sample_data, 0x23, 200);
+            //simple_ble_update_char_len(&app.rawSample_char_data_handle, 234);
         } else if (rawSample_state == RS_NEXT) {
             // send next data message to MSP
             uint16_t length = 2+1+1; // length (x2), type, checksum
@@ -635,6 +639,17 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
                 break;
         }
     } else {
+        //if (rawSample_state != RS_NONE && rawSample_state != RS_IDLE) {
+        //    app.raw_sample_data[0] = 0xFF;
+        //}
+        if (rawSample_state == RS_WAIT_START) {
+            app.raw_sample_data[0] = 0xF1;
+        } else if (rawSample_state == RS_WAIT_DATA) {
+            app.raw_sample_data[0] = 0xF2;
+        } else if (rawSample_state == RS_WAIT_QUIT) {
+            app.raw_sample_data[0] = 0xF3;
+        }
+        /*
         // no message received. Handle that
         if (rawSample_state == RS_WAIT_START) {
             // should have gotten an acknowledgement. Send again
@@ -650,6 +665,7 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
             // should have gotten a done message. Send again
             rawSample_state = RS_QUIT;
         }
+        */
     }
 }
 
