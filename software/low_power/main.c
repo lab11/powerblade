@@ -403,7 +403,7 @@ void transmitTry(void) {
 #ifdef CALIBRATE
 				uart_stuff(blockOffset + OFFSET_WH, (char*) &tx_i_ave, sizeof(tx_i_ave));
 #else
-				wattHoursSend = (uint32_t)(wattHours >> 9);
+				wattHoursSend = (uint32_t)(wattHours >> WHSCALE);
 				uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
 #endif
 				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
