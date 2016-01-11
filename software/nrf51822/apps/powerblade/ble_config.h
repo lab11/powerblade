@@ -1,11 +1,12 @@
 #ifndef __BLE_CONFIG_H
 #define __BLE_CONFIG_H
 
-#define APP_COMPANY_IDENTIFIER			0x4908
-
 #include "simple_ble.h"
 #include "uart_types.h"
 #include "powerblade.h"
+
+#define UMICH_COMPANY_IDENTIFIER    0x02E0
+#define POWERBLADE_SERVICE_IDENTIFIER 0x11
 
 // Intervals for advertising and connections
 static const simple_ble_config_t ble_config = {

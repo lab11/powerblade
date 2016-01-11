@@ -2,9 +2,16 @@
 // {BLE Address: Most recent sequence number} for each PowerBlade
 var powerblade_sequences = {};
 
+var OLD_COMPANY_ID = 0x4908;
+
 var parse_advertisement = function (advertisement, cb) {
 
-    var data = advertisement.manufacturerData.slice(2);
+    var company_id = advertisement.manufacturerData.readUIntLE(0,2);
+    var data = advertisement.manufacturerData.slice(3);
+    if (company_id == OLD_COMPANY_ID) {
+        // allow backwards compatibility with old powerblade format
+        data = advertisement.manufacturerData.slice(2);
+    }
     var recv_time = (new Date).getTime()/1000;
 
     // check length of data

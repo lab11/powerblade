@@ -3,7 +3,9 @@
 var noble = require('noble');
 var request = require('request');
 
-var POWERBLADE_MANUF_ID = 0x4908;
+var UMICH_COMPANY_ID = 0x02E0;
+var POWERBLADE_SERVICE_ID = 0x11;
+var OLD_COMPANY_ID = 0x4908;
 
 var INPUT_URL = 'http://inductor.eecs.umich.edu/input/post.json';
 var APIKEY = 'none';
@@ -35,18 +37,28 @@ noble.on('error', function (err) {
 
 noble.on('discover', function (peripheral) {
 
-    // Advertisement found. Get the manufacturer ID, if any
+    // Advertisement found. Check if it is a PowerBlade
+    //  PowerBlade data advertisements:
+    //      Have a Manufacturer Specific Data section
+    //      Have a Company Identifier of 0x02E0 (assigned to the University of Michigan, first two bytes of data)
+    //      Have a service id of 0x11 (assigned to PowerBlade [internally], third byte of data)
     var advertisement = peripheral.advertisement;
-    var manufacturer_id = 0;
-    if (typeof advertisement.manufacturerData !== undefined && advertisement.manufacturerData
-            && advertisement.manufacturerData.length >= 2) {
-        manufacturer_id = advertisement.manufacturerData.readUIntLE(0,2);
+    var company_id = 0;
+    var service_id = 0;
+    if (advertisement.manufacturerData !== undefined && advertisement.manufacturerData
+            && advertisement.manufacturerData.length >= 3) {
+        company_id = advertisement.manufacturerData.readUIntLE(0,2);
+        service_id = advertisement.manufacturerData.readUInt8(2);
     }
 
-    if (manufacturer_id == POWERBLADE_MANUF_ID) {
+    if ((company_id == UMICH_COMPANY_ID && service_id == POWERBLADE_SERVICE_ID) ||
+            company_id == OLD_COMPANY_ID) {
         // Found a PowerBlade
-        var address   = peripheral.address;
-        var data      = advertisement.manufacturerData.slice(2);
+        var address  = peripheral.address;
+        var data = advertisement.manufacturerData.slice(3);
+        if (company_id == OLD_COMPANY_ID) {
+            data = advertisement.manufacturerData.slice(2);
+        }
         var recv_time = (new Date).getTime()/1000;
 
         // check length of data

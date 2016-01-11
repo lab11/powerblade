@@ -149,35 +149,37 @@ void start_eddystone_adv (void) {
 
 void init_adv_data (void) {
     // Default values, helpful for debugging
-    powerblade_adv_data[0] = 0x01; // Version
+    powerblade_adv_data[0] = POWERBLADE_SERVICE_IDENTIFIER; // Service ID
+
+    powerblade_adv_data[1] = 0x01; // Version
     
-    powerblade_adv_data[1] = 0x01;
     powerblade_adv_data[2] = 0x01;
     powerblade_adv_data[3] = 0x01;
-    powerblade_adv_data[4] = 0x01; // Sequence
+    powerblade_adv_data[4] = 0x01;
+    powerblade_adv_data[5] = 0x01; // Sequence
 
-    powerblade_adv_data[5] = 0x42;
-    powerblade_adv_data[6] = 0x4A; // P_Scale
+    powerblade_adv_data[6] = 0x42;
+    powerblade_adv_data[7] = 0x4A; // P_Scale
 
-    powerblade_adv_data[7] = 0x7B; // V_Scale
+    powerblade_adv_data[8] = 0x7B; // V_Scale
 
-    powerblade_adv_data[8] = 0x09; // WH_Scale
+    powerblade_adv_data[9] = 0x09; // WH_Scale
 
-    powerblade_adv_data[9] = 0x31; // V_RMS
+    powerblade_adv_data[10] = 0x31; // V_RMS
 
-    powerblade_adv_data[10] = 0x08;
-    powerblade_adv_data[11] = 0x02; // True Power
+    powerblade_adv_data[11] = 0x08;
+    powerblade_adv_data[12] = 0x02; // True Power
 
-    powerblade_adv_data[12] = 0x0A;
-    powerblade_adv_data[13] = 0x1A; // Apparent Power
+    powerblade_adv_data[13] = 0x0A;
+    powerblade_adv_data[14] = 0x1A; // Apparent Power
 
-    powerblade_adv_data[14] = 0x00;
     powerblade_adv_data[15] = 0x00;
-    powerblade_adv_data[16] = 0x01;
-    powerblade_adv_data[17] = 0x0D; // Watt Hours
+    powerblade_adv_data[16] = 0x00;
+    powerblade_adv_data[17] = 0x01;
+    powerblade_adv_data[18] = 0x0D; // Watt Hours
 
-    powerblade_adv_data[18] = 0x00; // Flags
-    powerblade_adv_data_len = 19;
+    powerblade_adv_data[19] = 0x00; // Flags
+    powerblade_adv_data_len = 20;
 }
 
 void start_manufdata_adv (void) {
@@ -185,7 +187,7 @@ void start_manufdata_adv (void) {
 
     // Advertise PowerBlade data payload as manufacturer specific data
     ble_advdata_manuf_data_t manuf_specific_data;
-    manuf_specific_data.company_identifier = APP_COMPANY_IDENTIFIER;
+    manuf_specific_data.company_identifier = UMICH_COMPANY_IDENTIFIER;
     manuf_specific_data.data.p_data = powerblade_adv_data;
     manuf_specific_data.data.size   = powerblade_adv_data_len;
     simple_adv_manuf_data(&manuf_specific_data);
@@ -255,13 +257,14 @@ void process_rx_packet(uint16_t packet_len) {
             }
 
             // update advertisement
+            //  first byte of adv_data is service_id, skip it
             //NOTE: this is safe to call no matter where in the
             //  Eddystone/Manuf Data we are. If called during Manuf Data,
             //  nothing changes (second call to timer_start does nothing).
             //  If called during Eddystone, timing is screwed up, but it'll fix
             //  itself within one cycle
-            powerblade_adv_data_len = adv_len;
-            memcpy(powerblade_adv_data, &(rx_data[3]), adv_len);
+            powerblade_adv_data_len = 1+adv_len;
+            memcpy(&(powerblade_adv_data[1]), &(rx_data[3]), adv_len);
             start_manufdata_adv();
 
             // handle additional UART data, if any
