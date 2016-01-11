@@ -7,7 +7,9 @@ if (process.argv.length >= 3 && process.argv[2] == "--all") {
     dedup = false;
 }
 
-var POWERBLADE_MANUF_ID = 0x4908;
+var UMICH_COMPANY_ID = 0x02E0;
+var POWERBLADE_SERVICE_ID = 0x11;
+var OLD_COMPANY_ID = 0x4908;
 
 // {BLE Address: Most recent sequence number} for each PowerBlade
 var powerblade_sequences = {};
@@ -23,23 +25,37 @@ noble.on('stateChange', function(state) {
 
 noble.on('discover', function (peripheral) {
 
-    // Advertisement found. Get the manufacturer ID, if any
+    // Advertisement found. Check if it is a PowerBlade
+    //  PowerBlade data advertisements:
+    //      Have a Manufacturer Specific Data section
+    //      Have a Company Identifier of 0x02E0 (assigned to the University of Michigan, first two bytes of data)
+    //      Have a service id of 0x11 (assigned to PowerBlade [internally], third byte of data)
     var advertisement = peripheral.advertisement;
-    var manufacturer_id = 0;
-    if (typeof advertisement.manufacturerData !== undefined && advertisement.manufacturerData
-            && advertisement.manufacturerData.length >= 2) {
-        manufacturer_id = advertisement.manufacturerData.readUIntLE(0,2);
+    var company_id = 0;
+    var service_id = 0;
+    if (advertisement.manufacturerData !== undefined && advertisement.manufacturerData
+            && advertisement.manufacturerData.length >= 3) {
+        company_id = advertisement.manufacturerData.readUIntLE(0,2);
+        service_id = advertisement.manufacturerData.readUInt8(2);
     }
 
-    if (manufacturer_id == POWERBLADE_MANUF_ID) {
+    // also accept the old company ID of 4908 (no service ID) for compatibility
+    if ((company_id == UMICH_COMPANY_ID && service_id == POWERBLADE_SERVICE_ID) ||
+            company_id == OLD_COMPANY_ID) {
         // Found a PowerBlade
         var address  = peripheral.address;
-        var data = advertisement.manufacturerData.slice(2);
+        var data = advertisement.manufacturerData.slice(3);
+        if (company_id == OLD_COMPANY_ID) {
+            data = advertisement.manufacturerData.slice(2);
+        }
         var recv_time = (new Date).getTime()/1000;
 
         // check length of data
         if (data.length < 19) {
             console.log("ERROR: Bad PowerBlade packet");
+            console.log(data.length);
+            console.log(data);
+            console.log(advertisement);
             return;
         }
 
@@ -94,6 +110,9 @@ noble.on('discover', function (peripheral) {
         var pf_disp = real_power_disp / app_power_disp;
 
         // display data to user
+        if (company_id == OLD_COMPANY_ID) {
+            console.log("WARNING: Old PowerBlade packet format!");
+        }
         console.log('PowerBlade (' + address +')');
         console.log('      Sequence Number: ' + sequence_num);
         console.log('          RMS Voltage: ' + v_rms_disp.toFixed(2) + ' V');

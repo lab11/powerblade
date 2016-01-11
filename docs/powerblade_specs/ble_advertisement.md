@@ -3,21 +3,31 @@ BLE Advertisement Protocol
 
 PowerBlade broadcasts data over Bluetooth Low Energy advertisements. Advertisements are sent five times per second, with varying content. Four are data packets, and one is an eddystone URL packet. Data packets include real-time power measurements, total energy consumption, and calibration scaling values, and are updated with new measurements once per second. Eddystone URL packets point to a [Summon](https://github.com/lab11/summon) UI for reading data from the PowerBlade via a smartphone.
 
-
 ## Data Packet Format
+
+*BLE Advertisement Format*
+
+| **Field**           | Length | AD Type | AD Data   |
+|:-------------------:|:------:|:-------:|:---------:|
+| **Byte Index**      | 0      | 1       | 2-        |
+| **PowerBlade Value**| 0x16   | 0xFF    | 0xE002... |
+
+PowerBlade data is sent as Manufacturer Specific Data (AD Type 0xFF). The Company Identifier is 0x02E0 (registered to the University of Michigan), which is included in the advertisement in little-endian format per the BLE specification.
+
 *Protocol Version 1*
 
-| **Field**      | Version | Sequence | P_scale | V_scale | WH_scale | V_RMS |
-|:--------------:|:-------:|:--------:|:-------:|:-------:|:--------:|:-----:|
-| **Byte Index** | 0       | 1-4      | 5-6     | 7       | 8        | 9     |
+| **Field**      | Service ID | Version | Sequence | P_scale | V_scale | WH_scale | V_RMS |
+|:--------------:|:----------:|:-------:|:--------:|:-------:|:-------:|:--------:|:-----:|
+| **Byte Index** | 0          | 1       | 2-5      | 6-7     | 8       | 9        | 10    |
 
 | Real Power | Apparent Power | Energy Use | Flags |
 |:----------:|:--------------:|:----------:|:-----:|
-| 10-11      | 12-13          | 14-17      | 18    |
+| 11-12      | 13-14          | 15-18      | 19    |
 
 Data packets are sent four times per second (at 200 ms intervals, with a gap for the Eddystone URL packet). Data values are updated once per second. The redundancy in data packets allows for a better probability of receiving the measurement.
 
 Data fields are as follows:
+ * **Service ID**: Used to distinguish between devices using the University of Michigan Company Identifier. PowerBlade is assigned 0x11
  * **Version**: Protocol version number
  * **Sequence**: Sequence number incremented each packet. Used to detect duplicate data
  * **P_scale**: Power scaling value, see below
@@ -94,7 +104,7 @@ In this example:
 
 ## Eddystone Packet Format
 
-PowerBlade utilizes the [Eddystone protocol](https://github.com/google/eddystone) to transmit a URL. The URL points to a [Summon](https://github.com/lab11/summon) user interface that can automatically be pulled up on smartphones in order to interact with the device.
+PowerBlade utilizes the [Eddystone protocol](https://github.com/google/eddystone) to transmit a URL. The URL points to a [Summon](https://github.com/lab11/summon) user interface that can automatically be pulled up on smartphones in order to interact with the device. Per the specification, the URL is sent as Service Data (AD Type 0x16) for the 16-bit UUID 0xFEAA (assigned to Google).
 
 | **Field**      | Version | Sequence | P_scale | V_scale | WH_scale | V_RMS |
 |:--------------:|:-------:|:--------:|:-------:|:-------:|:--------:|:-----:|

@@ -1,8 +1,9 @@
 var async = require('async');
 var noble = require('noble');
 
-// mangled version of 0x4908
-var CompanyID = 18696;
+var UMICH_COMPANY_ID = 0x02E0;
+var POWERBLADE_SERVICE_ID = 0x11;
+var OLD_COMPANY_ID = 0x4908;
 
 var peripherals = {};
 
@@ -37,12 +38,15 @@ noble.on('discover', function(peripheral) {
   // device found!
   var advertisement = peripheral.advertisement;
   var manufacturer_id = 0;
-  if (typeof advertisement.manufacturerData !== undefined && advertisement.manufacturerData && advertisement.manufacturerData.length >= 2) {
+  var service_id = 0;
+  if (typeof advertisement.manufacturerData !== undefined && advertisement.manufacturerData && advertisement.manufacturerData.length >= 3) {
     manufacturer_id = advertisement.manufacturerData.readUIntLE(0,2);
+    service_id = advertisement.manufacturerData.readUIntBE(2,1);
   }
 
   // check if device is actually a PowerBlade
-  if (manufacturer_id == CompanyID) {
+  if ((manufacturer_id == UMICH_COMPANY_ID && service_id == POWERBLADE_SERVICE_ID) ||
+        manufacturer_id == OLD_COMPANY_ID) {
     var peripheral_uuid = peripheral.uuid;
     if (!(peripheral_uuid in peripherals)) {
         // device doesn't exist. Add it and record a "last squence number"
@@ -50,7 +54,10 @@ noble.on('discover', function(peripheral) {
     }
 
     // get data after the manufacturer ID
-    var data = advertisement.manufacturerData.slice(2);
+    var data = advertisement.manufacturerData.slice(3);
+    if (manufacturer_id == OLD_COMPANY_ID) {
+        data = advertisement.manufacturerData.slice(2);
+    }
 
     // get data values from the powerblade
     var recv_time = (new Date).getTime()/1000;
@@ -141,6 +148,9 @@ noble.on('discover', function(peripheral) {
 
       peripherals[peripheral_uuid] = sequence_num;
       last_seq = sequence_num;
+      if (manufacturer_id == OLD_COMPANY_ID) {
+          console.log('WARNING: Old PowerBlade packet format');
+      }
       console.log('Data: ' + recv_time);
       console.log('           BLE Address: ' + peripheral_uuid);
       console.log('         PowerBlade ID: ' + '0x' + powerblade_id.toString(16));
