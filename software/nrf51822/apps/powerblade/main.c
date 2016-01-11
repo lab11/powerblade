@@ -59,7 +59,7 @@ int main(void);
 
 static ble_app_t app;
 
-#define PHYSWEB_URL "goo.gl/jEKPu9"
+#define PHYSWEB_URL "goo.gl/9aD6Wi"
 
 // timer configuration
 #define TIMER_PRESCALER     0
