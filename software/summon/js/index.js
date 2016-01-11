@@ -85,7 +85,7 @@ function parse_advertisement(adv_buffer) {
         last_update = Date.now();
 
     } else {
-        app.log("Device had incorrect adv structure");
+        app.log("Unexpected advertisement structure");
     }
 }
 
