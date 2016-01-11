@@ -80,9 +80,9 @@ To calculate `Power Factor`:
     `Power Factor Final` = `Real Power` / `Apparent Power`
 
 ### Example Packet
-| **Field** | Version | Sequence   | P_scale | V_scale | WH_scale | V_RMS |
-|:---------:|:-------:|:----------:|:-------:|:-------:|:--------:|:-----:|
-| **Value** | 0x01    | 0x00000001 | 0x424A  | 0x7B    | 0x09     | 0x31  |
+| **Field** | Service ID | Version | Sequence   | P_scale | V_scale | WH_scale | V_RMS |
+|:---------:|:----------:|:-------:|:----------:|:-------:|:-------:|:--------:|:-----:|
+| **Value** | 0x11       | 0x01    | 0x00000001 | 0x424A  | 0x7B    | 0x09     | 0x31  |
 
 | Real Power | Apparent Power | Energy Use | Flags |
 |:----------:|:--------------:|:----------:|:-----:|

@@ -21,10 +21,9 @@ function parse_advertisement(adv_buffer) {
     var scanRecord = new Uint8Array(adv_buffer);
 
     // double-check that this is the right device
-    if (scanRecord.length > 7 &&
-            scanRecord[0] == 0x02 && scanRecord[1] == 0x01 && scanRecord[2] == 0x06 &&
-            scanRecord[4] == 0xFF &&
-            scanRecord[5] == 0x08 && scanRecord[6] == 0x49) {
+    if (scanRecord.length > 8 && scanRecord[4] == 0xFF &&
+            (scanRecord[5] == 0x08 && scanRecord[6] == 0x49) ||
+            (scanRecord[5] == 0xE0 && scanRecord[6] == 0x02 && scanRecord[7] == 0x11)) {
 
         // values to be displayed
         var v_rms_disp = 0;
@@ -34,7 +33,12 @@ function parse_advertisement(adv_buffer) {
         var pf_disp = 0;
 
         // parse values from advertisement
-        var data = new DataView(adv_buffer, 7);
+        var data = new DataView(adv_buffer, 8);
+        if (scanRecord[4] == 0x08) {
+            // support old packet format
+            data = new DataView(adv_buffer, 7);
+            app.log("WARNING: Old PowerBlade packet format");
+        }
         var powerblade_id  = data.getUint8(0);
         switch (powerblade_id) {
             case 0x01:
