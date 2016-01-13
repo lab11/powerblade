@@ -131,24 +131,6 @@ void start_eddystone_adv (void) {
 
     err_code = app_timer_start(start_manufdata_timer, EDDYSTONE_ADV_DURATION, NULL);
     APP_ERROR_CHECK(err_code);
-
-    //XXX: TESTING
-    // once only send TX data to the NRF
-    static bool already_sent = false;
-    if (!already_sent) {
-        calibration_state = CAL_SETSEQ;
-        already_sent = true;
-    }
-
-    /*
-    //XXX: TESTING
-    static uint8_t type = DONE_SAMDATA;
-    static uint8_t counter = 0;
-    if ((counter++)%10 == 0) {
-        on_receive_message(&type, 1);
-        already_transmitted = false;
-    }
-    */
 }
 
 void init_adv_data (void) {
@@ -374,12 +356,6 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 void timers_init (void) {
     uint32_t err_code;
 
-//XXX: Move these somewhere?
-#define TIMER_PRESCALER     0
-#define TIMER_OP_QUEUE_SIZE 4
-    //XXX: See what happens if this is called twice
-    //APP_TIMER_INIT(TIMER_PRESCALER, TIMER_OP_QUEUE_SIZE, false);
-
     err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_rx_enable);
     APP_ERROR_CHECK(err_code);
 
@@ -409,17 +385,11 @@ int main(void) {
     start_manufdata_adv();
     uart_rx_enable();
 
-    //XXX:TESTING
-    //led_init(25);
-    //led_on(25);
-
     while (1) {
         power_manage();
 
         // state machine. Only send one message per second
         if (!already_transmitted) {
-            //XXX: TESTING
-            //led_toggle(25);
             transmit_message();
         }
     }
@@ -452,9 +422,6 @@ void transmit_message(void) {
             tx_buffer[3] = additive_checksum(tx_buffer, length-1);
             uart_send(tx_buffer, length);
             rawSample_state = RS_WAIT_START;
-            //XXX:TESTING
-            //memset(raw_sample_data, 0x23, 200);
-            //simple_ble_update_char_len(&rawSample_char_data_handle, 234);
         } else if (rawSample_state == RS_NEXT) {
             // send next data message to MSP
             uint16_t length = 2+1+1; // length (x2), type, checksum
