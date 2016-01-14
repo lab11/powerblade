@@ -56,12 +56,10 @@ Each additional data field has only a single `Add Data Type`. If the MSP430 has 
 
 | Value | Name |
 |:------|:-----|
-| 0x10  | Calibration State |
 | 0x20  | Sample Data Starting |
 | 0x21  | Sample Data Values |
 | 0x22	| Send Data Done |
 
- * **Calibration State**: Current state of device calibration. More details can be found at [Calibration Protocol](calibration.md)
  * **Sample Data Starting**: MSP430 is collecting raw samples
  * **Sample Data Values**: Data values are raw samples from MSP430
  * **Sample Data Done**: All raw samples have been collected
@@ -89,25 +87,25 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 
 | Value | Name |
 |:------|:-----|
-| 0x10  | Calibration State |
-| 0x11  | Ground Truth Watts |
-| 0x12  | Get CUROFF |
-| 0x13  | Set CUROFF |
-| 0x14  | Get P_scale |
-| 0x15  | Set P_scale |
-| 0x16  | Get V_scale |
-| 0x17  | Set V_scale |
-| 0x18  | Get WH_scale |
-| 0x19  | Set WH_scale |
-| 0x1A	| Set Sequence |
+| 0x10  | Get V_offset |
+| 0x11  | Set V_offset |
+| 0x12  | Get I_offset |
+| 0x13  | Set I_offset |
+| 0x14  | Get CUROFF |
+| 0x15  | Set CUROFF |
+| 0x16  | Get P_scale |
+| 0x17  | Set P_scale |
+| 0x18  | Get V_scale |
+| 0x19  | Set V_scale |
+| 0x1A  | Get WH_scale |
+| 0x1B  | Set WH_scale |
+| 0x1C	| Set Sequence |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
 | 0x22  | Stop Sample Data Download |
 | 0xFF	| NAK (Checksum failed) |
 
- * **Set Sequence**: Set the sequence number to be included in future packets
- * **Calibration State**: Set current state of device calibration. More details can be found at [Calibration Protocol](calibration.md)
- * **Ground Truth Watts**: Active real power that the system should register. Used for calibration. More details can be found at [Calibration Protocol](calibration.md)
+ * **Set Sequence**: Set the sequence number to be included (and incremented) in future packets
  * **Get/Set X**: Getters and Setters for various calibration values
  * **Start Sample Data Download**: Get individual samples from one second of power sampling
  * **Continue Sample Data Download**: Get next set of raw samples from MSP430
