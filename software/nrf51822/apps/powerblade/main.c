@@ -57,24 +57,52 @@ int main(void);
  * Define and Globals
  **************************************************/
 
-static ble_app_t app;
-
-#define PHYSWEB_URL "goo.gl/9aD6Wi"
+// simple_ble configuration for advertising and connections
+static const simple_ble_config_t ble_config = {
+    .platform_id       = PLATFORM_ID_BYTE,  // used as 4th octet in device BLE address
+    .device_id         = DEVICE_ID_DEFAULT, // 5th and 6th octet in device BLE address
+    .adv_name          = DEVICE_NAME,       // used in advertisements if there is room
+    .adv_interval      = MSEC_TO_UNITS(200, UNIT_0_625_MS),
+    .min_conn_interval = MSEC_TO_UNITS(50, UNIT_1_25_MS),
+    .max_conn_interval = MSEC_TO_UNITS(100, UNIT_1_25_MS),
+};
+static simple_ble_app_t* simple_ble_app;
 
 // timer configuration
-#define TIMER_PRESCALER     0
-#define TIMER_OP_QUEUE_SIZE 4
 APP_TIMER_DEF(enable_uart_timer);
 APP_TIMER_DEF(start_eddystone_timer);
 APP_TIMER_DEF(start_manufdata_timer);
-#define EDDYSTONE_ADV_DURATION APP_TIMER_TICKS(200, TIMER_PRESCALER)
-#define MANUFDATA_ADV_DURATION APP_TIMER_TICKS(800, TIMER_PRESCALER)
-#define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, TIMER_PRESCALER)
+#define EDDYSTONE_ADV_DURATION APP_TIMER_TICKS(200, APP_TIMER_PRESCALER)
+#define MANUFDATA_ADV_DURATION APP_TIMER_TICKS(800, APP_TIMER_PRESCALER)
+#define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, APP_TIMER_PRESCALER)
 
 // advertisement data collected from UART
+#define PHYSWEB_URL "goo.gl/9aD6Wi"
 #define ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
 static uint8_t powerblade_adv_data[ADV_DATA_MAX_LEN];
 static uint8_t powerblade_adv_data_len = 0;
+
+// service for device calibration
+static simple_ble_service_t calibrate_service = {
+    .uuid128 = {{0x99, 0xf9, 0xac, 0xe5, 0x57, 0xb9, 0x43, 0xec,
+                 0x88, 0xf8, 0x88, 0xb9, 0x4d, 0xa1, 0x80, 0x50}}};
+
+// service for sample data collection
+static simple_ble_service_t rawSample_service = {
+    .uuid128 = {{0x31, 0x15, 0xd4, 0x39, 0x2a, 0x88, 0x4e, 0x1c,
+                 0x8c, 0xcc, 0xf8, 0x7c, 0x01, 0xaf, 0xad, 0xce}}};
+
+    // characteristic to start raw sample collection
+    static simple_ble_char_t rawSample_char_begin = {.uuid16 = 0x01B0};
+    static bool begin_rawSample;
+
+    // characteristic to provide raw samples to users
+    static simple_ble_char_t rawSample_char_data = {.uuid16 = 0x01B1};
+    static uint8_t raw_sample_data[SAMDATA_MAX_LEN];
+
+    // characteristic to indicate new data is available
+    static simple_ble_char_t rawSample_char_status = {.uuid16 = 0x01B2};
+    static uint8_t rawSample_status;
 
 // uart buffers
 // max length is: total length + adv length + adv data + add type + add data + checksum
@@ -84,31 +112,7 @@ static uint8_t* tx_data;
 static uint16_t tx_data_len = 0;
 static uint8_t tx_buffer[10];
 
-// state machine
-typedef enum {
-    NAK_NONE=0,
-    NAK_CHECKSUM,
-    NAK_RESEND,
-} NakState_t;
-
-typedef enum {
-    RS_NONE=0,
-    RS_START,
-    RS_WAIT_START,
-    RS_NEXT,
-    RS_WAIT_DATA,
-    RS_QUIT,
-    RS_WAIT_QUIT,
-    RS_IDLE,
-} RawSampleState_t;
-
-typedef enum {
-    CAL_NONE=0,
-    CAL_START,
-    CAL_GROUNDTRUTH,
-    CAL_SETSEQ,
-} CalibrationState_t;
-
+// states for handling transmissions to the MSP
 static bool already_transmitted = false;
 static NakState_t nak_state = NAK_NONE;
 static RawSampleState_t rawSample_state = RS_NONE;
@@ -127,24 +131,6 @@ void start_eddystone_adv (void) {
 
     err_code = app_timer_start(start_manufdata_timer, EDDYSTONE_ADV_DURATION, NULL);
     APP_ERROR_CHECK(err_code);
-
-    //XXX: TESTING
-    // once only send TX data to the NRF
-    static bool already_sent = false;
-    if (!already_sent) {
-        calibration_state = CAL_SETSEQ;
-        already_sent = true;
-    }
-
-    /*
-    //XXX: TESTING
-    static uint8_t type = DONE_SAMDATA;
-    static uint8_t counter = 0;
-    if ((counter++)%10 == 0) {
-        on_receive_message(&type, 1);
-        already_transmitted = false;
-    }
-    */
 }
 
 void init_adv_data (void) {
@@ -275,7 +261,7 @@ void process_rx_packet(uint16_t packet_len) {
     } else {
         // need to send a nak
         nak_state = NAK_CHECKSUM;
-        app.raw_sample_data[0] = 0xA5;
+        raw_sample_data[0] = 0xA5;
     }
 }
 
@@ -312,165 +298,48 @@ void uart_send (uint8_t* data, uint16_t len) {
  * Services
  **************************************************/
 
-// Randomly generated UUID
-const ble_uuid128_t calibrate_uuid128 = {
-    {0x99, 0xf9, 0xac, 0xe5, 0x57, 0xb9, 0x43, 0xec,
-     0x88, 0xf8, 0x88, 0xb9, 0x4d, 0xa1, 0x80, 0x50}
-};
-ble_uuid_t calibrate_uuid;
-#define CALIBRATE_SHORT_UUID            0x57B9
-#define CALIBRATE_CHAR_BEGIN_SHORT_UUID 0x57BA
-#define CALIBRATE_CHAR_WATTS_SHORT_UUID 0x57BB
-#define CALIBRATE_CHAR_NEXT_SHORT_UUID  0x57BC
-#define CALIBRATE_CHAR_DONE_SHORT_UUID  0x57BD
-
-// Randomly generated UUID
-const ble_uuid128_t rawSample_uuid128 = {
-    {0x31, 0x15, 0xd4, 0x39, 0x2a, 0x88, 0x4e, 0x1c,
-     0x8c, 0xcc, 0xf8, 0x7c, 0x01, 0xaf, 0xad, 0xce}
-};
-ble_uuid_t rawSample_uuid;
-#define RAWSAMPLE_SHORT_UUID             0x2A88
-#define RAWSAMPLE_CHAR_BEGIN_SHORT_UUID  0x2A89
-#define RAWSAMPLE_CHAR_DATA_SHORT_UUID   0x2A8A
-#define RAWSAMPLE_CHAR_STATUS_SHORT_UUID 0x2A8B
-
 void services_init (void) {
 
-    // Add calibration service
-    /*
-    app.calibrate_service_handle = simple_ble_add_service(&calibrate_uuid128,
-                                                &calibrate_uuid,
-                                                CALIBRATE_SHORT_UUID);
-
-        // Add the characteristic to write current watt setting
-        app.begin_calibration = false;
-        simple_ble_add_characteristic(0, 1, 0, // read, write, notify
-                                      calibrate_uuid.type,
-                                      CALIBRATE_CHAR_BEGIN_SHORT_UUID,
-                                      1, (uint8_t*)&app.begin_calibration,
-                                      app.calibrate_service_handle,
-                                      &app.calibrate_char_begin_handle);
-
-        // Add the characteristic to write current watt setting
-        app.ground_truth_watts = -1;
-        simple_ble_add_characteristic(0, 1, 0, // read, write, notify
-                                      calibrate_uuid.type,
-                                      CALIBRATE_CHAR_WATTS_SHORT_UUID,
-                                      2, (uint8_t*)&app.ground_truth_watts,
-                                      app.calibrate_service_handle,
-                                      &app.calibrate_char_watts_handle);
-
-        // Add the characteristic to write current watt setting
-        app.next_wattage = false;
-        simple_ble_add_characteristic(1, 0, 1, // read, write, notify
-                                      calibrate_uuid.type,
-                                      CALIBRATE_CHAR_NEXT_SHORT_UUID,
-                                      1, (uint8_t*)&app.next_wattage,
-                                      app.calibrate_service_handle,
-                                      &app.calibrate_char_next_handle);
-
-        // Add the characteristic to write current watt setting
-        app.done_calibrating = false;
-        simple_ble_add_characteristic(1, 0, 1, // read, write, notify
-                                      calibrate_uuid.type,
-                                      CALIBRATE_CHAR_DONE_SHORT_UUID,
-                                      1, (uint8_t*)&app.done_calibrating,
-                                      app.calibrate_service_handle,
-                                      &app.calibrate_char_done_handle);
-    */
-
     // Add raw sample download service
-    app.calibrate_service_handle = simple_ble_add_service(&rawSample_uuid128,
-                                                        &rawSample_uuid,
-                                                        RAWSAMPLE_SHORT_UUID);
+    simple_ble_add_service(&rawSample_service);
 
         // Add the characteristic to signal grab sample data
-        app.begin_rawSample = false;
-        simple_ble_add_characteristic(0, 1, 0, // read, write, notify
-                                      rawSample_uuid.type,
-                                      RAWSAMPLE_CHAR_BEGIN_SHORT_UUID,
-                                      1, (uint8_t*)&app.begin_rawSample,
-                                      app.rawSample_service_handle,
-                                      &app.rawSample_char_begin_handle);
+        begin_rawSample = false;
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                1, (uint8_t*)&begin_rawSample,
+                &rawSample_service, &rawSample_char_begin);
 
         // Add the characteristic to provide raw samples
-        memset(app.raw_sample_data, 0x00, SAMDATA_MAX_LEN);
-        simple_ble_add_vlen_characteristic(1, 0, 0, // read, write, notify
-                                      rawSample_uuid.type,
-                                      RAWSAMPLE_CHAR_DATA_SHORT_UUID,
-                                      SAMDATA_MAX_LEN, (uint8_t*)app.raw_sample_data,
-                                      app.rawSample_service_handle,
-                                      &app.rawSample_char_data_handle);
+        memset(raw_sample_data, 0x00, SAMDATA_MAX_LEN);
+        simple_ble_add_characteristic(1, 0, 0, 1, // read, write, notify, vlen
+                SAMDATA_MAX_LEN, (uint8_t*)raw_sample_data,
+                &rawSample_service, &rawSample_char_data);
         // must initialize to maximum valid length. Now reset down to 1
-        simple_ble_update_char_len(&app.rawSample_char_data_handle, 1);
+        simple_ble_update_char_len(&rawSample_char_data, 1);
 
         // Add the characteristic to provide raw samples
-        app.rawSample_status = 2;
-        simple_ble_add_characteristic(1, 1, 1, // read, write, notify
-                                      rawSample_uuid.type,
-                                      RAWSAMPLE_CHAR_STATUS_SHORT_UUID,
-                                      1, (uint8_t*)&app.rawSample_status,
-                                      app.rawSample_service_handle,
-                                      &app.rawSample_char_status_handle);
+        rawSample_status = 2;
+        simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
+                1, (uint8_t*)&rawSample_status,
+                &rawSample_service, &rawSample_char_status);
 }
 
 void ble_evt_write (ble_evt_t* p_ble_evt) {
-    ble_gatts_evt_write_t* p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
 
-    /*
-    if (p_evt_write->handle == app.calibrate_char_begin_handle.value_handle) {
-        // copy over data, single byte
-        if (app.begin_calibration) {
-            calibration_mode = true;
-
-            // send start calibration message to MSP430
-            uint16_t length = 2+2+1+1; // length, short UUID, value, checksum
-            tx_buffer[0] = (length >> 8);
-            tx_buffer[1] = (length & 0xFF);
-            tx_buffer[2] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID >> 8);
-            tx_buffer[3] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID & 0xFF);
-            tx_buffer[4] = (uint8_t)true;
-            tx_buffer[5] = additive_checksum(tx_buffer, length-1);
-            uart_send(tx_buffer, length);
-        }
-
-    } else if (p_evt_write->handle == app.calibrate_char_watts_handle.value_handle) {
-        // correct upper bits if user only wrote a single byte
-        //  It's reasonable to assume the user will only write unsigned data
-        if (p_evt_write->len == 1) {
-            app.ground_truth_watts = (0x0000 | (uint8_t)p_evt_write->data[0]);
-        }
-
-        if (calibration_mode) {
-            // send ground truth wattage to MSP430
-            uint16_t length = 2+2+2+1; // length, short UUID, value, checksum
-            tx_buffer[0] = (length >> 8);
-            tx_buffer[1] = (length & 0xFF);
-            tx_buffer[2] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID >> 8);
-            tx_buffer[3] = (CALIBRATE_CHAR_BEGIN_SHORT_UUID & 0xFF);
-            tx_buffer[4] = (app.ground_truth_watts >> 8);
-            tx_buffer[5] = (app.ground_truth_watts & 0xFF);
-            tx_buffer[6] = additive_checksum(tx_buffer, length-1);
-            uart_send(tx_buffer, length);
-        }
-    }
-    */
-
-    if (p_evt_write->handle == app.rawSample_char_begin_handle.value_handle) {
+    if (simple_ble_is_char_event(p_ble_evt, &rawSample_char_begin)) {
         // start or stop collection and transfer of raw samples as appropriate
-        if (rawSample_state == RS_NONE && app.begin_rawSample) {
+        if (rawSample_state == RS_NONE && begin_rawSample) {
             // start raw sample collection
             rawSample_state = RS_START;
-            app.rawSample_status = 0;
-        } else if (rawSample_state != RS_NONE && !app.begin_rawSample) {
+            rawSample_status = 0;
+        } else if (rawSample_state != RS_NONE && !begin_rawSample) {
             rawSample_state = RS_QUIT;
-            app.rawSample_status = 255;
+            rawSample_status = 255;
         }
 
-    } else if (p_evt_write->handle == app.rawSample_char_status_handle.value_handle) {
+    } else if (simple_ble_is_char_event(p_ble_evt, &rawSample_char_status)) {
         // clear value on write
-        app.rawSample_status = 0;
+        rawSample_status = 0;
 
         // request next data from MSP430
         if (rawSample_state == RS_IDLE) {
@@ -486,8 +355,6 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 
 void timers_init (void) {
     uint32_t err_code;
-
-    APP_TIMER_INIT(TIMER_PRESCALER, TIMER_OP_QUEUE_SIZE, false);
 
     err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_rx_enable);
     APP_ERROR_CHECK(err_code);
@@ -508,7 +375,7 @@ void ble_error(uint32_t error_code) {
 
 int main(void) {
     // Initialization
-    app.simple_ble_app = simple_ble_init(&ble_config);
+    simple_ble_app = simple_ble_init(&ble_config);
     timers_init();
     conn_params_init();
     uart_init();
@@ -518,17 +385,11 @@ int main(void) {
     start_manufdata_adv();
     uart_rx_enable();
 
-    //XXX:TESTING
-    //led_init(25);
-    //led_on(25);
-
     while (1) {
         power_manage();
 
         // state machine. Only send one message per second
         if (!already_transmitted) {
-            //XXX: TESTING
-            //led_toggle(25);
             transmit_message();
         }
     }
@@ -561,9 +422,6 @@ void transmit_message(void) {
             tx_buffer[3] = additive_checksum(tx_buffer, length-1);
             uart_send(tx_buffer, length);
             rawSample_state = RS_WAIT_START;
-            //XXX:TESTING
-            //memset(app.raw_sample_data, 0x23, 200);
-            //simple_ble_update_char_len(&app.rawSample_char_data_handle, 234);
         } else if (rawSample_state == RS_NEXT) {
             // send next data message to MSP
             uint16_t length = 2+1+1; // length (x2), type, checksum
@@ -615,25 +473,25 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
                 break;
             case CONT_SAMDATA:
                 // update data
-                memcpy(app.raw_sample_data, &(buf[1]), len-1);
-                simple_ble_update_char_len(&app.rawSample_char_data_handle, len-1);
+                memcpy(raw_sample_data, &(buf[1]), len-1);
+                simple_ble_update_char_len(&rawSample_char_data, len-1);
 
                 // notify user of new data
-                app.rawSample_status = 1;
-                simple_ble_notify_char(&app.rawSample_char_status_handle, 1);
+                rawSample_status = 1;
+                simple_ble_notify_char(&rawSample_char_status);
                 if (rawSample_state != RS_QUIT) {
                     rawSample_state = RS_IDLE;
                 }
                 break;
             case DONE_SAMDATA:
                 // notify user samples are done
-                app.begin_rawSample = false;
-                app.rawSample_status = 2;
-                simple_ble_notify_char(&app.rawSample_char_status_handle, 1);
+                begin_rawSample = false;
+                rawSample_status = 2;
+                simple_ble_notify_char(&rawSample_char_status);
 
                 // reset data
-                memset(app.raw_sample_data, 0x00, SAMDATA_MAX_LEN);
-                simple_ble_update_char_len(&app.rawSample_char_data_handle, 1);
+                memset(raw_sample_data, 0x00, SAMDATA_MAX_LEN);
+                simple_ble_update_char_len(&rawSample_char_data, 1);
 
                 rawSample_state = RS_NONE;
                 break;
@@ -643,14 +501,14 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
         }
     } else {
         //if (rawSample_state != RS_NONE && rawSample_state != RS_IDLE) {
-        //    app.raw_sample_data[0] = 0xFF;
+        //    raw_sample_data[0] = 0xFF;
         //}
         if (rawSample_state == RS_WAIT_START) {
-            app.raw_sample_data[0] = 0xF1;
+            raw_sample_data[0] = 0xF1;
         } else if (rawSample_state == RS_WAIT_DATA) {
-            app.raw_sample_data[0] = 0xF2;
+            raw_sample_data[0] = 0xF2;
         } else if (rawSample_state == RS_WAIT_QUIT) {
-            app.raw_sample_data[0] = 0xF3;
+            raw_sample_data[0] = 0xF3;
         }
         /*
         // no message received. Handle that
