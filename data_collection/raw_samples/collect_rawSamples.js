@@ -4,10 +4,10 @@ var noble = require('noble');
 var fs = require('fs');
 
 // characteristic UUIDs
-var rawSample_service_uuid = 'cead2a887cf8cc8c1c4e882a39d41531';
-var rawSample_start_uuid   = 'cead2a897cf8cc8c1c4e882a39d41531';
-var rawSample_data_uuid    = 'cead2a8a7cf8cc8c1c4e882a39d41531';
-var rawSample_status_uuid  = 'cead2a8b7cf8cc8c1c4e882a39d41531';
+var rawSample_service_uuid = 'cead01af7cf8cc8c1c4e882a39d41531';
+var rawSample_start_uuid   = 'cead01b07cf8cc8c1c4e882a39d41531';
+var rawSample_data_uuid    = 'cead01b17cf8cc8c1c4e882a39d41531';
+var rawSample_status_uuid  = 'cead01b27cf8cc8c1c4e882a39d41531';
 
 var target_device = 'c0:98:e5:70:45:36';
 if (process.argv.length >= 3) {
