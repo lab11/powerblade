@@ -31,5 +31,11 @@ typedef enum {
     CAL_SETSEQ,
 } CalibrationState_t;
 
+// state machine for startup
+typedef enum {
+    STARTUP_NONE=0,
+    STARTUP_SEQ,
+} StartupState_t;
+
 #endif
 

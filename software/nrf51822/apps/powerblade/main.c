@@ -117,6 +117,7 @@ static bool already_transmitted = false;
 static NakState_t nak_state = NAK_NONE;
 static RawSampleState_t rawSample_state = RS_NONE;
 static CalibrationState_t calibration_state = CAL_NONE;
+static StartupState_t startup_state = STARTUP_SEQ;
 
 
 /**************************************************
@@ -453,6 +454,12 @@ void transmit_message(void) {
             tx_buffer[4] = additive_checksum(tx_buffer, length-1);
             uart_send(tx_buffer, length);
             calibration_state = CAL_NONE;
+        }
+    } else if (startup_state != STARTUP_NONE) {
+        if (startup_state == STARTUP_SEQ) {
+            // update sequence number on startup for debugging
+            calibration_state = CAL_SETSEQ;
+            startup_state = STARTUP_NONE;
         }
     }
 }
