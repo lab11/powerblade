@@ -17,7 +17,7 @@
 #include "nrf_drv_common.h"
 
 // Platform, Peripherals, Devices, & Services
-#include "ble_config.h"
+#include "powerblade_states.h"
 #include "uart.h"
 #include "uart_types.h"
 #include "powerblade.h"
@@ -76,16 +76,39 @@ APP_TIMER_DEF(start_manufdata_timer);
 #define MANUFDATA_ADV_DURATION APP_TIMER_TICKS(800, APP_TIMER_PRESCALER)
 #define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, APP_TIMER_PRESCALER)
 
-// advertisement data collected from UART
+// advertisement data
 #define PHYSWEB_URL "goo.gl/9aD6Wi"
+#define UMICH_COMPANY_IDENTIFIER    0x02E0
+#define POWERBLADE_SERVICE_IDENTIFIER 0x11
 #define ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
 static uint8_t powerblade_adv_data[ADV_DATA_MAX_LEN];
 static uint8_t powerblade_adv_data_len = 0;
 
-// service for device calibration
-static simple_ble_service_t calibrate_service = {
+// service for device configuration
+static simple_ble_service_t config_service = {
     .uuid128 = {{0x99, 0xf9, 0xac, 0xe5, 0x57, 0xb9, 0x43, 0xec,
                  0x88, 0xf8, 0x88, 0xb9, 0x4d, 0xa1, 0x80, 0x50}}};
+
+    // holds various configuration values which are broken out in characteristics
+    static PowerBladeConfig_t powerblade_config = {0};
+
+    // characteristic to display device status
+    static simple_ble_char_t config_status_char = {.uuid16 = 0x4DA2};
+
+    // characteristic to access voltage offset
+    static simple_ble_char_t config_voff_char = {.uuid16 = 0x4DA3};
+
+    // characteristic to access current offset
+    static simple_ble_char_t config_ioff_char = {.uuid16 = 0x4DA4};
+
+    // characteristic to access power scaling value
+    static simple_ble_char_t config_pscale_char = {.uuid16 = 0x4DA5};
+
+    // characteristic to access voltage scaling value
+    static simple_ble_char_t config_vscale_char = {.uuid16 = 0x4DA6};
+
+    // characteristic to access watt-hours scaling value
+    static simple_ble_char_t config_whscale_char = {.uuid16 = 0x4DA7};
 
 // service for sample data collection
 static simple_ble_service_t rawSample_service = {
@@ -116,8 +139,10 @@ static uint8_t tx_buffer[10];
 static bool already_transmitted = false;
 static NakState_t nak_state = NAK_NONE;
 static RawSampleState_t rawSample_state = RS_NONE;
-static CalibrationState_t calibration_state = CAL_NONE;
-static StartupState_t startup_state = STARTUP_SEQ;
+static ConfigurationState_t config_state = CONF_NONE;
+//static StartupState_t startup_state = STARTUP_GET_CONF;
+static StartupState_t startup_state = STARTUP_SET_SEQ;
+static StatusCode_t status_code = STATUS_NONE;
 
 
 /**************************************************
@@ -301,6 +326,39 @@ void uart_send (uint8_t* data, uint16_t len) {
 
 void services_init (void) {
 
+    // Add configuration service
+    simple_ble_add_service(&config_service);
+
+        // Add characteristic to display status codes
+        simple_ble_add_characteristic(1, 0, 1, 0, // read, write, notify, vlen
+                sizeof(status_code), (uint8_t*)&status_code,
+                &config_service, &config_status_char);
+
+        // Add characteristic to access voff
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                sizeof(powerblade_config.voff), (uint8_t*)&powerblade_config.voff,
+                &config_service, &config_voff_char);
+
+        // Add characteristic to access ioff
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                sizeof(powerblade_config.ioff), (uint8_t*)&powerblade_config.ioff,
+                &config_service, &config_ioff_char);
+
+        // Add characteristic to access pscale
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                sizeof(powerblade_config.pscale), (uint8_t*)&powerblade_config.pscale,
+                &config_service, &config_pscale_char);
+
+        // Add characteristic to access vscale
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                sizeof(powerblade_config.vscale), (uint8_t*)&powerblade_config.vscale,
+                &config_service, &config_vscale_char);
+
+        // Add characteristic to access whscale
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                sizeof(powerblade_config.whscale), (uint8_t*)&powerblade_config.whscale,
+                &config_service, &config_whscale_char);
+
     // Add raw sample download service
     simple_ble_add_service(&rawSample_service);
 
@@ -346,6 +404,14 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
         if (rawSample_state == RS_IDLE) {
             rawSample_state = RS_NEXT;
         }
+
+    } else if (simple_ble_is_char_event(p_ble_evt, &config_voff_char) ||
+               simple_ble_is_char_event(p_ble_evt, &config_ioff_char) ||
+               simple_ble_is_char_event(p_ble_evt, &config_pscale_char) ||
+               simple_ble_is_char_event(p_ble_evt, &config_vscale_char) ||
+               simple_ble_is_char_event(p_ble_evt, &config_whscale_char)) {
+        // send updated value to MSP
+        config_state = CONF_SET_VALUES;
     }
 }
 
@@ -397,70 +463,86 @@ int main(void) {
 }
 
 void transmit_message(void) {
-    if (nak_state != NAK_NONE) {
-        if (nak_state == NAK_CHECKSUM) {
-            // send NAK to MSP
-            uint16_t length = 2+1+1; // length (x2), type, checksum
-            tx_buffer[0] = (length >> 8);
-            tx_buffer[1] = (length & 0xFF);
-            tx_buffer[2] = (UART_NAK);
-            tx_buffer[3] = additive_checksum(tx_buffer, length-1);
-            uart_send(tx_buffer, length);
-            nak_state = NAK_NONE;
-        } else if (nak_state == NAK_RESEND) {
-            // resend most recent message to MSP
-            uart_send(tx_data, tx_data_len);
-            nak_state = NAK_NONE;
-        }
+    // select message to transmit at this interval
+    //  message priority is based on ordering in this function
 
-    } else if (rawSample_state != RS_NONE) {
-        if (rawSample_state == RS_START) {
-            // send start message to MSP
-            uint16_t length = 2+1+1; // length (x2), type, checksum
-            tx_buffer[0] = (length >> 8);
-            tx_buffer[1] = (length & 0xFF);
-            tx_buffer[2] = (START_SAMDATA);
-            tx_buffer[3] = additive_checksum(tx_buffer, length-1);
-            uart_send(tx_buffer, length);
-            rawSample_state = RS_WAIT_START;
-        } else if (rawSample_state == RS_NEXT) {
-            // send next data message to MSP
-            uint16_t length = 2+1+1; // length (x2), type, checksum
-            tx_buffer[0] = (length >> 8);
-            tx_buffer[1] = (length & 0xFF);
-            tx_buffer[2] = (CONT_SAMDATA);
-            tx_buffer[3] = additive_checksum(tx_buffer, length-1);
-            uart_send(tx_buffer, length);
-            rawSample_state = RS_WAIT_DATA;
-        } else if (rawSample_state == RS_QUIT) {
-            // send quit message to MSP
-            uint16_t length = 2+1+1; // length (x2), type, checksum
-            tx_buffer[0] = (length >> 8);
-            tx_buffer[1] = (length & 0xFF);
-            tx_buffer[2] = (DONE_SAMDATA);
-            tx_buffer[3] = additive_checksum(tx_buffer, length-1);
-            uart_send(tx_buffer, length);
-            rawSample_state = RS_WAIT_QUIT;
-        }
+    if (nak_state == NAK_CHECKSUM) {
+        // send NAK to MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (UART_NAK);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        nak_state = NAK_NONE;
 
-    } else if (calibration_state != CAL_NONE) {
-        if (calibration_state == CAL_SETSEQ) {
-            // set sequence number. Used as a test message
-            uint16_t length = 2+1+1+1; // length (x2), type, value, checksum
-            tx_buffer[0] = (length >> 8);
-            tx_buffer[1] = (length & 0xFF);
-            tx_buffer[2] = (SET_SEQ);
-            tx_buffer[3] = 150;
-            tx_buffer[4] = additive_checksum(tx_buffer, length-1);
-            uart_send(tx_buffer, length);
-            calibration_state = CAL_NONE;
-        }
-    } else if (startup_state != STARTUP_NONE) {
-        if (startup_state == STARTUP_SEQ) {
-            // update sequence number on startup for debugging
-            calibration_state = CAL_SETSEQ;
-            startup_state = STARTUP_NONE;
-        }
+    } else if (nak_state == NAK_RESEND) {
+        // resend most recent message to MSP
+        uart_send(tx_data, tx_data_len);
+        nak_state = NAK_NONE;
+
+    } else if (rawSample_state == RS_START) {
+        // send start message to MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (START_SAMDATA);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        rawSample_state = RS_WAIT_START;
+
+    } else if (rawSample_state == RS_NEXT) {
+        // send next data message to MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (CONT_SAMDATA);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        rawSample_state = RS_WAIT_DATA;
+
+    } else if (rawSample_state == RS_QUIT) {
+        // send quit message to MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (DONE_SAMDATA);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        rawSample_state = RS_WAIT_QUIT;
+
+    } else if (config_state == CONF_SET_VALUES) {
+        // set configuration values
+        uint16_t length = 2+1+sizeof(powerblade_config)+1; // length(x2), type, configuration struct, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (SET_CONF);
+        memcpy(&(tx_buffer[3]), (uint8_t*)(&powerblade_config), sizeof(powerblade_config));
+        tx_buffer[3+sizeof(powerblade_config)] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        config_state = CONF_NONE;
+
+    } else if (startup_state == STARTUP_GET_CONF) {
+        // get MSP configuration to display to user
+        uint16_t length = 2+1+1; // length(x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (GET_CONF);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        startup_state = STARTUP_SET_SEQ;
+
+    } else if (startup_state == STARTUP_SET_SEQ) {
+        // update sequence number on startup for debugging
+        // set sequence number. Used as a test message
+        uint16_t length = 2+1+1+1; // length (x2), type, value, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (SET_SEQ);
+        tx_buffer[3] = 150; // randomly selected sequence number
+        tx_buffer[4] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        startup_state = STARTUP_NONE;
     }
 }
 
@@ -502,8 +584,18 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
 
                 rawSample_state = RS_NONE;
                 break;
+            case GET_CONF:
+                // updated configuration from the MSP
+                if ((len-1) == sizeof(powerblade_config)) {
+                    memcpy((uint8_t*)&powerblade_config, &(buf[1]), len-1);
+                } else {
+                    // data was the wrong size. Report error
+                    status_code = STATUS_BAD_CONFIG_SIZE;
+                    simple_ble_notify_char(&config_status_char);
+                }
+
             default:
-                // unhandled adv type. Don't handle it
+                // unhandled uart type. Don't handle it
                 break;
         }
     } else {
@@ -511,11 +603,14 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
         //    raw_sample_data[0] = 0xFF;
         //}
         if (rawSample_state == RS_WAIT_START) {
-            raw_sample_data[0] = 0xF1;
+            status_code = STATUS_NO_RS_START;
+            simple_ble_notify_char(&config_status_char);
         } else if (rawSample_state == RS_WAIT_DATA) {
-            raw_sample_data[0] = 0xF2;
+            status_code = STATUS_NO_RS_DATA;
+            simple_ble_notify_char(&config_status_char);
         } else if (rawSample_state == RS_WAIT_QUIT) {
-            raw_sample_data[0] = 0xF3;
+            status_code = STATUS_NO_RS_QUIT;
+            simple_ble_notify_char(&config_status_char);
         }
         /*
         // no message received. Handle that
