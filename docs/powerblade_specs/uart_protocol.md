@@ -87,27 +87,18 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 
 | Value | Name |
 |:------|:-----|
-| 0x10  | Get V_offset |
-| 0x11  | Set V_offset |
-| 0x12  | Get I_offset |
-| 0x13  | Set I_offset |
-| 0x14  | Get CUROFF |
-| 0x15  | Set CUROFF |
-| 0x16  | Get P_scale |
-| 0x17  | Set P_scale |
-| 0x18  | Get V_scale |
-| 0x19  | Set V_scale |
-| 0x1A  | Get WH_scale |
-| 0x1B  | Set WH_scale |
+| 0x10  | Get Configuration |
+| 0x11  | Set Configuration |
 | 0x1C	| Set Sequence |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
 | 0x22  | Stop Sample Data Download |
 | 0xFF	| NAK (Checksum failed) |
 
+ * **Get Configuration**: Get the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
+ * **Set Configuration**: Set the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
  * **Set Sequence**: Set the sequence number to be included (and incremented) in future packets
- * **Get/Set X**: Getters and Setters for various calibration values
- * **Start Sample Data Download**: Get individual samples from one second of power sampling
+  * **Start Sample Data Download**: Get individual samples from one second of power sampling
  * **Continue Sample Data Download**: Get next set of raw samples from MSP430
  * **Stop Sample Data Download**: Stop collecting and transmitting raw samples
  * **NAK**: nRF indicating checksum of previous message failed

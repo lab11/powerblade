@@ -1,8 +1,5 @@
-#ifndef __BLE_CONFIG_H
-#define __BLE_CONFIG_H
-
-#define UMICH_COMPANY_IDENTIFIER    0x02E0
-#define POWERBLADE_SERVICE_IDENTIFIER 0x11
+#ifndef __POWERBLADE_STATES_H
+#define __POWERBLADE_STATES_H
 
 // state machine for acknowledgements
 typedef enum {
@@ -23,19 +20,27 @@ typedef enum {
     RS_IDLE,
 } RawSampleState_t;
 
-// state machine for calibration
+// state machine for configuration
 typedef enum {
-    CAL_NONE=0,
-    CAL_START,
-    CAL_GROUNDTRUTH,
-    CAL_SETSEQ,
-} CalibrationState_t;
+    CONF_NONE=0,
+    CONF_SET_VALUES,
+} ConfigurationState_t;
 
 // state machine for startup
 typedef enum {
     STARTUP_NONE=0,
-    STARTUP_SEQ,
+    STARTUP_SET_SEQ,
+    STARTUP_GET_CONF,
 } StartupState_t;
+
+// device status codes
+typedef enum {
+    STATUS_NONE=0,
+    STATUS_BAD_CONFIG_SIZE,
+    STATUS_NO_RS_START,
+    STATUS_NO_RS_DATA,
+    STATUS_NO_RS_QUIT,
+} StatusCode_t;
 
 #endif
 
