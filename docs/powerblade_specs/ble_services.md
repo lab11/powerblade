@@ -1,16 +1,15 @@
 PowerBlade BLE Services
 =======================
 
-## PowerBlade Configuration
-
 ## Configuration
 Device Configuration Service
+
     Full UUID: 50804da1-b988-f888-ec43-b957e5acf999
     Short UUID: 0x4DA1
 
-    Allows calibration of the scaling values on the device and viewing of the device's
-    current status. Used for testing and development as well as device-specific
-    calibration at manufacturing time.
+    Allows calibration of the scaling values on the device and viewing of the
+    device's current status. Used for testing and development as well as
+    device-specific calibration at manufacturing time.
 
 0x4DA2 - Device Status
 
@@ -34,27 +33,32 @@ Device Configuration Service
 
     uint8_t: Read, Write
 
-    Scaling value used to determine power readings. Used for device calibration. Transmitted over advertisements to users
+    Scaling value used to determine power readings. Used for device calibration.
+    Transmitted over advertisements to users
 
 0x4DA6 - Voltage Scale Configuration
 
     uint8_t: Read, Write
 
-    Scaling value used to determine voltage readings. Used for device calibration. Transmitted over advertisements to users
+    Scaling value used to determine voltage readings. Used for device
+    calibration. Transmitted over advertisements to users
 
 0x4DA7 - Watt-Hours Scale Configuration
 
     uint8_t: Read, Write
 
-    Scaling value used to determine watt-hours readings. Used for device calibration. Transmitted over advertisements to users
+    Scaling value used to determine watt-hours readings. Used for device
+    calibration. Transmitted over advertisements to users
 
 ## Sample Collection
 Raw Sample Data Collection Service
+
     Full UUID: cead01af-7cf8-cc8c-1c4e-882a39d41531
     Short UUID: 0x01AF
 
-    Allows collection of raw voltage and current samples from a PowerBlade. Used for
-    testing and development as well as device-specific calibration at manufacturing time
+    Allows collection of raw voltage and current samples from a PowerBlade. Used
+    for testing and development as well as device-specific calibration at
+    manufacturing time
 
 0x01B0 - Begin Sample Collection
 
