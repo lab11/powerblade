@@ -429,6 +429,7 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT3;
 			// Store current value for future calculations
+			int8_t ioff = -4;
 			current = (int8_t) (ADC_Result - I_VCC2);
 
 			if(pb_state == pb_capture) {
@@ -439,6 +440,9 @@ __interrupt void ADC10_ISR(void) {
 				}
 			}
 
+			// After its been stored for raw sample transmission, apply offset
+			current -= ioff;
+
 			// Current is the last measurement, attempt transmission
 			//transmitTry();
 			__bic_SR_register_on_exit(LPM3_bits);
@@ -448,6 +452,7 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT3;
 			// Store voltage value
+			int8_t voff = -1;
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			if(pb_state == pb_capture) {
@@ -457,6 +462,9 @@ __interrupt void ADC10_ISR(void) {
 					dataIndex++;
 				}
 			}
+
+			// After its been stored for raw sample transmission, apply offset
+			voltage -= voff;
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
