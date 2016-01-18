@@ -1,32 +1,34 @@
 
 function calculate_constants(wattage, dataArr) {
-	var voltageArr = [2520];
-	var currentArr = [2520];
-	for(var i = 0; i < 2520; i++) {
+	var dataLen = dataArr.length / 2;
+
+	var voltageArr = [dataLen];
+	var currentArr = [dataLen];
+	for(var i = 0; i < dataLen; i++) {
 		voltageArr[i] = dataArr[2*i];
 		currentArr[i] = dataArr[2*i + 1];
 	}
 
 	var voff = 0;
 	var ioff = 0;
-	for(var i = 0; i < 2520; i++) {
+	for(var i = 0; i < dataLen; i++) {
 		voff += voltageArr[i];
 		ioff += currentArr[i];
 	}
-	voff = Math.floor(voff / 2520);
-	ioff = Math.floor(ioff / 2520);
+	voff = Math.floor(voff / dataLen);
+	ioff = Math.floor(ioff / dataLen);
 
-	var integrate = [2520];
+	var integrate = [dataLen];
 
 	var curoff = 0;
-	for(var i = 0; i < 2520; i++) {
+	for(var i = 0; i < dataLen; i++) {
 		var newCurrent = currentArr[i] - ioff;
 		aggCurrent += (newCurrent + (newCurrent >> 1));
 		aggCurrent -= aggCurrent >> 5;
 		integrate[i] = aggCurrent;
 		curoff += aggCurrent;
 	}
-	curoff = curoff / 2520;
+	curoff = curoff / dataLen;
 
 	var sampleCount = 0;
 	var aggCurrent = 0;
@@ -35,7 +37,7 @@ function calculate_constants(wattage, dataArr) {
 	var acc_p_ave = 0;
 	var wattHoursAve = 0;
 	var voltAmpAve = 0;
-	for(var i = 0; i < 2520; i++) {
+	for(var i = 0; i < dataLen; i++) {
 		var newVoltage = voltageArr[i] - voff;
 		var newIntegrate = integrate[i] - curoff;
 		acc_i_rms = newIntegrate * newIntegrate;
