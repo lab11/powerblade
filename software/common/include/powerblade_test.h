@@ -106,7 +106,8 @@
 	Nadc,max = 255 * (3.17 / 3.3) = 245 (0xF5)
 */
 #define ADC_VMIN	0x73
-#define ADC_VCHG	0xDB
+//#define ADC_VCHG	0xDB
+#define ADC_VCHG	0xC0
 
 #define ADC_VCC2	0x80
 #define V_VCC2		ADC_VCC2
