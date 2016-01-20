@@ -25,7 +25,6 @@
 #include "checksum.h"
 #include "uart.h"
 
-//#define CALIBRATE
 //#define NORDICDEBUG
 #define SIDEDATA
 
@@ -37,12 +36,10 @@ uint16_t delay_count;
 
 // Variables for integration
 int16_t agg_current;
-int32_t agg_average;
 
 // Used for data visualizer
 uint16_t pwm_duty;
 uint16_t voltage_duty;
-uint32_t tx_i_ave;
 
 // Count each sample and 60Hz measurement
 uint8_t sampleCount;
@@ -160,13 +157,11 @@ int main(void) {
 
 	// Initialize remaining transmitted values
 	sequence = 0;
-#ifdef CALIBRATE
-	scale = 0;
-#else
+
 	scale = PSCALE;
 	scale = (scale<<8)+VSCALE;
 	scale = (scale<<8)+WHSCALE;
-#endif
+
 	flags = 0xA5;
 	txIndex = 0;
 
@@ -256,15 +251,10 @@ void transmitTry(void) {
 
 	// Integrate current
 	agg_current += (int16_t) (current + (current >> 1));
-	agg_average = agg_current >> 5;
-	agg_current -= agg_average;
+	agg_current -= agg_current >> 5;
 
-	// Subtract offset, if not in calibration mode
-#ifndef CALIBRATE
+	// Subtract offset
 	 int32_t new_current = agg_current + CUROFF;
-#else
-	int32_t new_current = agg_current;
-#endif
 
 	// Perform calculations for I^2, V^2, and P
 	acc_i_rms += (new_current * new_current);
@@ -371,10 +361,6 @@ void transmitTry(void) {
 			// Increment sequence number for transmission
 			sequence++;
 
-#ifdef CALIBRATE
-			tx_i_ave = (uint32_t) Irms;
-#endif
-
 			truePower = (uint16_t) (wattHoursToAverage / 60);
 			wattHours += (uint64_t) truePower;
 			apparentPower = (uint16_t) (voltAmpsToAverage / 60);
@@ -400,12 +386,10 @@ void transmitTry(void) {
 				uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
 				uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 				uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
-#ifdef CALIBRATE
-				uart_stuff(blockOffset + OFFSET_WH, (char*) &tx_i_ave, sizeof(tx_i_ave));
-#else
+
 				wattHoursSend = (uint32_t)(wattHours >> WHSCALE);
 				uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
-#endif
+
 				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
 
 				uart_send(blockOffset, uart_len);
@@ -487,7 +471,6 @@ __interrupt void ADC10_ISR(void) {
 				if (ADC_Result > ADC_VCHG) {
 					SEN_EN_OUT |= SEN_EN_PIN;
 					agg_current = 0;
-					agg_average = 0;
 					ready = 1;
 				}
 			}
