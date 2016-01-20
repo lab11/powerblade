@@ -27,8 +27,8 @@
    POWERBLADE CONFIGURATION STRUCT
  **************************************************************************/
 typedef struct {
-    uint8_t voff;
-    uint8_t ioff;
+    int8_t voff;
+    int8_t ioff;
     uint16_t pscale;
     uint8_t vscale;
     uint8_t whscale;
