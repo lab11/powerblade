@@ -118,7 +118,7 @@
 #if defined (VERSION32)
 #define CUROFF		88
 #elif defined (VERSION33)
-#define CUROFF		16
+//#define CUROFF		16
 #else
 #define CUROFF		27
 #endif
