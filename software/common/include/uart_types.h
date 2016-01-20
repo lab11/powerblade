@@ -29,6 +29,7 @@
 typedef struct {
     int8_t voff;
     int8_t ioff;
+    int16_t curoff;
     uint16_t pscale;
     uint8_t vscale;
     uint8_t whscale;
