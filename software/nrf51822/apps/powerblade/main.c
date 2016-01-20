@@ -101,14 +101,17 @@ static simple_ble_service_t config_service = {
     // characteristic to access current offset
     static simple_ble_char_t config_ioff_char = {.uuid16 = 0x4DA4};
 
+    // characteristic to access current offset post-integration
+    static simple_ble_char_t config_curoff_char = {.uuid16 = 0x4DA5};
+
     // characteristic to access power scaling value
-    static simple_ble_char_t config_pscale_char = {.uuid16 = 0x4DA5};
+    static simple_ble_char_t config_pscale_char = {.uuid16 = 0x4DA6};
 
     // characteristic to access voltage scaling value
-    static simple_ble_char_t config_vscale_char = {.uuid16 = 0x4DA6};
+    static simple_ble_char_t config_vscale_char = {.uuid16 = 0x4DA7};
 
     // characteristic to access watt-hours scaling value
-    static simple_ble_char_t config_whscale_char = {.uuid16 = 0x4DA7};
+    static simple_ble_char_t config_whscale_char = {.uuid16 = 0x4DA8};
 
 // service for sample data collection
 static simple_ble_service_t rawSample_service = {
@@ -133,7 +136,7 @@ static simple_ble_service_t rawSample_service = {
 static uint8_t rx_data[RX_DATA_MAX_LEN];
 static uint8_t* tx_data;
 static uint16_t tx_data_len = 0;
-static uint8_t tx_buffer[10];
+static uint8_t tx_buffer[4+sizeof(powerblade_config)];
 
 // states for handling transmissions to the MSP
 static bool already_transmitted = false;
@@ -344,6 +347,11 @@ void services_init (void) {
                 sizeof(powerblade_config.ioff), (uint8_t*)&powerblade_config.ioff,
                 &config_service, &config_ioff_char);
 
+        // Add characteristic to access curoff
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                sizeof(powerblade_config.curoff), (uint8_t*)&powerblade_config.curoff,
+                &config_service, &config_curoff_char);
+
         // Add characteristic to access pscale
         simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
                 sizeof(powerblade_config.pscale), (uint8_t*)&powerblade_config.pscale,
@@ -407,6 +415,7 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 
     } else if (simple_ble_is_char_event(p_ble_evt, &config_voff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_ioff_char) ||
+               simple_ble_is_char_event(p_ble_evt, &config_curoff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_pscale_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_vscale_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_whscale_char)) {
