@@ -308,10 +308,9 @@ void transmitTry(void) {
 				switch(captureType) {
 				case GET_CONF:
 				{
-					uart_len += 1;	// Add length of data type
+					uart_len += 1 + sizeof(pb_config);	// Add length of data type AND length of pb_config
 					char data_type = GET_CONF;
 					uart_stuff(OFFSET_DATATYPE+(txIndex*UARTBLOCK), &data_type, sizeof(data_type));
-					uart_len += sizeof(pb_config);
 					uart_stuff(1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), (char*)&pb_config, sizeof(pb_config));
 					break;
 				}
