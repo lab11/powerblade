@@ -3,6 +3,7 @@
 
 #include "powerblade_test.h"
 
+char txBuf[UARTLEN];
 char captureType;
 char captureBuf[RXLEN - 4];
 

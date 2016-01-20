@@ -6,7 +6,6 @@
 #include "checksum.h"
 
 //void uart_send(char* buf, unsigned int len);
-char txBuf[UARTLEN];
 char* txBufSave;
 unsigned int txLen;
 int txCt;
