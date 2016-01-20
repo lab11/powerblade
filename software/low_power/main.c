@@ -69,6 +69,10 @@ uint64_t wattHours;
 uint32_t wattHoursSend;
 uint8_t flags;
 
+// Scale and offset values (configuration/calibration)
+#pragma PERSISTENT(pb_config)
+PowerBladeConfig_t pb_config = { .voff = 0x00, .ioff = 0x00, .pscale = 0x41F4, .vscale = 0x7B, .whscale = 0x09};
+
 // PowerBlade state (used for downloading data)
 int dataIndex;
 pb_state_t pb_state;
@@ -157,13 +161,13 @@ int main(void) {
 
 	// Initialize remaining transmitted values
 	sequence = 0;
-
-	scale = PSCALE;
-	scale = (scale<<8)+VSCALE;
-	scale = (scale<<8)+WHSCALE;
-
 	flags = 0xA5;
 	txIndex = 0;
+
+	// Initialize scale value (can be updated later)
+	scale = pb_config.pscale;
+	scale = (scale<<8)+pb_config.vscale;
+	scale = (scale<<8)+pb_config.whscale;
 
 	// Set SEN_EN to output and disable (~200uA)
 	SEN_EN_OUT &= ~SEN_EN_PIN;
@@ -302,6 +306,11 @@ void transmitTry(void) {
 			}
 			else if(processMessage() > 0) {
 				switch(captureType) {
+				case GET_CONF:
+					break;
+				case SET_CONF:
+
+					break;
 				case SET_SEQ:
 					sequence = captureBuf[0];
 					break;
@@ -387,7 +396,7 @@ void transmitTry(void) {
 				uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 				uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 
-				wattHoursSend = (uint32_t)(wattHours >> WHSCALE);
+				wattHoursSend = (uint32_t)(wattHours >> pb_config.whscale);
 				uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
 
 				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
@@ -413,7 +422,7 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT3;
 			// Store current value for future calculations
-			int8_t ioff = -4;
+			//int8_t ioff = -4;
 			current = (int8_t) (ADC_Result - I_VCC2);
 
 			if(pb_state == pb_capture) {
@@ -425,7 +434,7 @@ __interrupt void ADC10_ISR(void) {
 			}
 
 			// After its been stored for raw sample transmission, apply offset
-			current -= ioff;
+			current -= pb_config.ioff;
 
 			// Current is the last measurement, attempt transmission
 			//transmitTry();
@@ -436,7 +445,7 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT3;
 			// Store voltage value
-			int8_t voff = -1;
+			//int8_t voff = -1;
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			if(pb_state == pb_capture) {
@@ -448,7 +457,7 @@ __interrupt void ADC10_ISR(void) {
 			}
 
 			// After its been stored for raw sample transmission, apply offset
-			voltage -= voff;
+			voltage -= pb_config.voff;
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
