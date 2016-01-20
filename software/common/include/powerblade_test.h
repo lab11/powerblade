@@ -131,9 +131,9 @@
  **************************************************************************/
 //#define PSCALE		0x0001
 //#define PSCALE		0x41F4
-#define PSCALE		0x42AC
-#define VSCALE		0x7B
-#define WHSCALE		0x09
+//#define PSCALE		0x42AC
+//#define VSCALE		0x7B
+//#define WHSCALE		0x09
 
 /**************************************************************************
    UART CONSTANTS SECTION
