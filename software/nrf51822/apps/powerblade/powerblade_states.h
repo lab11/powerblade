@@ -29,6 +29,7 @@ typedef enum {
 // state machine for startup
 typedef enum {
     STARTUP_NONE=0,
+    STARTUP_NOP,
     STARTUP_SET_SEQ,
     STARTUP_GET_CONF,
 } StartupState_t;
