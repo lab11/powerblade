@@ -110,7 +110,7 @@
 
 #define ADC_VCC2	0x80
 #define V_VCC2		ADC_VCC2
-#define I_VCC2		0x7F
+#define I_VCC2		ADC_VCC2
 
 /**************************************************************************
    SENSING CONSTANTS SECTION
@@ -118,7 +118,7 @@
 #if defined (VERSION32)
 #define CUROFF		88
 #elif defined (VERSION33)
-#define CUROFF		108
+#define CUROFF		16
 #else
 #define CUROFF		27
 #endif
@@ -131,7 +131,7 @@
  **************************************************************************/
 //#define PSCALE		0x0001
 //#define PSCALE		0x41F4
-#define PSCALE		0x428F
+#define PSCALE		0x42AC
 #define VSCALE		0x7B
 #define WHSCALE		0x09
 
