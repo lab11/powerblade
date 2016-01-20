@@ -143,8 +143,7 @@ static bool already_transmitted = false;
 static NakState_t nak_state = NAK_NONE;
 static RawSampleState_t rawSample_state = RS_NONE;
 static ConfigurationState_t config_state = CONF_NONE;
-//static StartupState_t startup_state = STARTUP_GET_CONF;
-static StartupState_t startup_state = STARTUP_SET_SEQ;
+static StartupState_t startup_state = STARTUP_NOP;
 static StatusCode_t status_code = STATUS_NONE;
 
 
@@ -475,7 +474,12 @@ void transmit_message(void) {
     // select message to transmit at this interval
     //  message priority is based on ordering in this function
 
-    if (nak_state == NAK_CHECKSUM) {
+    if (startup_state == STARTUP_NOP) {
+        // skip this first cycle
+        already_transmitted = true;
+        startup_state = STARTUP_SET_SEQ;
+
+    } else if (nak_state == NAK_CHECKSUM) {
         // send NAK to MSP
         uint16_t length = 2+1+1; // length (x2), type, checksum
         tx_buffer[0] = (length >> 8);
@@ -531,16 +535,6 @@ void transmit_message(void) {
         uart_send(tx_buffer, length);
         config_state = CONF_NONE;
 
-    } else if (startup_state == STARTUP_GET_CONF) {
-        // get MSP configuration to display to user
-        uint16_t length = 2+1+1; // length(x2), type, checksum
-        tx_buffer[0] = (length >> 8);
-        tx_buffer[1] = (length & 0xFF);
-        tx_buffer[2] = (GET_CONF);
-        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
-        uart_send(tx_buffer, length);
-        startup_state = STARTUP_SET_SEQ;
-
     } else if (startup_state == STARTUP_SET_SEQ) {
         // update sequence number on startup for debugging
         // set sequence number. Used as a test message
@@ -550,6 +544,16 @@ void transmit_message(void) {
         tx_buffer[2] = (SET_SEQ);
         tx_buffer[3] = 150; // randomly selected sequence number
         tx_buffer[4] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        startup_state = STARTUP_GET_CONF;
+
+    } else if (startup_state == STARTUP_GET_CONF) {
+        // get MSP configuration to display to user
+        uint16_t length = 2+1+1; // length(x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (GET_CONF);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
         uart_send(tx_buffer, length);
         startup_state = STARTUP_NONE;
     }
