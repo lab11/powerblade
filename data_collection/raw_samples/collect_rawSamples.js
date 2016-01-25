@@ -29,6 +29,8 @@ var rawSample_start_char;
 var rawSample_data_char;
 var rawSample_status_char;
 
+var sampleData = new Array();
+
 noble.on('discover', function (peripheral) {
     //console.log(peripheral.address);
     if (peripheral.address == target_device) {
@@ -141,6 +143,8 @@ function RawSample_data_receive(data) {
     // do something with the data
     fs.writeFile('rawSamples_num' + output_file_no + '.bin', data);
     output_file_no += 1;
+    // do somethign else with the data (i.e. get ready for calibration)
+    sampleData = sampleData.concat(data);
 
     // write status to request next data
     console.log("Requesting next data");
