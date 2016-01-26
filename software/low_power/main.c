@@ -109,6 +109,7 @@ int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
 
 	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
+	delay_count = 0;
 //	TA0CCR0 = 12;								// PWM Period
 //	TA0CCR1 = 2;                     			// TA0.1 ADC trigger
 //	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
