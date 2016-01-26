@@ -258,7 +258,7 @@ void transmitTry(void) {
 	agg_current -= agg_current >> 5;
 
 	// Subtract offset
-	int32_t new_current = agg_current + pb_config.curoff;
+	int32_t new_current = agg_current - pb_config.curoff;
 
 	// Perform calculations for I^2, V^2, and P
 	acc_i_rms += (new_current * new_current);
@@ -435,7 +435,7 @@ __interrupt void ADC10_ISR(void) {
 
 			if(pb_state == pb_capture) {
 				if(dataIndex < 5040) {
-					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
+					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1) + (dataIndex/504);
 					uart_stuff(arrayIndex, (char*) &current, sizeof(current));
 					dataIndex++;
 				}
@@ -458,7 +458,7 @@ __interrupt void ADC10_ISR(void) {
 
 			if(pb_state == pb_capture) {
 				if(dataIndex < 5040) {
-					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1);
+					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1) + (dataIndex/504);
 					uart_stuff(arrayIndex, (char*) &voltage, sizeof(voltage));
 					dataIndex++;
 				}
