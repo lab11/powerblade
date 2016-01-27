@@ -109,13 +109,14 @@ int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
 
 	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-	TA0CCR0 = 12;								// PWM Period
-	TA0CCR1 = 2;                     			// TA0.1 ADC trigger
-	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
-	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
-	delay_count = 1250;
-	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
-	TA0CTL = 0;
+	delay_count = 0;
+//	TA0CCR0 = 12;								// PWM Period
+//	TA0CCR1 = 2;                     			// TA0.1 ADC trigger
+//	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
+//	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
+//	delay_count = 1250;
+//	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
+//	TA0CTL = 0;
 
 	// Clock Setup
 	PJSEL0 |= BIT4 + BIT5;						// XIN, XOUT on PJ4, PJ5 with external crystal
