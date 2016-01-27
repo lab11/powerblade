@@ -14,7 +14,12 @@ var target_device = 'c0:98:e5:70:45:36';
 if (process.argv.length >= 3) {
     target_device = process.argv[2];
 }
+var wattage = 200;
+if (process.argv.length >= 4) {
+    wattage = process.argv[3];
+}
 console.log("Looking for " + target_device);
+console.log("Programming to " + wattage + " W");
 
 noble.on('stateChange', function(state) {
     if (state === 'poweredOn') {
@@ -126,7 +131,7 @@ function RawSample_status_receive(data, isNotify) {
     } else if (data[0] == 2) {
         // calculate calibration numbers
         console.log("Calculating calibration numbers...")
-        calib.calculate_constants(200, sampleData);
+        calib.calculate_constants(wattage, sampleData);
         // finish up and exit if all data is read
         console.log("Finished! Disconnecting...");
         powerblade_periph.disconnect();
