@@ -109,10 +109,8 @@ int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
 
 	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-	delay_count = 0;
-//	TA0CCR0 = 12;								// PWM Period
-//	TA0CCR1 = 2;                     			// TA0.1 ADC trigger
-//	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
+//	TA0CCR0 = 100;								// PWM Period
+//	TA0CCTL0 = CCIE;               				// TA0CCR0 toggle
 //	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
 //	delay_count = 1250;
 //	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
@@ -196,10 +194,9 @@ int main(void) {
 	ADC10IE |= ADC10IE0;                   		// Enable ADC conv complete interrupt
 
 	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-	TA0CCR0 = 12;								// PWM Period
-	TA0CCR1 = 2;                     			// TA0.1 ADC trigger
-	TA0CCTL1 = OUTMOD_7 + CCIE;               	// TA0CCR0 toggle
-	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// TA0 set to ACLK (32kHz), up mode
+	TA0CCR0 = 13;								// PWM Period
+	TA0CCTL0 = CCIE;               				// TA0CCR0 toggle
+	TA0CTL = TASSEL_1 + MC_2 + TACLR;          	// TA0 set to ACLK (32kHz), up mode
 
 	P1DIR |= BIT2 + BIT3;
 #if defined (SIDEDATA)
@@ -224,10 +221,11 @@ int main(void) {
 	}
 }
 
-#pragma vector=TIMER0_A1_VECTOR
+#pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMERA0_ISR(void) {
-	TA0CCTL1 &= ~CCIFG;
-//	P1OUT |= BIT2;
+	TA0CCTL0 &= ~CCIFG;
+	TA0CCR0 += 13;
+	P1OUT |= BIT2;
 	if (delay_count > 1) {
 		delay_count--;
 	} else if (delay_count == 1) {
@@ -240,7 +238,7 @@ __interrupt void TIMERA0_ISR(void) {
 		ADC10CTL0 |= ADC10ENC;
 		ADC10CTL0 += ADC10SC;
 	}
-//	P1OUT &= ~BIT2;
+	P1OUT &= ~BIT2;
 }
 
 //#pragma vector=TIMER1_A1_VECTOR
@@ -253,6 +251,8 @@ __interrupt void TIMERA0_ISR(void) {
 //}
 
 void transmitTry(void) {
+
+	P1OUT |= BIT3;
 
 	// Integrate current
 	agg_current += (int16_t) (current + (current >> 1));
@@ -414,6 +414,7 @@ void transmitTry(void) {
 			}
 		}
 	}
+	P1OUT &= ~BIT3;
 }
 
 #pragma vector=ADC10_VECTOR
@@ -429,7 +430,7 @@ __interrupt void ADC10_ISR(void) {
 		switch (ADC_Channel) {
 		case ICASE:								// I_SENSE
 		{
-			P1OUT |= BIT3;
+			P1OUT |= BIT2;
 			// Store current value for future calculations
 			//int8_t ioff = -4;
 			current = (int8_t) (ADC_Result - I_VCC2);
@@ -452,7 +453,7 @@ __interrupt void ADC10_ISR(void) {
 		}
 		case VCASE:								// V_SENSE
 		{
-			P1OUT |= BIT3;
+			P1OUT |= BIT2;
 			// Store voltage value
 			//int8_t voff = -1;
 			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
@@ -477,7 +478,7 @@ __interrupt void ADC10_ISR(void) {
 			break;
 		}
 		case VCCCASE:	// VCC_SENSE
-			P1OUT |= BIT3 + BIT2;
+			P1OUT |= BIT2;
 			// Perform Vcap measurements
 			if (ADC_Result < ADC_VMIN) {
 #if !defined (NORDICDEBUG)
@@ -501,7 +502,7 @@ __interrupt void ADC10_ISR(void) {
 			ADC10CTL0 += ADC10SC;
 			break;
 		default: // ADC Reset condition
-			P1OUT |= BIT2;
+			P1OUT |= BIT3;
 			ADC10CTL0 += ADC10SC;
 			break;
 		}
