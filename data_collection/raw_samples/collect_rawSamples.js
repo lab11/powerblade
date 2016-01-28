@@ -10,6 +10,9 @@ var rawSample_start_uuid   = 'cead01b07cf8cc8c1c4e882a39d41531';
 var rawSample_data_uuid    = 'cead01b17cf8cc8c1c4e882a39d41531';
 var rawSample_status_uuid  = 'cead01b27cf8cc8c1c4e882a39d41531';
 
+var config_service_uuid = '5080a14db988f888ec43b957e5acf999';
+var config_
+
 var target_device = 'c0:98:e5:70:45:36';
 if (process.argv.length >= 3) {
     target_device = process.argv[2];
