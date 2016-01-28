@@ -17,7 +17,6 @@
 #include "nrf_drv_common.h"
 
 // Platform, Peripherals, Devices, & Services
-#include "complex_ble.h"
 #include "powerblade_states.h"
 #include "uart.h"
 #include "uart_types.h"
@@ -81,9 +80,9 @@ APP_TIMER_DEF(restart_advs_timer);
 #define EDDYSTONE_ADV_DURATION APP_TIMER_TICKS(200, APP_TIMER_PRESCALER)
 #define MANUFDATA_ADV_DURATION APP_TIMER_TICKS(800, APP_TIMER_PRESCALER)
 // end of uart message to start of next with guard time
-#define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, APP_TIMER_PRESCALER)
+#define UART_SLEEP_DURATION    APP_TIMER_TICKS(890, APP_TIMER_PRESCALER)
 // start of uart guard time to start of next guard time, determined empirically
-#define UART_SKIP_DURATION     APP_TIMER_TICKS(1049, APP_TIMER_PRESCALER)
+#define UART_SKIP_DURATION     APP_TIMER_TICKS(999, APP_TIMER_PRESCALER)
 
 // advertisement data
 #define PHYSWEB_URL "goo.gl/9aD6Wi"
@@ -307,8 +306,8 @@ void process_rx_packet(uint16_t packet_len) {
     } else {
         // need to send a nak
         nak_state = NAK_CHECKSUM;
-        //XXX: What's going on here???
-        raw_sample_data[0] = 0xA5;
+        status_code = STATUS_BAD_CHECKSUM;
+        simple_ble_notify_char(&config_status_char);
     }
 }
 
@@ -418,6 +417,7 @@ void services_init (void) {
         //  of it starts
         memset(raw_sample_data, 0x00, SAMDATA_MAX_LEN);
         simple_ble_add_auth_characteristic(1, 0, 0, 1, // read, write, notify, vlen
+                true, false, // read auth, write auth
                 SAMDATA_MAX_LEN, (uint8_t*)raw_sample_data,
                 &rawSample_service, &rawSample_char_data);
         // must initialize to maximum valid length. Now reset down to 1
@@ -678,9 +678,8 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
                 break;
         }
     } else {
-        //if (rawSample_state != RS_NONE && rawSample_state != RS_IDLE) {
-        //    raw_sample_data[0] = 0xFF;
-        //}
+        // expected a message but didn't receive one. Signal error status over
+        //  status characteristic
         if (rawSample_state == RS_WAIT_START) {
             status_code = STATUS_NO_RS_START;
             simple_ble_notify_char(&config_status_char);
@@ -691,23 +690,6 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
             status_code = STATUS_NO_RS_QUIT;
             simple_ble_notify_char(&config_status_char);
         }
-        /*
-        // no message received. Handle that
-        if (rawSample_state == RS_WAIT_START) {
-            // should have gotten an acknowledgement. Send again
-            if (rawSample_state != RS_QUIT) {
-                rawSample_state = RS_START;
-            }
-        } else if (rawSample_state == RS_WAIT_DATA) {
-            // should have gotten data. Request again
-            if (rawSample_state != RS_QUIT) {
-                rawSample_state = RS_NEXT;
-            }
-        } else if (rawSample_state == RS_WAIT_QUIT) {
-            // should have gotten a done message. Send again
-            rawSample_state = RS_QUIT;
-        }
-        */
     }
 }
 

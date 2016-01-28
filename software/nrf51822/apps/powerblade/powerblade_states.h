@@ -38,6 +38,7 @@ typedef enum {
 typedef enum {
     STATUS_NONE=0,
     STATUS_BAD_CONFIG_SIZE,
+    STATUS_BAD_CHECKSUM,
     STATUS_NO_RS_START,
     STATUS_NO_RS_DATA,
     STATUS_NO_RS_QUIT,
