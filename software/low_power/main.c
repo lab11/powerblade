@@ -108,13 +108,25 @@ void transmitTry(void);
 int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
 
-	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-//	TA0CCR0 = 100;								// PWM Period
-//	TA0CCTL0 = CCIE;               				// TA0CCR0 toggle
-//	TA0CTL = TASSEL_1 + MC_1 + TACLR;          	// ACLK, up mode
-//	delay_count = 1250;
-//	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
-//	TA0CTL = 0;
+	// Port J Configuration
+	PJSEL0 |= BIT4 + BIT5;						// XIN, XOUT on PJ4, PJ5 with external crystal
+	PJSEL0 |= BIT0;								// ZC signal on TDO
+	PJSEL1 |= BIT0;
+	PJDIR = 0;									// Low power in port J (no IO)
+	PJOUT = 0;
+	PJREN = 0xFF;
+
+	// Port 1 Configuration
+	P1SEL1 |= BIT0 + BIT1 + BIT4 + BIT5;		// Set up ADC on A0, A1, A4, & A5
+	P1SEL0 |= BIT0 + BIT1 + BIT4 + BIT5;
+	P1OUT = SYS_EN_PIN;							// Low power in port 1 and enable GPIO
+	P1DIR = BIT2 + BIT3 + SYS_EN_PIN;
+	P1REN = 0xFF;
+
+	// Port 2 Configuration
+	P2OUT = 0;									// Low power in port 2
+	P2DIR = SEN_EN_PIN;
+	P2REN = 0xFF;
 
 	// Clock Setup
 	PJSEL0 |= BIT4 + BIT5;						// XIN, XOUT on PJ4, PJ5 with external crystal
@@ -130,23 +142,9 @@ int main(void) {
 	} while (SFRIFG1 & OFIFG);              	// Test oscillator fault flag
 	// XT1 test passed
 
-	// Low power in port J
-	PJDIR = 0;
-	PJOUT = 0;
-	PJREN = 0xFF;
-
-	// Low power in port 1
-	P1DIR = 0;
-	P1OUT = 0;
-	P1REN = 0xFF;
-
-	// Low power in port 2
-	P2DIR = 0;
-	P2OUT = 0;
-	P2REN = 0xFF;
-
 	// Initialize system state
 	pb_state = pb_normal;
+	ready = 0;
 
 	// Zero all sensing values
 	sampleCount = 0;
@@ -168,24 +166,10 @@ int main(void) {
 	scale = (scale<<8)+pb_config.vscale;
 	scale = (scale<<8)+pb_config.whscale;
 
-	// Set SEN_EN to output and disable (~200uA)
-	SEN_EN_OUT &= ~SEN_EN_PIN;
-	SEN_EN_DIR |= SEN_EN_PIN;
-
-	// Set SYS_EN (radio control) to output and disable (PMOS)
-	ready = 0;
-	SYS_EN_OUT |= SYS_EN_PIN;
-	SYS_EN_DIR |= SYS_EN_PIN;
-
 	// Set up UART
 	uart_init();
 
 	// Set up ADC
-	// Enable ADC for VCC_SENSE, I_SENSE, V_SENSE
-	P1SEL1 |= BIT0 + BIT1 + BIT4 + BIT5;		// Set up ADC on A0, A1, A4, & A5
-	P1SEL0 |= BIT0 + BIT1 + BIT4 + BIT5;
-	P1DIR |= BIT4 + BIT0;						// Not sure what this does
-	P1OUT |= BIT4 + BIT0;
 	ADC10CTL0 |= ADC10ON;                  		// Turn ADC on (ADC10ON), no multiple sample (ADC10MSC)
 	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP;			// ADC10SC source select, sampling timer
 	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
