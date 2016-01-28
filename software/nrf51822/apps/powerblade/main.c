@@ -17,6 +17,7 @@
 #include "nrf_drv_common.h"
 
 // Platform, Peripherals, Devices, & Services
+#include "complex_ble.h"
 #include "powerblade_states.h"
 #include "uart.h"
 #include "uart_types.h"
@@ -41,7 +42,7 @@ void process_rx_packet(uint16_t packet_len);
 void process_additional_data(uint8_t* buf, uint16_t len);
 void uart_tx_handler(void);
 void uart_send(uint8_t* data, uint16_t len);
-void uart_resend(void);
+void uart_receive(void);
 
 void services_init(void);
 void ble_evt_write (ble_evt_t* p_ble_evt);
@@ -57,14 +58,18 @@ int main(void);
  * Define and Globals
  **************************************************/
 
+// override default configuration
+const int SLAVE_LATENCY = 4;
+const int FIRST_CONN_PARAMS_UPDATE_DELAY = APP_TIMER_TICKS(100, APP_TIMER_PRESCALER);
+
 // simple_ble configuration for advertising and connections
 static const simple_ble_config_t ble_config = {
     .platform_id       = PLATFORM_ID_BYTE,  // used as 4th octet in device BLE address
     .device_id         = DEVICE_ID_DEFAULT, // 5th and 6th octet in device BLE address
     .adv_name          = DEVICE_NAME,       // used in advertisements if there is room
     .adv_interval      = MSEC_TO_UNITS(200, UNIT_0_625_MS),
-    .min_conn_interval = MSEC_TO_UNITS(50, UNIT_1_25_MS),
-    .max_conn_interval = MSEC_TO_UNITS(100, UNIT_1_25_MS),
+    .min_conn_interval = MSEC_TO_UNITS(20, UNIT_1_25_MS),
+    .max_conn_interval = MSEC_TO_UNITS(50, UNIT_1_25_MS),
 };
 static simple_ble_app_t* simple_ble_app;
 
@@ -72,9 +77,13 @@ static simple_ble_app_t* simple_ble_app;
 APP_TIMER_DEF(enable_uart_timer);
 APP_TIMER_DEF(start_eddystone_timer);
 APP_TIMER_DEF(start_manufdata_timer);
+APP_TIMER_DEF(restart_advs_timer);
 #define EDDYSTONE_ADV_DURATION APP_TIMER_TICKS(200, APP_TIMER_PRESCALER)
 #define MANUFDATA_ADV_DURATION APP_TIMER_TICKS(800, APP_TIMER_PRESCALER)
+// end of uart message to start of next with guard time
 #define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, APP_TIMER_PRESCALER)
+// start of uart guard time to start of next guard time, determined empirically
+#define UART_SKIP_DURATION     APP_TIMER_TICKS(1049, APP_TIMER_PRESCALER)
 
 // advertisement data
 #define PHYSWEB_URL "goo.gl/9aD6Wi"
@@ -145,6 +154,7 @@ static RawSampleState_t rawSample_state = RS_NONE;
 static ConfigurationState_t config_state = CONF_NONE;
 static StartupState_t startup_state = STARTUP_NOP;
 static StatusCode_t status_code = STATUS_NONE;
+static bool skip_uart_cycle = false;
 
 
 /**************************************************
@@ -209,6 +219,14 @@ void start_manufdata_adv (void) {
     err_code = app_timer_start(start_eddystone_timer, MANUFDATA_ADV_DURATION, NULL);
     APP_ERROR_CHECK(err_code);
 }
+
+void restart_advertisements (void) {
+    // if our timers were stopped for connection startup, restart them now
+    //  there definitely isn't any new data, so starting eddystone seems
+    //  like the right call here
+    start_eddystone_adv();
+}
+
 
 /**************************************************
  * UART
@@ -289,6 +307,7 @@ void process_rx_packet(uint16_t packet_len) {
     } else {
         // need to send a nak
         nak_state = NAK_CHECKSUM;
+        //XXX: What's going on here???
         raw_sample_data[0] = 0xA5;
     }
 }
@@ -321,6 +340,24 @@ void uart_send (uint8_t* data, uint16_t len) {
     // transmission sent for this cycle
     already_transmitted = true;
 }
+
+void uart_receive (void) {
+    if (!skip_uart_cycle) {
+        // we are ready to receive, go for it
+        uart_rx_enable();
+    } else {
+        // skip this reception cycle to conserve power while doing heavy
+        //  lifting in BLE-land
+        app_timer_start(enable_uart_timer, UART_SKIP_DURATION, NULL);
+        // only skip a single cycle
+        skip_uart_cycle = false;
+        // if we haven't already transmitted, don't start now
+        //  if we have, we won't move on to the next state for a cycle since
+        //  already_transmitted will stay true
+        already_transmitted = true;
+    }
+}
+
 
 /**************************************************
  * Services
@@ -376,8 +413,11 @@ void services_init (void) {
                 &rawSample_service, &rawSample_char_begin);
 
         // Add the characteristic to provide raw samples
+        //  This characteristic requires read authorizations. This gives us the
+        //  opportunity to disable the UART transmissions while before a read
+        //  of it starts
         memset(raw_sample_data, 0x00, SAMDATA_MAX_LEN);
-        simple_ble_add_characteristic(1, 0, 0, 1, // read, write, notify, vlen
+        simple_ble_add_auth_characteristic(1, 0, 0, 1, // read, write, notify, vlen
                 SAMDATA_MAX_LEN, (uint8_t*)raw_sample_data,
                 &rawSample_service, &rawSample_char_data);
         // must initialize to maximum valid length. Now reset down to 1
@@ -388,6 +428,19 @@ void services_init (void) {
         simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
                 1, (uint8_t*)&rawSample_status,
                 &rawSample_service, &rawSample_char_status);
+}
+
+void ble_evt_connected (ble_evt_t* p_ble_evt) {
+    // a connection just started, skip the next uart cycle to save power
+    //XXX: if a UART is started when we connect, everything still crashes
+    skip_uart_cycle = true;
+
+    // also skip advertising for that cycle. The advertisement timers will be
+    //  restarted again once we are going
+    advertising_stop();
+    app_timer_stop(start_eddystone_timer);
+    app_timer_stop(start_manufdata_timer);
+    app_timer_start(restart_advs_timer, UART_SKIP_DURATION, NULL);
 }
 
 void ble_evt_write (ble_evt_t* p_ble_evt) {
@@ -423,6 +476,16 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
     }
 }
 
+void ble_evt_rw_auth (ble_evt_t* p_ble_evt) {
+    if (simple_ble_is_read_auth_event(p_ble_evt, &rawSample_char_data)) {
+        // read request for data characteristic, disable uart for a cycle and
+        //  authorize the read
+        skip_uart_cycle = true;
+        uint32_t err_code = simple_ble_grant_auth(p_ble_evt);
+        APP_ERROR_CHECK(err_code);
+    }
+}
+
 
 /**************************************************
  * Initialization
@@ -431,13 +494,16 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 void timers_init (void) {
     uint32_t err_code;
 
-    err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_rx_enable);
+    err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_receive);
     APP_ERROR_CHECK(err_code);
 
     err_code = app_timer_create(&start_eddystone_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)start_eddystone_adv);
     APP_ERROR_CHECK(err_code);
 
     err_code = app_timer_create(&start_manufdata_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)start_manufdata_adv);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_create(&restart_advs_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)restart_advertisements);
     APP_ERROR_CHECK(err_code);
 }
 
