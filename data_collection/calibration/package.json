@@ -1,0 +1,10 @@
+{
+  "name": "powerblade_calibration",
+  "version": "1.0.0",
+  "description": "Calibrate PowerBlade devices",
+  "main": "calibrate.js",
+  "author": "Branden Ghena",
+  "dependencies": {
+    "noble": "^1.2.1"
+  }
+}
