@@ -29,7 +29,7 @@ module.exports = {
 		var currentArr = [dataLen];
 		var voltageIndex = 0;
 		var currentIndex = 1;
-		fs.writeFileSync('rawSamples.dat', '# Count\tVoltage\tCurrent\tInt\n');
+		fs.writeFileSync('data/rawSamples.dat', '# Count\tVoltage\tCurrent\tInt\n');
 		for(var i = 0; i < dataLen; i++) {
 			voltageArr[i] = dataArr[2*i + voltageIndex];
 			if(voltageArr[i] > 127) {
@@ -76,7 +76,7 @@ module.exports = {
 			curoff += aggCurrent;
 
 			//console.log(i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i]);
-			fs.appendFileSync('rawSamples.dat', i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i] + '\n');
+			fs.appendFileSync('data/rawSamples.dat', i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i] + '\n');
 		}
 		curoff = Math.round(curoff / dataLen);
 
@@ -86,7 +86,7 @@ module.exports = {
 		var acc_p_ave = 0;
 		var wattHoursAve = 0;
 		var voltAmpAve = 0;
-		fs.writeFileSync('goodSamples.dat', '# Count\tVoltage\tCurrent\n');
+		fs.writeFileSync('data/goodSamples.dat', '# Count\tVoltage\tCurrent\n');
 
 		var vrms = 0;
 
@@ -101,7 +101,7 @@ module.exports = {
 			// 	console.log("First Current: " + newIntegrate);
 			// }
 
-			fs.appendFileSync('goodSamples.dat', i + '\t' + newVoltage + '\t' + newIntegrate + '\n');
+			fs.appendFileSync('data/goodSamples.dat', i + '\t' + newVoltage + '\t' + newIntegrate + '\n');
 
 			sampleCount++;
 			if(sampleCount == 42) {
@@ -141,7 +141,11 @@ module.exports = {
 		console.log("Vrms = " + (2.46*vrms));
 		console.log("True Power = " + truePower);
 		console.log("App Power = " + appPower);
+        console.log();
 
-	    return {voff, ioff, curoff, pscale_val};
+	    return {'voff': new Buffer([voff]),
+                'ioff': new Buffer([ioff]),
+                'curoff': new Buffer([curoff]),
+                'pscale': new Buffer([pscale_val])};
 	}
 }
