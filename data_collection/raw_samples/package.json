@@ -1,0 +1,10 @@
+{
+  "name": "rawSample_collection",
+  "version": "1.0.0",
+  "description": "Collect raw ADC samples from PowerBlade devices",
+  "main": "collect_rawSamples.js",
+  "author": "Branden Ghena",
+  "dependencies": {
+    "noble": "^1.2.1"
+  }
+}
