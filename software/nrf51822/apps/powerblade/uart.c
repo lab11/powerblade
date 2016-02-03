@@ -27,7 +27,7 @@ void uart_init (void) {
     nrf_gpio_cfg_output(UART_TX_PIN);
     nrf_gpio_pin_set(UART_TX_PIN);
     nrf_uart_txrx_pins_set(NRF_UART0, UART_TX_PIN, UART_RX_PIN);
-    nrf_uart_baudrate_set(NRF_UART0, UART_BAUDRATE_BAUDRATE_Baud115200);
+    nrf_uart_baudrate_set(NRF_UART0, UART_BAUDRATE_BAUDRATE_Baud9600);
     nrf_uart_configure(NRF_UART0, NRF_UART_PARITY_EXCLUDED, NRF_UART_HWFC_DISABLED);
 
     // interrupts enable
