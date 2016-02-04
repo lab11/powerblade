@@ -72,7 +72,9 @@ uint16_t truePower;
 uint16_t apparentPower;
 uint64_t wattHours;
 uint32_t wattHoursSend;
-uint8_t flags;
+
+#pragma PERSISTENT(flags)
+uint8_t flags = 0x05;
 
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
@@ -174,7 +176,6 @@ int main(void) {
 
 	// Initialize remaining transmitted values
 	sequence = 0;
-	flags = 0x05;
 	txIndex = 0;
 
 	// Initialize scale value (can be updated later)
@@ -325,10 +326,6 @@ void transmitTry(void) {
 
 			uart_len = ADLEN + UARTOVHD;
 
-			// XXX this is a temporary thing
-			flags &= 0x0F;
-			flags |= (rxCt << 4);
-
 			// Process any UART bytes
 			if(pb_state == pb_capture) {
 				uart_len = UARTBLOCK;
@@ -353,6 +350,7 @@ void transmitTry(void) {
 					scale = pb_config.pscale;
 					scale = (scale<<8)+pb_config.vscale;
 					scale = (scale<<8)+pb_config.whscale;
+					flags |= 0x80;
 					break;
 				case SET_SEQ:
 					sequence = captureBuf[0];
