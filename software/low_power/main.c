@@ -76,8 +76,7 @@ uint8_t flags;
 
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
-//PowerBladeConfig_t pb_config = { .voff = 0x00, .ioff = 0x00, .curoff = 0x0000, .pscale = 0x41F4, .vscale = 0x7B, .whscale = 0x09};
-PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -4, .curoff = -11, .pscale = 0x427B, .vscale = 0x7B, .whscale = 0x09};
+PowerBladeConfig_t pb_config = { .voff = 0x00, .ioff = 0x00, .curoff = 0x0000, .pscale = 0x41F4, .vscale = 0x7B, .whscale = 0x09};
 
 // PowerBlade state (used for downloading data)
 int dataIndex;
@@ -351,6 +350,9 @@ void transmitTry(void) {
 				case SET_CONF:
 					// XXX do we want to do any bounds-checking on this?
 					memcpy(&pb_config, captureBuf, sizeof(pb_config));
+					scale = pb_config.pscale;
+					scale = (scale<<8)+pb_config.vscale;
+					scale = (scale<<8)+pb_config.whscale;
 					break;
 				case SET_SEQ:
 					sequence = captureBuf[0];
