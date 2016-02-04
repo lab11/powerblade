@@ -76,7 +76,7 @@ uint8_t flags;
 
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
-PowerBladeConfig_t pb_config = { .voff = 0x00, .ioff = 0x00, .curoff = 0x0000, .pscale = 0x41F4, .vscale = 0x7B, .whscale = 0x09};
+PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -1, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x7B, .whscale = 0x09};
 
 // PowerBlade state (used for downloading data)
 int dataIndex;
