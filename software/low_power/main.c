@@ -61,8 +61,8 @@ uint32_t acc_v_rms;
 int32_t saved_accP;
 uint32_t saved_accI;
 uint32_t saved_accV;
-uint32_t wattHoursToAverage;
-uint32_t saved_wattHours;
+int32_t wattHoursToAverage;
+int32_t saved_wattHours;
 uint32_t voltAmpsToAverage;
 uint32_t saved_voltAmps;
 
@@ -84,6 +84,7 @@ uint32_t wattHoursSend;
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
 PowerBladeConfig_t pb_config = { .voff = 0x00, .ioff = 0x00, .curoff = 0x0000, .pscale = 0x41F4, .vscale = 0x7B, .whscale = 0x09};
+//PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -4, .curoff = -11, .pscale = 0x427B, .vscale = 0x7B, .whscale = 0x09};
 
 // PowerBlade state (used for downloading data)
 int dataIndex;
@@ -329,7 +330,7 @@ void transmitTry(void) {
 		acc_p_ave = 0;
 
 		// Increment energy calc
-		wattHoursToAverage += (uint32_t) (saved_accP / SAMCOUNT);
+		wattHoursToAverage += saved_accP / SAMCOUNT;
 
 		// Calculate Irms, Vrms, and apparent power
 		uint16_t Irms = (uint16_t) SquareRoot(saved_accI / SAMCOUNT);
@@ -433,7 +434,12 @@ void transmitTry(void) {
 			// Increment sequence number for transmission
 			sequence++;
 
-			truePower = (uint16_t) (saved_wattHours / 60);
+			if(saved_wattHours > 0) {
+				truePower = (uint16_t) (saved_wattHours / 60);
+			}
+			else {
+				truePower = 0;
+			}
 			wattHours += (uint64_t) truePower;
 			apparentPower = (uint16_t) (saved_voltAmps / 60);
 
