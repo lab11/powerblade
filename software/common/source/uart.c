@@ -10,21 +10,24 @@ char* txBufSave;
 unsigned int txLen;
 int txCt;
 
-char rxBuf[RXLEN];
-int rxCt;
 int capCt;
 
 void uart_init(void) {
 	UCA0CTL1 |= UCSWRST;						// Put UART into reset
-	UCA0CTL1 |= UCSSEL_2;						// Set to SMCLK
-//    UCA0BR0 = 52;								// Baud configuration for 38400
-//    UCA0BR1 = 0;
-//    UCA0MCTLW = 0x0200;
-	UCA0BR0 = 34;								// Baud configuration for 115200
+	UCA0CTL1 |= UCSSEL_1;						// Set to SMCLK
+	UCA0BR0 = 3;								// Baud configuration for 9600
 	UCA0BR1 = 0;
-	UCA0MCTLW = 0xBB00;
+	UCA0MCTLW = 0x9200;
+//    UCA0BR0 = 104;								// Baud configuration for 38400
+//    UCA0BR1 = 0;
+//    UCA0MCTLW = 0x1100;
+//	UCA0BR0 = 34;								// Baud configuration for 115200
+//	UCA0BR1 = 0;
+//	UCA0MCTLW = 0xBB00;
+	//UCA0CTL1 |= UCRXEIE + UCBRKIE;
+    //UCA0CTL1 |= UCMODE_3;
 	UCA0CTL1 &= ~UCSWRST;						// Take UART out of reset
-	UCA0IE |= UCRXIE + UCTXCPTIE;				// Enable RX, TX Complete interrupts
+	UCA0IE |= UCRXIE;// + UCTXCPTIE;				// Enable RX, TX Complete interrupts
 
 	// Initialize UART receive count
 	rxCt = 0;
@@ -91,11 +94,17 @@ int processMessage(void) {
 
 #pragma vector=USCI_A0_VECTOR
 __interrupt void USCI_A0_ISR(void) {
+
 	switch (__even_in_range(UCA0IV, 8)) {
 	case 0:
 		break;								// No interrupt
 	case 2: 								// RX interrupt
+//		if(UCA0STATW & UCRXERR) {
+//			flags |= 0x08;
+//		}
+		P1OUT |= (BIT2 + BIT3);
 		rxBuf[rxCt++] = UCA0RXBUF;
+		P1OUT &= ~(BIT2 + BIT3);
 		break;
 	case 4:									// TX interrupt
 		if (txCt < txLen) {
@@ -113,5 +122,7 @@ __interrupt void USCI_A0_ISR(void) {
 	default:
 		break;
 	}
+
 }
+
 

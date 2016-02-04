@@ -46,13 +46,25 @@ uint8_t sampleCount;
 uint8_t measCount;
 
 // Global variables used interrupt-to-interrupt
-int8_t current;
-int8_t voltage;
+#define BACKLOG_LEN		16
+int8_t current[BACKLOG_LEN];
+int8_t voltage[BACKLOG_LEN];
+uint8_t currentWriteCount;
+uint8_t currentReadCount;
+uint8_t voltageWriteCount;
+uint8_t voltageReadCount;
+int8_t savedCurrent;
+int8_t savedVoltage;
 int32_t acc_p_ave;
 uint32_t acc_i_rms;
 uint32_t acc_v_rms;
+int32_t saved_accP;
+uint32_t saved_accI;
+uint32_t saved_accV;
 uint32_t wattHoursToAverage;
+uint32_t saved_wattHours;
 uint32_t voltAmpsToAverage;
+uint32_t saved_voltAmps;
 
 // Near-constants to be transmitted
 uint16_t uart_len;
@@ -63,11 +75,11 @@ uint8_t powerblade_id = 1;
 uint32_t sequence;
 uint32_t scale;
 uint8_t Vrms;
+uint8_t saved_vrms;
 uint16_t truePower;
 uint16_t apparentPower;
 uint64_t wattHours;
 uint32_t wattHoursSend;
-uint8_t flags;
 
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
@@ -100,7 +112,10 @@ uint32_t SquareRoot(uint32_t a_nInput) {
 	return res;
 }
 
+uint16_t tryCount;
+uint16_t sendCount;
 void transmitTry(void);
+void transmit(void);
 
 /*
  * main.c
@@ -127,6 +142,7 @@ int main(void) {
 	P2OUT = 0;									// Low power in port 2
 	P2DIR = SEN_EN_PIN;
 	P2REN = 0xFF;
+	P2SEL0 = 0;
 
 	// Clock Setup
 	PJSEL0 |= BIT4 + BIT5;						// XIN, XOUT on PJ4, PJ5 with external crystal
@@ -145,8 +161,14 @@ int main(void) {
 	// Initialize system state
 	pb_state = pb_normal;
 	ready = 0;
+	tryCount = 0;
+	sendCount = 0;
 
 	// Zero all sensing values
+	currentWriteCount = 0;
+	currentReadCount = 0;
+	voltageWriteCount = 0;
+	voltageReadCount = 0;
 	sampleCount = 0;
 	measCount = 0;
 	acc_p_ave = 0;
@@ -158,7 +180,7 @@ int main(void) {
 
 	// Initialize remaining transmitted values
 	sequence = 0;
-	flags = 0xA5;
+	flags = 0x05;
 	txIndex = 0;
 
 	// Initialize scale value (can be updated later)
@@ -182,7 +204,6 @@ int main(void) {
 	TA0CCTL0 = CCIE;               				// TA0CCR0 toggle
 	TA0CTL = TASSEL_1 + MC_2 + TACLR;          	// TA0 set to ACLK (32kHz), up mode
 
-	P1DIR |= BIT2 + BIT3;
 #if defined (SIDEDATA)
 	// Set up PWM for side channel data
 //  	P1DIR |= BIT2 + BIT3;						// Set up P1.2 & P1.3 as timer
@@ -194,13 +215,20 @@ int main(void) {
 //  	TA1CCR2 = voltage_duty;
 //  	TA1CCTL1 = OUTMOD_7;						// Set current and voltage to RST/SET
 //  	TA1CCTL2 = OUTMOD_7;
-  	TA1CTL = TASSEL_2 + MC_1 + TAIE + TACLR;	// SMCLK, up to TA1R0, enable overflow int
+  	TA1CTL = TASSEL_1 + MC_2 + TACLR;	// SMCLK, up to TA1R0, enable overflow int
 #endif
 
 	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
 	while(1) {
-		transmitTry();
+		while(tryCount > 0) {
+			tryCount--;
+			transmitTry();
+		}
+		while(sendCount > 0) {
+			sendCount--;
+			transmit();
+		}
 		__bis_SR_register(LPM3_bits + GIE);
 	}
 }
@@ -210,36 +238,66 @@ __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL0 &= ~CCIFG;
 	TA0CCR0 += 13;
 	P1OUT |= BIT2;
-	if (delay_count > 1) {
-		delay_count--;
-	} else if (delay_count == 1) {
-		delay_count--;
-		__bic_SR_register_on_exit(LPM3_bits);
-	} else {
-		// Start with VCC_SENSE
-		ADC10CTL0 &= ~ADC10ENC;
-		ADC10MCTL0 = VCCMCTL0;
-		ADC10CTL0 |= ADC10ENC;
-		ADC10CTL0 += ADC10SC;
-	}
+
+	// Start with VCC_SENSE
+	ADC10CTL0 &= ~ADC10ENC;
+	ADC10MCTL0 = VCCMCTL0;
+	ADC10CTL0 |= ADC10ENC;
+	ADC10CTL0 += ADC10SC;
+
 	P1OUT &= ~BIT2;
 }
 
-//#pragma vector=TIMER1_A1_VECTOR
-//__interrupt void TIMERA1_ISR(void) {
-//	TA1CTL &= ~TAIFG;
-//	P1OUT |= BIT3;
-//	TA1CCR1 = pwm_duty;
-//	TA1CCR2 = voltage_duty;
-//	P1OUT &= ~BIT3;
-//}
+#pragma vector=TIMER1_A0_VECTOR
+__interrupt void TIMERA1_ISR(void) {
+	P1OUT |= (BIT2 + BIT3);
+	TA1CCTL0 = 0;
+	sendCount++;
+	__bic_SR_register_on_exit(LPM3_bits);
+	P1OUT &= ~(BIT2 + BIT3);
+}
+
+void transmit(void) {
+	P1OUT |= BIT3;
+
+	// Stuff data into txBuf
+	int blockOffset = txIndex * UARTBLOCK;
+	uart_stuff(blockOffset + OFFSET_UARTLEN, (char*) &uart_len, sizeof(uart_len));
+	uart_stuff(blockOffset + OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
+	uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
+	uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
+	uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
+	uart_stuff(blockOffset + OFFSET_VRMS, (char*) &saved_vrms, sizeof(saved_vrms));
+	uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
+	uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
+
+	wattHoursSend = (uint32_t)(wattHours >> pb_config.whscale);
+	uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
+
+	uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
+
+	uart_send(blockOffset, uart_len);
+
+	P1OUT &= ~BIT3;
+}
 
 void transmitTry(void) {
 
 	P1OUT |= BIT3;
 
+	// Save voltage and current before next interrupt happens
+	// XXX we could add a overflow check to make sure we havent missed it (unlikely)
+	savedCurrent = current[currentReadCount++];
+	if(currentReadCount == BACKLOG_LEN) {
+		currentReadCount = 0;
+	}
+	savedVoltage = voltage[voltageReadCount++];
+	if(voltageReadCount == BACKLOG_LEN) {
+		voltageReadCount = 0;
+	}
+
 	// Integrate current
-	agg_current += (int16_t) (current + (current >> 1));
+	agg_current += (int16_t) (savedCurrent + (savedCurrent >> 1));
 	agg_current -= agg_current >> 5;
 
 	// Subtract offset
@@ -247,8 +305,8 @@ void transmitTry(void) {
 
 	// Perform calculations for I^2, V^2, and P
 	acc_i_rms += (new_current * new_current);
-	acc_p_ave += (voltage * new_current);
-	acc_v_rms += voltage * voltage;
+	acc_p_ave += (savedVoltage * new_current);
+	acc_v_rms += savedVoltage * savedVoltage;
 
 //#if defined (SIDEDATA)
 //	// Set side channel output
@@ -261,26 +319,38 @@ void transmitTry(void) {
 		// Reset sampleCount once per wave
 		sampleCount = 0;
 
-		// Increment energy calc and reset accumulator
-		// XXX should we be doing this?
-		if (acc_p_ave < 0) {
-			acc_p_ave = 0;
-		}
-		wattHoursToAverage += (uint32_t) (acc_p_ave / SAMCOUNT);
+		// Save accumulator values before next interrupt happens
+		// XXX again could add overflow check (also unlikely, although more likely)
+		saved_accI = acc_i_rms;
+		acc_i_rms = 0;
+		saved_accV = acc_v_rms;
+		acc_v_rms = 0;
+		saved_accP = acc_p_ave;
 		acc_p_ave = 0;
 
+		// Increment energy calc
+		wattHoursToAverage += (uint32_t) (saved_accP / SAMCOUNT);
+
 		// Calculate Irms, Vrms, and apparent power
-		uint16_t Irms = (uint16_t) SquareRoot(acc_i_rms / SAMCOUNT);
-		Vrms = (uint8_t) SquareRoot(acc_v_rms / SAMCOUNT);
-		acc_i_rms = 0;
-		acc_v_rms = 0;
+		uint16_t Irms = (uint16_t) SquareRoot(saved_accI / SAMCOUNT);
+		Vrms = (uint8_t) SquareRoot(saved_accV / SAMCOUNT);
 		voltAmpsToAverage += (uint32_t) (Irms * Vrms);
 
 		measCount++;
 		if (measCount >= 60) { 					// Another second has passed
 			measCount = 0;
 
+			// Save values to transmit
+			saved_wattHours = wattHoursToAverage;
+			wattHoursToAverage = 0;
+			saved_voltAmps = voltAmpsToAverage;
+			voltAmpsToAverage = 0;
+			saved_vrms = Vrms;
+
 			uart_len = ADLEN + UARTOVHD;
+
+			flags &= 0x0F;
+			flags |= (rxCt << 4);
 
 			// Process any UART bytes
 			if(pb_state == pb_capture) {
@@ -363,11 +433,9 @@ void transmitTry(void) {
 			// Increment sequence number for transmission
 			sequence++;
 
-			truePower = (uint16_t) (wattHoursToAverage / 60);
+			truePower = (uint16_t) (saved_wattHours / 60);
 			wattHours += (uint64_t) truePower;
-			apparentPower = (uint16_t) (voltAmpsToAverage / 60);
-			wattHoursToAverage = 0;
-			voltAmpsToAverage = 0;
+			apparentPower = (uint16_t) (saved_voltAmps / 60);
 
 #if defined (NORDICDEBUG)
 			ready = 1;
@@ -375,26 +443,30 @@ void transmitTry(void) {
 			if (ready == 1) {
 				SYS_EN_OUT &= ~SYS_EN_PIN;
 				uart_enable(1);
+				//TA0CTL = 0;
 				// XXX do we still need this delay?
-				__delay_cycles(80000);
+				//__delay_cycles(80000);
 
-				// Stuff data into txBuf
-				int blockOffset = txIndex * UARTBLOCK;
-				uart_stuff(blockOffset + OFFSET_UARTLEN, (char*) &uart_len, sizeof(uart_len));
-				uart_stuff(blockOffset + OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
-				uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
-				uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
-				uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
-				uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
-				uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
-				uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
+				TA1CCR0 = TA1R + 885;
+				TA1CCTL0 = CCIE;
 
-				wattHoursSend = (uint32_t)(wattHours >> pb_config.whscale);
-				uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
-
-				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
-
-				uart_send(blockOffset, uart_len);
+//				// Stuff data into txBuf
+//				int blockOffset = txIndex * UARTBLOCK;
+//				uart_stuff(blockOffset + OFFSET_UARTLEN, (char*) &uart_len, sizeof(uart_len));
+//				uart_stuff(blockOffset + OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
+//				uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
+//				uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
+//				uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
+//				uart_stuff(blockOffset + OFFSET_VRMS, (char*) &saved_vrms, sizeof(saved_vrms));
+//				uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
+//				uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
+//
+//				wattHoursSend = (uint32_t)(wattHours >> pb_config.whscale);
+//				uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
+//
+//				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
+//
+//				uart_send(blockOffset, uart_len);
 			}
 		}
 	}
@@ -416,22 +488,25 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT2;
 			// Store current value for future calculations
-			//int8_t ioff = -4;
-			current = (int8_t) (ADC_Result - I_VCC2);
+			int8_t tempCurrent = (int8_t) (ADC_Result - I_VCC2);
 
 			if(pb_state == pb_capture) {
 				if(dataIndex < 5040) {
 					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1) + (dataIndex/504);
-					uart_stuff(arrayIndex, (char*) &current, sizeof(current));
+					uart_stuff(arrayIndex, (char*) &tempCurrent, sizeof(tempCurrent));
 					dataIndex++;
 				}
 			}
 
 			// After its been stored for raw sample transmission, apply offset
-			current -= pb_config.ioff;
+			current[currentWriteCount++] = tempCurrent - pb_config.ioff;
+			if(currentWriteCount == BACKLOG_LEN) {
+				currentWriteCount = 0;
+			}
 
 			// Current is the last measurement, attempt transmission
 			//transmitTry();
+			tryCount++;
 			__bic_SR_register_on_exit(LPM3_bits);
 			break;
 		}
@@ -439,19 +514,21 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT2;
 			// Store voltage value
-			//int8_t voff = -1;
-			voltage = (int8_t) (ADC_Result - V_VCC2) * -1;
+			int8_t tempVoltage = (int8_t) (ADC_Result - V_VCC2) * -1;
 
 			if(pb_state == pb_capture) {
 				if(dataIndex < 5040) {
 					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1) + (dataIndex/504);
-					uart_stuff(arrayIndex, (char*) &voltage, sizeof(voltage));
+					uart_stuff(arrayIndex, (char*) &tempVoltage, sizeof(tempVoltage));
 					dataIndex++;
 				}
 			}
 
 			// After its been stored for raw sample transmission, apply offset
-			voltage -= pb_config.voff;
+			voltage[voltageWriteCount] = tempVoltage - pb_config.voff;
+			if(voltageWriteCount == BACKLOG_LEN) {
+				voltageWriteCount = 0;
+			}
 
 			// Enable next sample
 			// After V_SENSE do I_SENSE
@@ -486,7 +563,6 @@ __interrupt void ADC10_ISR(void) {
 			ADC10CTL0 += ADC10SC;
 			break;
 		default: // ADC Reset condition
-			P1OUT |= BIT3;
 			ADC10CTL0 += ADC10SC;
 			break;
 		}
@@ -494,7 +570,7 @@ __interrupt void ADC10_ISR(void) {
 	default:
 		break;
 	}
-	P1OUT &= ~(BIT2 + BIT3);
+	P1OUT &= ~(BIT2);
 }
 
 
