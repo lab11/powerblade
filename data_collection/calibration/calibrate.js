@@ -256,13 +256,21 @@ function write_calibration() {
                 config_pscale_char.write(calibration_values['pscale'], false, function(error) {
                     if (error) throw error;
 
-                    // writing complete
-                    console.log("\tComplete\n");
+                    config_vscale_char.write(calibration_values['vscale'], false, function(error) {
+                        if (error) throw error;
 
-                    // calibration is complete
-                    console.log("Calibration Finished!");
-                    calibration_values = powerblade_periph.disconnect();
-                    process.exit(0);
+                        config_whscale_char.write(calibration_values['whscale'], false, function(error) {
+                            if (error) throw error;
+
+                            // writing complete
+                            console.log("\tComplete\n");
+
+                            // calibration is complete
+                            console.log("Calibration Finished!");
+                            calibration_values = powerblade_periph.disconnect();
+                            process.exit(0);
+                        });
+                    });
                 });
             });
         });
