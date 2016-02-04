@@ -2,7 +2,6 @@
 
 var noble = require('noble');
 var fs = require('fs');
-var calib = require('./calibrate_samples')
 
 // characteristic UUIDs
 var rawSample_service_uuid = 'cead01af7cf8cc8c1c4e882a39d41531';
@@ -14,12 +13,7 @@ var target_device = 'c0:98:e5:70:45:36';
 if (process.argv.length >= 3) {
     target_device = process.argv[2];
 }
-var wattage = 200;
-if (process.argv.length >= 4) {
-    wattage = process.argv[3];
-}
 console.log("Looking for " + target_device);
-console.log("Programming to " + wattage + " W");
 
 noble.on('stateChange', function(state) {
     if (state === 'poweredOn') {
@@ -34,8 +28,6 @@ var powerblade_periph;
 var rawSample_start_char;
 var rawSample_data_char;
 var rawSample_status_char;
-
-var sampleData = new Buffer(0);
 
 noble.on('discover', function (peripheral) {
     //console.log(peripheral.address);
@@ -129,9 +121,6 @@ function RawSample_status_receive(data, isNotify) {
     if (data[0] == 1) {
         setTimeout(read_data, 1000);
     } else if (data[0] == 2) {
-        // calculate calibration numbers
-        console.log("Calculating calibration numbers...")
-        calib.calculate_constants(wattage, sampleData);
         // finish up and exit if all data is read
         console.log("Finished! Disconnecting...");
         powerblade_periph.disconnect();
@@ -148,12 +137,10 @@ var output_file_no = 0;
 
 function RawSample_data_receive(data) {
     console.log("Data value received:");
-    //console.log(data);
+    console.log(data);
     // do something with the data
     fs.writeFile('rawSamples_num' + output_file_no + '.bin', data);
     output_file_no += 1;
-    // do somethign else with the data (i.e. get ready for calibration)
-    sampleData = Buffer.concat([sampleData, data]);
 
     // write status to request next data
     console.log("Requesting next data");
