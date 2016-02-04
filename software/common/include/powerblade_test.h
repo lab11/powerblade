@@ -154,4 +154,6 @@ typedef enum {
 	pb_data
 } pb_state_t;
 
+uint8_t flags;
+
 #endif
