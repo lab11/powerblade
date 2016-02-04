@@ -24,8 +24,6 @@ void uart_init(void) {
 //	UCA0BR0 = 34;								// Baud configuration for 115200
 //	UCA0BR1 = 0;
 //	UCA0MCTLW = 0xBB00;
-	//UCA0CTL1 |= UCRXEIE + UCBRKIE;
-    //UCA0CTL1 |= UCMODE_3;
 	UCA0CTL1 &= ~UCSWRST;						// Take UART out of reset
 	UCA0IE |= UCRXIE;// + UCTXCPTIE;				// Enable RX, TX Complete interrupts
 
@@ -99,9 +97,6 @@ __interrupt void USCI_A0_ISR(void) {
 	case 0:
 		break;								// No interrupt
 	case 2: 								// RX interrupt
-//		if(UCA0STATW & UCRXERR) {
-//			flags |= 0x08;
-//		}
 		P1OUT |= (BIT2 + BIT3);
 		rxBuf[rxCt++] = UCA0RXBUF;
 		P1OUT &= ~(BIT2 + BIT3);
