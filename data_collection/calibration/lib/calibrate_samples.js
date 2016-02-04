@@ -132,8 +132,8 @@ module.exports = {
 		var pscale_val = 0x4000 + Math.floor(pscale_num*Math.pow(10,4));
 
 		console.log();
-		console.log("Ioff = " + ioff);
 		console.log("Voff = " + voff);
+		console.log("Ioff = " + ioff);
 		console.log("Curoff = " + curoff);
 		console.log("Pscale = " + pscale_num);
 		console.log("Pscale = " + pscale_val);
@@ -143,9 +143,35 @@ module.exports = {
 		console.log("App Power = " + appPower);
         console.log();
 
-	    return {'voff': new Buffer([voff]),
-                'ioff': new Buffer([ioff]),
-                'curoff': new Buffer([curoff]),
-                'pscale': new Buffer([pscale_val])};
+        // do bounds checking on numbers
+        //  set numbers to their default values if they are out of bounds
+        //  default numbers taken from MSP430 programming
+        if (voff < -128 || voff > 127) {
+            voff = -1;
+        }
+        if (ioff < -128 || ioff > 127) {
+            ioff = -1;
+        }
+        if (curoff < -32768 || curoff > 32767) {
+            curoff = 0;
+        }
+        if (pscale_val < 0 || pscale_val > 65535) {
+            pscale_val = 0x428A;
+        }
+
+        // store values to properly sized buffers
+        var voff_buf = new Buffer(1);
+        voff_buf.writeInt8(voff);
+        var ioff_buf = new Buffer(1);
+        ioff_buf.writeInt8(ioff);
+        var curoff_buf = new Buffer(2);
+        curoff_buf.writeInt16LE(curoff);
+        var pscale_buf = new Buffer(2);
+        pscale_buf.writeUInt16LE(pscale_val);
+
+	    return {'voff': voff_buf,
+                'ioff': ioff_buf,
+                'curoff': curoff_buf,
+                'pscale': pscale_buf};
 	}
 }
