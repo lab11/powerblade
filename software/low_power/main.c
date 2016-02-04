@@ -26,20 +26,12 @@
 #include "uart.h"
 
 //#define NORDICDEBUG
-#define SIDEDATA
 
 // Transmission variables
 bool ready;
 
-// Delay (used at startup)
-uint16_t delay_count;
-
-// Variables for integration
+// Variable for integration
 int16_t agg_current;
-
-// Used for data visualizer
-uint16_t pwm_duty;
-uint16_t voltage_duty;
 
 // Count each sample and 60Hz measurement
 uint8_t sampleCount;
@@ -80,11 +72,12 @@ uint16_t truePower;
 uint16_t apparentPower;
 uint64_t wattHours;
 uint32_t wattHoursSend;
+uint8_t flags;
 
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
-PowerBladeConfig_t pb_config = { .voff = 0x00, .ioff = 0x00, .curoff = 0x0000, .pscale = 0x41F4, .vscale = 0x7B, .whscale = 0x09};
-//PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -4, .curoff = -11, .pscale = 0x427B, .vscale = 0x7B, .whscale = 0x09};
+//PowerBladeConfig_t pb_config = { .voff = 0x00, .ioff = 0x00, .curoff = 0x0000, .pscale = 0x41F4, .vscale = 0x7B, .whscale = 0x09};
+PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -4, .curoff = -11, .pscale = 0x427B, .vscale = 0x7B, .whscale = 0x09};
 
 // PowerBlade state (used for downloading data)
 int dataIndex;
@@ -113,6 +106,7 @@ uint32_t SquareRoot(uint32_t a_nInput) {
 	return res;
 }
 
+// Variables and functions for keeping computation and transmission out of interrupts
 uint16_t tryCount;
 uint16_t sendCount;
 void transmitTry(void);
@@ -200,24 +194,14 @@ int main(void) {
 	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
 	ADC10IE |= ADC10IE0;                   		// Enable ADC conv complete interrupt
 
-	// ADC conversion trigger signal - TimerA0.0 (32ms ON-period)
-	TA0CCR0 = 13;								// PWM Period
-	TA0CCTL0 = CCIE;               				// TA0CCR0 toggle
+	// ADC conversion trigger signal - TimerA0.0
+	TA0CCR0 = 13;								// Timer Period
+	TA0CCTL0 = CCIE;               				// TA0CCR0 interrupt
 	TA0CTL = TASSEL_1 + MC_2 + TACLR;          	// TA0 set to ACLK (32kHz), up mode
 
-#if defined (SIDEDATA)
-	// Set up PWM for side channel data
-//  	P1DIR |= BIT2 + BIT3;						// Set up P1.2 & P1.3 as timer
-//  	//P1SEL0 |= BIT2 + BIT3;						// output pins
-//  	TA1CCR0 = 1572;								// Period set to 393 us
-//  	pwm_duty = 100;								// Initialize both current and voltage to 100
-//  	voltage_duty = 100;
-//  	TA1CCR1 = pwm_duty;
-//  	TA1CCR2 = voltage_duty;
-//  	TA1CCTL1 = OUTMOD_7;						// Set current and voltage to RST/SET
-//  	TA1CCTL2 = OUTMOD_7;
-  	TA1CTL = TASSEL_1 + MC_2 + TACLR;	// SMCLK, up to TA1R0, enable overflow int
-#endif
+	// Wait timer for transmissions
+  	TA1CTL = TASSEL_1 + MC_2 + TACLR;			// ACLK, up mode
+
 
 	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
@@ -287,7 +271,6 @@ void transmitTry(void) {
 	P1OUT |= BIT3;
 
 	// Save voltage and current before next interrupt happens
-	// XXX we could add a overflow check to make sure we havent missed it (unlikely)
 	savedCurrent = current[currentReadCount++];
 	if(currentReadCount == BACKLOG_LEN) {
 		currentReadCount = 0;
@@ -309,19 +292,12 @@ void transmitTry(void) {
 	acc_p_ave += (savedVoltage * new_current);
 	acc_v_rms += savedVoltage * savedVoltage;
 
-//#if defined (SIDEDATA)
-//	// Set side channel output
-//	pwm_duty = (agg_current >> 3) + 786;
-//	voltage_duty = voltage + 786;
-//#endif
-
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 		// Reset sampleCount once per wave
 		sampleCount = 0;
 
 		// Save accumulator values before next interrupt happens
-		// XXX again could add overflow check (also unlikely, although more likely)
 		saved_accI = acc_i_rms;
 		acc_i_rms = 0;
 		saved_accV = acc_v_rms;
@@ -350,6 +326,7 @@ void transmitTry(void) {
 
 			uart_len = ADLEN + UARTOVHD;
 
+			// XXX this is a temporary thing
 			flags &= 0x0F;
 			flags |= (rxCt << 4);
 
@@ -434,6 +411,7 @@ void transmitTry(void) {
 			// Increment sequence number for transmission
 			sequence++;
 
+			// True power cannot be less than zero
 			if(saved_wattHours > 0) {
 				truePower = (uint16_t) (saved_wattHours / 60);
 			}
@@ -447,32 +425,14 @@ void transmitTry(void) {
 			ready = 1;
 #endif
 			if (ready == 1) {
+				// Boot the nordic and enable its UART
 				SYS_EN_OUT &= ~SYS_EN_PIN;
 				uart_enable(1);
-				//TA0CTL = 0;
-				// XXX do we still need this delay?
-				//__delay_cycles(80000);
 
+				// Delay for a bit to allow nordic to boot
+				// TODO this is only required the first time
 				TA1CCR0 = TA1R + 885;
 				TA1CCTL0 = CCIE;
-
-//				// Stuff data into txBuf
-//				int blockOffset = txIndex * UARTBLOCK;
-//				uart_stuff(blockOffset + OFFSET_UARTLEN, (char*) &uart_len, sizeof(uart_len));
-//				uart_stuff(blockOffset + OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
-//				uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
-//				uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
-//				uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
-//				uart_stuff(blockOffset + OFFSET_VRMS, (char*) &saved_vrms, sizeof(saved_vrms));
-//				uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
-//				uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
-//
-//				wattHoursSend = (uint32_t)(wattHours >> pb_config.whscale);
-//				uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
-//
-//				uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
-//
-//				uart_send(blockOffset, uart_len);
 			}
 		}
 	}
