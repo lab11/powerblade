@@ -7,6 +7,9 @@ char txBuf[UARTLEN];
 char captureType;
 char captureBuf[RXLEN - 4];
 
+char rxBuf[RXLEN];
+int rxCt;
+
 void uart_init(void);
 void uart_enable(bool enable);
 void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len);
