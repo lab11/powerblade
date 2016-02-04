@@ -110,10 +110,20 @@ noble.on('discover', function (peripheral) {
         var pf_disp = real_power_disp / app_power_disp;
 
         // display data to user
+        console.log('PowerBlade (' + address +')');
+
         if (company_id == OLD_COMPANY_ID) {
             console.log("WARNING: Old PowerBlade packet format!");
         }
-        console.log('PowerBlade (' + address +')');
+        else {
+            if (flags & 0x80) {
+                console.log('Calibrated unit');
+            }
+            else {
+                console.log('WARNING: Uncalibrated unit')
+            }
+        }
+
         console.log('      Sequence Number: ' + sequence_num);
         console.log('          RMS Voltage: ' + v_rms_disp.toFixed(2) + ' V');
         console.log('           Real Power: ' + real_power_disp.toFixed(2) + ' W');
