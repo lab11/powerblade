@@ -41,7 +41,7 @@ void process_rx_packet(uint16_t packet_len);
 void process_additional_data(uint8_t* buf, uint16_t len);
 void uart_tx_handler(void);
 void uart_send(uint8_t* data, uint16_t len);
-void uart_resend(void);
+void uart_start_receive(void);
 
 void services_init(void);
 void ble_evt_write (ble_evt_t* p_ble_evt);
@@ -57,14 +57,18 @@ int main(void);
  * Define and Globals
  **************************************************/
 
+// override default configuration
+const int SLAVE_LATENCY = 4;
+const int FIRST_CONN_PARAMS_UPDATE_DELAY = APP_TIMER_TICKS(100, APP_TIMER_PRESCALER);
+
 // simple_ble configuration for advertising and connections
 static const simple_ble_config_t ble_config = {
     .platform_id       = PLATFORM_ID_BYTE,  // used as 4th octet in device BLE address
     .device_id         = DEVICE_ID_DEFAULT, // 5th and 6th octet in device BLE address
     .adv_name          = DEVICE_NAME,       // used in advertisements if there is room
     .adv_interval      = MSEC_TO_UNITS(200, UNIT_0_625_MS),
-    .min_conn_interval = MSEC_TO_UNITS(50, UNIT_1_25_MS),
-    .max_conn_interval = MSEC_TO_UNITS(100, UNIT_1_25_MS),
+    .min_conn_interval = MSEC_TO_UNITS(20, UNIT_1_25_MS),
+    .max_conn_interval = MSEC_TO_UNITS(50, UNIT_1_25_MS),
 };
 static simple_ble_app_t* simple_ble_app;
 
@@ -72,9 +76,15 @@ static simple_ble_app_t* simple_ble_app;
 APP_TIMER_DEF(enable_uart_timer);
 APP_TIMER_DEF(start_eddystone_timer);
 APP_TIMER_DEF(start_manufdata_timer);
-#define EDDYSTONE_ADV_DURATION APP_TIMER_TICKS(200, APP_TIMER_PRESCALER)
-#define MANUFDATA_ADV_DURATION APP_TIMER_TICKS(800, APP_TIMER_PRESCALER)
-#define UART_SLEEP_DURATION    APP_TIMER_TICKS(940, APP_TIMER_PRESCALER)
+APP_TIMER_DEF(restart_advs_timer);
+#define EDDYSTONE_ADV_DURATION      APP_TIMER_TICKS(200, APP_TIMER_PRESCALER)
+#define MANUFDATA_ADV_DURATION      APP_TIMER_TICKS(800, APP_TIMER_PRESCALER)
+// end of uart message to start of next with guard time
+#define UART_SLEEP_DURATION         APP_TIMER_TICKS(925, APP_TIMER_PRESCALER)
+// start of uart guard time to start of next guard time, determined empirically
+#define UART_SKIP_DURATION          APP_TIMER_TICKS(999, APP_TIMER_PRESCALER)
+// skip two cycles during a connection start since those take longer
+#define CONNECTION_SKIP_DURATION    2*UART_SKIP_DURATION
 
 // advertisement data
 #define PHYSWEB_URL "goo.gl/9aD6Wi"
@@ -137,6 +147,9 @@ static uint8_t rx_data[RX_DATA_MAX_LEN];
 static uint8_t* tx_data;
 static uint16_t tx_data_len = 0;
 static uint8_t tx_buffer[4+sizeof(powerblade_config)];
+// when receiving long packets, briefly pause advertisements. I've decided that
+//  100 bytes is "long" essentially arbitarily
+#define LONG_PACKET_THRESHOLD 100
 
 // states for handling transmissions to the MSP
 static bool already_transmitted = false;
@@ -145,6 +158,7 @@ static RawSampleState_t rawSample_state = RS_NONE;
 static ConfigurationState_t config_state = CONF_NONE;
 static StartupState_t startup_state = STARTUP_NOP;
 static StatusCode_t status_code = STATUS_NONE;
+static bool skip_uart_cycle = false;
 
 
 /**************************************************
@@ -210,6 +224,13 @@ void start_manufdata_adv (void) {
     APP_ERROR_CHECK(err_code);
 }
 
+void restart_advertisements (void) {
+    // if our timers were paused, restart them now. There probably isn't any
+    //  new data, so starting eddystone first seems like the right call here
+    start_eddystone_adv();
+}
+
+
 /**************************************************
  * UART
  **************************************************/
@@ -226,7 +247,16 @@ void uart_rx_handler (void) {
     static uint16_t packet_len = 0;
     static uint16_t rx_index = 0;
 
-    // data is available
+    // if this is the first byte of data, restart the sleep timer
+    if (rx_index == 0) {
+        app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
+    }
+
+    // move uart data to buffer
+    //NOTE: we aren't doing any kind of check here to ensure that we aren't
+    //  waiting forever for an eronously large packet. That's okay though,
+    //  since the current draw when UART is on is unsustainable, the nRF will
+    //  just reboot if this occurs and get back to a good state
     nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
     rx_data[rx_index] = nrf_uart_rxd_get(NRF_UART0);
     rx_index++;
@@ -238,6 +268,16 @@ void uart_rx_handler (void) {
         // parse out expected packet length
         if (packet_len == 0) {
             packet_len = (rx_data[0] << 8 | rx_data[1]);
+
+            // if we are receiving a long packet, pause advertisements until it's done
+            if (packet_len > LONG_PACKET_THRESHOLD) {
+                advertising_stop();
+                app_timer_stop(start_eddystone_timer);
+                app_timer_stop(start_manufdata_timer);
+                // no need to set a timer to restart them, process_rx_packet
+                //  will do so. Unless the CRC is bad, in which case the next
+                //  uart transmission will
+            }
         }
 
         // process packet if we have all of it
@@ -253,7 +293,6 @@ void process_rx_packet(uint16_t packet_len) {
 
     // turn off UART until next window
     uart_rx_disable();
-    app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
 
     // a new window for transmission to the MSP430 is available
     already_transmitted = false;
@@ -289,7 +328,8 @@ void process_rx_packet(uint16_t packet_len) {
     } else {
         // need to send a nak
         nak_state = NAK_CHECKSUM;
-        raw_sample_data[0] = 0xA5;
+        status_code = STATUS_BAD_CHECKSUM;
+        simple_ble_notify_char(&config_status_char);
     }
 }
 
@@ -321,6 +361,24 @@ void uart_send (uint8_t* data, uint16_t len) {
     // transmission sent for this cycle
     already_transmitted = true;
 }
+
+void uart_start_receive (void) {
+    if (!skip_uart_cycle) {
+        // we are ready to receive, go for it
+        uart_rx_enable();
+    } else {
+        // skip this reception cycle to conserve power while doing heavy
+        //  lifting in BLE-land
+        app_timer_start(enable_uart_timer, UART_SKIP_DURATION, NULL);
+        // only skip a single cycle
+        skip_uart_cycle = false;
+        // if we haven't already transmitted, don't start now
+        //  if we have, we won't move on to the next state for a cycle since
+        //  already_transmitted will stay true
+        already_transmitted = true;
+    }
+}
+
 
 /**************************************************
  * Services
@@ -376,8 +434,12 @@ void services_init (void) {
                 &rawSample_service, &rawSample_char_begin);
 
         // Add the characteristic to provide raw samples
+        //  This characteristic requires read authorizations. This gives us the
+        //  opportunity to disable the UART transmissions while before a read
+        //  of it starts
         memset(raw_sample_data, 0x00, SAMDATA_MAX_LEN);
-        simple_ble_add_characteristic(1, 0, 0, 1, // read, write, notify, vlen
+        simple_ble_add_auth_characteristic(1, 0, 0, 1, // read, write, notify, vlen
+                true, false, // read auth, write auth
                 SAMDATA_MAX_LEN, (uint8_t*)raw_sample_data,
                 &rawSample_service, &rawSample_char_data);
         // must initialize to maximum valid length. Now reset down to 1
@@ -388,6 +450,17 @@ void services_init (void) {
         simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
                 1, (uint8_t*)&rawSample_status,
                 &rawSample_service, &rawSample_char_status);
+}
+
+void ble_evt_connected (ble_evt_t* p_ble_evt) {
+    // a connection just started, skip the next uart cycle to save power
+    skip_uart_cycle = true;
+
+    // stop any running advertisements and don't restart for a single UART cycle
+    advertising_stop();
+    app_timer_stop(start_eddystone_timer);
+    app_timer_stop(start_manufdata_timer);
+    app_timer_start(restart_advs_timer, CONNECTION_SKIP_DURATION, NULL);
 }
 
 void ble_evt_write (ble_evt_t* p_ble_evt) {
@@ -423,6 +496,16 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
     }
 }
 
+void ble_evt_rw_auth (ble_evt_t* p_ble_evt) {
+    if (simple_ble_is_read_auth_event(p_ble_evt, &rawSample_char_data)) {
+        // read request for data characteristic, disable uart for a cycle and
+        //  authorize the read
+        skip_uart_cycle = true;
+        uint32_t err_code = simple_ble_grant_auth(p_ble_evt);
+        APP_ERROR_CHECK(err_code);
+    }
+}
+
 
 /**************************************************
  * Initialization
@@ -431,13 +514,16 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 void timers_init (void) {
     uint32_t err_code;
 
-    err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_rx_enable);
+    err_code = app_timer_create(&enable_uart_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)uart_start_receive);
     APP_ERROR_CHECK(err_code);
 
     err_code = app_timer_create(&start_eddystone_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)start_eddystone_adv);
     APP_ERROR_CHECK(err_code);
 
     err_code = app_timer_create(&start_manufdata_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)start_manufdata_adv);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_create(&restart_advs_timer, APP_TIMER_MODE_SINGLE_SHOT, (app_timer_timeout_handler_t)restart_advertisements);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -612,9 +698,8 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
                 break;
         }
     } else {
-        //if (rawSample_state != RS_NONE && rawSample_state != RS_IDLE) {
-        //    raw_sample_data[0] = 0xFF;
-        //}
+        // expected a message but didn't receive one. Signal error status over
+        //  status characteristic
         if (rawSample_state == RS_WAIT_START) {
             status_code = STATUS_NO_RS_START;
             simple_ble_notify_char(&config_status_char);
@@ -625,23 +710,6 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
             status_code = STATUS_NO_RS_QUIT;
             simple_ble_notify_char(&config_status_char);
         }
-        /*
-        // no message received. Handle that
-        if (rawSample_state == RS_WAIT_START) {
-            // should have gotten an acknowledgement. Send again
-            if (rawSample_state != RS_QUIT) {
-                rawSample_state = RS_START;
-            }
-        } else if (rawSample_state == RS_WAIT_DATA) {
-            // should have gotten data. Request again
-            if (rawSample_state != RS_QUIT) {
-                rawSample_state = RS_NEXT;
-            }
-        } else if (rawSample_state == RS_WAIT_QUIT) {
-            // should have gotten a done message. Send again
-            rawSample_state = RS_QUIT;
-        }
-        */
     }
 }
 
