@@ -525,7 +525,7 @@ __interrupt void ADC10_ISR(void) {
 			}
 
 			// After its been stored for raw sample transmission, apply offset
-			voltage[voltageWriteCount] = tempVoltage - pb_config.voff;
+			voltage[voltageWriteCount++] = tempVoltage - pb_config.voff;
 			if(voltageWriteCount == BACKLOG_LEN) {
 				voltageWriteCount = 0;
 			}
