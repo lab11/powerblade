@@ -158,6 +158,8 @@ module.exports = {
         if (pscale_val < 0 || pscale_val > 65535) {
             pscale_val = 0x428A;
         }
+        var vscale = 0x7B;
+        var whscale = 0x09;
 
         // store values to properly sized buffers
         var voff_buf = new Buffer(1);
@@ -169,9 +171,18 @@ module.exports = {
         var pscale_buf = new Buffer(2);
         pscale_buf.writeUInt16LE(pscale_val);
 
+        // also set default values for the scaling factors (which are not
+        //  device dependent)
+        var vscale_buf = new Buffer(1);
+        vscale_buf.writeUInt8(vscale);
+        var whscale_buf = new Buffer(1);
+        whscale_buf.writeUInt8(whscale);
+
 	    return {'voff': voff_buf,
                 'ioff': ioff_buf,
                 'curoff': curoff_buf,
-                'pscale': pscale_buf};
+                'pscale': pscale_buf,
+                'vscale': vscale_buf,
+                'whscale': whscale_buf};
 	}
 }
