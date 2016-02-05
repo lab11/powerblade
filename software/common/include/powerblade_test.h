@@ -105,11 +105,18 @@
 	Vmax,div = 3.17V
 	Nadc,max = 255 * (3.17 / 3.3) = 245 (0xF5)
 */
+#if defined (ADC8)
 #define ADC_VMIN	0x73
 //#define ADC_VCHG	0xDB
 #define ADC_VCHG	0xC0
-
 #define ADC_VCC2	0x80
+#else
+#define ADC_VMIN	0x1CD
+//#define ADC_VCHG	0xDB
+#define ADC_VCHG	0x302
+#define ADC_VCC2	0x200
+#endif
+
 #define V_VCC2		ADC_VCC2
 #define I_VCC2		ADC_VCC2
 
