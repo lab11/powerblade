@@ -39,20 +39,24 @@ uint8_t measCount;
 
 // Global variables used interrupt-to-interrupt
 #define BACKLOG_LEN		16
+#if defined (ADC8)
 int8_t current[BACKLOG_LEN];
 int8_t voltage[BACKLOG_LEN];
+int8_t savedCurrent;
+int8_t savedVoltage;
+#else
+int16_t current[BACKLOG_LEN];
+int16_t voltage[BACKLOG_LEN];
+int16_t savedCurrent;
+int16_t savedVoltage;
+#endif
 uint8_t currentWriteCount;
 uint8_t currentReadCount;
 uint8_t voltageWriteCount;
 uint8_t voltageReadCount;
-int8_t savedCurrent;
-int8_t savedVoltage;
 int32_t acc_p_ave;
 uint32_t acc_i_rms;
 uint32_t acc_v_rms;
-int32_t saved_accP;
-uint32_t saved_accI;
-uint32_t saved_accV;
 int32_t wattHoursToAverage;
 int32_t saved_wattHours;
 uint32_t voltAmpsToAverage;
@@ -78,7 +82,11 @@ uint8_t flags = 0x05;
 
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
+#if defined (ADC8)
 PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -1, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x7B, .whscale = 0x09};
+#else
+PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -16, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x1F, .whscale = 0x09};
+#endif
 
 // PowerBlade state (used for downloading data)
 int dataIndex;
@@ -90,6 +98,27 @@ uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
 	uint32_t res = 0;
 	uint32_t one = 1uL << 30; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
+
+	// "one" starts at the highest power of four <= than the argument.
+	while (one > op) {
+		one >>= 2;
+	}
+
+	while (one != 0) {
+		if (op >= res + one) {
+			op = op - (res + one);
+			res = res + 2 * one;
+		}
+		res >>= 1;
+		one >>= 2;
+	}
+	return res;
+}
+
+uint64_t SquareRoot64(uint64_t a_nInput) {
+	uint64_t op = a_nInput;
+	uint64_t res = 0;
+	uint64_t one = (uint64_t)1 << 62; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
 
 	// "one" starts at the highest power of four <= than the argument.
 	while (one > op) {
@@ -189,7 +218,11 @@ int main(void) {
 	// Set up ADC
 	ADC10CTL0 |= ADC10ON;                  		// Turn ADC on (ADC10ON), no multiple sample (ADC10MSC)
 	ADC10CTL1 |= ADC10SHS_0 + ADC10SHP;			// ADC10SC source select, sampling timer
+#if defined (ADC8)
 	ADC10CTL2 &= ~ADC10RES;                    	// 8-bit conversion results
+#else
+	ADC10CTL2 |= ADC10RES;
+#endif
 	ADC10MCTL0 = VCCMCTL0; 						// Reference set to VCC & VSS, first input set to VCC_SENSE
 	ADC10CTL0 |= ADC10ENC;                     	// ADC10 Enable
 	ADC10IE |= ADC10IE0;                   		// Enable ADC conv complete interrupt
@@ -286,11 +319,12 @@ void transmitTry(void) {
 
 	// Subtract offset
 	int32_t new_current = agg_current - pb_config.curoff;
+	new_current = new_current >> 4;
 
 	// Perform calculations for I^2, V^2, and P
-	acc_i_rms += (new_current * new_current);
-	acc_p_ave += (savedVoltage * new_current);
-	acc_v_rms += savedVoltage * savedVoltage;
+	acc_i_rms += (uint32_t)(new_current * new_current);
+	acc_p_ave += ((int32_t)savedVoltage * new_current);
+	acc_v_rms += (uint32_t)((int32_t)savedVoltage * (int32_t)savedVoltage);
 
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
@@ -298,11 +332,11 @@ void transmitTry(void) {
 		sampleCount = 0;
 
 		// Save accumulator values before next interrupt happens
-		saved_accI = acc_i_rms;
+		uint32_t saved_accI = acc_i_rms;
 		acc_i_rms = 0;
-		saved_accV = acc_v_rms;
+		uint32_t saved_accV = acc_v_rms;
 		acc_v_rms = 0;
-		saved_accP = acc_p_ave;
+		int32_t saved_accP = acc_p_ave;
 		acc_p_ave = 0;
 
 		// Increment energy calc
@@ -413,13 +447,13 @@ void transmitTry(void) {
 
 			// True power cannot be less than zero
 			if(saved_wattHours > 0) {
-				truePower = (uint16_t) (saved_wattHours / 60);
+				truePower = (uint16_t) ((saved_wattHours / 60));// >> 4);
 			}
 			else {
 				truePower = 0;
 			}
 			wattHours += (uint64_t) truePower;
-			apparentPower = (uint16_t) (saved_voltAmps / 60);
+			apparentPower = (uint16_t) ((saved_voltAmps / 60));// >> 4);
 
 #if defined (NORDICDEBUG)
 			ready = 1;
@@ -442,7 +476,12 @@ void transmitTry(void) {
 #pragma vector=ADC10_VECTOR
 __interrupt void ADC10_ISR(void) {
 
+#if defined (ADC8)
 	uint8_t ADC_Result;
+#else
+	uint16_t ADC_Result;
+#endif
+
 	unsigned char ADC_Channel;
 
 	switch (__even_in_range(ADC10IV, 12)) {
@@ -454,7 +493,18 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT2;
 			// Store current value for future calculations
+#if defined (ADC8)
 			int8_t tempCurrent = (int8_t) (ADC_Result - I_VCC2);
+#else
+			int16_t tempCurrent;
+			if(ADC_Result & 0x200) {	// Measurement above VCC/2
+				tempCurrent = ADC_Result & 0x1FF;		// Subtract Vcc/2
+			}
+			else {
+				tempCurrent = 0x200 - ADC_Result - 1;
+				tempCurrent = ~tempCurrent;
+			}
+#endif
 
 			if(pb_state == pb_capture) {
 				if(dataIndex < 5040) {
@@ -480,7 +530,19 @@ __interrupt void ADC10_ISR(void) {
 		{
 			P1OUT |= BIT2;
 			// Store voltage value
+#if defined (ADC8)
 			int8_t tempVoltage = (int8_t) (ADC_Result - V_VCC2) * -1;
+#else
+			int16_t tempVoltage;
+			if(ADC_Result & 0x200) {	// Measurement above VCC/2
+				tempVoltage = ADC_Result & 0x1FF;		// Subtract Vcc/2
+				tempVoltage = ~tempVoltage;				// Mult by -1
+			}
+			else {
+				ADC_Result = ~ADC_Result;
+				tempVoltage = ADC_Result + 0x200 + 1;
+			}
+#endif
 
 			if(pb_state == pb_capture) {
 				if(dataIndex < 5040) {
