@@ -318,8 +318,7 @@ void transmitTry(void) {
 	agg_current -= agg_current >> 5;
 
 	// Subtract offset
-	int32_t new_current = agg_current - pb_config.curoff;
-	new_current = new_current >> 4;
+	int32_t new_current = (agg_current >> 4) - pb_config.curoff;
 
 	// Perform calculations for I^2, V^2, and P
 	acc_i_rms += (uint32_t)(new_current * new_current);
@@ -507,11 +506,20 @@ __interrupt void ADC10_ISR(void) {
 #endif
 
 			if(pb_state == pb_capture) {
+#if defined (ADC8)
 				if(dataIndex < 5040) {
 					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1) + (dataIndex/504);
 					uart_stuff(arrayIndex, (char*) &tempCurrent, sizeof(tempCurrent));
 					dataIndex++;
 				}
+#else
+				if(dataIndex < 2520) {
+					//tempCurrent = -50;
+					int arrayIndex = (2*dataIndex) + (ADLEN + UARTOVHD)*((dataIndex/252) + 1) + (dataIndex/252);
+					uart_stuff(arrayIndex, (char*) &tempCurrent, sizeof(tempCurrent));
+					dataIndex++;
+				}
+#endif
 			}
 
 			// After its been stored for raw sample transmission, apply offset
@@ -545,11 +553,20 @@ __interrupt void ADC10_ISR(void) {
 #endif
 
 			if(pb_state == pb_capture) {
+#if defined (ADC8)
 				if(dataIndex < 5040) {
 					int arrayIndex = dataIndex + (ADLEN + UARTOVHD)*((dataIndex/504) + 1) + (dataIndex/504);
 					uart_stuff(arrayIndex, (char*) &tempVoltage, sizeof(tempVoltage));
 					dataIndex++;
 				}
+#else
+				if(dataIndex < 2520) {
+					//tempVoltage = -194;
+					int arrayIndex = (2*dataIndex) + (ADLEN + UARTOVHD)*((dataIndex/252) + 1) + (dataIndex/252);
+					uart_stuff(arrayIndex, (char*) &tempVoltage, sizeof(tempVoltage));
+					dataIndex++;
+				}
+#endif
 			}
 
 			// After its been stored for raw sample transmission, apply offset
