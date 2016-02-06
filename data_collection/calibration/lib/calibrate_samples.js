@@ -23,27 +23,17 @@ function SquareRoot(a_nInput){
 
 module.exports = {
 	calculate_constants: function (wattage, dataArr) {
-		var dataLen = dataArr.length / 2;
+		var dataLen = dataArr.length / 4;
+		var dataBuf = new Buffer(dataArr);
 
-		var voltageArr = [dataLen];
-		var currentArr = [dataLen];
+		var voltageArr = [];
+		var currentArr = [];
 		var voltageIndex = 0;
-		var currentIndex = 1;
+		var currentIndex = 2;
 		fs.writeFileSync('data/rawSamples.dat', '# Count\tVoltage\tCurrent\tInt\n');
 		for(var i = 0; i < dataLen; i++) {
-			voltageArr[i] = dataArr[2*i + voltageIndex];
-			if(voltageArr[i] > 127) {
-				voltageArr[i] -= 256;
-			}
-			currentArr[i] = dataArr[2*i + currentIndex];
-			if(currentArr[i] > 127) {
-				currentArr[i] -= 256;
-			}
-
-			// if((i % ((504/2)-1)) == 0) {
-			// 	voltageIndex ^= 1;
-			// 	currentIndex ^= 1;
-			// }
+			voltageArr.push(dataBuf.readInt16BE(4*i + voltageIndex));
+			currentArr.push(dataBuf.readInt16BE(4*i + currentIndex));
 		}
 
 		var voff = 0;
@@ -92,7 +82,7 @@ module.exports = {
 
 		for(var i = 0; i < dataLen; i++) {
 			var newVoltage = voltageArr[i] - voff;
-			var newIntegrate = integrate[i] - curoff;
+			var newIntegrate = (integrate[i] >> 4) - curoff;
 			acc_i_rms += newIntegrate * newIntegrate;
 			acc_v_rms += newVoltage * newVoltage;
 			acc_p_ave += newVoltage * newIntegrate;
@@ -116,9 +106,9 @@ module.exports = {
 			}
 		}
 
-		vrms = vrms / 60;
-		var truePower = wattHoursAve / 60;
-		var appPower = voltAmpAve / 60;
+		vrms = vrms / 30;//60;
+		var truePower = wattHoursAve / 30;//60;
+		var appPower = voltAmpAve / 30;//60;
 		var pscale_num = wattage / truePower;
 
 		console.log();
@@ -138,7 +128,7 @@ module.exports = {
 		console.log("Pscale = " + pscale_num);
 		console.log("Pscale = " + pscale_val);
 		console.log();
-		console.log("Vrms = " + (2.46*vrms));
+		console.log("Vrms = " + (0.62*vrms));
 		console.log("True Power = " + truePower);
 		console.log("App Power = " + appPower);
         console.log();
@@ -158,7 +148,7 @@ module.exports = {
         if (pscale_val < 0 || pscale_val > 65535) {
             pscale_val = 0x428A;
         }
-        var vscale = 0x7B;
+        var vscale = 0x1F;
         var whscale = 0x09;
 
         // store values to properly sized buffers
