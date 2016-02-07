@@ -85,7 +85,8 @@ function parse_advertisement(adv_buffer) {
         last_update = Date.now();
 
     } else {
-        app.log("Unexpected advertisement structure");
+        app.log("Unexpected advertisement structure - loggin scan record");
+		app.log(scanRecord);
     }
 }
 
