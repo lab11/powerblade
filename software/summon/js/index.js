@@ -21,9 +21,9 @@ function parse_advertisement(adv_buffer) {
     var scanRecord = new Uint8Array(adv_buffer);
 
     // double-check that this is the right device
-    if (scanRecord.length > 8 && scanRecord[4] == 0xFF &&
-            (scanRecord[5] == 0x08 && scanRecord[6] == 0x49) ||
-            (scanRecord[5] == 0xE0 && scanRecord[6] == 0x02 && scanRecord[7] == 0x11)) {
+    if (scanRecord.length > 11 && ((scanRecord[4] == 0xFF &&
+            scanRecord[5] == 0x08 && scanRecord[6] == 0x49) ||
+            (scanRecord[8] == 0xFF && scanRecord[9] == 0xE0 && scanRecord[10] == 0x02 && scanRecord[11] == 0x11))) {
 
         // values to be displayed
         var v_rms_disp = 0;
@@ -33,7 +33,7 @@ function parse_advertisement(adv_buffer) {
         var pf_disp = 0;
 
         // parse values from advertisement
-        var data = new DataView(adv_buffer, 8);
+        var data = new DataView(adv_buffer, 12);
         if (scanRecord[4] == 0x08) {
             // support old packet format
             data = new DataView(adv_buffer, 7);
@@ -85,7 +85,7 @@ function parse_advertisement(adv_buffer) {
         last_update = Date.now();
 
     } else {
-        app.log("Unexpected advertisement structure - loggin scan record");
+        app.log("Unexpected advertisement structure - logging scan record");
 		app.log(scanRecord);
     }
 }
