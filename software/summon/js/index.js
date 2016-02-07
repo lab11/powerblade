@@ -23,7 +23,7 @@ function parse_advertisement(adv_buffer) {
     // double-check that this is the right device
     if (scanRecord.length > 11 && 
 		((scanRecord[4] == 0xFF && scanRecord[5] == 0x08 && scanRecord[6] == 0x49) 			|| 
-		(scanRecord[5] == 0xE0 && scanRecord[6] = 0x02 && scanRecord[7] == 0x11) 
+		(scanRecord[5] == 0xE0 && scanRecord[6] == 0x02 && scanRecord[7] == 0x11) 
 		 ||
        	(scanRecord[8] == 0xFF && scanRecord[9] == 0xE0 && 
 		scanRecord[10] == 0x02 && scanRecord[11] == 0x11))) {
@@ -43,7 +43,7 @@ function parse_advertisement(adv_buffer) {
             app.log("WARNING: Oldest PowerBlade packet format");
         } else if(scanRecord[5] == 0xE0) {
             data = new DataView(adv_buffer, 8);
-            app.log("WARNING: Older PowerBlade packet format ");
+            app.log("WARNING: Older PowerBlade packet format");
 		}
 
         var powerblade_id  = data.getUint8(0);
