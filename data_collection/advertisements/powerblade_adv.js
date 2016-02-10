@@ -7,6 +7,13 @@ if (process.argv.length >= 3 && process.argv[2] == "--all") {
     dedup = false;
 }
 
+var singleSource = false;
+var pb_address;
+if (process.argv.length >= 4 && process.argv[2] == "--addr") {
+    singleSource = true;
+    pb_address = process.argv[3];
+}
+
 var UMICH_COMPANY_ID = 0x02E0;
 var POWERBLADE_SERVICE_ID = 0x11;
 var OLD_COMPANY_ID = 0x4908;
@@ -49,6 +56,12 @@ noble.on('discover', function (peripheral) {
             data = advertisement.manufacturerData.slice(2);
         }
         var recv_time = (new Date).getTime()/1000;
+
+        if(singleSource == true) {
+            if(address != pb_address) {
+                return;
+            }
+        }
 
         // check length of data
         if (data.length < 19) {
