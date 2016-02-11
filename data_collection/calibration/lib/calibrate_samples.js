@@ -60,12 +60,14 @@ module.exports = {
 			// if(i < 15) {
 			// 	console.log("Agg current = " + aggCurrent);
 			// }
-			curoff += (aggCurrent >> 3);
+			if((i > 60) && i < (dataLen - 60)) {
+				curoff += (aggCurrent >> 3);
+			}
 
 			//console.log(i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i]);
 			fs.appendFileSync('data/rawSamples.dat', i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i] + '\n');
 		}
-		curoff = Math.round(curoff / dataLen);
+		curoff = Math.round(curoff / (dataLen-120));
 
 		var sampleCount = 0;
 		var acc_i_rms = 0;
