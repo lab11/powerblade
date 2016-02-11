@@ -7,6 +7,13 @@ if (process.argv.length >= 3 && process.argv[2] == "--all") {
     dedup = false;
 }
 
+var singleSource = false;
+var pb_address;
+if (process.argv.length >= 4 && process.argv[2] == "--addr") {
+    singleSource = true;
+    pb_address = process.argv[3];
+}
+
 var UMICH_COMPANY_ID = 0x02E0;
 var POWERBLADE_SERVICE_ID = 0x11;
 var OLD_COMPANY_ID = 0x4908;
@@ -50,6 +57,12 @@ noble.on('discover', function (peripheral) {
         }
         var recv_time = (new Date).getTime()/1000;
 
+        if(singleSource == true) {
+            if(address != pb_address) {
+                return;
+            }
+        }
+
         // check length of data
         if (data.length < 19) {
             console.log("ERROR: Bad PowerBlade packet");
@@ -88,7 +101,14 @@ noble.on('discover', function (peripheral) {
         var flags = data.readUIntBE(18,1);
 
         // calculate scaling values
-        var volt_scale = vscale / 50;
+        // TODO here is the vscale change
+        var volt_scale;
+        if(version_num == 1) {
+            volt_scale = vscale / 50;
+        }
+        else {
+            volt_scale = vscale / 200;
+        }
         var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
         var wh_shift = whscale;
 
@@ -110,16 +130,29 @@ noble.on('discover', function (peripheral) {
         var pf_disp = real_power_disp / app_power_disp;
 
         // display data to user
+        console.log('PowerBlade (' + address +')');
+
         if (company_id == OLD_COMPANY_ID) {
             console.log("WARNING: Old PowerBlade packet format!");
         }
-        console.log('PowerBlade (' + address +')');
+        else {
+            if (flags & 0x80) {
+                console.log('Calibrated unit');
+            }
+            else {
+                console.log('WARNING: Uncalibrated unit')
+            }
+        }
+
         console.log('      Sequence Number: ' + sequence_num);
         console.log('          RMS Voltage: ' + v_rms_disp.toFixed(2) + ' V');
         console.log('           Real Power: ' + real_power_disp.toFixed(2) + ' W');
         console.log('       Apparent Power: ' + app_power_disp.toFixed(2) + ' VA');
         console.log('Cumulative Energy Use: ' + watt_hours_disp.toFixed(2) + ' Wh');
         console.log('         Power Factor: ' + pf_disp.toFixed(2));
+        // console.log('Raw voltage: ' + v_rms.toFixed(2));
+        // console.log('Volt scale: ' + volt_scale.toFixed(2));
+        // console.log('Pscale: ' + pscale.toFixed(2));
         console.log('');
     }
 });
