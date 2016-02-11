@@ -101,7 +101,7 @@ noble.on('discover', function (peripheral) {
         var flags = data.readUIntBE(18,1);
 
         // calculate scaling values
-        var volt_scale = vscale / 50;
+        var volt_scale = vscale / 200;
         var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
         var wh_shift = whscale;
 
@@ -143,6 +143,9 @@ noble.on('discover', function (peripheral) {
         console.log('       Apparent Power: ' + app_power_disp.toFixed(2) + ' VA');
         console.log('Cumulative Energy Use: ' + watt_hours_disp.toFixed(2) + ' Wh');
         console.log('         Power Factor: ' + pf_disp.toFixed(2));
+        // console.log('Raw voltage: ' + v_rms.toFixed(2));
+        // console.log('Volt scale: ' + volt_scale.toFixed(2));
+        // console.log('Pscale: ' + pscale.toFixed(2));
         console.log('');
     }
 });
