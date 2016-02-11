@@ -14,8 +14,12 @@ var wattage = 200;
 if (process.argv.length >= 4) {
     wattage = process.argv[3];
 }
+var voltage = 120;
+if (process.argv.length >= 5) {
+    voltage = process.argv[4];
+}
 console.log("Looking for " + target_device);
-console.log("Calibrating at " + wattage + " W");
+console.log("Calibrating at " + wattage + " W and " + voltage + " V");
 
 // reference to discovered peripheral
 var powerblade_periph;
@@ -210,7 +214,7 @@ function RawSample_status_receive(data, isNotify) {
 
         // calculate calibration numbers
         console.log("Calculating calibration numbers...")
-        calibration_values = calib.calculate_constants(wattage, sampleData);
+        calibration_values = calib.calculate_constants(wattage, voltage, sampleData);
 
         // write the calculated calibration values back to the powerblade
         write_calibration();
