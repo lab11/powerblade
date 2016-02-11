@@ -18,7 +18,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <math.h>
 
 #include "powerblade_test.h"
 #include "uart_types.h"
@@ -29,6 +28,7 @@
 
 // Transmission variables
 bool ready;
+bool senseEnabled;
 
 // Variable for integration
 int16_t agg_current;
@@ -58,20 +58,17 @@ int32_t acc_p_ave;
 uint32_t acc_i_rms;
 uint32_t acc_v_rms;
 int32_t wattHoursToAverage;
-int32_t saved_wattHours;
 uint32_t voltAmpsToAverage;
-uint32_t saved_voltAmps;
 
 // Near-constants to be transmitted
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
-uint8_t powerblade_id = 1;
+uint8_t powerblade_id = 2;
 
 // Transmitted values
 uint32_t sequence;
 uint32_t scale;
 uint8_t Vrms;
-uint8_t saved_vrms;
 uint16_t truePower;
 uint16_t apparentPower;
 uint64_t wattHours;
@@ -85,7 +82,7 @@ uint8_t flags = 0x05;
 #if defined (ADC8)
 PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -1, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x7B, .whscale = 0x09};
 #else
-PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -16, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x1F, .whscale = 0x09};
+PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -16, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x79, .whscale = 0x09};
 #endif
 
 // PowerBlade state (used for downloading data)
@@ -115,7 +112,7 @@ uint32_t SquareRoot(uint32_t a_nInput) {
 	return res;
 }
 
-uint64_t SquareRoot64(uint64_t a_nInput) {
+uint32_t SquareRoot64(uint64_t a_nInput) {
 	uint64_t op = a_nInput;
 	uint64_t res = 0;
 	uint64_t one = (uint64_t)1 << 62; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
@@ -169,8 +166,32 @@ int main(void) {
 	P2REN = 0xFF;
 	P2SEL0 = 0;
 
+	// Initialize system state
+	pb_state = pb_normal;
+	ready = 0;
+	senseEnabled = 0;
+	tryCount = 0;
+	sendCount = 0;
+
+	// Zero all sensing values
+	currentWriteCount = 0;
+	currentReadCount = 0;
+	voltageWriteCount = 0;
+	voltageReadCount = 0;
+	wattHours = 0;
+	sampleCount = 0;
+	measCount = 0;
+
+	// Initialize remaining transmitted values
+	sequence = 0;
+	txIndex = 0;
+
+	// Initialize scale value (can be updated later)
+	scale = pb_config.pscale;
+	scale = (scale<<8)+pb_config.vscale;
+	scale = (scale<<8)+pb_config.whscale;
+
 	// Clock Setup
-	PJSEL0 |= BIT4 + BIT5;						// XIN, XOUT on PJ4, PJ5 with external crystal
 	CSCTL0_H = 0xA5;							// Input CSKEY password to change clock settings
 	CSCTL1 = DCOFSEL0 + DCOFSEL1;             	// Set DCO to 8MHz
 	CSCTL2 = SELA_0 + SELS_3 + SELM_3;        	// Set ACLK = XT1, SMCLK = MCLK = DCO
@@ -182,35 +203,6 @@ int main(void) {
 		SFRIFG1 &= ~OFIFG;
 	} while (SFRIFG1 & OFIFG);              	// Test oscillator fault flag
 	// XT1 test passed
-
-	// Initialize system state
-	pb_state = pb_normal;
-	ready = 0;
-	tryCount = 0;
-	sendCount = 0;
-
-	// Zero all sensing values
-	currentWriteCount = 0;
-	currentReadCount = 0;
-	voltageWriteCount = 0;
-	voltageReadCount = 0;
-	sampleCount = 0;
-	measCount = 0;
-	acc_p_ave = 0;
-	acc_i_rms = 0;
-	acc_v_rms = 0;
-	wattHours = 0;
-	wattHoursToAverage = 0;
-	voltAmpsToAverage = 0;
-
-	// Initialize remaining transmitted values
-	sequence = 0;
-	txIndex = 0;
-
-	// Initialize scale value (can be updated later)
-	scale = pb_config.pscale;
-	scale = (scale<<8)+pb_config.vscale;
-	scale = (scale<<8)+pb_config.whscale;
 
 	// Set up UART
 	uart_init();
@@ -285,7 +277,7 @@ void transmit(void) {
 	uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
 	uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
 	uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
-	uart_stuff(blockOffset + OFFSET_VRMS, (char*) &saved_vrms, sizeof(saved_vrms));
+	uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
 	uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 	uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 
@@ -318,44 +310,32 @@ void transmitTry(void) {
 	agg_current -= agg_current >> 5;
 
 	// Subtract offset
-	int32_t new_current = (agg_current >> 4) - pb_config.curoff;
+	int32_t new_current = (agg_current >> 3) - pb_config.curoff;
 
 	// Perform calculations for I^2, V^2, and P
-	acc_i_rms += (uint32_t)(new_current * new_current);
-	acc_p_ave += ((int32_t)savedVoltage * new_current);
-	acc_v_rms += (uint32_t)((int32_t)savedVoltage * (int32_t)savedVoltage);
+	acc_i_rms += (uint64_t)(new_current * new_current);
+	acc_p_ave += ((int64_t)savedVoltage * new_current);
+	acc_v_rms += (uint64_t)((int32_t)savedVoltage * (int32_t)savedVoltage);
 
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 		// Reset sampleCount once per wave
 		sampleCount = 0;
 
-		// Save accumulator values before next interrupt happens
-		uint32_t saved_accI = acc_i_rms;
-		acc_i_rms = 0;
-		uint32_t saved_accV = acc_v_rms;
-		acc_v_rms = 0;
-		int32_t saved_accP = acc_p_ave;
+		// Increment energy calc
+		wattHoursToAverage += (int32_t)(acc_p_ave / SAMCOUNT);
 		acc_p_ave = 0;
 
-		// Increment energy calc
-		wattHoursToAverage += saved_accP / SAMCOUNT;
-
 		// Calculate Irms, Vrms, and apparent power
-		uint16_t Irms = (uint16_t) SquareRoot(saved_accI / SAMCOUNT);
-		Vrms = (uint8_t) SquareRoot(saved_accV / SAMCOUNT);
+		uint16_t Irms = (uint16_t) SquareRoot64(acc_i_rms / SAMCOUNT);
+		Vrms = (uint8_t) SquareRoot64(acc_v_rms / SAMCOUNT);
 		voltAmpsToAverage += (uint32_t) (Irms * Vrms);
+		acc_i_rms = 0;
+		acc_v_rms = 0;
 
 		measCount++;
 		if (measCount >= 60) { 					// Another second has passed
 			measCount = 0;
-
-			// Save values to transmit
-			saved_wattHours = wattHoursToAverage;
-			wattHoursToAverage = 0;
-			saved_voltAmps = voltAmpsToAverage;
-			voltAmpsToAverage = 0;
-			saved_vrms = Vrms;
 
 			uart_len = ADLEN + UARTOVHD;
 
@@ -445,14 +425,17 @@ void transmitTry(void) {
 			sequence++;
 
 			// True power cannot be less than zero
-			if(saved_wattHours > 0) {
-				truePower = (uint16_t) ((saved_wattHours / 60));// >> 4);
+			if(wattHoursToAverage > 0) {
+				truePower = (uint16_t) ((wattHoursToAverage / 60));
 			}
 			else {
 				truePower = 0;
 			}
 			wattHours += (uint64_t) truePower;
-			apparentPower = (uint16_t) ((saved_voltAmps / 60));// >> 4);
+			apparentPower = (uint16_t) ((voltAmpsToAverage / 60));
+
+			wattHoursToAverage = 0;
+			voltAmpsToAverage = 0;
 
 #if defined (NORDICDEBUG)
 			ready = 1;
@@ -464,7 +447,7 @@ void transmitTry(void) {
 
 				// Delay for a bit to allow nordic to boot
 				// TODO this is only required the first time
-				TA1CCR0 = TA1R + 885;
+				TA1CCR0 = TA1R + 500;
 				TA1CCTL0 = CCIE;
 			}
 		}
@@ -595,17 +578,29 @@ __interrupt void ADC10_ISR(void) {
 			} else if (ready == 0) {
 				if (ADC_Result > ADC_VCHG) {
 					SEN_EN_OUT |= SEN_EN_PIN;
+					senseEnabled = 1;
+					acc_p_ave = 0;
+					acc_i_rms = 0;
+					acc_v_rms = 0;
+					wattHoursToAverage = 0;
+					voltAmpsToAverage = 0;
 					agg_current = 0;
 					ready = 1;
 				}
 			}
 
+#if defined (NORDICDEBUG)
+			senseEnabled = 1;
+#endif
+
 			// Enable next sample
 			// After VCC_SENSE do V_SENSE
-			ADC10CTL0 &= ~ADC10ENC;
-			ADC10MCTL0 = VMCTL0;
-			ADC10CTL0 |= ADC10ENC;
-			ADC10CTL0 += ADC10SC;
+			if(senseEnabled == 1) {
+				ADC10CTL0 &= ~ADC10ENC;
+				ADC10MCTL0 = VMCTL0;
+				ADC10CTL0 |= ADC10ENC;
+				ADC10CTL0 += ADC10SC;
+			}
 			break;
 		default: // ADC Reset condition
 			ADC10CTL0 += ADC10SC;
