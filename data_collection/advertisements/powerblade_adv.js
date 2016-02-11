@@ -101,6 +101,8 @@ noble.on('discover', function (peripheral) {
         var flags = data.readUIntBE(18,1);
 
         // calculate scaling values
+        // TODO here is the vscale change
+        //var volt_scale = vscale / 50;
         var volt_scale = vscale / 200;
         var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
         var wh_shift = whscale;
