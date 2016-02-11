@@ -22,7 +22,7 @@ function SquareRoot(a_nInput){
 }
 
 module.exports = {
-	calculate_constants: function (wattage, dataArr) {
+	calculate_constants: function (wattage, voltage, dataArr) {
 		var dataLen = dataArr.length / 4;
 		var dataBuf = new Buffer(dataArr);
 
@@ -38,20 +38,17 @@ module.exports = {
 
 		var voff = 0;
 		var ioff = 0;
-		for(var i = 0; i < dataLen; i++) {
+		for(var i = 60; i < (dataLen-60); i++) {
 			voff += voltageArr[i];
 			ioff += currentArr[i];
 		}
-		voff = Math.round(voff / dataLen);
-		ioff = Math.round(ioff / dataLen);
+		voff = Math.round(voff / (dataLen-120));
+		ioff = Math.round(ioff / (dataLen-120));
 
-		var integrate = [dataLen];
+		var integrate = [];
 
 		var curoff = 0;
 		var aggCurrent = 0;
-		var tempCurrent = currentArr[0] - ioff;
-		// console.log(currentArr[0])
-		// console.log(aggCurrent + (tempCurrent + (tempCurrent >> 1)));
 		for(var i = 0; i < dataLen; i++) {
 			var newCurrent = currentArr[i] - ioff;
 			// if(i < 15) {
@@ -59,11 +56,11 @@ module.exports = {
 			// }
 			aggCurrent += (newCurrent + (newCurrent >> 1));
 			aggCurrent -= aggCurrent >> 5;
-			integrate[i] = aggCurrent;
+			integrate[i] = (aggCurrent >> 3);
 			// if(i < 15) {
 			// 	console.log("Agg current = " + aggCurrent);
 			// }
-			curoff += aggCurrent;
+			curoff += (aggCurrent >> 3);
 
 			//console.log(i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i]);
 			fs.appendFileSync('data/rawSamples.dat', i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i] + '\n');
@@ -79,10 +76,12 @@ module.exports = {
 		fs.writeFileSync('data/goodSamples.dat', '# Count\tVoltage\tCurrent\n');
 
 		var vrms = 0;
+		var throwOutFirst = true;
+		var divCount = 0;
 
 		for(var i = 0; i < dataLen; i++) {
 			var newVoltage = voltageArr[i] - voff;
-			var newIntegrate = (integrate[i] >> 4) - curoff;
+			var newIntegrate = integrate[i] - curoff;
 			acc_i_rms += newIntegrate * newIntegrate;
 			acc_v_rms += newVoltage * newVoltage;
 			acc_p_ave += newVoltage * newIntegrate;
@@ -96,19 +95,30 @@ module.exports = {
 			sampleCount++;
 			if(sampleCount == 42) {
 				sampleCount = 0;
-				wattHoursAve += acc_p_ave / 42;
-				//console.log(wattHoursAve);
+				if(throwOutFirst == false) {
+					wattHoursAve += acc_p_ave / 42;
+					//console.log(wattHoursAve);
+					voltAmpAve += SquareRoot(acc_v_rms / 42) * SquareRoot(acc_i_rms / 42);
+					vrms += SquareRoot(acc_v_rms / 42);
+					divCount = divCount + 1;
+				}
+				throwOutFirst = false;
 				acc_p_ave = 0;
-				voltAmpAve += SquareRoot(acc_v_rms / 42) * SquareRoot(acc_i_rms / 42);
-				vrms += SquareRoot(acc_v_rms / 42);
 				acc_v_rms = 0;
 				acc_i_rms = 0;
 			}
 		}
 
-		vrms = vrms / 30;//60;
-		var truePower = wattHoursAve / 30;//60;
-		var appPower = voltAmpAve / 30;//60;
+		console.log("Div len: " + divCount);
+
+		
+		vrms = vrms / divCount;
+		var truePower = wattHoursAve / divCount;
+		var appPower = voltAmpAve / divCount;
+
+		var vscale_num = voltage / vrms;
+		var vscale = Math.round(vscale_num * 200);
+
 		var pscale_num = wattage / truePower;
 
 		console.log();
@@ -127,8 +137,10 @@ module.exports = {
 		console.log("Curoff = " + curoff);
 		console.log("Pscale = " + pscale_num);
 		console.log("Pscale = " + pscale_val);
+		console.log("Vscale = " + vscale_num);
+		console.log("Vscale = " + vscale);
 		console.log();
-		console.log("Vrms = " + (0.62*vrms));
+		console.log("Vrms = " + (vscale_num*vrms));
 		console.log("True Power = " + truePower);
 		console.log("App Power = " + appPower);
         console.log();
@@ -148,7 +160,7 @@ module.exports = {
         if (pscale_val < 0 || pscale_val > 65535) {
             pscale_val = 0x428A;
         }
-        var vscale = 0x1F;
+        //var vscale = 0x1F;
         var whscale = 0x09;
 
         // store values to properly sized buffers
