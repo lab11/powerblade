@@ -1,0 +1,16 @@
+{
+  "name": "gateway",
+  "version": "1.0.0",
+  "description": "Interact with gateway deployments of powerblades",
+  "main": "push_to_gatd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Branden Ghena",
+  "dependencies": {
+    "moment": "^2.11.2",
+    "mqtt": "^1.7.0",
+    "request": "^2.69.0",
+    "watchout": "0.0.5"
+  }
+}
