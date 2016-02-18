@@ -47,9 +47,9 @@ function parse_advertisement(adv_buffer) {
 		}
 
         var powerblade_id  = data.getUint8(0);
+        app.log("PowerBlade version " + powerblade_id);
         switch (powerblade_id) {
             case 0x01:
-                app.log("PowerBlade version " + powerblade_id);
                 var sequence_num   = data.getUint32(1);
                 var pscale         = data.getUint16(5);
                 var vscale         = data.getUint8(7);
@@ -62,6 +62,36 @@ function parse_advertisement(adv_buffer) {
 
                 // do maths
                 var volt_scale = vscale / 50;
+                var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
+                var wh_shift = whscale;
+                var v_rms_disp = v_rms*volt_scale;
+                var real_power_disp = real_power*power_scale;
+                var app_power_disp = apparent_power*power_scale;
+                if(volt_scale > 0) {
+                  var watt_hours_disp = (watt_hours << wh_shift)*(power_scale/3600);
+                }
+                else {
+                  var watt_hours_disp = watt_hours;
+                }
+                var pf_disp = real_power_disp / app_power_disp;
+                break;
+
+            case 0x02:
+                // version 2 has a vscale value that needs to be divided by 200
+                //  instead of 50. Sending a larger vscale allows the resulting
+                //  voltage displayed to the user to be more precise
+                var sequence_num   = data.getUint32(1);
+                var pscale         = data.getUint16(5);
+                var vscale         = data.getUint8(7);
+                var whscale        = data.getUint8(8);
+                var v_rms          = data.getUint8(9);
+                var real_power     = data.getUint16(10);
+                var apparent_power = data.getUint16(12);
+                var watt_hours     = data.getUint32(14);
+                var flags          = data.getUint8(18);
+
+                // do maths
+                var volt_scale = vscale / 200;
                 var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
                 var wh_shift = whscale;
                 var v_rms_disp = v_rms*volt_scale;

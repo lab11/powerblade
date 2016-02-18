@@ -49,7 +49,14 @@ var parse_advertisement = function (advertisement, cb) {
     var flags = data.readUIntBE(18,1);
 
     // calculate scaling values
-    var volt_scale = vscale / 50;
+    var volt_scale;
+    if (version_num == 1) {
+        volt_scale = vscale / 50;
+    } else {
+        // starting in version 2, vscale became bigger to allow for more
+        //  precision in v_rms
+        volt_scale = vscale / 200;
+    }
     var power_scale = (pscale & 0x0FFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
     var wh_shift = whscale;
 

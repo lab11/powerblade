@@ -2,7 +2,7 @@
 
 rm -fr _build
 
-cordova create _build edu.umich.eecs.lab11.tritag TriTag
+cordova create _build edu.umich.eecs.lab11.powerblade PowerBlade
 pushd _build
 cordova platform add android
 cordova plugin add cordova-plugin-whitelist
@@ -19,6 +19,7 @@ rm index.html
 
 ln -s ../../css .
 ln -s ../../js .
+ln -s ../../img .
 ln -s ../../index.html .
 
 popd
