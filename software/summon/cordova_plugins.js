@@ -20,13 +20,6 @@ module.exports = [
         ]
     },
     {
-        "file": "plugins/com.randdusing.bluetoothle/www/bluetoothle.js",
-        "id": "com.randdusing.bluetoothle.BluetoothLe",
-        "clobbers": [
-            "window.bluetoothle"
-        ]
-    },
-    {
         "file": "plugins/cordova-plugin-ble-central/www/ble.js",
         "id": "cordova-plugin-ble-central.ble",
         "clobbers": [
@@ -39,8 +32,8 @@ module.exports.metadata =
 {
     "cordova-plugin-whitelist": "1.0.0",
     "cordova-plugin-console": "1.0.1",
-    "com.randdusing.bluetoothle": "2.1.0",
     "cordova-plugin-ble-central": "1.0.1"
 }
 // BOTTOM OF METADATA
 });
+
