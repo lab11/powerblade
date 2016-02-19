@@ -60,7 +60,7 @@ document.addEventListener("deviceready", function () {
       var serviceData = advertising.kCBAdvDataServiceData;
       if (serviceData) {
         for (var serviceDataUuid in serviceData) {
-          advertisement.serviceData.push({
+          peripheral.advertisement.serviceData.push({
             uuid: serviceDataUuid,
             data: new Uint8Array(serviceData[serviceDataUuid]),
           });
@@ -70,7 +70,7 @@ document.addEventListener("deviceready", function () {
       //XXX: loook at this
       if (advertising.kCBAdvDataServiceUUIDs) {
         for(i = 0; i < advertising.kCBAdvDataServiceUUIDs.length; i++) {
-          advertisement.serviceUuids.push(advertising.kCBAdvDataServiceUUIDs[i]);
+          peripheral.advertisement.serviceUuids.push(advertising.kCBAdvDataServiceUUIDs[i]);
         }
       }
 

@@ -42,10 +42,10 @@ function parse_powerblade(adv) {
         var pf_disp = 0;
 
         // parse values from advertisement
-        var data = new DataView(adv.manufacturerData.slice(3).buffer);
+        var data = new DataView(new Uint8Array(adv.manufacturerData.subarray(3)).buffer);
         if (company_id == OLD_COMPANY_ID) {
             // support old packet format
-            data = new DataView(adv.manufacturerData.slice(2).buffer);
+            data = new DataView(new Uint8Array(adv.manufacturerData.subrarray(2)).buffer);
             app.log("WARNING: Old PowerBlade packet format");
 		}
 
