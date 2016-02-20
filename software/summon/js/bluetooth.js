@@ -18,6 +18,8 @@ document.addEventListener("deviceready", function () {
   };
 
   // create a common advertisement interface between iOS and android
+  //  This format follows the nodejs BLE library, noble
+  //  https://github.com/sandeepmistry/noble#peripheral-discovered
   translate_advertisement = function (peripheral, success) {
     var advertising = peripheral.advertising;
 
@@ -28,12 +30,11 @@ document.addEventListener("deviceready", function () {
       localName: undefined,
       txPowerLevel: undefined,
       manufacturerData: undefined,
+      channel: undefined,   // ios only
+      flags: undefined,     // android only
       serviceData: [],
       serviceUuids: [],
     };
-
-    // special fields that only exist on one OS or another are listed here
-    peripheral._os_dependent = {};
 
     // this is a hack and only has to be in place until this code gets pulled
     //  into the summon app. Since we use the same hack to decide which
@@ -41,9 +42,8 @@ document.addEventListener("deviceready", function () {
     if (navigator.platform.startsWith("iP")) {
 
       // we are on iOS (iPad, iPod, iPhone)
-      peripheral._os_dependent.os = 'ios';
-      peripheral._os_dependent.channel = advertising.kCBAdvDataChannel;
-      peripheral._os_dependent.isConnectable = advertising.kCBAdvDataIsConnectable;
+      peripheral.advertisement.channel = advertising.kCBAdvDataChannel;
+      peripheral.isConnectable = advertising.kCBAdvDataIsConnectable;
 
       // directly copy fields as long as they exist
       if (advertising.kCBAdvDataLocalName) {
@@ -54,6 +54,9 @@ document.addEventListener("deviceready", function () {
       }
       if (advertising.kCBAdvDataManufacturerData) {
         peripheral.advertisement.manufacturerData = new Uint8Array(advertising.kCBAdvDataManufacturerData);
+      }
+      if (advertising.kCBAdvDataServiceUUIDs) {
+        peripheral.advertisement.serviceUuids = advertising.kCBAdvDataServiceUUIDs;
       }
 
       // format for service data is different
@@ -67,82 +70,108 @@ document.addEventListener("deviceready", function () {
         }
       }
 
-      //XXX: loook at this
-      if (advertising.kCBAdvDataServiceUUIDs) {
-        for(i = 0; i < advertising.kCBAdvDataServiceUUIDs.length; i++) {
-          peripheral.advertisement.serviceUuids.push(advertising.kCBAdvDataServiceUUIDs[i]);
-        }
-      }
-
-    } else { // Android
-      //XXX: change a lot of these to slices to cut up the actual ArrayBuffer
-      peripheral._os_dependent.os = 'android';
+    } else {
+      // we are on android
+      //XXX: can we determine `connectable` on android?
       var scanRecord = new Uint8Array(advertising);
       var index = 0;
       while (index < scanRecord.length) {
+        // first is length of the field, length of zero indicates advertisement
+        //  is complete
         var length = scanRecord[index++];
-        if (length == 0) break; // Done once we run out of records
+        if (length == 0) {
+          break;
+        }
+
+        // next is type of field and then field data (if any)
         var type = scanRecord[index];
-        if (type == 0) break; // Done if our record isn't a valid type
-        var data = scanRecord.subarray(index+1, index+length); 
+        var data = scanRecord.subarray(index+1, index+length);
+
+        // determine data based on field type
         switch (type) {
           case 0x01: // Flags
-            peripheral._os_dependent.flags = data[0] & 0xFF;
+            peripheral.advertisement.flags = data[0] & 0xFF;
             break;
+
           case 0x02: // Incomplete List of 16-Bit Service UUIDs
           case 0x03: // Complete List of 16-Bit Service UUIDs
             for (var n=0; n<data.length; n+=2) {
               peripheral.advertisement.serviceUuids.push(uuid(data.subarray(n,n+2)));
             }
             break;
+
           case 0x04: // Incomplete List of 32-Bit Service UUIDs
           case 0x05: // Complete List of 32-Bit Service UUIDs
             for (var n=0; n<data.length; n+=4) {
               peripheral.advertisement.serviceUuids.push(uuid(data.subarray(n,n+4)));
             }
             break;
+
           case 0x06: // Incomplete List of 128-Bit Service UUIDs
           case 0x07: // Complete List of 128-Bit Service UUIDs
             for (var n=0; n<data.length; n+=16) {
               peripheral.advertisement.serviceUuids.push(uuid(data.subarray(n,n+16)));
             }
             break;
+
           case 0x08: // Short Local Name
           case 0x09: // Complete Local Name
             peripheral.advertisement.localName = String.fromCharCode.apply(null,data);
             break;
+
           case 0x0A: // TX Power Level
             peripheral.advertisement.txPowerLevel = data[0] & 0xFF;
             break;
+
           case 0x16: // Service Data
             peripheral.advertisement.serviceData.push({
               uuid: uuid(data.subarray(0,2)),
-              data: data.subarray(2),
+              data: new Uint8Array(data.subarray(2)),
             });
             break;
+
           case 0xFF: // Manufacturer Specific Data
-            peripheral.advertisement.manufacturerData = data;
+            peripheral.advertisement.manufacturerData = new Uint8Array(data);
             break;
         }
-        index += length; //Advance
+
+        // move to next advertisement field
+        index += length;
       }
     }
+
+    // finished parsing, call originally intended callback
     success(peripheral);
   };
 
-  //XXX: This needs to be tested on 32-bit and 128-bit UUIDs
-  uuid = function(id) {
-    if (id.length <= 4) {
-      return hex(id.slice().reverse());
+  //XXX: This needs to be tested!!
+  // convert an array of bytes representing a UUID into a hex string
+  //    Note that all arrays need to be reversed before presenting to the user
+  uuid = function (id) {
+    if (id.length == 2) {
+      return hex(id[1]) + hex(id[0]);
+
+    } else if (id.length <= 4) {
+      return hex(id[3]) + hex(id[2]) + hex(id[1]) + hex(id[0]);
+
     } else if (id.length == 16) {
-      return hex(id.subarray(0,4))+"-"+hex(id.subarray(4,6))+"-"+hex(id.subarray(6,8))+"-"+hex(id.subarray(8,10))+"-"+hex(id.subarray(10,16));
+      return hex(id[15]) + hex(id[14]) + hex(id[13]) + hex(id[12]) + '-' +
+             hex(id[11]) + hex(id[10]) + '-' +
+             hex(id[9])  + hex(id[8])  + '-' +
+             hex(id[7])  + hex(id[6])  + '-' +
+             hex(id[5])  + hex(id[4])  + hex(id[3])  + hex(id[2])  + hex(id[1])  + hex(id[0]);
+
     } else {
+      // invalid number of bytes
       return "";
     }
   };
 
-  hex = function(ab) {
-    return Array.prototype.map.call(ab,function(m){return ("0"+m.toString(16)).substr(-2);}).join('').toUpperCase();
+  // convert an array of bytes into hex data
+  hex = function (ab) {
+    return Array.prototype.map.call(ab, function (m) {
+      return ("0"+m.toString(16)).substr(-2);
+    }).join('').toUpperCase();
   };
 
 });
