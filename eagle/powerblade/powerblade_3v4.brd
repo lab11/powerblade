@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.3">
+<eagle version="6.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -145,8 +145,8 @@
 <plain>
 <wire x1="5.207" y1="8.001" x2="5.207" y2="3.0226" width="0" layer="48"/>
 <wire x1="5.207" y1="3.0226" x2="12.7" y2="3.0226" width="0" layer="48"/>
-<text x="10.4775" y="-4.445" size="0.635" layer="21" rot="R90">PowerBlade 3v3</text>
-<text x="11.27125" y="-4.445" size="0.635" layer="21" rot="R90">S.DeBruin 9.22.15</text>
+<text x="10.4775" y="-4.445" size="0.635" layer="21" rot="R90">PowerBlade 3v4</text>
+<text x="11.27125" y="-4.445" size="0.635" layer="21" rot="R90">S.DeBruin 2.23.16</text>
 <text x="6.35" y="5.08" size="1.524" layer="22" rot="MR0">PowerBlade</text>
 <text x="3.4925" y="4.1275" size="0.762" layer="22" rot="MR0">S.DeBruin</text>
 </plain>
@@ -3971,29 +3971,29 @@ This Sunstone Circuits 4 Layer .DRU has been set to cover our minimum requiremen
 </signal>
 </signals>
 <errors>
+<approved hash="4,1,95de968ad1cdd399"/>
+<approved hash="4,1,72de4f8a373a0b6e"/>
+<approved hash="4,16,95de968ad1cdd399"/>
+<approved hash="4,16,72de4f8a373a0b6e"/>
 <approved hash="3,1,df91dd95dd95df91"/>
 <approved hash="3,1,df97dd97dd97df97"/>
 <approved hash="3,16,df97dd97dd97df97"/>
 <approved hash="3,16,df91dd95dd95df91"/>
 <approved hash="4,1,66649c55b8cf7ffe"/>
 <approved hash="4,1,c338a196c313bebd"/>
-<approved hash="4,1,95de968ad1cdd399"/>
 <approved hash="19,1,f94ac488c9fdf43f"/>
 <approved hash="19,1,38c7850583fe3e3c"/>
 <approved hash="19,1,bc9959db5f26ba64"/>
 <approved hash="19,1,7d14185615257067"/>
 <approved hash="4,1,40e240b0474c401e"/>
 <approved hash="4,1,40e240b0474c401e"/>
-<approved hash="4,1,72de4f8a373a0b6e"/>
-<approved hash="19,16,97c72eafe6c869a4"/>
 <approved hash="19,16,08eaab4ae43c73b0"/>
-<approved hash="4,16,95de968ad1cdd399"/>
+<approved hash="19,16,97c72eafe6c869a4"/>
 <approved hash="4,16,ddd7f6d6fdb2b238"/>
 <approved hash="4,16,b468f8daf700ee3d"/>
 <approved hash="4,16,a4206d818901ea25"/>
 <approved hash="4,16,d94c8f50686aa5f7"/>
 <approved hash="4,16,40e240b0474c401e"/>
-<approved hash="4,16,72de4f8a373a0b6e"/>
 </errors>
 </board>
 </drawing>
