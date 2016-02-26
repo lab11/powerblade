@@ -14,6 +14,7 @@ the WDT (watchdog timer) is enabled.
 
 | Version	| PB_ID 	| Notes		|
 |:----------|:----------|:----------|
-| 0  		| 1 		| This is the default, the first MSP430 code that responds to the version request will respond '1' |
+| 0  		| Multiple	| This is the default, the first MSP430 code that responds to the version request will respond '1' |
+| 1			| 2			| 10 bit ADC, watchdog timer enabled |
 
 
