@@ -99,8 +99,9 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 
  * **Get Configuration**: Get the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
  * **Set Configuration**: Set the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
+ * **Get software version**: Get the version of the software running on the MSP430. Response payload will be a single byte
  * **Set Sequence**: Set the sequence number to be included (and incremented) in future packets
-  * **Start Sample Data Download**: Get individual samples from one second of power sampling
+ * **Start Sample Data Download**: Get individual samples from one second of power sampling
  * **Continue Sample Data Download**: Get next set of raw samples from MSP430
  * **Stop Sample Data Download**: Stop collecting and transmitting raw samples
  * **NAK**: nRF indicating checksum of previous message failed
