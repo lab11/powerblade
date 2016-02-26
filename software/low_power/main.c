@@ -64,6 +64,7 @@ uint32_t voltAmpsToAverage;
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 2;
+char msp_software_version = 0;
 
 // Transmitted values
 uint32_t sequence;
@@ -72,7 +73,6 @@ uint8_t Vrms;
 uint16_t truePower;
 uint16_t apparentPower;
 uint64_t wattHours;
-uint32_t wattHoursSend;
 
 #pragma PERSISTENT(flags)
 uint8_t flags = 0x05;
@@ -179,7 +179,7 @@ int main(void) {
 	currentReadCount = 0;
 	voltageWriteCount = 0;
 	voltageReadCount = 0;
-	wattHours = 0;
+	//wattHours = 0;
 	sampleCount = 0;
 	measCount = 0;
 
@@ -282,7 +282,7 @@ void transmit(void) {
 	uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 	uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 
-	wattHoursSend = (uint32_t)(wattHours >> pb_config.whscale);
+	uint32_t wattHoursSend = (uint32_t)(wattHours >> pb_config.whscale);
 	uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
 
 	uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
@@ -353,14 +353,10 @@ void transmitTry(void) {
 			else if(processMessage() > 0) {
 				switch(captureType) {
 				case GET_CONF:
-				{
 					uart_len += 1 + sizeof(pb_config);	// Add length of data type AND length of pb_config
-					char data_type = GET_CONF;
-					uart_stuff(OFFSET_DATATYPE+(txIndex*UARTBLOCK), &data_type, sizeof(data_type));
-					//uart_stuff(1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), (char*)&pb_config, sizeof(pb_config));
+					uart_stuff(OFFSET_DATATYPE+(txIndex*UARTBLOCK), &captureType, sizeof(captureType));
 					memcpy(txBuf + 1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), &pb_config, sizeof(pb_config));
 					break;
-				}
 				case SET_CONF:
 					// XXX do we want to do any bounds-checking on this?
 					memcpy(&pb_config, captureBuf, sizeof(pb_config));
@@ -369,8 +365,16 @@ void transmitTry(void) {
 					scale = (scale<<8)+pb_config.whscale;
 					flags |= 0x80;
 					break;
+				case GET_VER:
+					uart_len += 2;						// Add length of data type and version
+					uart_stuff(OFFSET_DATATYPE+(txIndex*UARTBLOCK), &captureType, sizeof(captureType));
+					uart_stuff(1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), &msp_software_version, sizeof(msp_software_version));
+					break;
 				case SET_SEQ:
 					sequence = captureBuf[0];
+					break;
+				case CLR_WH:
+					wattHours = 0;
 					break;
 				default:
 					switch(pb_state) {

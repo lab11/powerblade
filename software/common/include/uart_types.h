@@ -10,7 +10,9 @@
  **************************************************************************/
 #define GET_CONF        0x10
 #define SET_CONF        0x11
+#define GET_VER         0x12
 #define SET_SEQ         0x1C
+#define CLR_WH          0x1D
 #define START_SAMDATA   0x20
 #define CONT_SAMDATA    0x21
 #define DONE_SAMDATA    0x22
