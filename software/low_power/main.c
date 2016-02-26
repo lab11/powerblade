@@ -143,7 +143,8 @@ void transmit(void);
  * main.c
  */
 int main(void) {
-	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
+	// Reset WDT, start WDT at 16s interval on ACLK
+	WDTCTL = WDTPW + WDTSSEL_1 + WDTCNTCL + WDTIS_3;
 
 	// Port J Configuration
 	PJSEL0 |= BIT4 + BIT5;						// XIN, XOUT on PJ4, PJ5 with external crystal
@@ -285,6 +286,9 @@ void transmit(void) {
 	uart_stuff(blockOffset + OFFSET_WH, (char*) &wattHoursSend, sizeof(wattHoursSend));
 
 	uart_stuff(blockOffset + OFFSET_FLAGS, (char*) &flags, sizeof(flags));
+
+	// About to transmit, reset the watchdog timer
+	WDTCTL = WDTPW + WDTSSEL_1 + WDTCNTCL + WDTIS_3;
 
 	uart_send(blockOffset, uart_len);
 
