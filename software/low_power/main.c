@@ -64,7 +64,7 @@ uint32_t voltAmpsToAverage;
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 2;
-char msp_software_version = 0;
+char msp_software_version = 1;
 
 // Transmitted values
 uint32_t sequence;
