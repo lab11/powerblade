@@ -89,7 +89,9 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 |:------|:-----|
 | 0x10  | Get Configuration |
 | 0x11  | Set Configuration |
+| 0x12	| Get software version |
 | 0x1C	| Set Sequence |
+| 0x1D	| Set WH to zero (reset accumulator) |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
 | 0x22  | Stop Sample Data Download |
