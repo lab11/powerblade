@@ -9,6 +9,7 @@ char captureBuf[RXLEN - 4];
 
 char rxBuf[RXLEN];
 int rxCt;
+int savedCount;
 
 void uart_init(void);
 void uart_enable(bool enable);

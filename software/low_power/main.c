@@ -345,6 +345,7 @@ void transmitTry(void) {
 
 			// Process any UART bytes
 			if(pb_state == pb_capture) {
+				rxCt = 0;	// Clear any message received in this time
 				uart_len = UARTBLOCK;
 				pb_state = pb_data;
 				char data_type = CONT_SAMDATA;
@@ -428,6 +429,12 @@ void transmitTry(void) {
 					break;
 				}
 			}
+			else {
+				if(savedCount > 0) {	// Had partial message for multiple bookends
+					rxCt = 0;
+				}
+			}
+			savedCount = rxCt;
 
 			// Increment sequence number for transmission
 			sequence++;

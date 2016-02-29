@@ -29,6 +29,7 @@ void uart_init(void) {
 
 	// Initialize UART receive count
 	rxCt = 0;
+	savedCount = 0;
 }
 
 void uart_enable(bool enable) {
