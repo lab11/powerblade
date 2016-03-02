@@ -18,11 +18,13 @@ try {
 }
 
 // add a watchdog to notify when no MQTT packets have been received in a while
-var watchdog = new watchout(5*60*1000, function(didCancelWatchdog) {
+var died = false;
+var watchdog = new watchout(1*60*1000, function(didCancelWatchdog) {
     if (didCancelWatchdog) {
         // benign
     } else {
         console.log(now_str() + "MQTT watchdog tripped");
+        died = true;
     }
 });
 
@@ -37,6 +39,10 @@ client.on('connect', function () {
 client.on('message', function (topic, message) {
     // got a packet, reset watchdog
     watchdog.reset();
+    if (died) {
+        console.log(now_str() + "Getting packets again");
+        died = false;
+    }
 
     // parse into a JSON object
     var adv_obj = JSON.parse(message.toString());
@@ -60,15 +66,13 @@ function post_to_gatd (adv) {
 
     request(req, function (error, response, body) {
         if (error || response.statusCode != 200) {
-            console.log(now_str() + "Error posting to GATD");
-            console.log(error);
-            console.log(response);
-            console.log();
+            //console.log(now_str() + "Error posting to GATD");
+            //console.log('\t' + response.statusCode + ': ' + response.statusMessage);
         }
     });
 }
 
 function now_str () {
-    return moment().format('MMMM Do YYYY, h:mm:ss a ');
+    return moment().format('MMMM Do YYYY, h:mm:ss A z\t');
 }
 
