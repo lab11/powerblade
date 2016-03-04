@@ -1,0 +1,17 @@
+{
+  "name": "powerblade-to-gatd",
+  "version": "1.0.0",
+  "description": "Post PowerBlade BLE packets to GATD",
+  "main": "powerblade-to-gatd.js",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "mqtt-discover": "^0.1.1",
+    "request": "^2.69.0",
+    "watchout": "0.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Branden Ghena"
+}
