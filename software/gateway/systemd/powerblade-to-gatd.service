@@ -1,0 +1,13 @@
+[Unit]
+Description=Push PowerBlade data to GATD.
+After=bluetooth.target mosquitto.service
+
+[Service]
+ExecStart=/home/debian/powerblade/software/gateway/powerblade-to-gatd/powerblade-to-gatd.js
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=powerblade-to-gatd
+
+[Install]
+WantedBy=multi-user.target
