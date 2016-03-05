@@ -13,12 +13,12 @@ Software running on the gateway can be found in the
     sudo systemctl disable node-red
 
 # Push data to GATD
-    sudo cp shed/projects/powerblade/powerblade_deployment/gatd.conf /etc/swarm-gateway/gatd.conf
+    sudo scp <user@comptuer>:~/shed/projects/powerblade/powerblade_deployment/gatd.conf /etc/swarm-gateway/gatd.conf
     sudo systemctl enable gateway-mqtt-gatd
     sudo systemctl start gateway-mqtt-gatd
 
 # Push data to EmonCMS
-    sudo cp shed/projects/powerblade/powerblade_deployment/emoncms.conf /etc/swarm-gateway/emoncms.conf
+    sudo scp <user@computer>:~/shed/projects/powerblade/powerblade_deployment/emoncms.conf /etc/swarm-gateway/emoncms.conf
     sudo systemctl enable gateway-mqtt-emoncms
     sudo systemctl start gateway-mqtt-emoncms
 
@@ -27,7 +27,7 @@ First Install a FAT32-formatted micro SD Card in the gateway. Then find the
 sdcard with `fdisk -l` it's probably `/dev/mmcblk1p1`
     sudo mkdir /media/sdcard
     sudo mount -v /dev/mmcblk1p1 /media/sdcard
-    sudo cp shed/projects/powerblade/powerblade_deployment/log.conf /etc/swarm-gateway/log.conf
+    sudo scp <user@computer>:~/shed/projects/powerblade/powerblade_deployment/log.conf /etc/swarm-gateway/log.conf
     sudo systemctl enable gateway-mqtt-log
     sudo systemctl start gateway-mqtt-log
 
