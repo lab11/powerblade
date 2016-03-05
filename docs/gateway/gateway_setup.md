@@ -6,6 +6,12 @@ Base gateway platform is the Swarm Gateway. Documentation can be found in the
 Software running on the gateway can be found in the
 [lab11/gateway](https://github.com/lab11/gateway) repo.
 
+# Disable unnecessary services
+    sudo systemctl stop ble-nearby
+    sudo systemctl disable ble-nearby
+    sudo systemctl stop node-red
+    sudo systemctl disable node-red
+
 # Push data to GATD
     sudo cp shed/projects/powerblade/powerblade_deployment/gatd.conf /etc/swarm-gateway/gatd.conf
     sudo systemctl enable gateway-mqtt-gatd
