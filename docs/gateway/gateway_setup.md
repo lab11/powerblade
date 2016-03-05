@@ -8,8 +8,8 @@ Software running on the gateway can be found in the
 
 # Push data to GATD
     sudo cp shed/projects/powerblade/powerblade_deployment/gatd.conf /etc/swarm-gateway/gatd.conf
-    sudo systemctl enable data-to-gatd
-    sudo systemctl start data-to-gatd
+    sudo systemctl enable gateway-mqtt-gatd
+    sudo systemctl start gateway-mqtt-gatd
 
 # Push data to EmonCMS
     sudo cp shed/projects/powerblade/powerblade_deployment/emoncms.conf /etc/swarm-gateway/emoncms.conf
