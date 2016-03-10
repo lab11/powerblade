@@ -31,7 +31,7 @@ var parse_advertisement = function (advertisement, cb) {
             if (version_num >= 1) {
 
                 // check for duplicate advertisements
-                var address = advertisement.id;
+                var address = advertisement.advertiser_id;
                 var sequence_num = data.readUIntBE(1,4);
                 if (!(address in powerblade_sequences)) {
                     powerblade_sequences[address] = -1;
