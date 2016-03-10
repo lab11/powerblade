@@ -10,7 +10,9 @@ var OLD_COMPANY_ID = 0x4908;
 var parse_advertisement = function (advertisement, cb) {
 
     // add an interval timer for cleanup of old powerblades
-    cleanup_timer = setInterval(cleanup_powerblades, CLEANUP_INTERVAL);
+    if (cleanup_timer == null) {
+        cleanup_timer = setInterval(cleanup_powerblades, CLEANUP_INTERVAL);
+    }
 
     // check for a valid advertisement packet
     if (advertisement.manufacturerData) {
@@ -101,7 +103,7 @@ var cleanup_powerblades = function () {
 
     // search for devices that are old and remove them
     for (powerblade in powerblade_last_seens) {
-        if ((curr_time - powerblade_last_seens) > 10*1000) {
+        if ((curr_time - powerblade_last_seens) > 10) {
             delete powerblade_sequences[powerblade];
             delete powerblade_last_seens[powerblade];
         }
