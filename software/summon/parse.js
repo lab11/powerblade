@@ -3,16 +3,16 @@
 var powerblade_sequences = {};
 var powerblade_last_seens = {};
 var cleanup_timer = null;
-var CLEANUP_INTERVAL = 12*60*60*1000;
+var CLEANUP_INTERVAL = 1*60*1000;
 
 var OLD_COMPANY_ID = 0x4908;
 
 var parse_advertisement = function (advertisement, cb) {
 
     // add an interval timer for cleanup of old powerblades
-    //if (cleanup_timer == null) {
-    //    cleanup_timer = setInterval(cleanup_powerblades, CLEANUP_INTERVAL);
-    //}
+    if (cleanup_timer == null) {
+        cleanup_timer = setInterval(cleanup_powerblades, CLEANUP_INTERVAL);
+    }
 
     // check for a valid advertisement packet
     if (advertisement.manufacturerData) {
@@ -30,9 +30,28 @@ var parse_advertisement = function (advertisement, cb) {
             var version_num = data.readUIntBE(0,1);
             if (version_num >= 1) {
 
-                // check for duplicate advertisements
-                var address = advertisement.advertiser_id;
+                // parse fields from advertisement
                 var sequence_num = data.readUIntBE(1,4);
+                var pscale = data.readUIntBE(5,2);
+                var vscale =  data.readUIntBE(7,1);
+                var whscale = data.readUIntBE(8,1);
+                var v_rms = data.readUIntBE(9,1);
+                var real_power = data.readUIntBE(10,2);
+                var apparent_power = data.readUIntBE(12,2);
+                var watt_hours = data.readUIntBE(14,4);
+                var flags = data.readUIntBE(18,1);
+
+                // get "unique" address for device
+                //  as a stop-gap for things with old ble-gateway installs,
+                //  sequence number concatenated with real power and watt
+                //  should be able to uniquely identify a packet
+                var address = '' + sequence_num + '_' + real_power + '_' + watt_hours;
+                if (advertisement.advertiser_id) {
+                    // user a better peripheral id if provided
+                    var address = advertisement.advertiser_id;
+                }
+
+                // check for duplicate advertisements
                 if (!(address in powerblade_sequences)) {
                     powerblade_sequences[address] = -1;
                     powerblade_last_seens[address] = -1;
@@ -48,17 +67,6 @@ var parse_advertisement = function (advertisement, cb) {
                 console.log(str + '\nparsing');
                 powerblade_sequences[address] = sequence_num;
                 powerblade_last_seens[address] = recv_time;
-                console.log(powerblade_sequences);
-
-                // parse fields from advertisement
-                var pscale = data.readUIntBE(5,2);
-                var vscale =  data.readUIntBE(7,1);
-                var whscale = data.readUIntBE(8,1);
-                var v_rms = data.readUIntBE(9,1);
-                var real_power = data.readUIntBE(10,2);
-                var apparent_power = data.readUIntBE(12,2);
-                var watt_hours = data.readUIntBE(14,4);
-                var flags = data.readUIntBE(18,1);
 
                 // calculate scaling values
                 var volt_scale;
@@ -107,12 +115,18 @@ var cleanup_powerblades = function () {
     var curr_time = (new Date).getTime()/1000;
 
     // search for devices that are old and remove them
+    var total = 0;
+    var deleted = 0;
     for (powerblade in powerblade_last_seens) {
-        if ((curr_time - powerblade_last_seens) > 10) {
+        total++;
+        if ((curr_time - powerblade_last_seens[powerblade]) > 10) {
+            deleted++;
             delete powerblade_sequences[powerblade];
             delete powerblade_last_seens[powerblade];
         }
     }
+
+    console.log("CLEANING!!! Deleted: " + deleted + ' / ' + total);
 }
 
 module.exports = {
