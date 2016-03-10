@@ -37,11 +37,14 @@ var parse_advertisement = function (advertisement, cb) {
                     powerblade_sequences[address] = -1;
                     powerblade_last_seens[address] = -1;
                 }
+                var str = "Testing: " + powerblade_sequences[address] + '?=' + sequence_num;
                 if (powerblade_sequences[address] == sequence_num) {
                     // duplicate advertisement. Don't display
+                    console.log(str + '\nskipping');
                     cb(null);
                     return;
                 }
+                console.log(str + '\nparsing');
                 powerblade_sequences[address] = sequence_num;
                 powerblade_last_seens[address] = recv_time;
 
