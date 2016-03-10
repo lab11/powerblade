@@ -1,10 +1,16 @@
 
 // {BLE Address: Most recent sequence number} for each PowerBlade
 var powerblade_sequences = {};
+var powerblade_last_seens = {};
+var cleanup_timer = null;
+var CLEANUP_INTERVAL = 12*60*60*1000;
 
 var OLD_COMPANY_ID = 0x4908;
 
 var parse_advertisement = function (advertisement, cb) {
+
+    // add an interval timer for cleanup of old powerblades
+    cleanup_timer = setInterval(cleanup_powerblades, CLEANUP_INTERVAL);
 
     // check for a valid advertisement packet
     if (advertisement.manufacturerData) {
@@ -24,14 +30,17 @@ var parse_advertisement = function (advertisement, cb) {
 
                 // check for duplicate advertisements
                 var sequence_num = data.readUIntBE(1,4);
-                // if (!(address in powerblade_sequences)) {
-                //     powerblade_sequences[address] = -1;
-                // }
-                // if (powerblade_sequences[address] == sequence_num) {
-                //     // duplicate advertisement. Don't display
-                //     cb(null);
-                // }
-                // powerblade_sequences[address] = sequence_num;
+                if (!(address in powerblade_sequences)) {
+                    powerblade_sequences[address] = -1;
+                    powerblade_last_seens[address] = -1;
+                }
+                if (powerblade_sequences[address] == sequence_num) {
+                    // duplicate advertisement. Don't display
+                    cb(null);
+                    return;
+                }
+                powerblade_sequences[address] = sequence_num;
+                powerblade_last_seens[address] = recv_time;
 
                 // parse fields from advertisement
                 var pscale = data.readUIntBE(5,2);
@@ -86,6 +95,17 @@ var parse_advertisement = function (advertisement, cb) {
     cb(null);
 }
 
+var cleanup_powerblades = function () {
+    var curr_time = (new Date).getTime()/1000;
+
+    // search for devices that are old and remove them
+    for (powerblade in powerblade_last_seens) {
+        if ((curr_time - powerblade_last_seens) > 10*1000) {
+            delete powerblade_sequences[powerblade];
+            delete powerblade_last_seens[powerblade];
+        }
+    }
+}
 
 module.exports = {
     parseAdvertisement: parse_advertisement
