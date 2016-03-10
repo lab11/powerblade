@@ -10,9 +10,9 @@ var OLD_COMPANY_ID = 0x4908;
 var parse_advertisement = function (advertisement, cb) {
 
     // add an interval timer for cleanup of old powerblades
-    if (cleanup_timer == null) {
-        cleanup_timer = setInterval(cleanup_powerblades, CLEANUP_INTERVAL);
-    }
+    //if (cleanup_timer == null) {
+    //    cleanup_timer = setInterval(cleanup_powerblades, CLEANUP_INTERVAL);
+    //}
 
     // check for a valid advertisement packet
     if (advertisement.manufacturerData) {
@@ -37,7 +37,8 @@ var parse_advertisement = function (advertisement, cb) {
                     powerblade_sequences[address] = -1;
                     powerblade_last_seens[address] = -1;
                 }
-                var str = "Testing: " + powerblade_sequences[address] + '?=' + sequence_num;
+                var str = "Testing: " + address;
+                str += '\n' + powerblade_sequences[address] + ' ?= ' + sequence_num;
                 if (powerblade_sequences[address] == sequence_num) {
                     // duplicate advertisement. Don't display
                     console.log(str + '\nskipping');
@@ -47,6 +48,7 @@ var parse_advertisement = function (advertisement, cb) {
                 console.log(str + '\nparsing');
                 powerblade_sequences[address] = sequence_num;
                 powerblade_last_seens[address] = recv_time;
+                console.log(powerblade_sequences);
 
                 // parse fields from advertisement
                 var pscale = data.readUIntBE(5,2);
