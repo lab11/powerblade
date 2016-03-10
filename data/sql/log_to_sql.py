@@ -17,8 +17,7 @@ for root, dir, files in os.walk("."):
 	for file in files:
 		if file.startswith("gateway.log"):
 			print()
-			print(root)
-			print(file)
+			print(root + '/' + file)
 			for line in open(root + '/' + file,'r'):
 				json_data = json.loads(line)
 				#print(json_data['device'])
@@ -60,7 +59,7 @@ for root, dir, files in os.walk("."):
 					blees += 1
 
 				writecount += 1
-				if (writecount % 73) == 0:
+				if (writecount % 173) == 0:
 					sys.stdout.write("Found: %i powerblade packets, %i blees packets \r" % (powerblades, blees) )
 					sys.stdout.flush()
 
