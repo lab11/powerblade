@@ -56,15 +56,11 @@ var parse_advertisement = function (advertisement, cb) {
                     powerblade_sequences[address] = -1;
                     powerblade_last_seens[address] = -1;
                 }
-                var str = "Testing: " + address;
-                str += '\n' + powerblade_sequences[address] + ' ?= ' + sequence_num;
                 if (powerblade_sequences[address] == sequence_num) {
                     // duplicate advertisement. Don't display
-                    console.log(str + '\nskipping');
                     cb(null);
                     return;
                 }
-                console.log(str + '\nparsing');
                 powerblade_sequences[address] = sequence_num;
                 powerblade_last_seens[address] = recv_time;
 
@@ -115,18 +111,12 @@ var cleanup_powerblades = function () {
     var curr_time = (new Date).getTime()/1000;
 
     // search for devices that are old and remove them
-    var total = 0;
-    var deleted = 0;
     for (powerblade in powerblade_last_seens) {
-        total++;
         if ((curr_time - powerblade_last_seens[powerblade]) > 10) {
-            deleted++;
             delete powerblade_sequences[powerblade];
             delete powerblade_last_seens[powerblade];
         }
     }
-
-    console.log("CLEANING!!! Deleted: " + deleted + ' / ' + total);
 }
 
 module.exports = {
