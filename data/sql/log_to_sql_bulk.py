@@ -12,6 +12,8 @@ powerblades = 0
 blees = 0
 writecount = 0
 
+tempfile = open('.sqldata.temp','w')
+
 #for file in os.listdir("."):
 for root, dir, files in os.walk("."):
 	for file in files:
@@ -24,20 +26,30 @@ for root, dir, files in os.walk("."):
 					#print(json_data['device'])
 					if json_data['device'] == "PowerBlade":
 						#print(json_data)
-						sql = "INSERT INTO powerblade_raw_temp VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+						# sql = "INSERT INTO powerblade_raw_temp VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 						[date,time] = json_data['_meta']['received_time'].split('T')
 						time = time[0:-1]
 						datetime = date + ' ' + time
-						with connection.cursor() as cursor:
-							cursor.execute(sql, (json_data['_meta']['gateway_id'].replace(":",""),
-								json_data['id'],
-								json_data['sequence_number'],
-								json_data['rms_voltage'],
-								json_data['power'],
-								json_data['energy'],
-								json_data['power_factor'],
-								datetime))
-							connection.commit()
+						# with connection.cursor() as cursor:
+						# 	cursor.execute(sql, (json_data['_meta']['gateway_id'].replace(":",""),
+						# 		json_data['id'],
+						# 		json_data['sequence_number'],
+						# 		json_data['rms_voltage'],
+						# 		json_data['power'],
+						# 		json_data['energy'],
+						# 		json_data['power_factor'],
+						# 		datetime))
+						# 	connection.commit()
+
+						tempfile.write(str(json_data['_meta']['gateway_id'].replace(":","")) + ',' +
+							str(json_data['id']) + ',' +
+							str(json_data['sequence_number']) + ',' +
+							str(json_data['rms_voltage']) + ',' +
+							str(json_data['power']) + ',' +
+							str(json_data['energy']) + ',' +
+							str(json_data['power_factor']) + ',' +
+							str(datetime) + '\n')
+
 						powerblades += 1
 
 					elif json_data['device'] == "BLEES":
