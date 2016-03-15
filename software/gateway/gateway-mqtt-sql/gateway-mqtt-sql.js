@@ -8,6 +8,7 @@ var watchout = require('watchout');
 var request = require('request');
 var fs = require('fs');
 var ini = require('ini');
+var mysql = require('mysql');
 
 // discover the local MQTT broker
 var MQTTDiscover = require('mqtt-discover');
@@ -18,14 +19,21 @@ var MQTT_DATA_TOPIC = 'gateway-data';
 try {
     var config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-sql.conf', 'utf-8');
     var config = ini.parse(config_file);
-    if (config.post_url == undefined || config.post_url == '') {
-        throw new Exception("No GATD HTTP POST Receiver URL");
-    }
+    // if (config.post_url == undefined || config.post_url == '') {
+    //     throw new Exception("No GATD HTTP POST Receiver URL");
+    // }
 } catch (e) {
     console.log(e);
     console.log("\nCannot find /etc/swarm-gateway/powerblade-sql.conf or configuration invalid.");
     process.exit(1);
 }
+
+var connection = mysql.createConnection({
+  host     : config.sql_ip,
+  user     : config.sql_usr,
+  password : config.sql_pw,
+  database : config.sql_db
+});
 
 // settings
 var POST_BUFFER_LEN = 4; // group N packets into a single post
@@ -44,7 +52,8 @@ var mqtt_watchdog = new watchout(1*60*1000, function(didCancelWatchdog) {
 });
 
 // connect to MQTT broker
-var post_count = 0;
+var powerblade_count = 0;
+var blees_count = 0;
 var UPLOAD_COUNT = 1000;
 var file_start_time = 0;
 var FILE_TIMEOUT = 30;
@@ -65,34 +74,31 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
 
         // log packets in SQL format
         var curr_time = Date.now()/1000;
-        log_to_sql(adv);
-        if(post_count == 0) {      // Mark the start time of the first packet in this file
+        if(powerblade_count == 0 && blees_count == 0) {      // Mark the start time of the first packet in this file
             file_start_time = curr_time;
         }
-        post_count += 1;
+        log_to_sql(adv);
 		
 		// if enough packets have been logged, push to SQL
-        if(post_count >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
-		  post_to_sql();
+        if((powerblade_count + blees_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+            post_to_sql();
         }
     });
 });
 
 // Log csv-formatted advertisements to a temp file
-var powerblade_count = 0;
 function log_to_sql (adv) {
 
     var timestamp = adv['_meta']['received_time'].split('T');
-    timestamp[1] = timestamp[1][0:-1];
-    datetime = timestamp[0] + ' ' + timestamp[1]
-
-    console.log(adv['received_time'])
-    console.log(datetime)
+    timestamp[1] = timestamp[1].slice(0,-1);
+    datetime = timestamp[0] + ' ' + timestamp[1];
 
     if(adv['device'] == "PowerBlade") {
-        fs.appendFile(config.pbcsv, 
+        powerblade_count += 1;
+        fs.appendFile(config.pb_csv, 
             adv['_meta']['gateway_id'] + ',' +
             adv['id'] + ',' +
+            adv['rms_voltage'] + ',' + 
             adv['sequence_number'] + ',' +
             adv['power'] + ',' +
             adv['energy'] + ',' +
@@ -104,14 +110,55 @@ function log_to_sql (adv) {
         });
     }
     else if(adv['device'] == "BLEES"){
-        fs.appendFile(config.pbcsv, adv, encoding='utf8', function (err) {
+        blees_count += 1;
+        fs.appendFile(config.bl_csv, 
+            adv['_meta']['gateway_id'] + ',' +
+            adv['id'] + ',' +
+            adv['temperature_celcius'] + ',' +
+            adv['light_lux'] + ',' +
+            adv['pressure_pascals'] + ',' +
+            adv['humidity_percent'] + ',' +
+            adv['acceleration_advertisement'] + ',' +
+            adv['acceleration_interval'] + ',' +
+            datetime + '\n', 
+            encoding='utf8', 
+            function (err) {
             if (err) throw err;
         });
     }
 }
 
 function post_to_sql () {
-    console.log("Post");
+
+    connection.connect();
+
+    if(powerblade_count > 0) {
+        // Batch upload to SQL
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\';';
+        console.log(loadQuery)
+        // connection.query(loadQuery, function(err, rows, fields) {
+        //     if (err) throw err;
+        // });
+
+        // Erase the PowerBlade temp file
+        fs.writeFile(config.pb_csv, '', function (err) {
+            if (err) throw err;
+        });
+        powerblade_count = 0;
+    }
+    if(blees_count > 0) {
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
+        console.log(loadQuery)
+        // connection.query(loadQuery, function(err, rows, fields) {
+        //     if (err) throw err;
+        // });
+
+        // Erase the BLEES temp file
+        fs.writeFile(config.bl_csv, '', function (err) {
+            if (err) throw err;
+        });
+        blees_count = 0;
+    }
 }
 
 // post JSON advertisements to GATD
