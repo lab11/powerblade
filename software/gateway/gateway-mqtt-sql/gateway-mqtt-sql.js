@@ -159,7 +159,7 @@ function post_to_sql () {
             pb_csv_current = config.pb_csv1;
         }
         else {
-            pb_csv_current = config.pb_csv1;   
+            pb_csv_current = config.pb_csv0;   
         }
 
         // Batch upload to SQL
@@ -187,7 +187,7 @@ function post_to_sql () {
             bl_csv_current = config.bl_csv1;
         }
         else {
-            bl_csv_current = config.bl_csv1;   
+            bl_csv_current = config.bl_csv0;   
         }
 
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
