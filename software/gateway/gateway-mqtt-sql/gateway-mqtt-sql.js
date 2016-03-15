@@ -93,6 +93,7 @@ function log_to_sql (adv) {
     timestamp[1] = timestamp[1].slice(0,-1);
     datetime = timestamp[0] + ' ' + timestamp[1];
 
+    console.log(adv['device'])
     if(adv['device'] == "PowerBlade") {
         powerblade_count += 1;
         fs.appendFile(config.pb_csv, 
@@ -135,10 +136,10 @@ function post_to_sql () {
     if(powerblade_count > 0) {
         // Batch upload to SQL
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\';';
-        console.log(loadQuery)
-        // connection.query(loadQuery, function(err, rows, fields) {
-        //     if (err) throw err;
-        // });
+        //console.log(loadQuery)
+        connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+        });
 
         // Erase the PowerBlade temp file
         fs.writeFile(config.pb_csv, '', function (err) {
@@ -148,17 +149,21 @@ function post_to_sql () {
     }
     if(blees_count > 0) {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
-        console.log(loadQuery)
-        // connection.query(loadQuery, function(err, rows, fields) {
-        //     if (err) throw err;
-        // });
+        //console.log(loadQuery)
+        connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done');
+        });
 
         // Erase the BLEES temp file
         fs.writeFile(config.bl_csv, '', function (err) {
             if (err) throw err;
+            console.log('Done');
         });
         blees_count = 0;
     }
+
+    connection.end();
 }
 
 // post JSON advertisements to GATD
