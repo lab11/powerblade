@@ -113,10 +113,10 @@ function log_to_sql (adv) {
 
     var gatewayID = adv['_meta']['gateway_id'].replace(new RegExp(':', 'g'), '');
 
-    console.log(adv['device'])
+    console.log(adv['device']);
     if(adv['device'] == "PowerBlade") {
         powerblade_count += 1;
-        fs.appendFile(config.pb_csv_current, 
+        fs.appendFile(String(config.pb_csv_current), 
             gatewayID + ',' +
             adv['id'] + ',' +
             adv['rms_voltage'] + ',' + 
@@ -132,7 +132,7 @@ function log_to_sql (adv) {
     }
     else if(adv['device'] == "BLEES"){
         blees_count += 1;
-        fs.appendFile(config.bl_csv_current, 
+        fs.appendFile(String(config.bl_csv_current), 
             gatewayID + ',' +
             adv['id'] + ',' +
             adv['temperature_celcius'] + ',' +
@@ -171,7 +171,7 @@ function post_to_sql () {
 
     if(powerblade_count > 0) {
         // Batch upload to SQL
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\';';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\';';
         console.log(loadQuery)
 
         connection.query(loadQuery, function(err, rows, fields) {
@@ -180,7 +180,7 @@ function post_to_sql () {
 
             // Erase the PowerBlade temp file
             console.log('Erasing PowerBlade');
-            fs.writeFile(config.pb_csv, '', function (err) {
+            fs.writeFile(String(pb_csv), '', function (err) {
                 if (err) throw err;
                 console.log('Done erasing PowerBlade');
             });
@@ -189,7 +189,7 @@ function post_to_sql () {
     }
 
     if(blees_count > 0) {
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
         console.log(loadQuery)
         
         connection.query(loadQuery, function(err, rows, fields) {
@@ -198,14 +198,14 @@ function post_to_sql () {
 
             // Erase the BLEES temp file
             console.log('Erasing BLEES');
-            fs.writeFile(config.bl_csv, '', function (err) {
+            fs.writeFile(String(bl_csv), '', function (err) {
                 if (err) throw err;
                 console.log('Done erasing BLEES');
             });
             blees_count = 0;
         });
     }
-    
+
     connection.end();
 }
 
