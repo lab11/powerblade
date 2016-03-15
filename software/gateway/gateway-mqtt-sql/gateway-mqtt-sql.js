@@ -23,7 +23,7 @@ try {
     }
 } catch (e) {
     console.log(e);
-    console.log("\nCannot find /etc/swarm-gateway/gatd.conf or configuration invalid.");
+    console.log("\nCannot find /etc/swarm-gateway/powerblade-sql.conf or configuration invalid.");
     process.exit(1);
 }
 
@@ -82,8 +82,16 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
 var powerblade_count = 0;
 function log_to_sql (adv) {
 
-
-    console.log(adv['device']);
+    if(adv['device'] == "PowerBlade") {
+        fs.appendFile(config.pbcsv, adv, encoding='utf8', function (err) {
+            if (err) throw err;
+        });
+    }
+    else if(adv['device'] == "BLEES"){
+        fs.appendFile(config.pbcsv, adv, encoding='utf8', function (err) {
+            if (err) throw err;
+        });
+    }
 }
 
 function post_to_sql () {
