@@ -113,7 +113,7 @@ function log_to_sql (adv) {
 
     var gatewayID = adv['_meta']['gateway_id'].replace(new RegExp(':', 'g'), '');
 
-    console.log(adv['device']);
+    //console.log(adv['device']);
     if(adv['device'] == "PowerBlade") {
         powerblade_count += 1;
         fs.appendFile(pb_csv_current, 
