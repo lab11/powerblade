@@ -28,6 +28,24 @@ try {
     process.exit(1);
 }
 
+// This is used for re-directing the flow during an upload
+var pb_csv_current = config.pb_csv0;
+var bl_csv_current = config.bl_csv0;
+
+// Erase the temporary files
+fs.writeFile(config.pb_csv0, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.pb_csv1, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.bl_csv0, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.bl_csv1, '', function (err) {
+    if (err) throw err;
+});
+
 var connection = mysql.createConnection({
   host     : config.sql_ip,
   user     : config.sql_usr,
@@ -98,7 +116,7 @@ function log_to_sql (adv) {
     console.log(adv['device'])
     if(adv['device'] == "PowerBlade") {
         powerblade_count += 1;
-        fs.appendFile(config.pb_csv, 
+        fs.appendFile(config.pb_csv_current, 
             gatewayID + ',' +
             adv['id'] + ',' +
             adv['rms_voltage'] + ',' + 
@@ -114,7 +132,7 @@ function log_to_sql (adv) {
     }
     else if(adv['device'] == "BLEES"){
         blees_count += 1;
-        fs.appendFile(config.bl_csv, 
+        fs.appendFile(config.bl_csv_current, 
             gatewayID + ',' +
             adv['id'] + ',' +
             adv['temperature_celcius'] + ',' +
@@ -133,42 +151,61 @@ function log_to_sql (adv) {
 
 function post_to_sql () {
 
+    // Switch log files (save current log)
+    var pb_csv = pb_csv_current;
+    if(pb_csv_current == config.pb_csv0) {
+        pb_csv_current = config.pb_csv1;
+    }
+    else {
+        pb_csv_current = config.pb_csv1;   
+    }
+    var bl_csv = bl_csv_current;
+    if(bl_csv_current == config.bl_csv0) {
+        bl_csv_current = config.bl_csv1;
+    }
+    else {
+        bl_csv_current = config.bl_csv1;   
+    }
+
     connection.connect();
 
     if(powerblade_count > 0) {
         // Batch upload to SQL
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\';';
         console.log(loadQuery)
+
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing to PowerBlade');
-        });
 
-        // Erase the PowerBlade temp file
-        console.log('Erasing PowerBlade');
-        fs.writeFile(config.pb_csv, '', function (err) {
-            if (err) throw err;
-            console.log('Done erasing PowerBlade');
+            // Erase the PowerBlade temp file
+            console.log('Erasing PowerBlade');
+            fs.writeFile(config.pb_csv, '', function (err) {
+                if (err) throw err;
+                console.log('Done erasing PowerBlade');
+            });
+            powerblade_count = 0;
         });
-        powerblade_count = 0;
     }
+
     if(blees_count > 0) {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + config.bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
         console.log(loadQuery)
+        
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing to BLEES');
-        });
 
-        // Erase the BLEES temp file
-        console.log('Erasing BLEES');
-        fs.writeFile(config.bl_csv, '', function (err) {
-            if (err) throw err;
-            console.log('Done erasing BLEES');
+            // Erase the BLEES temp file
+            console.log('Erasing BLEES');
+            fs.writeFile(config.bl_csv, '', function (err) {
+                if (err) throw err;
+                console.log('Done erasing BLEES');
+            });
+            blees_count = 0;
         });
-        blees_count = 0;
     }
-
+    
     connection.end();
 }
 
