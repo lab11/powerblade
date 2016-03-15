@@ -93,11 +93,13 @@ function log_to_sql (adv) {
     timestamp[1] = timestamp[1].slice(0,-1);
     datetime = timestamp[0] + ' ' + timestamp[1];
 
+    var gatewayID = adv['_meta']['gateway_id'].replace(new RegExp(':', 'g'), '');
+
     console.log(adv['device'])
     if(adv['device'] == "PowerBlade") {
         powerblade_count += 1;
         fs.appendFile(config.pb_csv, 
-            adv['_meta']['gateway_id'].replace(":","") + ',' +
+            gatewayID + ',' +
             adv['id'] + ',' +
             adv['rms_voltage'] + ',' + 
             adv['sequence_number'] + ',' +
@@ -113,7 +115,7 @@ function log_to_sql (adv) {
     else if(adv['device'] == "BLEES"){
         blees_count += 1;
         fs.appendFile(config.bl_csv, 
-            adv['_meta']['gateway_id'].replace(":","") + ',' +
+            gatewayID + ',' +
             adv['id'] + ',' +
             adv['temperature_celcius'] + ',' +
             adv['light_lux'] + ',' +
@@ -139,12 +141,14 @@ function post_to_sql () {
         console.log(loadQuery)
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done');
+            console.log('Done writing to PowerBlade');
         });
 
         // Erase the PowerBlade temp file
+        console.log('Erasing PowerBlade');
         fs.writeFile(config.pb_csv, '', function (err) {
             if (err) throw err;
+            console.log('Done erasing PowerBlade');
         });
         powerblade_count = 0;
     }
@@ -153,12 +157,14 @@ function post_to_sql () {
         console.log(loadQuery)
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done');
+            console.log('Done writing to BLEES');
         });
 
         // Erase the BLEES temp file
+        console.log('Erasing BLEES');
         fs.writeFile(config.bl_csv, '', function (err) {
             if (err) throw err;
+            console.log('Done erasing BLEES');
         });
         blees_count = 0;
     }
