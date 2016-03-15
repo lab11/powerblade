@@ -151,25 +151,20 @@ function log_to_sql (adv) {
 
 function post_to_sql () {
 
-    // Switch log files (save current log)
-    var pb_csv = pb_csv_current;
-    if(pb_csv_current == config.pb_csv0) {
-        pb_csv_current = config.pb_csv1;
-    }
-    else {
-        pb_csv_current = config.pb_csv1;   
-    }
-    var bl_csv = bl_csv_current;
-    if(bl_csv_current == config.bl_csv0) {
-        bl_csv_current = config.bl_csv1;
-    }
-    else {
-        bl_csv_current = config.bl_csv1;   
-    }
-
     connection.connect();
 
     if(powerblade_count > 0) {
+        powerblade_count = 0;
+
+        // Switch log files (save current log)
+        var pb_csv = pb_csv_current;
+        if(pb_csv_current == config.pb_csv0) {
+            pb_csv_current = config.pb_csv1;
+        }
+        else {
+            pb_csv_current = config.pb_csv1;   
+        }
+
         // Batch upload to SQL
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\';';
         console.log(loadQuery)
@@ -184,11 +179,20 @@ function post_to_sql () {
                 if (err) throw err;
                 console.log('Done erasing PowerBlade');
             });
-            powerblade_count = 0;
         });
     }
 
     if(blees_count > 0) {
+        blees_count = 0;
+
+        var bl_csv = bl_csv_current;
+        if(bl_csv_current == config.bl_csv0) {
+            bl_csv_current = config.bl_csv1;
+        }
+        else {
+            bl_csv_current = config.bl_csv1;   
+        }
+
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
         console.log(loadQuery)
         
@@ -202,7 +206,6 @@ function post_to_sql () {
                 if (err) throw err;
                 console.log('Done erasing BLEES');
             });
-            blees_count = 0;
         });
     }
 
