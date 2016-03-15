@@ -116,7 +116,7 @@ function log_to_sql (adv) {
     console.log(adv['device']);
     if(adv['device'] == "PowerBlade") {
         powerblade_count += 1;
-        fs.appendFile(String(config.pb_csv_current), 
+        fs.appendFile(pb_csv_current, 
             gatewayID + ',' +
             adv['id'] + ',' +
             adv['rms_voltage'] + ',' + 
@@ -132,7 +132,7 @@ function log_to_sql (adv) {
     }
     else if(adv['device'] == "BLEES"){
         blees_count += 1;
-        fs.appendFile(String(config.bl_csv_current), 
+        fs.appendFile(bl_csv_current, 
             gatewayID + ',' +
             adv['id'] + ',' +
             adv['temperature_celcius'] + ',' +
@@ -180,7 +180,7 @@ function post_to_sql () {
 
             // Erase the PowerBlade temp file
             console.log('Erasing PowerBlade');
-            fs.writeFile(String(pb_csv), '', function (err) {
+            fs.writeFile(pb_csv, '', function (err) {
                 if (err) throw err;
                 console.log('Done erasing PowerBlade');
             });
@@ -198,7 +198,7 @@ function post_to_sql () {
 
             // Erase the BLEES temp file
             console.log('Erasing BLEES');
-            fs.writeFile(String(bl_csv), '', function (err) {
+            fs.writeFile(bl_csv, '', function (err) {
                 if (err) throw err;
                 console.log('Done erasing BLEES');
             });
