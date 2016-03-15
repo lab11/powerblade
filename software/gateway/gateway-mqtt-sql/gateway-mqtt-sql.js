@@ -82,8 +82,24 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
 var powerblade_count = 0;
 function log_to_sql (adv) {
 
+    var timestamp = adv['_meta']['received_time'].split('T');
+    timestamp[1] = timestamp[1][0:-1];
+    datetime = timestamp[0] + ' ' + timestamp[1]
+
+    console.log(adv['received_time'])
+    console.log(datetime)
+
     if(adv['device'] == "PowerBlade") {
-        fs.appendFile(config.pbcsv, adv, encoding='utf8', function (err) {
+        fs.appendFile(config.pbcsv, 
+            adv['_meta']['gateway_id'] + ',' +
+            adv['id'] + ',' +
+            adv['sequence_number'] + ',' +
+            adv['power'] + ',' +
+            adv['energy'] + ',' +
+            adv['power_factor'] + ',' +
+            datetime + '\n',
+            encoding='utf8', 
+            function (err) {
             if (err) throw err;
         });
     }
