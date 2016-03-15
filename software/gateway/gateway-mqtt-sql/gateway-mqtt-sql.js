@@ -119,8 +119,8 @@ function log_to_sql (adv) {
         fs.appendFile(pb_csv_current, 
             gatewayID + ',' +
             adv['id'] + ',' +
-            adv['rms_voltage'] + ',' + 
             adv['sequence_number'] + ',' +
+            adv['rms_voltage'] + ',' + 
             adv['power'] + ',' +
             adv['energy'] + ',' +
             adv['power_factor'] + ',' +
@@ -150,9 +150,6 @@ function log_to_sql (adv) {
 }
 
 function post_to_sql () {
-
-    connection.connect();
-
     if(powerblade_count > 0) {
         powerblade_count = 0;
 
@@ -208,8 +205,6 @@ function post_to_sql () {
             });
         });
     }
-
-    connection.end();
 }
 
 // post JSON advertisements to GATD
