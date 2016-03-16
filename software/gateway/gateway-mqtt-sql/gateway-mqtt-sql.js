@@ -185,7 +185,7 @@ function post_to_sql () {
         }
 
         // Batch upload to SQL
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\';';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
         console.log(loadQuery)
 
         connection.query(loadQuery, function(err, rows, fields) {
@@ -213,7 +213,7 @@ function post_to_sql () {
             bl_csv_current = config.bl_csv0;   
         }
 
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\';';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
         console.log(loadQuery)
         
         connection.query(loadQuery, function(err, rows, fields) {
@@ -241,7 +241,7 @@ function post_to_sql () {
             cc_csv_current = config.cc_csv0;
         }
 
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE coilcube_test FIELDS TERMINATED BY \',\';';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE coilcube_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
         console.log(loadQuery);
 
         connection.query(loadQuery, function(err, rows, fields) {
