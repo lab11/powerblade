@@ -158,7 +158,7 @@ function log_to_sql (adv) {
     else if(adv['device'].slice(0,8) == "Coilcube") {
         coilcube_count += 1;
         fs.appendFile(cc_csv_current,
-            gateway_id + ',' + 
+            gatewayID + ',' +
             adv['_meta']['device_id'] + ',' + 
             adv['seq_no'] + ',' + 
             adv['counter'] + ',' +
@@ -172,6 +172,7 @@ function log_to_sql (adv) {
 
 function post_to_sql () {
     if(powerblade_count > 0) {
+        var powerblade_count_save = powerblade_count;
         powerblade_count = 0;
 
         // Switch log files (save current log)
@@ -189,7 +190,7 @@ function post_to_sql () {
 
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done writing to PowerBlade');
+            console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade');
 
             // Erase the PowerBlade temp file
             console.log('Erasing PowerBlade');
@@ -201,6 +202,7 @@ function post_to_sql () {
     }
 
     if(blees_count > 0) {
+        var blees_count_save = blees_count;
         blees_count = 0;
 
         var bl_csv = bl_csv_current;
@@ -216,7 +218,7 @@ function post_to_sql () {
         
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done writing to BLEES');
+            console.log('Done writing ' + blees_count_save + ' packets to BLEES');
 
             // Erase the BLEES temp file
             console.log('Erasing BLEES');
@@ -228,6 +230,7 @@ function post_to_sql () {
     }
 
     if(coilcube_count > 0) {
+        var coilcube_count_save = coilcube_count;
         coilcube_count = 0;
 
         var cc_csv = cc_csv_current;
@@ -243,7 +246,7 @@ function post_to_sql () {
 
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done writing to Coilcube');
+            console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube');
 
             // Erase the Coilcube temp file
             console.log('Erasing Coilcube');
