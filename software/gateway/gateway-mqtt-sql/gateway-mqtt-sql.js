@@ -155,7 +155,7 @@ function log_to_sql (adv) {
             if (err) throw err;
         });
     }
-    else if(adv['device'].slice(0,8) == "Coilcube") {
+    else if(adv['device'].slice(0,8) == "Coilcube" || adv['device'] == "Solar Monjolo") {
         coilcube_count += 1;
         fs.appendFile(cc_csv_current,
             gatewayID + ',' +
