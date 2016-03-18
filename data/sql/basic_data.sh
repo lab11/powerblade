@@ -14,11 +14,15 @@ case $key in
 	printf "  Enter password when prompted.\n  Password will be saved encrypted at ~/.mylogin.cnf\n\n"
 	printf "Parameters:\n"
 	printf "  -f: Path to device list. List should be deviceMAC without ':', separated by newline\n"
-	printf "  -d: Device name, deviceMAC with ':'. -d is ignored if -f is specified\n"
+	printf "  -d: Device name, deviceMAC without ':'. -d is ignored if -f is specified\n"
 	printf "  -t: Query time in minutes. Currently queries are for the past t minutes ending now in UTC\n"
 	printf "  -e: (No argument required). Display along-side energy bridge data\n"
 	printf "  -o: Specify path to save pdf. Must not exist.\n"
 	printf "  -h: Display this help (no query is run)\n\n"
+	printf "For a 120 minute query over c098e5700012 (default settings):\n"
+	printf "  ./basic_data.sh\n\n"
+	printf "For a 60 minute query over the devices listed in deviceList.txt:\n"
+	printf "  ./basic_data.sh -f deviceList.txt -t 60\n\n"
 	exit
 	shift
 	;;
@@ -112,7 +116,7 @@ if [[ -n "${FILENAME+1}" ]]; then
 elif [[ -n "${SQLDEVICE+1}" ]]; then
 	DEVICELIST_TEMP="deviceMAC='${SQLDEVICE}'"
 else
-	DEVICELIST_TEMP="deviceMAC='c098e5700035'"
+	DEVICELIST_TEMP="deviceMAC='c098e5700012'"
 fi
 DEVICELIST_TEMP="(${DEVICELIST_TEMP})"
 
@@ -155,7 +159,7 @@ if [[ -n "${FILENAME+1}" ]]; then
 elif [[ -n "${SQLDEVICE+1}" ]]; then
 	DEVICELIST="deviceMAC='${SQLDEVICE}'"
 else
-	DEVICELIST="deviceMAC='c098e5700035'"
+	DEVICELIST="deviceMAC='c098e5700012'"
 fi
 DEVICELIST="(${DEVICELIST})"
 #echo $DEVICELIST
