@@ -1,4 +1,7 @@
-outside_light.csv
 *.pdf
 .sqldata.temp
-*.eps
+*.eps 
+*.csv
+!blees_light_lookup.csv
+deviceList.txt
+temp.plt
