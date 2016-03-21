@@ -122,9 +122,7 @@ ORDER BY timestamp ASC;"
 DEVICELIST_TEMP=""
 if [[ -n "${FILENAME+1}" ]]; then
 	while read dev; do
-		if [[ ${dev:0:1} == "#" ]]; then
-			echo "Skipping ${dev}"
-		else
+		if [[ ${dev:0:1} != "#" ]]; then
 			DEVICELIST_TEMP="${DEVICELIST_TEMP} OR deviceMAC='${dev}'"
 		fi
 	done <"${FILENAME}"
@@ -134,6 +132,7 @@ elif [[ -n "${SQLDEVICE+1}" ]]; then
 else
 	DEVICELIST_TEMP="deviceMAC='c098e5700012'"
 fi
+echo "${DEVICELIST_TEMP}"
 DEVICELIST_TEMP="(${DEVICELIST_TEMP})"
 
 echo "Creating Calendar"
@@ -144,12 +143,13 @@ select t2.timestamp as timestamp, t1.deviceMAC as deviceMAC from
 cross join
 (select a.Date as timestamp
 from (
-    select ${ENDTIME} - INTERVAL (a.a + (10 * b.a) + (100 * c.a) + (1000 * d.a) + (10000 * e.a)) SECOND as Date
+    select ${ENDTIME} - INTERVAL (a.a + (10 * b.a) + (100 * c.a) + (1000 * d.a) + (10000 * e.a) + (100000 * f.a)) SECOND as Date
     from (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as a
     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as b
     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as c
     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as d
     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as e
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as f
 ) a
 where a.Date between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) AND ${ENDTIME} order by a.Date asc) t2;"
 
@@ -169,8 +169,10 @@ if [[ -n "${FILENAME+1}" ]]; then
 	while read dev; do
 		if [[ ${dev:0:1} != "#" ]]; then
 			DEVICELIST="${DEVICELIST} OR deviceMAC='${dev}'"
-			PLTLINE="${PLTLINE},\x5C\n\t\"${dev}.csv\" u 1:2 with lines title \"${dev}\" "
 			mysql --login-path=resistor whisperwood -e "SELECT timestamp,power from overall_power_filled WHERE deviceMAC='${dev}' and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > "${dev}".csv
+			if [ -s "$dev" ]; then
+				PLTLINE="${PLTLINE},\x5C\n\t\"${dev}.csv\" u 1:2 with lines title \"${dev}\" "
+			fi
 		fi
 	done <"${FILENAME}"
 	DEVICELIST="${DEVICELIST:3}"
@@ -186,8 +188,8 @@ echo
 echo "Running MySQL Query"
 
 if [[ -n "${EBRIDGE+1}" ]]; then
-	mysql --login-path=resistor whisperwood -e "SET @end_date = date_sub(${ENDTIME}, INTERVAL 4 HOUR); SELECT date_add(timestamp,INTERVAL 4 HOUR),((1000*max(power))-0) FROM energy_bridge
-	WHERE timestamp BETWEEN date_sub(@end_date, INTERVAL ${DURTIME} MINUTE) and @end_date
+	mysql --login-path=resistor whisperwood -e "SET @end_time = date_sub(${ENDTIME}, INTERVAL 4 HOUR);SELECT date_add(timestamp,INTERVAL 4 HOUR),((1000*max(power))-0) FROM energy_bridge
+	WHERE timestamp BETWEEN date_sub(@end_time, INTERVAL ${DURTIME} MINUTE) and @end_time
 	AND house_name != 'test'
 	GROUP BY timestamp
 	ORDER BY timestamp asc;" > ebridge.csv
