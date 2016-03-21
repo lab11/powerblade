@@ -4,7 +4,7 @@ set output "temp.eps"
 set xlabel "Timestamp" offset 0,-4
 set ylabel "Power (W)"
 
-set yrange [0:]
+set yrange [-2:]
 
 set datafile separator "\t"
 set timefmt "%Y-%m-%d %H:%M:%S"
