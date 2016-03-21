@@ -59,6 +59,9 @@ esac
 shift # past argument or value
 done
 
+# Used to extend the figure above the energy bridge line
+ebridge_expansion=1.2
+
 if [[ -n "${DURTIME+1}" ]]; then
 	echo "Query over ${DURTIME} minutes"
 else
@@ -70,8 +73,9 @@ if [[ -n "${ENDTIME+1}" ]]; then
 	ENDTIME="'${ENDTIME}'"
 	echo "Ending at ${ENDTIME}"
 else
-	ENDTIME="utc_timestamp()"
-	echo "Ending now"
+	ENDTIME=$(date +%Y-%m-%d\ %H:%M:%S)
+	ENDTIME="'${ENDTIME}'"
+	echo "Ending now (${ENDTIME})"
 fi
 
 # Update Tables
@@ -154,6 +158,7 @@ if [[ -n "${EBRIDGE+1}" ]]; then
 	AND house_name != 'test'
 	GROUP BY timestamp
 	ORDER BY timestamp asc;" > ebridge.csv
+	maxpower=$(mysql --login-path=resistor whisperwood -se "SET @end_time = date_sub(${ENDTIME}, INTERVAL 4 HOUR); SELECT (${ebridge_expansion}*1000*max(power)) FROM energy_bridge WHERE timestamp BETWEEN date_sub(@end_time, INTERVAL ${DURTIME} MINUTE) AND @end_time;")
 	PLTLINE="${PLTLINE},\x5C\n\t\"ebridge.csv\" u 1:2 with lines title \"Energy Bridge\" "
 fi
 
@@ -162,7 +167,8 @@ mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 
 
 echo "Finishing Plotting File"
 cat dataviewer.plt > temp.plt
-printf "set xtics ${DURTIME}*60/10 rotate by 70 offset -2.9,-4.65\n" >> temp.plt
+printf "set xtics ${DURTIME}*60/10 rotate by 70 offset -2.9,-4.65\n\n" >> temp.plt
+printf "set yrange [-2:${maxpower}]\n\n" >> temp.plt
 if [ -s sumPower.csv ]; then
 	printf "plot \"sumPower.csv\" u 1:2 with lines title \"Calc. Sum\"${PLTLINE}" >> temp.plt
 else
