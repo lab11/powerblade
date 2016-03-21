@@ -129,8 +129,10 @@ if [[ -n "${FILENAME+1}" ]]; then
 		if [[ ${dev:0:1} != "#" ]]; then
 			DEVICELIST="${DEVICELIST} OR deviceMAC='${dev}'"
 			mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),power from overall_power_filled WHERE deviceMAC='${dev}' and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > "${dev}".csv
-			if [ -s "$dev" ]; then
+			if [ -s "${dev}".csv ]; then
 				PLTLINE="${PLTLINE},\x5C\n\t\"${dev}.csv\" u 1:2 with lines title \"${dev}\" "
+			else
+				echo "No data points for ${dev}"
 			fi
 		fi
 	done <"${FILENAME}"
