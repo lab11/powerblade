@@ -158,7 +158,7 @@ mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS overall_power_f
 mysql --login-path=resistor whisperwood -e "CREATE TABLE overall_power_filled AS
 SELECT t1.*, (select power from overall_power where id=max(t2.ID)) as power
 FROM calendar t1
-JOIN overall_power t2
+LEFT JOIN overall_power t2
 ON (t2.timestamp BETWEEN date_sub(t1.timestamp, INTERVAL 1 MINUTE) AND t1.timestamp)
 AND t1.deviceMAC=t2.deviceMAC
 GROUP BY t1.timestamp, t1.deviceMAC;"
