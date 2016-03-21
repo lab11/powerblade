@@ -128,7 +128,7 @@ if [[ -n "${FILENAME+1}" ]]; then
 	while read dev; do
 		if [[ ${dev:0:1} != "#" ]]; then
 			DEVICELIST="${DEVICELIST} OR deviceMAC='${dev}'"
-			mysql --login-path=resistor whisperwood -e "SELECT timestamp,power from overall_power_filled WHERE deviceMAC='${dev}' and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > "${dev}".csv
+			mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),power from overall_power_filled WHERE deviceMAC='${dev}' and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > "${dev}".csv
 			if [ -s "$dev" ]; then
 				PLTLINE="${PLTLINE},\x5C\n\t\"${dev}.csv\" u 1:2 with lines title \"${dev}\" "
 			fi
@@ -147,7 +147,7 @@ echo
 echo "Running MySQL Query"
 
 if [[ -n "${EBRIDGE+1}" ]]; then
-	mysql --login-path=resistor whisperwood -e "SET @end_time = date_sub(${ENDTIME}, INTERVAL 4 HOUR);SELECT date_add(timestamp,INTERVAL 4 HOUR),((1000*max(power))-0) FROM energy_bridge
+	mysql --login-path=resistor whisperwood -e "SET @end_time = date_sub(${ENDTIME}, INTERVAL 4 HOUR);SELECT timestamp,((1000*max(power))-0) FROM energy_bridge
 	WHERE timestamp BETWEEN date_sub(@end_time, INTERVAL ${DURTIME} MINUTE) and @end_time
 	AND house_name != 'test'
 	GROUP BY timestamp
@@ -156,7 +156,7 @@ if [[ -n "${EBRIDGE+1}" ]]; then
 fi
 
 
-mysql --login-path=resistor whisperwood -e "SELECT timestamp,sum(power) as sum FROM overall_power_filled WHERE ${DEVICELIST} and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > sumPower.csv
+mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),sum(power) as sum FROM overall_power_filled WHERE ${DEVICELIST} and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > sumPower.csv
 
 echo "Finishing Plotting File"
 cat dataviewer.plt > temp.plt
