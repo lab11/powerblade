@@ -158,7 +158,7 @@ mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS overall_power_f
 mysql --login-path=resistor whisperwood -e "CREATE TABLE overall_power_filled AS
 SELECT t1.*, (select power from overall_power where id=max(t2.ID)) as power
 FROM calendar t1
-LEFT JOIN overall_power t2
+JOIN overall_power t2
 ON (t2.timestamp BETWEEN date_sub(t1.timestamp, INTERVAL 1 MINUTE) AND t1.timestamp)
 AND t1.deviceMAC=t2.deviceMAC
 GROUP BY t1.timestamp, t1.deviceMAC;"
@@ -202,7 +202,11 @@ mysql --login-path=resistor whisperwood -e "SELECT timestamp,sum(power) as sum F
 echo "Finishing Plotting File"
 cat dataviewer.plt > temp.plt
 printf "set xtics ${DURTIME}*60/10 rotate by 70 offset -2.9,-4.65\n" >> temp.plt
-printf "plot \"sumPower.csv\" u 1:2 with lines title \"Calc. Sum\"${PLTLINE}" >> temp.plt
+if [ -s sumPower.csv ]; then
+	printf "plot \"sumPower.csv\" u 1:2 with lines title \"Calc. Sum\"${PLTLINE}" >> temp.plt
+else
+	printf "plot 0 with lines title \"Calc. Sum\"${PLTLINE}" >> temp.plt
+fi
 
 echo "Plotting"
 gnuplot temp.plt
