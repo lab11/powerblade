@@ -140,6 +140,21 @@ function log_to_sql (adv) {
     }
     else if(adv['device'] == "BLEES"){
         blees_count += 1;
+
+        var accel_ad, accel_int;
+        if(adv['acceleration_advertisement'] == "true") {
+            accel_ad = 1;
+        }
+        else {
+            accel_ad = 0;
+        }
+        if(adv['acceleration_interval'] == "false") {
+            accel_int = 1;
+        }
+        else {
+            accel_int = 0;
+        }
+
         fs.appendFile(bl_csv_current, 
             gatewayID + ',' +
             adv['id'] + ',' +
@@ -147,8 +162,8 @@ function log_to_sql (adv) {
             adv['light_lux'] + ',' +
             adv['pressure_pascals'] + ',' +
             adv['humidity_percent'] + ',' +
-            adv['acceleration_advertisement'] + ',' +
-            adv['acceleration_interval'] + ',' +
+            accel_ad + ',' +
+            accel_int + ',' +
             datetime + '\n', 
             encoding='utf8', 
             function (err) {
