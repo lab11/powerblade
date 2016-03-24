@@ -2,11 +2,23 @@
 if (navigator.platform.startsWith("iP")) {
     // iOS (iPhone, iPad, iPod)
     console.log("Loading iOS-specific cordova");
-    $.getScript('cordova_ios.js', load_after);
+    $.getScript('cordova_ios.js', load_after)
+        .fail(function(jqxhr, settings, exception) {
+            console.log("Failed to load");
+            console.log("Exception: " + exception);
+            console.log("Attempting to power through");
+            load_after();
+        });
 } else {
     // android or bust
     console.log("Loading android-specific cordova");
-    $.getScript('cordova_android.js', load_after);
+    $.getScript('cordova_android.js', load_after)
+        .fail(function(jqxhr, settings, exception) {
+            console.log("Failed to load");
+            console.log("Exception: " + exception);
+            console.log("Attempting to power through");
+            load_after();
+        });
 }
 
 // don't load the user's index.js until cordova is loaded
