@@ -69,6 +69,12 @@ var connection = mysql.createConnection({
   database : config.sql_db
 });
 
+var gateway_mac;
+getmac.getMac(function(err,macAddress) {
+    if (err) throw err;
+    gateway_mac = macAddress;
+}
+
 // settings
 var POST_BUFFER_LEN = 4; // group N packets into a single post
 var POST_TIMEOUT = 30; // after 30 seconds, just post anyway
