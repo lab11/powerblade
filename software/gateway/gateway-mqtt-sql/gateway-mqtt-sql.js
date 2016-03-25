@@ -9,6 +9,7 @@ var request = require('request');
 var fs = require('fs');
 var ini = require('ini');
 var mysql = require('mysql');
+var getmac = require('getmac');
 
 // discover the local MQTT broker
 var MQTTDiscover = require('mqtt-discover');
@@ -100,30 +101,25 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
     mqtt_client.subscribe(MQTT_DATA_TOPIC);
     mqtt_client.subscribe(MQTT_RSSI_TOPIC);
     mqtt_client.on('message', function (topic, message) {
-        if(topic == MQTT_DATA_TOPIC) {
-            var adv = JSON.parse(message.toString());
+        var adv = JSON.parse(message.toString());
 
-            // got a packet, reset watchdog
-            mqtt_watchdog.reset();
-            if (mqtt_down) {
-                console.log("Getting packets again");
-                mqtt_down = false;
-            }
-
-            // log packets in SQL format
-            var curr_time = Date.now()/1000;
-            if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0) {      // Mark the start time of the first packet in this file
-                file_start_time = curr_time;
-            }
-            log_to_sql(adv);
-    		
-    		// if enough packets have been logged, push to SQL
-            if((powerblade_count + blees_count + coilcube_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
-                post_to_sql();
-            }
+        // got a packet, reset watchdog
+        mqtt_watchdog.reset();
+        if (mqtt_down) {
+            console.log("Getting packets again");
+            mqtt_down = false;
         }
-        else {
-            console.log(message);
+
+        // log packets in SQL format
+        var curr_time = Date.now()/1000;
+        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0) {      // Mark the start time of the first packet in this file
+            file_start_time = curr_time;
+        }
+        log_to_sql(adv);
+		
+		// if enough packets have been logged, push to SQL
+        if((powerblade_count + blees_count + coilcube_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+            post_to_sql();
         }
     });
 });
