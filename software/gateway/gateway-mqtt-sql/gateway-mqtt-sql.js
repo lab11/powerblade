@@ -194,7 +194,7 @@ function log_to_sql (topic, adv) {
         datetime = timestamp[0] + ' ' + timestamp[1];
 
         rssi_count += 1;
-        fs.appendFile(rssi_count,
+        fs.appendFile(rssi_csv_current,
             gateway_mac + ',' + 
             adv['address'] + ',' + 
             adv['rssi'] + ',' + 
