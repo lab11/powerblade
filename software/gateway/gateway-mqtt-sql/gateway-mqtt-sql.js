@@ -220,7 +220,7 @@ function post_to_sql () {
     var rssi_count_save = rssi_count;
     rssi_count = 0;
 
-    if(powerblade_count > 0) {
+    if(powerblade_count_save > 0) {
         // Switch log files (save current log)
         var pb_csv = pb_csv_current;
         if(pb_csv_current == config.pb_csv0) {
@@ -247,7 +247,7 @@ function post_to_sql () {
         });
     }
 
-    if(blees_count > 0) {
+    if(blees_count_save > 0) {
         var bl_csv = bl_csv_current;
         if(bl_csv_current == config.bl_csv0) {
             bl_csv_current = config.bl_csv1;
@@ -272,7 +272,7 @@ function post_to_sql () {
         });
     }
 
-    if(coilcube_count > 0) {
+    if(coilcube_count_save > 0) {
         var cc_csv = cc_csv_current;
         if(cc_csv_current == config.cc_csv0) {
             cc_csv_current = config.cc_csv1;
@@ -297,7 +297,7 @@ function post_to_sql () {
         })
     }
 
-    if(rssi_count > 0) {
+    if(rssi_count_save > 0) {
         var rssi_csv = rssi_csv_current;
         if(rssi_csv_current == config.rssi_csv0) {
             rssi_csv_current = config.rssi_csv1;
