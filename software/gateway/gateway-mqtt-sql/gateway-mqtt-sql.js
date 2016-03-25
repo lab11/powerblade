@@ -14,6 +14,7 @@ var mysql = require('mysql');
 var MQTTDiscover = require('mqtt-discover');
 MQTTDiscover.start();
 var MQTT_DATA_TOPIC = 'gateway-data';
+var MQTT_RSSI_TOPIC = 'ble-advertisements'
 
 // configuration
 try {
@@ -32,6 +33,7 @@ try {
 var pb_csv_current = config.pb_csv0;
 var bl_csv_current = config.bl_csv0;
 var cc_csv_current = config.cc_csv0;
+var rssi_csv_current = config.rssi_csv0;
 
 // Erase the temporary files
 fs.writeFile(config.pb_csv0, '', function (err) {
@@ -50,6 +52,12 @@ fs.writeFile(config.cc_csv0, '', function (err) {
     if (err) throw err;
 });
 fs.writeFile(config.cc_csv1, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.rssi_csv0, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.rssi_csv1, '', function (err) {
     if (err) throw err;
 });
 
@@ -80,6 +88,8 @@ var mqtt_watchdog = new watchout(1*60*1000, function(didCancelWatchdog) {
 var powerblade_count = 0;
 var blees_count = 0;
 var coilcube_count = 0;
+var rssi_count = 0;
+
 var UPLOAD_COUNT = 1000;
 var file_start_time = 0;
 var FILE_TIMEOUT = 30;
@@ -88,26 +98,32 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
 
     // subscribe to powerblade data
     mqtt_client.subscribe(MQTT_DATA_TOPIC);
+    mqtt_client.subscribe(MQTT_RSSI_TOPIC);
     mqtt_client.on('message', function (topic, message) {
-        var adv = JSON.parse(message.toString());
+        if(topic == MQTT_DATA_TOPIC) {
+            var adv = JSON.parse(message.toString());
 
-        // got a packet, reset watchdog
-        mqtt_watchdog.reset();
-        if (mqtt_down) {
-            console.log("Getting packets again");
-            mqtt_down = false;
-        }
+            // got a packet, reset watchdog
+            mqtt_watchdog.reset();
+            if (mqtt_down) {
+                console.log("Getting packets again");
+                mqtt_down = false;
+            }
 
-        // log packets in SQL format
-        var curr_time = Date.now()/1000;
-        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0) {      // Mark the start time of the first packet in this file
-            file_start_time = curr_time;
+            // log packets in SQL format
+            var curr_time = Date.now()/1000;
+            if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0) {      // Mark the start time of the first packet in this file
+                file_start_time = curr_time;
+            }
+            log_to_sql(adv);
+    		
+    		// if enough packets have been logged, push to SQL
+            if((powerblade_count + blees_count + coilcube_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+                post_to_sql();
+            }
         }
-        log_to_sql(adv);
-		
-		// if enough packets have been logged, push to SQL
-        if((powerblade_count + blees_count + coilcube_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
-            post_to_sql();
+        else {
+            console.log(message);
         }
     });
 });
