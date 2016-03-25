@@ -131,7 +131,7 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
 });
 
 // Log csv-formatted advertisements to a temp file
-function log_to_sql (adv) {
+function log_to_sql (topic, adv) {
 
     if(topic == MQTT_DATA_TOPIC) {
         var timestamp = adv['_meta']['received_time'].split('T');
