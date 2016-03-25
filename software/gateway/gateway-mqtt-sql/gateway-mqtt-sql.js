@@ -72,7 +72,7 @@ var connection = mysql.createConnection({
 var gateway_mac;
 getmac.getMac(function(err,macAddress) {
     if (err) throw err;
-    gateway_mac = macAddress;
+    gateway_mac = macAddress.replace(new RegExp(':', 'g'), '');
 }
 
 // settings
@@ -118,13 +118,13 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
 
         // log packets in SQL format
         var curr_time = Date.now()/1000;
-        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0) {      // Mark the start time of the first packet in this file
+        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0) {      // Mark the start time of the first packet in this file
             file_start_time = curr_time;
         }
-        log_to_sql(adv);
+        log_to_sql(topic, adv);
 		
 		// if enough packets have been logged, push to SQL
-        if((powerblade_count + blees_count + coilcube_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+        if((powerblade_count + blees_count + coilcube_count + rssi_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
             post_to_sql();
         }
     });
@@ -137,62 +137,86 @@ function log_to_sql (adv) {
     timestamp[1] = timestamp[1].slice(0,-1);
     datetime = timestamp[0] + ' ' + timestamp[1];
 
-    var gatewayID = adv['_meta']['gateway_id'].replace(new RegExp(':', 'g'), '');
+    if(topic == MQTT_DATA_TOPIC) {
+        var gatewayID = adv['_meta']['gateway_id'].replace(new RegExp(':', 'g'), '');
 
-    //console.log(adv['device']);
-    if(adv['device'] == "PowerBlade") {
-        powerblade_count += 1;
-        fs.appendFile(pb_csv_current, 
-            gatewayID + ',' +
-            adv['id'] + ',' +
-            adv['sequence_number'] + ',' +
-            adv['rms_voltage'] + ',' + 
-            adv['power'] + ',' +
-            adv['energy'] + ',' +
-            adv['power_factor'] + ',' +
-            datetime + '\n',
-            encoding='utf8', 
-            function (err) {
-            if (err) throw err;
-        });
+        //console.log(adv['device']);
+        if(adv['device'] == "PowerBlade") {
+            powerblade_count += 1;
+            fs.appendFile(pb_csv_current, 
+                gatewayID + ',' +
+                adv['id'] + ',' +
+                adv['sequence_number'] + ',' +
+                adv['rms_voltage'] + ',' + 
+                adv['power'] + ',' +
+                adv['energy'] + ',' +
+                adv['power_factor'] + ',' +
+                datetime + '\n',
+                encoding='utf8', 
+                function (err) {
+                if (err) throw err;
+            });
+        }
+        else if(adv['device'] == "BLEES"){
+            blees_count += 1;
+            fs.appendFile(bl_csv_current, 
+                gatewayID + ',' +
+                adv['id'] + ',' +
+                adv['temperature_celcius'] + ',' +
+                adv['light_lux'] + ',' +
+                adv['pressure_pascals'] + ',' +
+                adv['humidity_percent'] + ',' +
+                (adv['acceleration_advertisement']+0) + ',' +
+                (adv['acceleration_interval']+0) + ',' +
+                datetime + '\n', 
+                encoding='utf8', 
+                function (err) {
+                if (err) throw err;
+            });
+        }
+        else if(adv['device'].slice(0,8) == "Coilcube" || adv['device'] == "Solar Monjolo") {
+            coilcube_count += 1;
+            fs.appendFile(cc_csv_current,
+                gatewayID + ',' +
+                adv['_meta']['device_id'] + ',' + 
+                adv['seq_no'] + ',' + 
+                adv['counter'] + ',' +
+                datetime + '\n',
+                encoding='utf8',
+                function (err) {
+                if (err) throw err;
+            });
+        }
     }
-    else if(adv['device'] == "BLEES"){
-        blees_count += 1;
-        fs.appendFile(bl_csv_current, 
-            gatewayID + ',' +
-            adv['id'] + ',' +
-            adv['temperature_celcius'] + ',' +
-            adv['light_lux'] + ',' +
-            adv['pressure_pascals'] + ',' +
-            adv['humidity_percent'] + ',' +
-            (adv['acceleration_advertisement']+0) + ',' +
-            (adv['acceleration_interval']+0) + ',' +
-            datetime + '\n', 
-            encoding='utf8', 
-            function (err) {
-            if (err) throw err;
-        });
-    }
-    else if(adv['device'].slice(0,8) == "Coilcube" || adv['device'] == "Solar Monjolo") {
-        coilcube_count += 1;
-        fs.appendFile(cc_csv_current,
-            gatewayID + ',' +
-            adv['_meta']['device_id'] + ',' + 
-            adv['seq_no'] + ',' + 
-            adv['counter'] + ',' +
+    else {
+        rssi_count += 1;
+        fs.appendFile(rssi_count,
+            gateway_mac + ',' + 
+            adv['address'] + ',' + 
+            adv['rssi'] + ',' + 
             datetime + '\n',
             encoding='utf8',
             function (err) {
             if (err) throw err;
         });
     }
+    
 }
 
 function post_to_sql () {
-    if(powerblade_count > 0) {
-        var powerblade_count_save = powerblade_count;
-        powerblade_count = 0;
+    var powerblade_count_save = powerblade_count;
+    powerblade_count = 0;
 
+    var blees_count_save = blees_count;
+    blees_count = 0;
+
+    var coilcube_count_save = coilcube_count;
+    coilcube_count = 0;
+
+    var rssi_count_save = rssi_count;
+    rssi_count = 0;
+
+    if(powerblade_count > 0) {
         // Switch log files (save current log)
         var pb_csv = pb_csv_current;
         if(pb_csv_current == config.pb_csv0) {
@@ -220,9 +244,6 @@ function post_to_sql () {
     }
 
     if(blees_count > 0) {
-        var blees_count_save = blees_count;
-        blees_count = 0;
-
         var bl_csv = bl_csv_current;
         if(bl_csv_current == config.bl_csv0) {
             bl_csv_current = config.bl_csv1;
@@ -248,9 +269,6 @@ function post_to_sql () {
     }
 
     if(coilcube_count > 0) {
-        var coilcube_count_save = coilcube_count;
-        coilcube_count = 0;
-
         var cc_csv = cc_csv_current;
         if(cc_csv_current == config.cc_csv0) {
             cc_csv_current = config.cc_csv1;
@@ -273,6 +291,31 @@ function post_to_sql () {
                 console.log('Done erasing Coilcube');
             });
         })
+    }
+
+    if(rssi_count > 0) {
+        var rssi_csv = rssi_csv_current;
+        if(rssi_csv_current == config.rssi_csv0) {
+            rssi_csv_current = config.rssi_csv1;
+        }
+        else {
+            rssi_csv_current = config.rssi_csv0;
+        }
+
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE rssi_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
+        console.log(loadQuery);
+
+        connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done writing ' + rssi_count_save + ' packets to RSSI');
+
+            // Erase RSSI file
+            console.log('Erasing RSSI');
+            fs.writeFile(rssi_csv, '', function (err) {
+                if (err) throw err;
+                console.log('Done erasing RSSI');
+            });
+        });
     }
 }
 
