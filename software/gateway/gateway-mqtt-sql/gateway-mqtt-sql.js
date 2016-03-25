@@ -73,7 +73,7 @@ var gateway_mac;
 getmac.getMac(function(err,macAddress) {
     if (err) throw err;
     gateway_mac = macAddress.replace(new RegExp(':', 'g'), '');
-}
+});
 
 // settings
 var POST_BUFFER_LEN = 4; // group N packets into a single post
@@ -133,11 +133,11 @@ MQTTDiscover.on('mqttBroker', function (mqtt_client) {
 // Log csv-formatted advertisements to a temp file
 function log_to_sql (adv) {
 
-    var timestamp = adv['_meta']['received_time'].split('T');
-    timestamp[1] = timestamp[1].slice(0,-1);
-    datetime = timestamp[0] + ' ' + timestamp[1];
-
     if(topic == MQTT_DATA_TOPIC) {
+        var timestamp = adv['_meta']['received_time'].split('T');
+        timestamp[1] = timestamp[1].slice(0,-1);
+        datetime = timestamp[0] + ' ' + timestamp[1];
+
         var gatewayID = adv['_meta']['gateway_id'].replace(new RegExp(':', 'g'), '');
 
         //console.log(adv['device']);
@@ -189,6 +189,10 @@ function log_to_sql (adv) {
         }
     }
     else {
+        var timestamp = adv['receivedTime'].split('T');
+        timestamp[1] = timestamp[1].slice(0,-1);
+        datetime = timestamp[0] + ' ' + timestamp[1];
+
         rssi_count += 1;
         fs.appendFile(rssi_count,
             gateway_mac + ',' + 
