@@ -1,8 +1,9 @@
-#! /usr/bin/env python3.5
+#! /usr/bin/env python3
 # model percentage of packet collisions in a group of advertising BLE devices
 
 import functools
 import math
+import fractions
 import random
 random.seed("Seed string")
 
@@ -14,12 +15,11 @@ random.seed("Seed string")
 debug = False
 
 # list of BLE devices specified by
-#   (count, advertising interval in ms, advertisement length in ms, new data interval in ms)
+#   (count, advertising interval in ms, advertisement length in ms, new data interval in ms, number of eddystone per data interval)
 devices = [
-        (  0, 1000, 1, 2000),
-        (108,  200, 1, 1000),
+        ( 17, 1000, 1, 2000, 1),
+        ( 19,  200, 1, 1000, 1),
         ]
-#TODO: implement an eddystone adv on top of this
 
 # start all devices at the same moment or at a random time in their interval
 synchronized_start = False
@@ -30,7 +30,7 @@ synchronized_start = False
 adv_jitter = 10
 
 # duration of testing, in ms
-duration = 1*60*1000
+duration = 10*60*1000
 
 
 ####################
@@ -46,13 +46,15 @@ lengths = []
 data_times = []
 data_intervals = []
 count_per_datas = []
+eddystones = []
+in_eddystones = []
 
 # iteration step
 #   GCD of advertising intervals in ms
 iter_step = 1
 
 # initialization
-for (count, interval, length, data_interval) in devices:
+for (count, interval, length, data_interval, eddystone) in devices:
     for i in range(count):
         if synchronized_start:
             times += [0]
@@ -64,9 +66,11 @@ for (count, interval, length, data_interval) in devices:
         data_times += [times[-1]]
         data_intervals += [data_interval]
         count_per_datas += [0]
+        eddystones += [eddystone]
+        in_eddystones += [0]
 
 # calculate actual GCD of advertising intervals
-iter_step = functools.reduce(math.gcd, intervals)
+iter_step = functools.reduce(fractions.gcd, intervals)
 
 # iterate for duration
 curr_time = 0
@@ -79,15 +83,23 @@ while curr_time < duration:
     # increment advertisements
     updated_indices = []
     for index in range(len(times)):
+        # generate new advertisements
         if curr_time > (times[index]+intervals[index]):
             times[index] += intervals[index] + random.uniform(0,adv_jitter)
             updated_indices += [index]
+        # determine if advertisements have new data
         if curr_time > (data_times[index]+data_intervals[index]):
             data_times[index] += data_intervals[index]
             unique_transmissions += 1
             if count_per_datas[index] > 0:
                 unique_successes += 1
             count_per_datas[index] = 0
+            # we'll say that the first packets of each data are the eddystones
+            in_eddystones[index] = eddystones[index]
+        elif in_eddystones[index] > 0:
+            # eddystone packet was transmitted
+            in_eddystones[index] -= 1
+
     if debug:
         print(str(times) + str(count_per_datas) + '('+str(len(updated_indices))+')')
 
@@ -96,7 +108,8 @@ while curr_time < duration:
     transmissions += len(updated_indices)
     successes += len(updated_indices)
     for tx_index in updated_indices:
-        count_per_datas[tx_index] += 1
+        if in_eddystones[index] == 0:
+            count_per_datas[tx_index] += 1
         for other_index in range(len(times)):
             # don't test against yourself
             if tx_index == other_index:
@@ -115,7 +128,8 @@ while curr_time < duration:
                 # packet collision
                 collisions += 1
                 successes -= 1
-                count_per_datas[tx_index] -= 1
+                if in_eddystones[index] == 0:
+                    count_per_datas[tx_index] -= 1
                 if debug:
                     print("Packet 1: " + str(tx_start_time) + '-' + str(tx_end_time))
                     print("Packet 2: " + str(ot_start_time) + '-' + str(ot_end_time))
