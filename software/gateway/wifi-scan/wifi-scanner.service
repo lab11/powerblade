@@ -1,0 +1,13 @@
+[Unit]
+Description=Scan WiFi channel usage and record to csv file
+After=bluetooth.target mosquitto.service
+
+[Service]
+ExecStart=/home/debian/powerblade/software/gateway/wifi-scan/wifi-scanner.py
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=wifi-scanner
+
+[Install]
+WantedBy=multi-user.target
