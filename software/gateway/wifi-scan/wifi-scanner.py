@@ -22,7 +22,7 @@ def main():
     # create a csv file for writing to
     f = open('/home/nuc/wifi.csv', 'a+')
 
-    scanner = WiFiScanner()
+    scanner = WiFiScanner(f)
 
     while True:
         # move to next channel down the line
@@ -33,7 +33,9 @@ def main():
 
 class WiFiScanner():
     # Possible wifi channels for scanning
-    wifi_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    wifi_channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                    # Sam's nuc doesn't do channel 14
+                    #14,
                     ]
                     # Only 1-14 are relevant for BLE conflicts
                     #36, 38, 40, 44, 46, 48,
@@ -92,7 +94,7 @@ class WiFiScanner():
                     "Bytes Per Second=" + str(bps))
 
             # write data to csv file
-            csv_file.write(str(self.wifi_channels[chan_index]) + ',' + str(bps))
+            self.csv_file.write(str(self.wifi_channels[chan_index]) + ',' + str(bps))
 
             # The data should be periodically zeroed out again
             self.packet_count[chan_index]['packets'] = 0
@@ -106,7 +108,7 @@ class WiFiScanner():
                 self.channel_index = 0
                 self.completed_channel_cycle()
 
-            #print(cur_datetime() + "Info: Hopping to channel " + str(self.wifi_channels[self.channel_index]))
+            print(cur_datetime() + "Info: Hopping to channel " + str(self.wifi_channels[self.channel_index]))
             if (os.system("iwconfig wlan0 channel " +
                     str(self.wifi_channels[self.channel_index])) != 0):
                 print(cur_datetime() + "Error: Failed to change channel! Resetting...")
@@ -114,7 +116,7 @@ class WiFiScanner():
 
     def sniff(self, timeout=1):
             # run a time-limited scan on the channel
-            #print(cur_datetime() + "Info: Sniffing for " + str(timeout) + " seconds")
+            print(cur_datetime() + "Info: Sniffing for " + str(timeout) + " seconds")
             sniff(iface="wlan0", prn = self.PacketHandler,
                     lfilter=(lambda x: x.haslayer(Dot11)), timeout=timeout)
             self.packet_count[self.channel_index]['duration'] += timeout
