@@ -81,7 +81,7 @@ class WiFiScanner():
             self.packet_count[self.channel_index]['bytes'] += len(str(pkt))
 
     def completed_channel_cycle(self):
-        #print("\n***Completed Channel Cycle***")
+        print("\n***Completed Channel Cycle***")
         for chan_index in range(len(self.wifi_channels)):
             packets = self.packet_count[chan_index]['packets']
             packet_bytes = self.packet_count[chan_index]['bytes']
@@ -94,7 +94,7 @@ class WiFiScanner():
                     "Bytes Per Second=" + str(bps))
 
             # write data to csv file
-            self.csv_file.write(str(self.wifi_channels[chan_index]) + ',' + str(bps))
+            self.csv_file.write(str(self.wifi_channels[chan_index]) + ',' + str(bps) + '\n')
 
             # The data should be periodically zeroed out again
             self.packet_count[chan_index]['packets'] = 0
