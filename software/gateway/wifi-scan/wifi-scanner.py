@@ -20,7 +20,7 @@ if os.geteuid() != 0:
 def main():
     
     # create a csv file for writing to
-    f = open('/home/nuc/wifi.csv', 'a+')
+    f = open('/home/nuc/wifi.csv', 'a+', 0)
 
     scanner = WiFiScanner(f)
 
@@ -48,7 +48,7 @@ class WiFiScanner():
         self.last_packet = time.time()
         self.packet_count = []
         for index in range(len(self.wifi_channels)):
-            self.packet_count += [{'duration': 0.0, 'packets': 0.0, 'bytes': 0.0}]
+            self.packet_count += [{'duration': 0.0, 'packets': 0.0, 'bytes': 0.0, 'timestamp': 0}]
 
         # need to set wlan0 into monitor mode
         self._reset_wlan0()
@@ -86,6 +86,7 @@ class WiFiScanner():
             packets = self.packet_count[chan_index]['packets']
             packet_bytes = self.packet_count[chan_index]['bytes']
             duration = self.packet_count[chan_index]['duration']
+            timestamp = self.packet_count[chan_index]['timestamp']
             bps = 0
             if duration != 0:
                 bps = packet_bytes/duration
@@ -94,12 +95,13 @@ class WiFiScanner():
                     "Bytes Per Second=" + str(bps))
 
             # write data to csv file
-            self.csv_file.write(str(self.wifi_channels[chan_index]) + ',' + str(bps) + '\n')
+            self.csv_file.write(str(self.wifi_channels[chan_index]) + ',' + str(timestamp) + ',' + str(bps) + '\n')
 
             # The data should be periodically zeroed out again
             self.packet_count[chan_index]['packets'] = 0
             self.packet_count[chan_index]['bytes'] = 0
             self.packet_count[chan_index]['duration'] = 0
+            self.packet_count[chan_index]['timestamp'] = 0
 
     def hop(self):
             # hop to the next channel
@@ -117,9 +119,10 @@ class WiFiScanner():
     def sniff(self, timeout=1):
             # run a time-limited scan on the channel
             print(cur_datetime() + "Info: Sniffing for " + str(timeout) + " seconds")
+            self.packet_count[self.channel_index]['timestamp'] += time.time()
+            self.packet_count[self.channel_index]['duration'] += timeout
             sniff(iface="wlan0", prn = self.PacketHandler,
                     lfilter=(lambda x: x.haslayer(Dot11)), timeout=timeout)
-            self.packet_count[self.channel_index]['duration'] += timeout
 
             # check if the wireless device stopped working (defined as 10
             #   minutes without a single packet)
