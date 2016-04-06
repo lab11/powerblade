@@ -31,11 +31,11 @@ SELECT id, gatewayMAC, deviceMAC, power, timestamp
 FROM blees_power t2 WHERE t2.id>(SELECT max(bl_id) FROM overall_power);"
 
 echo "Inserting PowerBlade & BLEES data into recent"
-mysql --login-path=resistor whisperwood -e "INSERT INTO recent_power (pb_id, gatewayMAC, deviceMAC, power, timestamp)
-SELECT id, gatewayMAC, deviceMAC, power, timestamp
+mysql --login-path=resistor whisperwood -e "INSERT INTO recent_power (pb_id, gatewayMAC, deviceMAC, power, timestamp, shortMAC)
+SELECT id, gatewayMAC, deviceMAC, power, timestamp, conv(right(deviceMAC,6), 16, 10)
 FROM powerblade_test t1 WHERE t1.id>(SELECT max(pb_id) FROM recent_power);
-INSERT INTO recent_power (bl_id, gatewayMAC, deviceMAC, power, timestamp)
-SELECT id, gatewayMAC, deviceMAC, power, timestamp
+INSERT INTO recent_power (bl_id, gatewayMAC, deviceMAC, power, timestamp, shortMAC)
+SELECT id, gatewayMAC, deviceMAC, power, timestamp, conv(right(deviceMAC,6), 16, 10)
 FROM blees_power t2 WHERE t2.id>(SELECT max(bl_id) FROM recent_power);"
 
 # OR
