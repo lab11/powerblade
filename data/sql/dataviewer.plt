@@ -12,7 +12,7 @@ set xdata time
 
 set format x "%m-%d %H:%M"
 
-set key above
+#unset key
 
 set bmargin 8
 
