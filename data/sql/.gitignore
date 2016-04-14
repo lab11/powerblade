@@ -1,5 +1,7 @@
 *.pdf
 .sqldata.temp
+shortlist.txt
+bridge.plt
 *.eps 
 *.csv
 !blees_light_lookup.csv

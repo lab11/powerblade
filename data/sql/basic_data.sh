@@ -73,7 +73,7 @@ if [[ -n "${ENDTIME+1}" ]]; then
 	ENDTIME="'${ENDTIME}'"
 	echo "Ending at ${ENDTIME}"
 else
-	ENDTIME=$(date +%Y-%m-%d\ %H:%M:%S)
+	ENDTIME=$(date -u +%Y-%m-%d\ %H:%M:%S)
 	ENDTIME="'${ENDTIME}'"
 	echo "Ending now (${ENDTIME})"
 fi
@@ -100,9 +100,11 @@ DEVICELIST_TEMP="(${DEVICELIST_TEMP})"
 
 echo "Creating Calendar"
 mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS calendar;"
-mysql --login-path=resistor whisperwood -e "CREATE TABLE calendar AS
-select t2.timestamp as timestamp, t1.deviceMAC as deviceMAC from
-(select deviceMAC from overall_power where ${DEVICELIST_TEMP} group by deviceMAC) t1
+mysql --login-path=resistor whisperwood -e "CREATE TABLE calendar (timestamp datetime,
+	deviceMAC char(12), shortMAC int(11), index(timestamp),index(shortMAC));"
+mysql --login-path=resistor whisperwood -e "INSERT INTO calendar
+select t2.timestamp, t1.deviceMAC, conv(concat(case when substring(deviceMAC,7,1)='7' then '1' else '0' end, right(deviceMAC,2)),16,10) from
+(select deviceMAC from device_list where ${DEVICELIST_TEMP} group by deviceMAC) t1
 cross join
 (select a.Date as timestamp
 from (
@@ -116,15 +118,38 @@ from (
 ) a
 where a.Date between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) AND ${ENDTIME} order by a.Date asc) t2;"
 
+#echo "Creating subset of power table"
+#mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS overall_power_window; CREATE TABLE overall_power_window as select * from overall_power_shortmac where timestamp between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) and ${ENDTIME}"
 echo "Creating Final Overall Power Table. This may take several minutes depending on query"
 mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS overall_power_filled;"
 mysql --login-path=resistor whisperwood -e "CREATE TABLE overall_power_filled AS
-SELECT t1.*, (select power from overall_power where id=max(t2.ID)) as power
+SELECT t1.*, (select power from overall_power_shortmac where id=max(t2.ID)) as power
 FROM calendar t1
-JOIN overall_power t2
+JOIN (select * from overall_power_shortmac where timestamp between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) and ${ENDTIME}) t2
 ON (t2.timestamp BETWEEN date_sub(t1.timestamp, INTERVAL 1 MINUTE) AND t1.timestamp)
-AND t1.deviceMAC=t2.deviceMAC
-GROUP BY t1.timestamp, t1.deviceMAC;"
+AND t1.shortMAC=t2.shortMAC
+GROUP BY t1.timestamp, t1.shortMAC;"
+
+#(select power from recent_power where id=max(t2.ID)) as power
+
+# mysql --login-path=resistor whisperwood -e "CREATE TABLE overall_power_filled AS
+# select t1.*, (select power from recent_power where id=max(t2.ID)) as power
+# from calendar_sub t1
+# join recent_power t2
+# on (t2.timestamp between date_sub(t1.timestamp, INTERVAL 1 MINUTE) and t1.timestamp)
+# and t1.deviceMAC=t2.deviceMAC
+# GROUP BY t1.timestamp, t1.deviceMAC;"
+
+# mysql --login-path=resistor whisperwood -e "CREATE TABLE overall_power_filled AS
+# select t1.*, t2.power
+# from calendar_sub t1
+# join recent_power t2
+# on t2.id=(select max(t2b.id)
+# from recent_power t2b 
+# where t2b.timestamp between date_sub(t1.timestamp, INTERVAL 1 MINUTE) and t1.timestamp
+# and t1.shortMAC=t2b.shortMAC);"
+
+
 
 DEVICELIST=""
 PLTLINE=""
@@ -134,7 +159,7 @@ if [[ -n "${FILENAME+1}" ]]; then
 			DEVICELIST="${DEVICELIST} OR deviceMAC='${dev}'"
 			mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),power from overall_power_filled WHERE deviceMAC='${dev}' and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > "${dev}".csv
 			if [ -s "${dev}".csv ]; then
-				PLTLINE="${PLTLINE},\x5C\n\t\"${dev}.csv\" u 1:2 with lines title \"${dev}\" "
+				PLTLINE="${PLTLINE},\x5C\n\t\"${dev}.csv\" u 1:2 with lines notitle "
 			else
 				echo "No data points for ${dev}"
 			fi
@@ -159,12 +184,12 @@ if [[ -n "${EBRIDGE+1}" ]]; then
 	GROUP BY timestamp
 	ORDER BY timestamp asc;" > ebridge.csv
 	maxpower=$(mysql --login-path=resistor whisperwood -se "SET @end_time = date_sub(${ENDTIME}, INTERVAL 4 HOUR); SELECT (${ebridge_expansion}*1000*max(power)) FROM energy_bridge WHERE timestamp BETWEEN date_sub(@end_time, INTERVAL ${DURTIME} MINUTE) AND @end_time;")
-	PLTLINE="${PLTLINE},\x5C\n\t\"ebridge.csv\" u 1:2 with lines title \"Energy Bridge\" "
+	PLTLINE="${PLTLINE},\x5C\n\t\"ebridge.csv\" u 1:2 with linespoints title \"Energy Bridge\" "
 fi
 
 
-mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),sum(power) as sum FROM overall_power_filled WHERE ${DEVICELIST} and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > sumPower.csv
-
+#mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),sum(power) as sum FROM overall_power_filled group by timestamp order by timestamp asc;" > sumPower.csv
+mysql --login-path=resistor whisperwood -e "SET @weight=1;select date_sub(timestamp, INTERVAL 4 HOUR),@x:=Round((@weight*@x+(10-@weight)*sum(power))/10,2) as sum from overall_power_filled join ( select @x:=1 ) as dummy group by timestamp order by timestamp asc;" > sumPower.csv
 echo "Finishing Plotting File"
 cat dataviewer.plt > temp.plt
 printf "set xtics ${DURTIME}*60/10 rotate by 70 offset -2.9,-4.65\n\n" >> temp.plt
