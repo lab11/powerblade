@@ -3,5 +3,4 @@
 *.eps 
 *.csv
 !blees_light_lookup.csv
-deviceList.txt
 temp.plt
