@@ -32,6 +32,7 @@ bool senseEnabled;
 
 // Variable for integration
 int16_t agg_current;
+int16_t agg_current_local;
 
 // Count each sample and 60Hz measurement
 uint8_t sampleCount;
@@ -73,6 +74,16 @@ uint8_t Vrms;
 uint16_t truePower;
 uint16_t apparentPower;
 uint64_t wattHours;
+
+// Local calibration values
+int32_t voff_local;
+uint32_t voff_count;
+int32_t ioff_local;
+uint32_t ioff_count;
+int32_t curoff_local;
+uint32_t curoff_count;
+int32_t vscale_local;
+int32_t pscale_local;
 
 #pragma PERSISTENT(flags)
 uint8_t flags = 0x05;
@@ -277,8 +288,15 @@ void transmit(void) {
 	uart_stuff(blockOffset + OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
 	uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
 	uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
+
+	scale = 1;
+	scale = (scale<<8)+pb_config.vscale;
+	scale = (scale<<8)+pb_config.whscale;
 	uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
+
 	uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
+	truePower = (uint16_t)(-1*voff_local);
+	apparentPower = (uint16_t)(-1*ioff_local);
 	uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 	uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 
@@ -342,6 +360,14 @@ void transmitTry(void) {
 			measCount = 0;
 
 			uart_len = ADLEN + UARTOVHD;
+
+			if(pb_state == pb_capture) {
+				voff_local = voff_local / voff_count;
+				ioff_local = ioff_local / ioff_count;
+			}
+			else if(pb_state == pb_data) {
+				curoff_local = curoff_local / curoff_count;
+			}
 
 			// Process any UART bytes
 			if(pb_state == pb_capture) {
@@ -515,9 +541,20 @@ __interrupt void ADC10_ISR(void) {
 					//tempCurrent = -50;
 					int arrayIndex = (2*dataIndex) + (ADLEN + UARTOVHD)*((dataIndex/252) + 1) + (dataIndex/252);
 					uart_stuff(arrayIndex, (char*) &tempCurrent, sizeof(tempCurrent));
+					if(dataIndex >= 60 && dataIndex < 2460) {
+						ioff_local += tempCurrent;
+						ioff_count++;
+					}
 					dataIndex++;
 				}
 #endif
+			}
+			else if(pb_state == pb_data) {
+				int16_t newCurrent = tempCurrent - ioff_local;
+				agg_current_local += (newCurrent + (newCurrent >> 1));
+				agg_current_local -= agg_current_local >> 5;
+				curoff_local += agg_current_local >> 3;
+				curoff_count++;
 			}
 
 			// After its been stored for raw sample transmission, apply offset
@@ -562,6 +599,10 @@ __interrupt void ADC10_ISR(void) {
 					//tempVoltage = -194;
 					int arrayIndex = (2*dataIndex) + (ADLEN + UARTOVHD)*((dataIndex/252) + 1) + (dataIndex/252);
 					uart_stuff(arrayIndex, (char*) &tempVoltage, sizeof(tempVoltage));
+					if(dataIndex >= 60 && dataIndex < 2460) {
+						voff_local += tempVoltage;
+						voff_count++;
+					}
 					dataIndex++;
 				}
 #endif
@@ -600,6 +641,7 @@ __interrupt void ADC10_ISR(void) {
 					wattHoursToAverage = 0;
 					voltAmpsToAverage = 0;
 					agg_current = 0;
+					agg_current_local = 0;
 					ready = 1;
 				}
 			}
