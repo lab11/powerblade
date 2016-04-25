@@ -77,11 +77,11 @@ uint64_t wattHours;
 
 // Local calibration values
 int32_t voff_local;
-uint32_t voff_count;
+int32_t voff_count;
 int32_t ioff_local;
-uint32_t ioff_count;
+int32_t ioff_count;
 int32_t curoff_local;
-uint32_t curoff_count;
+int32_t curoff_count;
 int32_t vscale_local;
 int32_t pscale_local;
 
@@ -289,14 +289,9 @@ void transmit(void) {
 	uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
 	uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
 
-	scale = 1;
-	scale = (scale<<8)+pb_config.vscale;
-	scale = (scale<<8)+pb_config.whscale;
 	uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
 
 	uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
-	truePower = (uint16_t)(-1*voff_local);
-	apparentPower = (uint16_t)(-1*ioff_local);
 	uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 	uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 
@@ -367,6 +362,7 @@ void transmitTry(void) {
 			}
 			else if(pb_state == pb_data) {
 				curoff_local = curoff_local / curoff_count;
+				pscale_local = 0x4000 + ((uint16_t)((uint32_t)200*10000/truePower) & 0x0FFF);
 			}
 
 			// Process any UART bytes
@@ -390,6 +386,10 @@ void transmitTry(void) {
 					scale = pb_config.pscale;
 					scale = (scale<<8)+pb_config.vscale;
 					scale = (scale<<8)+pb_config.whscale;
+					pb_config.voff = voff_local;
+					pb_config.ioff = ioff_local;
+					pb_config.curoff = curoff_local;
+					pb_config.pscale = pscale_local;
 					flags |= 0x80;
 					break;
 				case GET_VER:
