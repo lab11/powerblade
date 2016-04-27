@@ -113,15 +113,15 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
  * **Start Sample Data Download**: Get individual samples from one second of power sampling
  * **Continue Sample Data Download**: Get next set of raw samples from MSP430
  * **Stop Sample Data Download**: Stop collecting and transmitting raw samples
- * **Start Local Calibration**: Start local calibration procedure at known wattage, voltage
+ * **Start Local Calibration**: Start local calibration procedure at known wattage, voltage. These values are transmitted after the type (0x23) as two 16-bit numbers representing 10x the intended value (see example below). 
  * **Continue Local Calibration**: Calibration load still active, "Done" (0x25) not yet received
  * **Stop Local Calibration**: Cancel local calibration process. Old calibration values are maintained. 
  * **NAK**: nRF indicating checksum of previous message failed
 
 #### Example Packet
 
-Example UART packet with a `Ground Truth Watts` type and a wattage value of 200 Watts. 
+Example UART packet with a `Start Local Calibration` type, a wattage value of 200.1 W, and voltage of 118.8 V. 
 
-| **Field** | Total Length | Data Type | Data Values | Checksum |
-|:---------:|:------------:|:---------:|:-----------:|:--------:|
-| **Value** | 0x0006       | 0x11      | 0x00C8      | 0x20     |
+| **Field** | Total Length | Data Type | Wattage | Voltage | Checksum |
+|:---------:|:------------:|:---------:|:-------:|:-------:|:--------:|
+| **Value** | 0x0008       | 0x23      | 0x07D1  | 0x04A4  | ???      |
