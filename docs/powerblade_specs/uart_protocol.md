@@ -59,10 +59,16 @@ Each additional data field has only a single `Add Data Type`. If the MSP430 has 
 | 0x20  | Sample Data Starting |
 | 0x21  | Sample Data Values |
 | 0x22	| Send Data Done |
+| 0x23  | Local Calibration Starting |
+| 0x24  | Local Calibration Ongoing |
+| 0x25  | Local Calibration Done | 
 
  * **Sample Data Starting**: MSP430 is collecting raw samples
  * **Sample Data Values**: Data values are raw samples from MSP430
  * **Sample Data Done**: All raw samples have been collected
+ * **Local Calibration Starting**: MSP430 is beginning local calibration
+ * **Local Calibration Ongoing**: Local calibration is in process, has not failed or finished
+ * **Local Calibration Done**: Calibration process is done/settled
 
 
 ## nRF to MSP Packet Specification
@@ -95,6 +101,9 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
 | 0x22  | Stop Sample Data Download |
+| 0x23  | Start Local Calibration |
+| 0x24  | Continue Local Calibration |
+| 0x25  | Stop Local Calibration | 
 | 0xFF	| NAK (Checksum failed) |
 
  * **Get Configuration**: Get the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
@@ -104,6 +113,9 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
  * **Start Sample Data Download**: Get individual samples from one second of power sampling
  * **Continue Sample Data Download**: Get next set of raw samples from MSP430
  * **Stop Sample Data Download**: Stop collecting and transmitting raw samples
+ * **Start Local Calibration**: Start local calibration procedure at known wattage, voltage
+ * **Continue Local Calibration**: Calibration load still active, "Done" (0x25) not yet received
+ * **Stop Local Calibration**: Cancel local calibration process. Old calibration values are maintained. 
  * **NAK**: nRF indicating checksum of previous message failed
 
 #### Example Packet

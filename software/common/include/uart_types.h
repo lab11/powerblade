@@ -16,6 +16,9 @@
 #define START_SAMDATA   0x20
 #define CONT_SAMDATA    0x21
 #define DONE_SAMDATA    0x22
+#define START_LOCALC	0x23
+#define CONT_LOCALC		0x24
+#define DONE_LOCALC		0x25
 #define UART_NAK        0xFF
 
 
