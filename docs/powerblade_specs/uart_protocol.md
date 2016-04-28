@@ -59,10 +59,16 @@ Each additional data field has only a single `Add Data Type`. If the MSP430 has 
 | 0x20  | Sample Data Starting |
 | 0x21  | Sample Data Values |
 | 0x22	| Send Data Done |
+| 0x23  | Local Calibration Starting |
+| 0x24  | Local Calibration Ongoing |
+| 0x25  | Local Calibration Done | 
 
  * **Sample Data Starting**: MSP430 is collecting raw samples
  * **Sample Data Values**: Data values are raw samples from MSP430
  * **Sample Data Done**: All raw samples have been collected
+ * **Local Calibration Starting**: MSP430 is beginning local calibration
+ * **Local Calibration Ongoing**: Local calibration is in process, has not failed or finished
+ * **Local Calibration Done**: Calibration process is done/settled
 
 
 ## nRF to MSP Packet Specification
@@ -90,26 +96,33 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x10  | Get Configuration |
 | 0x11  | Set Configuration |
 | 0x12	| Get software version |
-| 0x1C	| Set Sequence |
-| 0x1D	| Set WH to zero (reset accumulator) |
+| 0x1C	| Set Sequence DEPRECIATED |
+| 0x1D	| Set WH to zero (reset accumulator) DEPRECIATED |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
 | 0x22  | Stop Sample Data Download |
+| 0x23  | Start Local Calibration |
+| 0x24  | Continue Local Calibration |
+| 0x25  | Stop Local Calibration | 
 | 0xFF	| NAK (Checksum failed) |
 
  * **Get Configuration**: Get the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
  * **Set Configuration**: Set the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
  * **Get software version**: Get the version of the software running on the MSP430. Response payload will be a single byte
- * **Set Sequence**: Set the sequence number to be included (and incremented) in future packets
+ * **Set Sequence**: This command is no longer valid, MSP430 will respond NAK (0xFF)
+ * **Set WH to zero**: This command is no longer valid, MSP430 will respond NAK (0xFF) 
  * **Start Sample Data Download**: Get individual samples from one second of power sampling
  * **Continue Sample Data Download**: Get next set of raw samples from MSP430
  * **Stop Sample Data Download**: Stop collecting and transmitting raw samples
+ * **Start Local Calibration**: Start local calibration procedure at known wattage, voltage. These values are transmitted after the type (0x23) as two 16-bit numbers representing 10x the intended value (see example below). 
+ * **Continue Local Calibration**: Calibration load still active, "Done" (0x25) not yet received
+ * **Stop Local Calibration**: Cancel local calibration process. Old calibration values are maintained. 
  * **NAK**: nRF indicating checksum of previous message failed
 
 #### Example Packet
 
-Example UART packet with a `Ground Truth Watts` type and a wattage value of 200 Watts. 
+Example UART packet with a `Start Local Calibration` type, a wattage value of 200.1 W, and voltage of 118.8 V. 
 
-| **Field** | Total Length | Data Type | Data Values | Checksum |
-|:---------:|:------------:|:---------:|:-----------:|:--------:|
-| **Value** | 0x0006       | 0x11      | 0x00C8      | 0x20     |
+| **Field** | Total Length | Data Type | Wattage | Voltage | Checksum |
+|:---------:|:------------:|:---------:|:-------:|:-------:|:--------:|
+| **Value** | 0x0008       | 0x23      | 0x07D1  | 0x04A4  | ???      |

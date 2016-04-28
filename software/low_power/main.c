@@ -421,8 +421,13 @@ void transmitTry(void) {
 					break;
 				}
 				case CLR_WH:
-					wattHours = 0;
+				{
+					//wattHours = 0;
+					uart_len += 1;
+					char data_type = UART_NAK;
+					uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
 					break;
+				}
 				default:
 					switch(pb_state) {
 
