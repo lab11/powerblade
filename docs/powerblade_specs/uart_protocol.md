@@ -96,8 +96,8 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
 | 0x10  | Get Configuration |
 | 0x11  | Set Configuration |
 | 0x12	| Get software version |
-| 0x1C	| Set Sequence |
-| 0x1D	| Set WH to zero (reset accumulator) |
+| 0x1C	| Set Sequence DEPRECIATED |
+| 0x1D	| Set WH to zero (reset accumulator) DEPRECIATED |
 | 0x20  | Start Sample Data Download |
 | 0x21	| Continue Sample Data Download |
 | 0x22  | Stop Sample Data Download |
@@ -109,7 +109,8 @@ Each packet has only a single `Data Type`. If the nRF has multiple items to be s
  * **Get Configuration**: Get the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
  * **Set Configuration**: Set the current values of PowerBlade configuration values: Voff, Ioff, PScale, VScale, and WHScale
  * **Get software version**: Get the version of the software running on the MSP430. Response payload will be a single byte
- * **Set Sequence**: Set the sequence number to be included (and incremented) in future packets
+ * **Set Sequence**: This command is no longer valid, MSP430 will respond NAK (0xFF)
+ * **Set WH to zero**: This command is no longer valid, MSP430 will respond NAK (0xFF) 
  * **Start Sample Data Download**: Get individual samples from one second of power sampling
  * **Continue Sample Data Download**: Get next set of raw samples from MSP430
  * **Stop Sample Data Download**: Stop collecting and transmitting raw samples
