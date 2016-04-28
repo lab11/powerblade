@@ -195,7 +195,7 @@ int main(void) {
 	measCount = 0;
 
 	// Initialize remaining transmitted values
-	sequence = 0;
+	//sequence = 0;
 	txIndex = 0;
 
 	// Initialize scale value (can be updated later)
@@ -413,8 +413,13 @@ void transmitTry(void) {
 					uart_stuff(1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), &msp_software_version, sizeof(msp_software_version));
 					break;
 				case SET_SEQ:
-					sequence = captureBuf[0];
+				{
+					//sequence = captureBuf[0];
+					uart_len += 1;
+					char data_type = UART_NAK;
+					uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
 					break;
+				}
 				case CLR_WH:
 					wattHours = 0;
 					break;
