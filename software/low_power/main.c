@@ -65,7 +65,7 @@ uint32_t voltAmpsToAverage;
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 2;
-char msp_software_version = 1;
+char msp_software_version = 2;
 
 // Transmitted values
 uint32_t sequence;
@@ -327,7 +327,17 @@ void transmitTry(void) {
 	agg_current -= agg_current >> 5;
 
 	// Subtract offset
-	int32_t new_current = (agg_current >> 3) - pb_config.curoff;
+	int32_t new_current;
+	if(pb_state == pb_local3) {
+		new_current = (agg_current >> 3) - curoff_local;
+	}
+	else {
+		new_current = (agg_current >> 3) - pb_config.curoff;
+		if(pb_state == pb_local2) {
+			curoff_local += agg_current >> 3;
+			curoff_count++;
+		}
+	}
 
 	// Perform calculations for I^2, V^2, and P
 	acc_i_rms += (uint64_t)(new_current * new_current);
@@ -356,13 +366,18 @@ void transmitTry(void) {
 
 			uart_len = ADLEN + UARTOVHD;
 
-			if(pb_state == pb_capture) {
+			if(pb_state == pb_local1) {
 				voff_local = voff_local / voff_count;
 				ioff_local = ioff_local / ioff_count;
+				pb_state = pb_local2;
 			}
-			else if(pb_state == pb_data) {
+			else if(pb_state == pb_local2) {
 				curoff_local = curoff_local / curoff_count;
+				pb_state = pb_local3;
+			}
+			else if(pb_state == pb_local3) {
 				pscale_local = 0x4000 + ((uint16_t)((uint32_t)200*10000/truePower) & 0x0FFF);
+				pb_state = pb_local_done;
 			}
 
 			// Process any UART bytes
@@ -386,10 +401,10 @@ void transmitTry(void) {
 					scale = pb_config.pscale;
 					scale = (scale<<8)+pb_config.vscale;
 					scale = (scale<<8)+pb_config.whscale;
-					pb_config.voff = voff_local;
-					pb_config.ioff = ioff_local;
-					pb_config.curoff = curoff_local;
-					pb_config.pscale = pscale_local;
+//					pb_config.voff = voff_local;
+//					pb_config.ioff = ioff_local;
+//					pb_config.curoff = curoff_local;
+//					pb_config.pscale = pscale_local;
 					flags |= 0x80;
 					break;
 				case GET_VER:
@@ -414,6 +429,15 @@ void transmitTry(void) {
 							dataIndex = 0;
 							uart_len += 1;
 							char data_type = START_SAMDATA;
+							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
+							break;
+						}
+						case START_LOCALC:
+						{
+							pb_state = pb_local1;
+							dataIndex = 0;
+							uart_len += 1;
+							char data_type = START_LOCALC;
 							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
 							break;
 						}
@@ -450,6 +474,39 @@ void transmitTry(void) {
 							break;
 						}
 						break;
+
+					case pb_local2:
+					case pb_local3:
+						switch(captureType) {
+						case CONT_LOCALC:
+						{
+							uart_len += 1;
+							char data_type = CONT_LOCALC;
+							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
+							break;
+						}
+						default:
+							break;
+						}
+						break;
+
+					case pb_local_done:
+						switch(captureType) {
+						case CONT_LOCALC:
+						{
+							uart_len += 1;
+							char data_type = DONE_LOCALC;
+							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
+							pb_config.voff = voff_local;
+							pb_config.ioff = ioff_local;
+							pb_config.curoff = curoff_local;
+							pb_config.pscale = pscale_local;
+							flags |= 0x40;
+							break;
+						}
+						default:
+							break;
+						}
 
 					}
 					break;
@@ -541,24 +598,32 @@ __interrupt void ADC10_ISR(void) {
 					//tempCurrent = -50;
 					int arrayIndex = (2*dataIndex) + (ADLEN + UARTOVHD)*((dataIndex/252) + 1) + (dataIndex/252);
 					uart_stuff(arrayIndex, (char*) &tempCurrent, sizeof(tempCurrent));
-					if(dataIndex >= 60 && dataIndex < 2460) {
-						ioff_local += tempCurrent;
-						ioff_count++;
-					}
 					dataIndex++;
 				}
 #endif
 			}
-			else if(pb_state == pb_data) {
-				int16_t newCurrent = tempCurrent - ioff_local;
-				agg_current_local += (newCurrent + (newCurrent >> 1));
-				agg_current_local -= agg_current_local >> 5;
-				curoff_local += agg_current_local >> 3;
-				curoff_count++;
+			else if(pb_state == pb_local1) {
+				if(dataIndex >= 60 && dataIndex < 2460) {
+					ioff_local += tempCurrent;
+					ioff_count++;
+				}
+				dataIndex++;
 			}
+//			else if(pb_state == pb_local2) {
+//				int16_t newCurrent = tempCurrent - ioff_local;
+//				agg_current_local += (newCurrent + (newCurrent >> 1));
+//				agg_current_local -= agg_current_local >> 5;
+//				curoff_local += agg_current_local >> 3;
+//				curoff_count++;
+//			}
 
 			// After its been stored for raw sample transmission, apply offset
-			current[currentWriteCount++] = tempCurrent - pb_config.ioff;
+			if(pb_state == pb_local2 || pb_state == pb_local3) {
+				current[currentWriteCount++] = tempCurrent - ioff_local;
+			}
+			else {
+				current[currentWriteCount++] = tempCurrent - pb_config.ioff;
+			}
 			if(currentWriteCount == BACKLOG_LEN) {
 				currentWriteCount = 0;
 			}
@@ -599,17 +664,25 @@ __interrupt void ADC10_ISR(void) {
 					//tempVoltage = -194;
 					int arrayIndex = (2*dataIndex) + (ADLEN + UARTOVHD)*((dataIndex/252) + 1) + (dataIndex/252);
 					uart_stuff(arrayIndex, (char*) &tempVoltage, sizeof(tempVoltage));
-					if(dataIndex >= 60 && dataIndex < 2460) {
-						voff_local += tempVoltage;
-						voff_count++;
-					}
 					dataIndex++;
 				}
 #endif
 			}
+			else if(pb_state == pb_local1) {
+				if(dataIndex >= 60 && dataIndex < 2460) {
+					voff_local += tempVoltage;
+					voff_count++;
+				}
+				dataIndex++;
+			}
 
 			// After its been stored for raw sample transmission, apply offset
-			voltage[voltageWriteCount++] = tempVoltage - pb_config.voff;
+			if(pb_state == pb_local2 || pb_state == pb_local3) {
+				voltage[voltageWriteCount++] = tempVoltage - voff_local;
+			}
+			else {
+				voltage[voltageWriteCount++] = tempVoltage - pb_config.voff;
+			}
 			if(voltageWriteCount == BACKLOG_LEN) {
 				voltageWriteCount = 0;
 			}
