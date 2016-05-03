@@ -106,7 +106,7 @@ var blees_count = 0;
 var coilcube_count = 0;
 var rssi_count = 0;
 
-var UPLOAD_COUNT = 1000;
+var UPLOAD_COUNT = 5000;
 var file_start_time = 0;
 var FILE_TIMEOUT = 30;
 MQTTDiscover.on('mqttBroker', function (mqtt_client) {
