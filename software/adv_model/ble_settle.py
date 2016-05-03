@@ -20,11 +20,10 @@ debug = False
 # list of BLE devices specified by
 #   (count, advertising interval in ms, advertisement length in ms, new data interval in ms, number of eddystone per data interval)
 devices = [
-        ( 1, 1000, 0.376, 2000, 1),
-        ( 1,  200, 0.376, 1000, 1),
-        #( 18, 1000, 0.376, 2000, 1),
-        #( 61,  200, 0.376, 1000, 1),
-        #(2, 1000, 10, 1000, 0),
+        #( 17, 1000, 0.376, 2000, 1),
+        #( 19,  200, 0.376, 1000, 1),
+        ((17), 1000, 0.376, 1000, 0),
+        ((19+28),  200, 0.376, 200, 0),
         ]
 
 # start all devices at the same moment or at a random time in their interval
@@ -35,8 +34,13 @@ synchronized_start = False
 #   The current assumption is that jitter is continuous from 0
 adv_jitter = 10
 
+# desired stability of output. When the output changes less than this amount
+#   we consider the simulation to be complete
+settling_point = 0.000001
+
+#XXX: delete
 # duration of testing, in ms
-duration = 24*60*60*1000
+#duration = 10*60*1000
 
 
 ####################
@@ -78,21 +82,15 @@ for (count, interval, length, data_interval, eddystone) in devices:
 # calculate actual GCD of advertising intervals
 iter_step = functools.reduce(fractions.gcd, intervals)
 
-# iterate for duration
+# iterate until settled
 curr_time = 0
 transmissions = 0
 successes = 0
+prev_prr = 0
 unique_transmissions = 0
 unique_successes = 0
-prev_successes = 0
-prev_transmissions = 0
-prev_prr = 0
-while curr_time < duration:
+while transmissions == 0 or abs((successes/transmissions)-prev_prr) > settling_point:
     if transmissions != 0:
-        #print(str((successes-prev_successes)/(transmissions-prev_transmissions)))
-        #print(prev_prr)
-        prev_successes = successes
-        prev_transmissions = transmissions
         prev_prr = (successes/transmissions)
 
     # increment advertisements
@@ -152,13 +150,16 @@ while curr_time < duration:
                 break
 
     # status
-    if False and not debug and collisions != 0:
+    if not debug and collisions != 0:
         print("Time: " + str(curr_time) + '\tCollisions: ' + str(collisions))
 
     # iterate
     curr_time += iter_step
 
 # print results
+print("\n")
+print("Total Time: " + str(curr_time/1000) + " s")
+print("")
 print("Successful Transmissions: " + str(successes))
 print("Total Transmissions: " + str(transmissions))
 print("PRR: " + str(successes/transmissions))
