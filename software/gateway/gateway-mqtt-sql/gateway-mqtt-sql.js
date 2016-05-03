@@ -21,6 +21,8 @@ var MQTT_RSSI_TOPIC = 'ble-advertisements'
 try {
     var config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-sql.conf', 'utf-8');
     var config = ini.parse(config_file);
+    var aws_config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-aws.conf', 'utf-8');
+    var aws_config = ini.parse(aws_config_file);
     // if (config.post_url == undefined || config.post_url == '') {
     //     throw new Exception("No GATD HTTP POST Receiver URL");
     // }
@@ -67,6 +69,13 @@ var connection = mysql.createConnection({
   user     : config.sql_usr,
   password : config.sql_pw,
   database : config.sql_db
+});
+
+var aws_connection = mysql.createConnection({
+  host     : aws_config.sql_ip,
+  user     : aws_config.sql_usr,
+  password : aws_config.sql_pw,
+  database : aws_config.sql_db
 });
 
 var gateway_mac;
@@ -236,7 +245,16 @@ function post_to_sql () {
 
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade');
+            console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in Umich');
+        });
+
+        // Batch upload to AWS
+        loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE dat_powerblade FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
+        console.log(loadQuery)
+
+        aws_connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in AWS');
 
             // Erase the PowerBlade temp file
             console.log('Erasing PowerBlade');
@@ -261,7 +279,15 @@ function post_to_sql () {
         
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done writing ' + blees_count_save + ' packets to BLEES');
+            console.log('Done writing ' + blees_count_save + ' packets to BLEES in Umich');
+        });
+
+        loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE dat_blees FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
+        console.log(loadQuery)
+
+        aws_connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done writing ' + blees_count_save + ' packets to BLEES in AWS');
 
             // Erase the BLEES temp file
             console.log('Erasing BLEES');
@@ -286,7 +312,15 @@ function post_to_sql () {
 
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube');
+            console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in Umich');
+        });
+
+        loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE dat_coilcube FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
+        console.log(loadQuery);
+
+        aws_connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in AWS');
 
             // Erase the Coilcube temp file
             console.log('Erasing Coilcube');
@@ -294,7 +328,7 @@ function post_to_sql () {
                 if (err) throw err;
                 console.log('Done erasing Coilcube');
             });
-        })
+        });
     }
 
     if(rssi_count_save > 0) {
@@ -311,7 +345,15 @@ function post_to_sql () {
 
         connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
-            console.log('Done writing ' + rssi_count_save + ' packets to RSSI');
+            console.log('Done writing ' + rssi_count_save + ' packets to RSSI in Umich');
+        });
+
+        loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE dat_rssi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
+        console.log(loadQuery);
+
+        aws_connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done writing ' + rssi_count_save + ' packets to RSSI in AWS');
 
             // Erase RSSI file
             console.log('Erasing RSSI');
