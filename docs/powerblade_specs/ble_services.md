@@ -29,26 +29,81 @@ Device Configuration Service
 
     Offset to apply to each current ADC reading. Used for device calibration
 
-0x4DA5 - Power Scale Configuration
+0x4DA5 - Current Offset Post-Integration Configuration
+
+    uint8_t Read, Write
+
+    Offset to apply to each current measurement post-integration. Used for
+    device calibration
+
+0x4DA6 - Power Scale Configuration
 
     uint8_t: Read, Write
 
     Scaling value used to determine power readings. Used for device calibration.
     Transmitted over advertisements to users
 
-0x4DA6 - Voltage Scale Configuration
+0x4DA7 - Voltage Scale Configuration
 
     uint8_t: Read, Write
 
     Scaling value used to determine voltage readings. Used for device
     calibration. Transmitted over advertisements to users
 
-0x4DA7 - Watt-Hours Scale Configuration
+0x4DA8 - Watt-Hours Scale Configuration
 
     uint8_t: Read, Write
 
     Scaling value used to determine watt-hours readings. Used for device
     calibration. Transmitted over advertisements to users
+
+0x4DA9 - Clear Watt-Hours
+
+    uint8_t: Write
+
+    Clears stored Watt-Hours measurement value back to zero
+
+## Self Calibration
+Calibration Control Service
+
+    Full UUID: 494b3070-aad5-4e84-9ed9-6194ed0bc457
+    Short UUID: 0xED0B
+
+    Runs internal calibration of measurements on the MSP430. Used for
+    device-specific calibration at manufacturing time
+
+0xED0C - Wattage Setpoint
+
+    uint16_t: Read, Write
+
+    Real power wattage value the PowerBlade is attached to measured in
+    tenths of watts
+
+0xED0D - Voltage Setpoint
+
+    uint16_t: Read, Write
+
+    RMS voltage value the PowerBlade is attached to measured in tenths of volts
+
+0xED0E - Calibration Control and Status
+
+    uint8_t: Read, Write, Notify
+
+    Control of and status from calibration.
+    When calibration is not running, writing any value begins the process.
+    Writing any value while calibration is running cancels the procedure. While
+    running, the value is set to 1 after calibration has started and as it
+    continues. When complete, the value is set to 2.
+
+### Method of Operation:
+Install PowerBlade on a load with known wattage and voltage. Write wattage
+value to `Wattage Setpoint` and voltage value to `Voltage Setpoint` both as
+tenths of their respective units. Enable notifications on
+`Calibration Control and Status`. Write a value of 1 to
+`Calibration Control and Status`. Wait until a notification value of 2 arrives
+from `Calibration Control and Status`. Calibration is now complete. If desired,
+the specific calibration values can be read from the
+`Device Configuration Service`.
 
 ## Sample Collection
 Raw Sample Data Collection Service
@@ -92,4 +147,9 @@ Raw Sample Data Collection Service
     Notifies whenever new data is available (1) or data collection is complete (2)
 
 ### Method of Operation:
-Enable notifications on `Collection Status`. Next, write 0x01 to `Begin Sample Collection`. On notification value 0x01, read a raw sample chunk from `Raw Sample Values`. Write 0x01 to `Collection Status`. Repeat reading and writing until sent the notification value of 0x02 at which point all data has been collected and Sample Collection is complete.
+Enable notifications on `Collection Status`. Next, write 0x01 to
+`Begin Sample Collection`. On notification value 0x01, read a raw sample chunk
+from `Raw Sample Values`. Write 0x01 to `Collection Status`. Repeat reading and
+writing until sent the notification value of 0x02 at which point all data has
+been collected and Sample Collection is complete.
+

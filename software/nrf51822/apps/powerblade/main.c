@@ -123,6 +123,27 @@ static simple_ble_service_t config_service = {
     // characteristic to access watt-hours scaling value
     static simple_ble_char_t config_whscale_char = {.uuid16 = 0x4DA8};
 
+    // characteristic to clear the WH value
+    static simple_ble_char_t config_clear_wh_char = {.uuid16 = 0x4DA9};
+    static uint8_t config_clear_wh;
+
+// service for internal calibration
+static simple_ble_service_t calibration_service = {
+    .uuid128 = {{0x49, 0x4b, 0x30, 0x70, 0xaa, 0xd5, 0x4e, 0x84,
+                 0x9e, 0xd9, 0x61, 0x94, 0xed, 0x0b, 0xc4, 0x57}}};
+
+    // characteristic to hold wattage setpoint
+    static simple_ble_char_t calibration_wattage_char = {.uuid16 = 0xED0C};
+    static uint16_t calibration_wattage;
+
+    // characteristic to hold voltage setpoint
+    static simple_ble_char_t calibration_voltage_char = {.uuid16 = 0xED0D};
+    static uint16_t calibration_voltage;
+
+    // characteristic to control internal calibration
+    static simple_ble_char_t calibration_control_char = {.uuid16 = 0xED0E};
+    static uint8_t calibration_control;
+
 // service for sample data collection
 static simple_ble_service_t rawSample_service = {
     .uuid128 = {{0x31, 0x15, 0xd4, 0x39, 0x2a, 0x88, 0x4e, 0x1c,
@@ -154,6 +175,7 @@ static uint8_t tx_buffer[4+sizeof(powerblade_config)];
 // states for handling transmissions to the MSP
 static bool already_transmitted = false;
 static NakState_t nak_state = NAK_NONE;
+static CalibrationState_t calibration_state = CALIB_NONE;
 static RawSampleState_t rawSample_state = RS_NONE;
 static ConfigurationState_t config_state = CONF_NONE;
 static StartupState_t startup_state = STARTUP_NOP;
@@ -424,6 +446,33 @@ void services_init (void) {
                 sizeof(powerblade_config.whscale), (uint8_t*)&powerblade_config.whscale,
                 &config_service, &config_whscale_char);
 
+        // Add watt hours clearing
+        simple_ble_add_characteristic(0, 1, 0, 0, // read, write, notify, vlen
+                sizeof(config_clear_wh), (uint8_t*)&config_clear_wh,
+                &config_service, &config_clear_wh_char);
+
+
+    // Add internal calibration service
+    simple_ble_add_service(&calibration_service);
+
+        // Add the characteristic to set calibration load wattage
+        calibration_wattage = 0;
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                2, (uint8_t*)&calibration_wattage,
+                &calibration_service, &calibration_wattage_char);
+
+        // Add the characteristic to set calibration load voltage
+        calibration_voltage = 0x04B0; // 1200 deci-volts
+        simple_ble_add_characteristic(1, 1, 0, 0, // read, write, notify, vlen
+                2, (uint8_t*)&calibration_voltage,
+                &calibration_service, &calibration_voltage_char);
+
+        // Add the characteristic to control and indicate status
+        calibration_control = 0;
+        simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
+                1, (uint8_t*)&calibration_control,
+                &calibration_service, &calibration_control_char);
+
     // Add raw sample download service
     simple_ble_add_service(&rawSample_service);
 
@@ -465,7 +514,25 @@ void ble_evt_connected (ble_evt_t* p_ble_evt) {
 
 void ble_evt_write (ble_evt_t* p_ble_evt) {
 
-    if (simple_ble_is_char_event(p_ble_evt, &rawSample_char_begin)) {
+    if (simple_ble_is_char_event(p_ble_evt, &calibration_control_char)) {
+        // start or stop calibration depending on current state
+        if (calibration_state == CALIB_NONE) {
+            // start internal calibration
+            calibration_state = CALIB_START;
+        } else {
+            // stop internal calibration
+            calibration_state = CALIB_STOP;
+        }
+
+    } else if (simple_ble_is_char_event(p_ble_evt, &calibration_wattage_char) ||
+            simple_ble_is_char_event(p_ble_evt, &calibration_voltage_char)) {
+        // user just changed calibration parameters. Stop calibration if in progress
+        if (calibration_state != CALIB_NONE) {
+            // stop internal calibration
+            calibration_state = CALIB_STOP;
+        }
+
+    } else if (simple_ble_is_char_event(p_ble_evt, &rawSample_char_begin)) {
         // start or stop collection and transfer of raw samples as appropriate
         if (rawSample_state == RS_NONE && begin_rawSample) {
             // start raw sample collection
@@ -484,6 +551,10 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
         if (rawSample_state == RS_IDLE) {
             rawSample_state = RS_NEXT;
         }
+
+    } else if (simple_ble_is_char_event(p_ble_evt, &config_clear_wh_char)) {
+        // clear current watt hours reading
+        config_state = CONF_CLEAR_WH;
 
     } else if (simple_ble_is_char_event(p_ble_evt, &config_voff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_ioff_char) ||
@@ -563,7 +634,7 @@ void transmit_message(void) {
     if (startup_state == STARTUP_NOP) {
         // skip this first cycle
         already_transmitted = true;
-        startup_state = STARTUP_SET_SEQ;
+        startup_state = STARTUP_GET_CONFIG;
 
     } else if (nak_state == NAK_CHECKSUM) {
         // send NAK to MSP
@@ -579,6 +650,50 @@ void transmit_message(void) {
         // resend most recent message to MSP
         uart_send(tx_data, tx_data_len);
         nak_state = NAK_NONE;
+
+    } else if (calibration_state == CALIB_START) {
+        // send start message to MSP
+        uint16_t length = 2+1+2+2+1; // length (x2), type, wattage (x2), voltage (x2), checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (START_LOCALC);
+        tx_buffer[3] = (calibration_wattage >> 8);
+        tx_buffer[4] = (calibration_wattage & 0xFF);
+        tx_buffer[5] = (calibration_voltage >> 8);
+        tx_buffer[6] = (calibration_voltage & 0xFF);
+        tx_buffer[7] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        rawSample_state = CALIB_WAIT_START;
+
+    } else if (calibration_state == CALIB_CONTINUE) {
+        // check on the state of the MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (CONT_LOCALC);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        rawSample_state = CALIB_WAIT_CONTINUE;
+
+    } else if (calibration_state == CALIB_GET_CONFIG) {
+        // request new configuration from MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (GET_CONF);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        rawSample_state = CALIB_WAIT_GET_CONFIG;
+
+    } else if (calibration_state == CALIB_STOP) {
+        // send stop message to MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (DONE_LOCALC);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        rawSample_state = CALIB_WAIT_STOP;
 
     } else if (rawSample_state == RS_START) {
         // send start message to MSP
@@ -621,24 +736,32 @@ void transmit_message(void) {
         uart_send(tx_buffer, length);
         config_state = CONF_NONE;
 
-    } else if (startup_state == STARTUP_SET_SEQ) {
-        // update sequence number on startup for debugging
-        // set sequence number. Used as a test message
-        uint16_t length = 2+1+1+1; // length (x2), type, value, checksum
+    } else if (config_state == CONF_CLEAR_WH) {
+        // send start message to MSP
+        uint16_t length = 2+1+1; // length (x2), type, checksum
         tx_buffer[0] = (length >> 8);
         tx_buffer[1] = (length & 0xFF);
-        tx_buffer[2] = (SET_SEQ);
-        tx_buffer[3] = 150; // randomly selected sequence number
-        tx_buffer[4] = additive_checksum(tx_buffer, length-1);
+        tx_buffer[2] = (CLR_WH);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
         uart_send(tx_buffer, length);
-        startup_state = STARTUP_GET_CONF;
+        rawSample_state = CONF_NONE;
 
-    } else if (startup_state == STARTUP_GET_CONF) {
+    } else if (startup_state == STARTUP_GET_CONFIG) {
         // get MSP configuration to display to user
         uint16_t length = 2+1+1; // length(x2), type, checksum
         tx_buffer[0] = (length >> 8);
         tx_buffer[1] = (length & 0xFF);
         tx_buffer[2] = (GET_CONF);
+        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
+        uart_send(tx_buffer, length);
+        startup_state = STARTUP_GET_VERSION;
+
+    } else if (startup_state == STARTUP_GET_VERSION) {
+        // get MSP software version to display to user
+        uint16_t length = 2+1+1; // length(x2), type, checksum
+        tx_buffer[0] = (length >> 8);
+        tx_buffer[1] = (length & 0xFF);
+        tx_buffer[2] = (GET_VER);
         tx_buffer[3] = additive_checksum(tx_buffer, length-1);
         uart_send(tx_buffer, length);
         startup_state = STARTUP_NONE;
@@ -651,14 +774,66 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
         uint8_t data_type = buf[0];
         switch (data_type) {
             case UART_NAK:
+                status_code = STATUS_GOT_NAK;
+                simple_ble_notify_char(&config_status_char);
                 nak_state = NAK_RESEND;
                 break;
+
+            case GET_CONF:
+                // updated configuration from the MSP
+                if ((len-1) == sizeof(powerblade_config)) {
+                    memcpy((uint8_t*)&powerblade_config, &(buf[1]), len-1);
+                } else {
+                    // data was the wrong size. Report error
+                    status_code = STATUS_BAD_CONFIG_SIZE;
+                    simple_ble_notify_char(&config_status_char);
+                }
+
+                // check if we are waiting on configuration to complete calibration
+                if (calibration_state != CALIB_NONE) {
+                    calibration_state = CALIB_NONE;
+                }
+                break;
+
+            case GET_VER:
+                // updated configuration from the MSP
+                //TODO: copy over version number into some characteristic
+                break;
+
+            case START_LOCALC:
+                // write status to characteristic
+                calibration_control = 1;
+                simple_ble_notify_char(&calibration_control_char);
+
+                // MSP has begun interal calibration
+                if (calibration_state != CALIB_STOP) {
+                    calibration_state = CALIB_CONTINUE;
+                }
+                break;
+
+            case CONT_LOCALC:
+                // MSP is still running internal calibration
+                if (calibration_state != CALIB_STOP) {
+                    calibration_state = CALIB_CONTINUE;
+                }
+                break;
+
+            case DONE_LOCALC:
+                // write status to characteristic
+                calibration_control = 2;
+                simple_ble_notify_char(&calibration_control_char);
+
+                // MSP has stopped internal calibration
+                calibration_state = CALIB_GET_CONFIG;
+                break;
+
             case START_SAMDATA:
                 // MSP acknowledges, wait for data
                 if (rawSample_state != RS_QUIT) {
                     rawSample_state = RS_WAIT_DATA;
                 }
                 break;
+
             case CONT_SAMDATA:
                 // update data
                 memcpy(raw_sample_data, &(buf[1]), len-1);
@@ -671,6 +846,7 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
                     rawSample_state = RS_IDLE;
                 }
                 break;
+
             case DONE_SAMDATA:
                 // notify user samples are done
                 begin_rawSample = false;
@@ -683,24 +859,28 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
 
                 rawSample_state = RS_NONE;
                 break;
-            case GET_CONF:
-                // updated configuration from the MSP
-                if ((len-1) == sizeof(powerblade_config)) {
-                    memcpy((uint8_t*)&powerblade_config, &(buf[1]), len-1);
-                } else {
-                    // data was the wrong size. Report error
-                    status_code = STATUS_BAD_CONFIG_SIZE;
-                    simple_ble_notify_char(&config_status_char);
-                }
 
             default:
                 // unhandled uart type. Don't handle it
                 break;
         }
     } else {
+        //XXX: Request retransmission if several windows have passed without a response
         // expected a message but didn't receive one. Signal error status over
         //  status characteristic
-        if (rawSample_state == RS_WAIT_START) {
+        if (calibration_state == CALIB_WAIT_START) {
+            status_code = STATUS_NO_CALIB_START;
+            simple_ble_notify_char(&config_status_char);
+        } else if (calibration_state == CALIB_WAIT_CONTINUE) {
+            status_code = STATUS_NO_CALIB_CONTINUE;
+            simple_ble_notify_char(&config_status_char);
+        } else if (calibration_state == CALIB_WAIT_GET_CONFIG) {
+            status_code = STATUS_NO_CALIB_GET_CONFIG;
+            simple_ble_notify_char(&config_status_char);
+        } else if (calibration_state == CALIB_WAIT_STOP) {
+            status_code = STATUS_NO_CALIB_STOP;
+            simple_ble_notify_char(&config_status_char);
+        } else if (rawSample_state == RS_WAIT_START) {
             status_code = STATUS_NO_RS_START;
             simple_ble_notify_char(&config_status_char);
         } else if (rawSample_state == RS_WAIT_DATA) {

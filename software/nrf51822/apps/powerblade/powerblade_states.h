@@ -20,18 +20,32 @@ typedef enum {
     RS_IDLE,
 } RawSampleState_t;
 
+// state machine for local calibration
+typedef enum {
+    CALIB_NONE=0,
+    CALIB_START,
+    CALIB_WAIT_START,
+    CALIB_CONTINUE,
+    CALIB_WAIT_CONTINUE,
+    CALIB_GET_CONFIG,
+    CALIB_WAIT_GET_CONFIG,
+    CALIB_STOP,
+    CALIB_WAIT_STOP,
+} CalibrationState_t;
+
 // state machine for configuration
 typedef enum {
     CONF_NONE=0,
     CONF_SET_VALUES,
+    CONF_CLEAR_WH,
 } ConfigurationState_t;
 
 // state machine for startup
 typedef enum {
     STARTUP_NONE=0,
     STARTUP_NOP,
-    STARTUP_SET_SEQ,
-    STARTUP_GET_CONF,
+    STARTUP_GET_CONFIG,
+    STARTUP_GET_VERSION,
 } StartupState_t;
 
 // device status codes
@@ -39,9 +53,14 @@ typedef enum {
     STATUS_NONE=0,
     STATUS_BAD_CONFIG_SIZE,
     STATUS_BAD_CHECKSUM,
+    STATUS_GOT_NAK,
     STATUS_NO_RS_START,
     STATUS_NO_RS_DATA,
     STATUS_NO_RS_QUIT,
+    STATUS_NO_CALIB_START,
+    STATUS_NO_CALIB_CONTINUE,
+    STATUS_NO_CALIB_GET_CONFIG,
+    STATUS_NO_CALIB_STOP,
 } StatusCode_t;
 
 #endif
