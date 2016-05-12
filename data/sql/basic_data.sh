@@ -52,6 +52,10 @@ case $key in
 	OUTFILE="$2"
 	shift
 	;;
+	-s|--server)
+	DB="$2"
+	shift
+	;;
     *)
             # unknown option
     ;;
@@ -78,6 +82,45 @@ else
 	echo "Ending now (${ENDTIME})"
 fi
 
+if [[ -n "${DB+1}" ]]; then
+	if [ "${DB}" = "aws" ]; then
+		DB_STRING="aws powerblade"
+		PDAT="dat_powerblade"
+		BDAT="dat_blees"
+		BLL="inf_blees_light_lookup"
+		BBIN="upd_blees_binary"
+		BPWR="upd_blees_power"
+		OVPWR="upd_overall_power"
+		RCPWR="upd_recent_power"
+		SHTMC="upd_overall_power_shortmac"
+		echo "Accessing AWS"
+	else
+		DB_STRING="resistor whisperwood"
+		PDAT="powerblade_test"
+		BDAT="blees_test"
+		BLL="blees_light_lookup"
+		BBIN="blees_binary"
+		BPWR="blees_power"
+		OVPWR="overall_power"
+		RCPWR="recent_power"
+		SHTMC="overall_power_shortmac"
+		echo "Accessing Umich"
+	fi
+else
+	DB_STRING="resistor whisperwood"
+	PDAT="powerblade_test"
+	BDAT="blees_test"
+	BLL="blees_light_lookup"
+	BBIN="blees_binary"
+	BPWR="blees_power"
+	OVPWR="overall_power"
+	RCPWR="recent_power"
+	SHTMC="overall_power_shortmac"
+	echo "Accessing Umich"
+fi
+
+SQLLOGIN="mysql --login-path=${DB_STRING} -e"
+
 # Update Tables
 ./update_tables.sh
 
@@ -99,10 +142,10 @@ echo "${DEVICELIST_TEMP}"
 DEVICELIST_TEMP="(${DEVICELIST_TEMP})"
 
 echo "Creating Calendar"
-mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS calendar;"
-mysql --login-path=resistor whisperwood -e "CREATE TABLE calendar (timestamp datetime,
-	deviceMAC char(12), shortMAC int(11), index(timestamp),index(shortMAC));"
-mysql --login-path=resistor whisperwood -e "INSERT INTO calendar
+eval "${SQLLOGIN} \"DROP TABLE IF EXISTS calendar;\""
+eval "${SQLLOGIN} \"CREATE TABLE calendar (timestamp datetime,
+	deviceMAC char(12), shortMAC int(11), index(timestamp),index(shortMAC));\""
+eval "${SQLLOGIN} \"INSERT INTO calendar
 select t2.timestamp, t1.deviceMAC, conv(concat(case when substring(deviceMAC,7,1)='7' then '1' else '0' end, right(deviceMAC,2)),16,10) from
 (select deviceMAC from device_list where ${DEVICELIST_TEMP} group by deviceMAC) t1
 cross join
@@ -116,19 +159,19 @@ from (
     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as e
     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as f
 ) a
-where a.Date between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) AND ${ENDTIME} order by a.Date asc) t2;"
+where a.Date between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) AND ${ENDTIME} order by a.Date asc) t2;\""
 
 #echo "Creating subset of power table"
 #mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS overall_power_window; CREATE TABLE overall_power_window as select * from overall_power_shortmac where timestamp between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) and ${ENDTIME}"
 echo "Creating Final Overall Power Table. This may take several minutes depending on query"
-mysql --login-path=resistor whisperwood -e "DROP TABLE IF EXISTS overall_power_filled;"
-mysql --login-path=resistor whisperwood -e "CREATE TABLE overall_power_filled AS
+eval "${SQLLOGIN} \"DROP TABLE IF EXISTS overall_power_filled;\""
+eval "${SQLLOGIN} \"CREATE TABLE overall_power_filled AS
 SELECT t1.*, (select power from overall_power_shortmac where id=max(t2.ID)) as power
 FROM calendar t1
 JOIN (select * from overall_power_shortmac where timestamp between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) and ${ENDTIME}) t2
 ON (t2.timestamp BETWEEN date_sub(t1.timestamp, INTERVAL 1 MINUTE) AND t1.timestamp)
 AND t1.shortMAC=t2.shortMAC
-GROUP BY t1.timestamp, t1.shortMAC;"
+GROUP BY t1.timestamp, t1.shortMAC;\""
 
 #(select power from recent_power where id=max(t2.ID)) as power
 
@@ -157,7 +200,7 @@ if [[ -n "${FILENAME+1}" ]]; then
 	while read dev; do
 		if [[ ${dev:0:1} != "#" ]]; then
 			DEVICELIST="${DEVICELIST} OR deviceMAC='${dev}'"
-			mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),power from overall_power_filled WHERE deviceMAC='${dev}' and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;" > "${dev}".csv
+			eval "${SQLLOGIN} \"SELECT date_sub(timestamp, INTERVAL 4 HOUR),power from overall_power_filled WHERE deviceMAC='${dev}' and timestampdiff(minute,timestamp,${ENDTIME}) between 0 and ${DURTIME} group by timestamp order by timestamp asc;\" > \"${dev}\".csv"
 			if [ -s "${dev}".csv ]; then
 				PLTLINE="${PLTLINE},\x5C\n\t\"${dev}.csv\" u 1:2 with lines notitle "
 			else
@@ -189,7 +232,7 @@ fi
 
 
 #mysql --login-path=resistor whisperwood -e "SELECT date_sub(timestamp, INTERVAL 4 HOUR),sum(power) as sum FROM overall_power_filled group by timestamp order by timestamp asc;" > sumPower.csv
-mysql --login-path=resistor whisperwood -e "SET @weight=1;select date_sub(timestamp, INTERVAL 4 HOUR),@x:=Round((@weight*@x+(10-@weight)*sum(power))/10,2) as sum from overall_power_filled join ( select @x:=1 ) as dummy group by timestamp order by timestamp asc;" > sumPower.csv
+eval "${SQLLOGIN} \"SET @weight=1;select date_sub(timestamp, INTERVAL 4 HOUR),@x:=Round((@weight*@x+(10-@weight)*sum(power))/10,2) as sum from overall_power_filled join ( select @x:=1 ) as dummy group by timestamp order by timestamp asc;\" > sumPower.csv"
 echo "Finishing Plotting File"
 cat dataviewer.plt > temp.plt
 printf "set xtics ${DURTIME}*60/10 rotate by 70 offset -2.9,-4.65\n\n" >> temp.plt

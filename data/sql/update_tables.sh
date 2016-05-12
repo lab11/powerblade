@@ -6,7 +6,7 @@ do
 key="$1"
 
 case $key in
-	-d|--database)
+	-s|--server)
 	DB="$2"
 	shift
 	;;
