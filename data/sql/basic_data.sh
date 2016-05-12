@@ -93,6 +93,7 @@ if [[ -n "${DB+1}" ]]; then
 		OVPWR="upd_overall_power"
 		RCPWR="upd_recent_power"
 		SHTMC="upd_overall_power_shortmac"
+		UPT="./update_tables.sh -s aws"
 		echo "Accessing AWS"
 	else
 		DB_STRING="resistor whisperwood"
@@ -104,6 +105,7 @@ if [[ -n "${DB+1}" ]]; then
 		OVPWR="overall_power"
 		RCPWR="recent_power"
 		SHTMC="overall_power_shortmac"
+		UPT="./update_tables.sh"
 		echo "Accessing Umich"
 	fi
 else
@@ -116,13 +118,15 @@ else
 	OVPWR="overall_power"
 	RCPWR="recent_power"
 	SHTMC="overall_power_shortmac"
+	UPT="./update_tables.sh"
 	echo "Accessing Umich"
 fi
 
 SQLLOGIN="mysql --login-path=${DB_STRING} -e"
 
 # Update Tables
-./update_tables.sh
+eval "${UPT}"
+#./update_tables.sh
 
 # This is really shameless... im sorry
 DEVICELIST_TEMP=""
