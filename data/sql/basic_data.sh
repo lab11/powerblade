@@ -170,9 +170,9 @@ where a.Date between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) AND ${ENDT
 echo "Creating Final Overall Power Table. This may take several minutes depending on query"
 eval "${SQLLOGIN} \"DROP TABLE IF EXISTS overall_power_filled;\""
 eval "${SQLLOGIN} \"CREATE TABLE overall_power_filled AS
-SELECT t1.*, (select power from overall_power_shortmac where id=max(t2.ID)) as power
+SELECT t1.*, (select power from ${SHTMC} where id=max(t2.ID)) as power
 FROM calendar t1
-JOIN (select * from overall_power_shortmac where timestamp between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) and ${ENDTIME}) t2
+JOIN (select * from ${SHTMC} where timestamp between date_sub(${ENDTIME}, INTERVAL ${DURTIME} MINUTE) and ${ENDTIME}) t2
 ON (t2.timestamp BETWEEN date_sub(t1.timestamp, INTERVAL 1 MINUTE) AND t1.timestamp)
 AND t1.shortMAC=t2.shortMAC
 GROUP BY t1.timestamp, t1.shortMAC;\""
