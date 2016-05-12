@@ -123,10 +123,6 @@ static simple_ble_service_t config_service = {
     // characteristic to access watt-hours scaling value
     static simple_ble_char_t config_whscale_char = {.uuid16 = 0x4DA8};
 
-    // characteristic to clear the WH value
-    static simple_ble_char_t config_clear_wh_char = {.uuid16 = 0x4DA9};
-    static uint8_t config_clear_wh;
-
 // service for internal calibration
 static simple_ble_service_t calibration_service = {
     .uuid128 = {{0x49, 0x4b, 0x30, 0x70, 0xaa, 0xd5, 0x4e, 0x84,
@@ -446,11 +442,6 @@ void services_init (void) {
                 sizeof(powerblade_config.whscale), (uint8_t*)&powerblade_config.whscale,
                 &config_service, &config_whscale_char);
 
-        // Add watt hours clearing
-        simple_ble_add_characteristic(0, 1, 0, 0, // read, write, notify, vlen
-                sizeof(config_clear_wh), (uint8_t*)&config_clear_wh,
-                &config_service, &config_clear_wh_char);
-
 
     // Add internal calibration service
     simple_ble_add_service(&calibration_service);
@@ -551,10 +542,6 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
         if (rawSample_state == RS_IDLE) {
             rawSample_state = RS_NEXT;
         }
-
-    } else if (simple_ble_is_char_event(p_ble_evt, &config_clear_wh_char)) {
-        // clear current watt hours reading
-        config_state = CONF_CLEAR_WH;
 
     } else if (simple_ble_is_char_event(p_ble_evt, &config_voff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_ioff_char) ||
@@ -735,16 +722,6 @@ void transmit_message(void) {
         tx_buffer[3+sizeof(powerblade_config)] = additive_checksum(tx_buffer, length-1);
         uart_send(tx_buffer, length);
         config_state = CONF_NONE;
-
-    } else if (config_state == CONF_CLEAR_WH) {
-        // send start message to MSP
-        uint16_t length = 2+1+1; // length (x2), type, checksum
-        tx_buffer[0] = (length >> 8);
-        tx_buffer[1] = (length & 0xFF);
-        tx_buffer[2] = (CLR_WH);
-        tx_buffer[3] = additive_checksum(tx_buffer, length-1);
-        uart_send(tx_buffer, length);
-        rawSample_state = CONF_NONE;
 
     } else if (startup_state == STARTUP_GET_CONFIG) {
         // get MSP configuration to display to user

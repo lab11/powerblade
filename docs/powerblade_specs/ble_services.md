@@ -57,12 +57,6 @@ Device Configuration Service
     Scaling value used to determine watt-hours readings. Used for device
     calibration. Transmitted over advertisements to users
 
-0x4DA9 - Clear Watt-Hours
-
-    uint8_t: Write
-
-    Clears stored Watt-Hours measurement value back to zero
-
 ## Self Calibration
 Calibration Control Service
 

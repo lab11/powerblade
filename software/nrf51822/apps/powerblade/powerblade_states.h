@@ -37,7 +37,6 @@ typedef enum {
 typedef enum {
     CONF_NONE=0,
     CONF_SET_VALUES,
-    CONF_CLEAR_WH,
 } ConfigurationState_t;
 
 // state machine for startup
