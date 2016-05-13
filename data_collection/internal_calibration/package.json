@@ -1,0 +1,13 @@
+{
+  "name": "internal_calibration",
+  "version": "1.0.0",
+  "description": "Internal calibration of PowerBlades",
+  "main": "calibrate.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Branden Ghena",
+  "dependencies": {
+    "noble": "^1.5.0"
+  }
+}
