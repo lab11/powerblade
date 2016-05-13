@@ -60,7 +60,7 @@ Device Configuration Service
 ## Self Calibration
 Calibration Control Service
 
-    Full UUID: 494b3070-aad5-4e84-9ed9-6194ed0bc457
+    Full UUID: 57c4ed0b-9461-d99e-844e-d5aa70304b49
     Short UUID: 0xED0B
 
     Runs internal calibration of measurements on the MSP430. Used for

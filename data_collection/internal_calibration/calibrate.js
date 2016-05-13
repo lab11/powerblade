@@ -18,10 +18,10 @@ if (process.argv.length >= 5) {
     console.log("Ex: ./calibrate.js c0:98:e5:70:00:01 200.0 120.0 --read");
     process.exit(1);
 }
-var read_calibration = false;
+var read_config = false;
 if (process.argv.length >= 6) {
     if (process.argv[5] == '--read') {
-        read_calibration = true;
+        read_config = true;
     }
 }
 console.log("Looking for " + target_device);
@@ -148,7 +148,7 @@ function discover_calibration() {
                     console.log("\tComplete\n");
 
                     // only bother discovering config service if we need it
-                    if (read_calibration) {
+                    if (read_config) {
                         discover_config();
                     } else {
                         start_calibration();
@@ -246,7 +246,7 @@ function Calibration_status_receive(data, isNotify) {
     } else if (data[0] == 2) {
         console.log("\tComplete\n");
 
-        if (read_calibration) {
+        if (read_config) {
             read_calibration();
         } else {
             complete_calibration();
