@@ -127,7 +127,7 @@ function discover_char(service, char_uuid, callback) {
 
 function discover_calibration() {
     console.log("Discovering calibration service");
-    powerblade_periph_discoverServices([calibration_service_uuid], function(error, services) {
+    powerblade_periph.discoverServices([calibration_service_uuid], function(error, services) {
         if (error) throw error;
         if (services.length != 1) {
             log_discovery_error(calibration_service_uuid, services);
