@@ -31,10 +31,10 @@ console.log("Calibrating at " + wattage + " W and " + voltage + " V");
 var powerblade_periph;
 
 // internal calibration service
-var calibration_service_uuid = '494b3070aad54e849ed96194ed0bc457';
-var calibration_wattage_uuid = '494b3070aad54e849ed96194ed0cc457';
-var calibration_voltage_uuid = '494b3070aad54e849ed96194ed0dc457';
-var calibration_control_uuid = '494b3070aad54e849ed96194ed0ec457';
+var calibration_service_uuid = '57c4ed0b9461d99e844ed5aa70304b49';
+var calibration_wattage_uuid = '57c4ed0c9461d99e844ed5aa70304b49';
+var calibration_voltage_uuid = '57c4ed0d9461d99e844ed5aa70304b49';
+var calibration_control_uuid = '57c4ed0e9461d99e844ed5aa70304b49';
 var calibration_wattage_char;
 var calibration_voltage_char;
 var calibration_control_char;
