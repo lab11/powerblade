@@ -84,6 +84,10 @@ int32_t curoff_local;
 int32_t curoff_count;
 int32_t vscale_local;
 int32_t pscale_local;
+int16_t vsamp[2400];
+int16_t isamp[2400];
+uint16_t vSampOffset;
+uint16_t iSampOffset;
 
 #pragma PERSISTENT(flags)
 uint8_t flags = 0x05;
@@ -445,6 +449,8 @@ void transmitTry(void) {
 						case START_LOCALC:
 						{
 							pb_state = pb_local1;
+							vSampOffset = 0;
+							iSampOffset = 0;
 							dataIndex = 0;
 							uart_len += 1;
 							char data_type = START_LOCALC;
@@ -511,6 +517,7 @@ void transmitTry(void) {
 							pb_config.ioff = ioff_local;
 							pb_config.curoff = curoff_local;
 							pb_config.pscale = pscale_local;
+							flags &= 0x3F;	// Clear any previous calibration
 							flags |= 0x40;
 							break;
 						}
