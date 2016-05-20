@@ -42,6 +42,27 @@ This will log to sdcard if it is mounted or locally if it is not.
     sudo systemctl enable ieee802154-monjolo-gateway
     sudo systemctl start ieee802154-monjolo-gateway
 
+# Collect 802.15.4 packets from Triumvis
+You must be using an Edison gateway in order to receive Triumvi data. First,
+you need to flash the cc2538 on the gateway.
+    Clone [lab11/IntelEdisonGateway](https://github.com/lab11/IntelEdisonGateway)
+    Clone [JelmerT/cc2538-bsl](https://github.com/JelmerT/cc2538-bsl)
+    cd IntelEdisonGateway/Triumvi/cc2538/bin/
+    Edit `flash.sh` to point at your copy of cc2538-bsl/cc2538-bsl.py
+    Connect pogo pin program to the gateway with `Epic Multi Prog` board
+    ./flash.sh
+
+# Connect to WiFi
+Edit /etc/network/interfaces. (Already set up for MWireless)
+
+# Set up Sensu
+Make sure you have a unique MAC address first!
+    sudo scp <user@computer>:~/shed/projects/powerblade/powerblade_deployment/sensu.json /etc/sensu/conf.d/client.json
+    cd gateway-tools/gateway/
+    sudo ./sensu-configure-client.js
+    sudo systemctl enable sensu-client
+    sudo systemctl start sensu-client
+
 # Common problems
 To test that a service is working run `sudo systemctl status -l <SERVICE_NAME>`
 
