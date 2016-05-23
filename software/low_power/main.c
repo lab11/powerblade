@@ -88,6 +88,8 @@ int16_t vsamp[2400];
 int16_t isamp[2400];
 uint16_t vSampOffset;
 uint16_t iSampOffset;
+uint16_t wattageSetpoint;
+uint16_t voltageSetpoint;
 
 #pragma PERSISTENT(flags)
 uint8_t flags = 0x05;
@@ -105,6 +107,7 @@ int dataIndex;
 pb_state_t pb_state;
 int txIndex;
 bool dataComplete;
+int pb_toggle;
 
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
@@ -184,6 +187,7 @@ int main(void) {
 
 	// Initialize system state
 	pb_state = pb_normal;
+	pb_toggle = 0;
 	ready = 0;
 	senseEnabled = 0;
 	tryCount = 0;
@@ -296,6 +300,12 @@ void transmit(void) {
 	uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
 
 	uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
+
+	// XXX this is kind of cheating
+	if(apparentPower < truePower) {
+		apparentPower = truePower;
+	}
+
 	uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 	uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 
@@ -370,18 +380,25 @@ void transmitTry(void) {
 
 			uart_len = ADLEN + UARTOVHD;
 
-			if(pb_state == pb_local1) {
-				voff_local = voff_local / voff_count;
-				ioff_local = ioff_local / ioff_count;
-				pb_state = pb_local2;
+			if(pb_toggle < 1) {
+				pb_toggle++;
 			}
-			else if(pb_state == pb_local2) {
-				curoff_local = curoff_local / curoff_count;
-				pb_state = pb_local3;
-			}
-			else if(pb_state == pb_local3) {
-				pscale_local = 0x4000 + ((uint16_t)((uint32_t)200*10000/truePower) & 0x0FFF);
-				pb_state = pb_local_done;
+			else {
+				if(pb_state == pb_local1) {
+					voff_local = voff_local / voff_count;
+					ioff_local = ioff_local / ioff_count;
+					pb_state = pb_local2;
+					pb_toggle = 0;
+				}
+				else if(pb_state == pb_local2) {
+					curoff_local = curoff_local / curoff_count;
+					pb_state = pb_local3;
+				}
+				else if(pb_state == pb_local3) {
+					pscale_local = 0x4000 + ((uint16_t)((uint32_t)wattageSetpoint*1000/truePower) & 0x0FFF);
+					pb_state = pb_local_done;
+					pb_toggle = 0;
+				}
 			}
 
 			// Process any UART bytes
@@ -452,6 +469,8 @@ void transmitTry(void) {
 							vSampOffset = 0;
 							iSampOffset = 0;
 							dataIndex = 0;
+							memcpy(&wattageSetpoint, captureBuf, sizeof(wattageSetpoint));
+							memcpy(&voltageSetpoint, captureBuf + sizeof(wattageSetpoint), sizeof(voltageSetpoint));
 							uart_len += 1;
 							char data_type = START_LOCALC;
 							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
@@ -491,6 +510,7 @@ void transmitTry(void) {
 						}
 						break;
 
+					case pb_local1:
 					case pb_local2:
 					case pb_local3:
 						switch(captureType) {
@@ -517,6 +537,9 @@ void transmitTry(void) {
 							pb_config.ioff = ioff_local;
 							pb_config.curoff = curoff_local;
 							pb_config.pscale = pscale_local;
+							scale = pb_config.pscale;
+							scale = (scale<<8)+pb_config.vscale;
+							scale = (scale<<8)+pb_config.whscale;
 							flags &= 0x3F;	// Clear any previous calibration
 							flags |= 0x40;
 							break;
@@ -620,7 +643,7 @@ __interrupt void ADC10_ISR(void) {
 #endif
 			}
 			else if(pb_state == pb_local1) {
-				if(dataIndex >= 60 && dataIndex < 2460) {
+				if(dataIndex >= 60 && dataIndex < 4980) {
 					ioff_local += tempCurrent;
 					ioff_count++;
 				}
@@ -686,7 +709,7 @@ __interrupt void ADC10_ISR(void) {
 #endif
 			}
 			else if(pb_state == pb_local1) {
-				if(dataIndex >= 60 && dataIndex < 2460) {
+				if(dataIndex >= 60 && dataIndex < 4980) {
 					voff_local += tempVoltage;
 					voff_count++;
 				}
