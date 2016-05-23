@@ -158,6 +158,10 @@
 typedef enum {
 	pb_normal,
 	pb_capture,
+	pb_local1,		// Collect raw samples, calculate voff_local and ioff_local
+	pb_local2,		// Collect integrate samples, calculate curoff_local
+	pb_local3,		// Calculate power, use to calculate pscale_local
+	pb_local_done,	// Local calibration done, write values to config
 	pb_data
 } pb_state_t;
 

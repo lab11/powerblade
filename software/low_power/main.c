@@ -32,6 +32,7 @@ bool senseEnabled;
 
 // Variable for integration
 int16_t agg_current;
+int16_t agg_current_local;
 
 // Count each sample and 60Hz measurement
 uint8_t sampleCount;
@@ -64,7 +65,7 @@ uint32_t voltAmpsToAverage;
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 2;
-char msp_software_version = 1;
+char msp_software_version = 2;
 
 // Transmitted values
 uint32_t sequence;
@@ -73,6 +74,22 @@ uint8_t Vrms;
 uint16_t truePower;
 uint16_t apparentPower;
 uint64_t wattHours;
+
+// Local calibration values
+int32_t voff_local;
+int32_t voff_count;
+int32_t ioff_local;
+int32_t ioff_count;
+int32_t curoff_local;
+int32_t curoff_count;
+int32_t vscale_local;
+int32_t pscale_local;
+int16_t vsamp[2400];
+int16_t isamp[2400];
+uint16_t vSampOffset;
+uint16_t iSampOffset;
+uint16_t wattageSetpoint;
+uint16_t voltageSetpoint;
 
 #pragma PERSISTENT(flags)
 uint8_t flags = 0x05;
@@ -90,6 +107,7 @@ int dataIndex;
 pb_state_t pb_state;
 int txIndex;
 bool dataComplete;
+int pb_toggle;
 
 uint32_t SquareRoot(uint32_t a_nInput) {
 	uint32_t op = a_nInput;
@@ -169,6 +187,7 @@ int main(void) {
 
 	// Initialize system state
 	pb_state = pb_normal;
+	pb_toggle = 0;
 	ready = 0;
 	senseEnabled = 0;
 	tryCount = 0;
@@ -184,7 +203,7 @@ int main(void) {
 	measCount = 0;
 
 	// Initialize remaining transmitted values
-	sequence = 0;
+	//sequence = 0;
 	txIndex = 0;
 
 	// Initialize scale value (can be updated later)
@@ -277,8 +296,16 @@ void transmit(void) {
 	uart_stuff(blockOffset + OFFSET_ADLEN, (char*) &ad_len, sizeof(ad_len));
 	uart_stuff(blockOffset + OFFSET_PBID, (char*) &powerblade_id, sizeof(powerblade_id));
 	uart_stuff(blockOffset + OFFSET_SEQ, (char*) &sequence, sizeof(sequence));
+
 	uart_stuff(blockOffset + OFFSET_SCALE, (char*) &scale, sizeof(scale));
+
 	uart_stuff(blockOffset + OFFSET_VRMS, (char*) &Vrms, sizeof(Vrms));
+
+	// XXX this is kind of cheating
+	if(apparentPower < truePower) {
+		apparentPower = truePower;
+	}
+
 	uart_stuff(blockOffset + OFFSET_TP, (char*) &truePower, sizeof(truePower));
 	uart_stuff(blockOffset + OFFSET_AP, (char*) &apparentPower, sizeof(apparentPower));
 
@@ -314,7 +341,17 @@ void transmitTry(void) {
 	agg_current -= agg_current >> 5;
 
 	// Subtract offset
-	int32_t new_current = (agg_current >> 3) - pb_config.curoff;
+	int32_t new_current;
+	if(pb_state == pb_local3) {
+		new_current = (agg_current >> 3) - curoff_local;
+	}
+	else {
+		new_current = (agg_current >> 3) - pb_config.curoff;
+		if(pb_state == pb_local2) {
+			curoff_local += agg_current >> 3;
+			curoff_count++;
+		}
+	}
 
 	// Perform calculations for I^2, V^2, and P
 	acc_i_rms += (uint64_t)(new_current * new_current);
@@ -342,6 +379,28 @@ void transmitTry(void) {
 			measCount = 0;
 
 			uart_len = ADLEN + UARTOVHD;
+
+			if(pb_toggle < 1) {
+				pb_toggle++;
+			}
+			else {
+				if(pb_state == pb_local1) {
+					voff_local = voff_local / voff_count;
+					ioff_local = ioff_local / ioff_count;
+					pb_state = pb_local2;
+					pb_toggle = 0;
+				}
+				else if(pb_state == pb_local2) {
+					curoff_local = curoff_local / curoff_count;
+					pb_state = pb_local3;
+				}
+				else if(pb_state == pb_local3) {
+					pscale_local = 0x4000 + ((uint16_t)((uint32_t)wattageSetpoint*1000/truePower) & 0x0FFF);
+					vscale_local = 20 * voltageSetpoint / (uint16_t)Vrms;
+					pb_state = pb_local_done;
+					pb_toggle = 0;
+				}
+			}
 
 			// Process any UART bytes
 			if(pb_state == pb_capture) {
@@ -372,11 +431,21 @@ void transmitTry(void) {
 					uart_stuff(1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), &msp_software_version, sizeof(msp_software_version));
 					break;
 				case SET_SEQ:
-					sequence = captureBuf[0];
+				{
+					//sequence = captureBuf[0];
+					uart_len += 1;
+					char data_type = UART_NAK;
+					uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
 					break;
+				}
 				case CLR_WH:
-					wattHours = 0;
+				{
+					//wattHours = 0;
+					uart_len += 1;
+					char data_type = UART_NAK;
+					uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
 					break;
+				}
 				default:
 					switch(pb_state) {
 
@@ -388,6 +457,19 @@ void transmitTry(void) {
 							dataIndex = 0;
 							uart_len += 1;
 							char data_type = START_SAMDATA;
+							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
+							break;
+						}
+						case START_LOCALC:
+						{
+							pb_state = pb_local1;
+							vSampOffset = 0;
+							iSampOffset = 0;
+							dataIndex = 0;
+							memcpy(&wattageSetpoint, captureBuf, sizeof(wattageSetpoint));
+							memcpy(&voltageSetpoint, captureBuf + sizeof(wattageSetpoint), sizeof(voltageSetpoint));
+							uart_len += 1;
+							char data_type = START_LOCALC;
 							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
 							break;
 						}
@@ -424,6 +506,45 @@ void transmitTry(void) {
 							break;
 						}
 						break;
+
+					case pb_local1:
+					case pb_local2:
+					case pb_local3:
+						switch(captureType) {
+						case CONT_LOCALC:
+						{
+							uart_len += 1;
+							char data_type = CONT_LOCALC;
+							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
+							break;
+						}
+						default:
+							break;
+						}
+						break;
+
+					case pb_local_done:
+						switch(captureType) {
+						case CONT_LOCALC:
+						{
+							uart_len += 1;
+							char data_type = DONE_LOCALC;
+							uart_stuff(OFFSET_DATATYPE, &data_type, sizeof(data_type));
+							pb_config.voff = voff_local;
+							pb_config.ioff = ioff_local;
+							pb_config.curoff = curoff_local;
+							pb_config.vscale = vscale_local;
+							pb_config.pscale = pscale_local;
+							scale = pb_config.pscale;
+							scale = (scale<<8)+pb_config.vscale;
+							scale = (scale<<8)+pb_config.whscale;
+							flags &= 0x3F;	// Clear any previous calibration
+							flags |= 0x40;
+							break;
+						}
+						default:
+							break;
+						}
 
 					}
 					break;
@@ -519,9 +640,28 @@ __interrupt void ADC10_ISR(void) {
 				}
 #endif
 			}
+			else if(pb_state == pb_local1) {
+				if(dataIndex >= 60 && dataIndex < 4980) {
+					ioff_local += tempCurrent;
+					ioff_count++;
+				}
+				dataIndex++;
+			}
+//			else if(pb_state == pb_local2) {
+//				int16_t newCurrent = tempCurrent - ioff_local;
+//				agg_current_local += (newCurrent + (newCurrent >> 1));
+//				agg_current_local -= agg_current_local >> 5;
+//				curoff_local += agg_current_local >> 3;
+//				curoff_count++;
+//			}
 
 			// After its been stored for raw sample transmission, apply offset
-			current[currentWriteCount++] = tempCurrent - pb_config.ioff;
+			if(pb_state == pb_local2 || pb_state == pb_local3) {
+				current[currentWriteCount++] = tempCurrent - ioff_local;
+			}
+			else {
+				current[currentWriteCount++] = tempCurrent - pb_config.ioff;
+			}
 			if(currentWriteCount == BACKLOG_LEN) {
 				currentWriteCount = 0;
 			}
@@ -566,9 +706,21 @@ __interrupt void ADC10_ISR(void) {
 				}
 #endif
 			}
+			else if(pb_state == pb_local1) {
+				if(dataIndex >= 60 && dataIndex < 4980) {
+					voff_local += tempVoltage;
+					voff_count++;
+				}
+				dataIndex++;
+			}
 
 			// After its been stored for raw sample transmission, apply offset
-			voltage[voltageWriteCount++] = tempVoltage - pb_config.voff;
+			if(pb_state == pb_local2 || pb_state == pb_local3) {
+				voltage[voltageWriteCount++] = tempVoltage - voff_local;
+			}
+			else {
+				voltage[voltageWriteCount++] = tempVoltage - pb_config.voff;
+			}
 			if(voltageWriteCount == BACKLOG_LEN) {
 				voltageWriteCount = 0;
 			}
@@ -600,6 +752,7 @@ __interrupt void ADC10_ISR(void) {
 					wattHoursToAverage = 0;
 					voltAmpsToAverage = 0;
 					agg_current = 0;
+					agg_current_local = 0;
 					ready = 1;
 				}
 			}
