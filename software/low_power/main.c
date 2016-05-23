@@ -396,6 +396,7 @@ void transmitTry(void) {
 				}
 				else if(pb_state == pb_local3) {
 					pscale_local = 0x4000 + ((uint16_t)((uint32_t)wattageSetpoint*1000/truePower) & 0x0FFF);
+					vscale_local = 20 * voltageSetpoint / (uint16_t)Vrms;
 					pb_state = pb_local_done;
 					pb_toggle = 0;
 				}
@@ -422,10 +423,6 @@ void transmitTry(void) {
 					scale = pb_config.pscale;
 					scale = (scale<<8)+pb_config.vscale;
 					scale = (scale<<8)+pb_config.whscale;
-//					pb_config.voff = voff_local;
-//					pb_config.ioff = ioff_local;
-//					pb_config.curoff = curoff_local;
-//					pb_config.pscale = pscale_local;
 					flags |= 0x80;
 					break;
 				case GET_VER:
@@ -536,6 +533,7 @@ void transmitTry(void) {
 							pb_config.voff = voff_local;
 							pb_config.ioff = ioff_local;
 							pb_config.curoff = curoff_local;
+							pb_config.vscale = vscale_local;
 							pb_config.pscale = pscale_local;
 							scale = pb_config.pscale;
 							scale = (scale<<8)+pb_config.vscale;
