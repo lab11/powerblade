@@ -247,7 +247,7 @@ function Calibration_status_receive(data, isNotify) {
         console.log("\tComplete\n");
 
         if (read_config) {
-            read_calibration();
+            setTimeout(read_calibration, 1200);
         } else {
             complete_calibration();
         }
