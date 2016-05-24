@@ -64,7 +64,7 @@ Clone the PowerBlade repository and install node packages
 
     git clone https://github.com/lab11/powerblade.git
     cd powerblade/software/gateway/
-    ln -s node_modules ~/gateway/software/node_modules/
+    ln -s ~/gateway/software/node_modules/ node_modules
 
 Then follow the instructions [here](https://github.com/lab11/powerblade/tree/master/software/gateway/gateway-mqtt-sql)
 
