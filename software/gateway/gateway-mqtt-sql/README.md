@@ -4,6 +4,16 @@ Gateway to GATD
 [GATD](gatd.io) is a data collection, storage, and distribution service. This
 service HTTP POSTs data collected by the gateway to GATD for storage.
 
+Setup
+-----
+
+    sudo scp <user@computer>:~/shed/projects/powerblade/powerblade_deployment/powerblade-sql.conf /etc/swarm-gateway/powerblade-sql.conf
+    sudo scp <user@computer>:~/shed/projects/powerblade/powerblade_deployment/powerblade-aws.conf /etc/swarm-gateway/powerblade-aws.conf
+    sudo cp gateway-mqtt-sql.service /etc/systemd/system/
+    sudo systemctl enable gateway-mqtt-sql
+    sudo systemctl start gateway-mqtt-sql
+
+
 Configuration
 -------------
 
