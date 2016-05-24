@@ -6,6 +6,15 @@ service HTTP POSTs data collected by the gateway to GATD for storage.
 
 Setup
 -----
+If running standalone:
+
+    npm install
+
+or if running as part of a gateway:
+
+    npm install mysql
+
+Then
 
     sudo scp <user@computer>:~/shed/projects/powerblade/powerblade_deployment/powerblade-sql.conf /etc/swarm-gateway/powerblade-sql.conf
     sudo scp <user@computer>:~/shed/projects/powerblade/powerblade_deployment/powerblade-aws.conf /etc/swarm-gateway/powerblade-aws.conf
