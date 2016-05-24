@@ -60,7 +60,7 @@ you need to flash the cc2538 on the gateway.
     ./flash.sh
 
 # Post data to SQL database
-    Follow instructions [here](https://github.com/lab11/powerblade/tree/master/software/gateway/gateway-mqtt-sql)
+Follow instructions [here](https://github.com/lab11/powerblade/tree/master/software/gateway/gateway-mqtt-sql)
 
 # Connect to WiFi
 Edit /etc/network/interfaces. (Already set up for MWireless)
