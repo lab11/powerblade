@@ -138,10 +138,13 @@ noble.on('discover', function (peripheral) {
         }
         else {
             if (flags & 0x80) {
-                console.log('Calibrated unit');
+                console.log('Wireless calibrated unit');
+            }
+            else if (flags & 0x40) {
+                console.log('Local calibrated unit');
             }
             else {
-                console.log('WARNING: Uncalibrated unit')
+                console.log('WARNING: Uncalibrated unit');
             }
         }
 
