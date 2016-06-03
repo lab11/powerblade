@@ -81,7 +81,7 @@ var parse_advertisement = function (advertisement, cb) {
                 var real_power_disp = real_power*power_scale;
                 var app_power_disp = apparent_power*power_scale;
                 if(volt_scale > 0) {
-                  var watt_hours_disp = (watt_hours << wh_shift)*(power_scale/3600);
+                  var watt_hours_disp = watt_hours*Math.pow(2, wh_shift)*(power_scale/3600);
                 } else {
                   var watt_hours_disp = watt_hours;
                 }
