@@ -267,19 +267,19 @@ function read_calibration() {
     console.log("Reading calibration values from PowerBlade...");
     config_voff_char.read(function(error, data) {
         if (error) throw error;
-        console.log("Voff= " + data.readUInt8() + ' (' + data.toString('hex') + ')');
+        console.log("Voff= " + data.readInt8() + ' (' + data.toString('hex') + ')');
 
         config_ioff_char.read(function(error, data) {
             if (error) throw error;
-            console.log("Ioff= " + data.readUInt8() + ' (' + data.toString('hex') + ')');
+            console.log("Ioff= " + data.readInt8() + ' (' + data.toString('hex') + ')');
 
             config_curoff_char.read(function(error, data) {
                 if (error) throw error;
-                console.log("Curoff= " + data.readUInt8() + ' (' + data.toString('hex') + ')');
+                console.log("Curoff= " + data.readInt8() + ' (' + data.toString('hex') + ')');
 
                 config_pscale_char.read(function(error, data) {
                     if (error) throw error;
-                    console.log("PScale= " + data.readUInt8() + ' (' + data.toString('hex') + ')');
+                    console.log("PScale= " + data.readUInt16LE() + ' (' + data.toString('hex') + ')');
 
                     config_vscale_char.read(function(error, data) {
                         if (error) throw error;

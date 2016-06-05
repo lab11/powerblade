@@ -118,7 +118,7 @@ noble.on('discover', function (peripheral) {
         var real_power_disp = real_power*power_scale;
         var app_power_disp = apparent_power*power_scale;
         if(volt_scale > 0) {
-          var watt_hours_disp = (watt_hours << wh_shift)*(power_scale/3600);
+          var watt_hours_disp = watt_hours*Math.pow(2, wh_shift)*(power_scale/3600);
         } else {
           var watt_hours_disp = watt_hours;
         }
@@ -138,10 +138,13 @@ noble.on('discover', function (peripheral) {
         }
         else {
             if (flags & 0x80) {
-                console.log('Calibrated unit');
+                console.log('Wireless calibrated unit');
+            }
+            else if (flags & 0x40) {
+                console.log('Local calibrated unit');
             }
             else {
-                console.log('WARNING: Uncalibrated unit')
+                console.log('WARNING: Uncalibrated unit');
             }
         }
 

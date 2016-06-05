@@ -64,12 +64,14 @@ fs.writeFile(config.rssi_csv1, '', function (err) {
     if (err) throw err;
 });
 
+/*
 var connection = mysql.createConnection({
   host     : config.sql_ip,
   user     : config.sql_usr,
   password : config.sql_pw,
   database : config.sql_db
 });
+*/
 
 var aws_connection = mysql.createConnection({
   host     : aws_config.sql_ip,
@@ -239,6 +241,7 @@ function post_to_sql () {
             pb_csv_current = config.pb_csv0;   
         }
 
+        /*
         // Batch upload to SQL
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
         console.log(loadQuery)
@@ -247,9 +250,10 @@ function post_to_sql () {
             if (err) throw err;
             console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in Umich');
         });
+        */
 
         // Batch upload to AWS
-        loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE dat_powerblade FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE dat_powerblade FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
         console.log(loadQuery)
 
         aws_connection.query(loadQuery, function(err, rows, fields) {
@@ -274,6 +278,7 @@ function post_to_sql () {
             bl_csv_current = config.bl_csv0;   
         }
 
+        /*
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
         console.log(loadQuery)
         
@@ -281,8 +286,9 @@ function post_to_sql () {
             if (err) throw err;
             console.log('Done writing ' + blees_count_save + ' packets to BLEES in Umich');
         });
+        */
 
-        loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE dat_blees FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE dat_blees FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
         console.log(loadQuery)
 
         aws_connection.query(loadQuery, function(err, rows, fields) {
@@ -307,6 +313,7 @@ function post_to_sql () {
             cc_csv_current = config.cc_csv0;
         }
 
+        /*
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE coilcube_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
         console.log(loadQuery);
 
@@ -314,8 +321,9 @@ function post_to_sql () {
             if (err) throw err;
             console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in Umich');
         });
+        */
 
-        loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE dat_coilcube FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE dat_coilcube FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
         console.log(loadQuery);
 
         aws_connection.query(loadQuery, function(err, rows, fields) {
@@ -340,6 +348,7 @@ function post_to_sql () {
             rssi_csv_current = config.rssi_csv0;
         }
 
+        /*
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE rssi_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
         console.log(loadQuery);
 
@@ -347,8 +356,9 @@ function post_to_sql () {
             if (err) throw err;
             console.log('Done writing ' + rssi_count_save + ' packets to RSSI in Umich');
         });
+        */
 
-        loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE dat_rssi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE dat_rssi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
         console.log(loadQuery);
 
         aws_connection.query(loadQuery, function(err, rows, fields) {
