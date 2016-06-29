@@ -95,7 +95,8 @@ var parse_advertisement = function (advertisement, cb) {
                     power: real_power_disp.toFixed(2),
                     apparent_power: app_power_disp.toFixed(2),
                     energy: watt_hours_disp.toFixed(2),
-                    power_factor: pf_disp.toFixed(2)
+                    power_factor: pf_disp.toFixed(2),
+					flags: flags
                 }
 
                 cb(out);
