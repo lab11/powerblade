@@ -3,3 +3,4 @@ Debug
 Release
 .launches
 RemoteSystemsTempFiles
+!msp_images/*
