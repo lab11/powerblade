@@ -88,7 +88,7 @@ APP_TIMER_DEF(restart_advs_timer);
 
 // advertisement data
 // for https://cdn.rawgit.com/lab11/powerblade/030626a2aa748c0b0d7c3a69d9fd005d6d769667/software/summon/index.html
-#define PHYSWEB_URL "goo.gl/6EKY8W"
+#define PHYSWEB_URL "j2x.us/6EKY8W"
 #define UMICH_COMPANY_IDENTIFIER    0x02E0
 #define POWERBLADE_SERVICE_IDENTIFIER 0x11
 #define ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
