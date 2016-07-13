@@ -65,7 +65,7 @@ uint32_t voltAmpsToAverage;
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 2;
-char msp_software_version = 2;
+char msp_software_version = 3;
 
 // Transmitted values
 uint32_t sequence;
@@ -565,7 +565,10 @@ void transmitTry(void) {
 				truePower = (uint16_t) ((wattHoursToAverage / 60));
 			}
 			else {
-				truePower = 0;
+				//truePower = 0;
+				// The following change makes it so applying PowerBlade backwards does not result in 0 for true power
+				// TODO: this isnt a great fix, the original code was in place for a reason
+				truePower = (uint16_t) ((wattHoursToAverage / -60));
 			}
 			wattHours += (uint64_t) truePower;
 			apparentPower = (uint16_t) ((voltAmpsToAverage / 60));
