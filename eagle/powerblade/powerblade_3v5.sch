@@ -17529,16 +17529,16 @@ nRF24LE1, nRF51822-QFAA/AB, with integrated harmonic filter</description>
 <library name="crystals">
 <packages>
 <package name="TXC-8Y">
-<smd name="4" x="-0.7" y="0.55" dx="0.9" dy="0.8" layer="1"/>
-<smd name="3" x="0.7" y="0.55" dx="0.9" dy="0.8" layer="1"/>
-<smd name="2" x="0.7" y="-0.55" dx="0.9" dy="0.8" layer="1"/>
-<smd name="1" x="-0.7" y="-0.55" dx="0.9" dy="0.8" layer="1"/>
-<wire x1="-1" y1="0.8" x2="1" y2="0.8" width="0.127" layer="21"/>
-<wire x1="1" y1="0.8" x2="1" y2="-0.8" width="0.127" layer="21"/>
-<wire x1="1" y1="-0.8" x2="-1" y2="-0.8" width="0.127" layer="21"/>
-<wire x1="-1" y1="-0.8" x2="-1" y2="0.8" width="0.127" layer="21"/>
-<wire x1="-1.3" y1="0.2" x2="-1.3" y2="1.1" width="0.127" layer="21"/>
-<wire x1="-1.3" y1="1.1" x2="-0.3" y2="1.1" width="0.127" layer="21"/>
+<smd name="4" x="-0.65" y="0.5" dx="0.8" dy="0.7" layer="1"/>
+<smd name="3" x="0.65" y="0.5" dx="0.8" dy="0.7" layer="1"/>
+<smd name="2" x="0.65" y="-0.5" dx="0.8" dy="0.7" layer="1"/>
+<smd name="1" x="-0.65" y="-0.5" dx="0.8" dy="0.7" layer="1"/>
+<wire x1="-1.1" y1="0.9" x2="1.1" y2="0.9" width="0.06" layer="21"/>
+<wire x1="1.1" y1="0.9" x2="1.1" y2="-0.9" width="0.06" layer="21"/>
+<wire x1="1.1" y1="-0.9" x2="-1.1" y2="-0.9" width="0.06" layer="21"/>
+<wire x1="-1.1" y1="-0.9" x2="-1.1" y2="0.9" width="0.06" layer="21"/>
+<wire x1="-1.2" y1="0.05" x2="-1.2" y2="-1" width="0.06" layer="21"/>
+<wire x1="-1.2" y1="-1" x2="-0.2" y2="-1" width="0.06" layer="21"/>
 <text x="0" y="1.3" size="1.016" layer="25" font="vector" ratio="12" align="bottom-center">&gt;NAME</text>
 </package>
 </packages>
