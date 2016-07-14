@@ -149,7 +149,7 @@
 <text x="11.27125" y="-4.445" size="0.635" layer="21" rot="R90">S.DeBruin 7.14.16</text>
 <text x="6.35" y="5.08" size="1.524" layer="22" rot="MR0">PowerBlade</text>
 <text x="3.4925" y="4.1275" size="0.762" layer="22" rot="MR0">S.DeBruin</text>
-<text x="-2.143125" y="2.54" size="1.778" layer="22" rot="MR0">1</text>
+<text x="-2.38125" y="2.54" size="1.778" layer="22" rot="MR0">1</text>
 </plain>
 <libraries>
 <library name="rcl">
