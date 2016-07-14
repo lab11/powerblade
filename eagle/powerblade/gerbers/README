@@ -1,0 +1,24 @@
+Panelizing & Tab Routing:
+Please panelize in 7x7 panels, for a total of 49 units per panel
+
+Plating: 
+Two of the three cutouts are plated all the way around, an part of the cutout 
+has an additional annular ring around it. This should all be exposed, as per 
+the soldermask files. This is identical to Sunstone order #FP0481637.
+
+Layer Mapping:
+powerblade_3v5.oln - outline & cutouts
+powerblade_3v5.L1 - top copper	
+powerblade_3v5.L2 - inner layer 1
+powerblade_3v5.L3 - inner layer 2
+powerblade_3v5.L4 - bottom copper
+powerblade_3v5.smt - solder mask top
+powerblade_3v5.smb - solder mask bottom
+powerblade_3v5.slk - silkscreen top
+powerblade_3v5.bsk - silkscreen bottom
+powerblade_3v5.drd - drill placement
+powerblade_3v5.dri - drill info
+powerblade_3v5.gpi - info file
+
+
+	
