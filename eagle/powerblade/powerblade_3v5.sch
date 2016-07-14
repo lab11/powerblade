@@ -18831,20 +18831,6 @@ We've spent an enormous amount of time creating and checking these footprints an
 <label x="58.42" y="25.4" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
-<net name="PWM_CURRENT" class="0">
-<segment>
-<pinref part="U3" gate="G$1" pin="P1.2/TA1.1/A2"/>
-<wire x1="27.94" y1="12.7" x2="25.4" y2="12.7" width="0.1524" layer="91"/>
-<label x="27.94" y="12.7" size="1.27" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="PWM_VOLTAGE" class="0">
-<segment>
-<pinref part="U3" gate="G$1" pin="P1.3/TA1.2/A3"/>
-<wire x1="27.94" y1="10.16" x2="25.4" y2="10.16" width="0.1524" layer="91"/>
-<label x="27.94" y="10.16" size="1.27" layer="95" xref="yes"/>
-</segment>
-</net>
 <net name="VFILT" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="P1.1/VREF+"/>
