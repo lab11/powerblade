@@ -14540,6 +14540,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <wire x1="-1.15" y1="1" x2="1.15" y2="1" width="0.127" layer="21"/>
 <wire x1="1.15" y1="-1" x2="-1.15" y2="-1" width="0.127" layer="21"/>
 <text x="-2.54" y="1.27" size="1.27" layer="25">&gt;NAME</text>
+<rectangle x1="-1.2135" y1="-1" x2="-0.508" y2="1" layer="21"/>
 </package>
 <package name="AC_703W">
 <pad name="N" x="-7" y="-7.3" drill="1.8"/>
@@ -16264,7 +16265,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <vertex x="-9.083509375" y="-2.9591"/>
 <vertex x="-7.366" y="-2.8067"/>
 </polygon>
-<text x="-1.905" y="2.54" size="1.778" layer="22" rot="MR0">5</text>
+<text x="1.905" y="2.54" size="1.778" layer="22" rot="MR0">5.1.</text>
 <polygon width="0" layer="1">
 <vertex x="7.366" y="3.3655"/>
 <vertex x="9.642309375" y="3.3655" curve="-90"/>
