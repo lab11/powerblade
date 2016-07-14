@@ -14509,15 +14509,15 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <smd name="P23" x="-0.75" y="1.975" dx="0.28" dy="0.85" layer="1" roundness="100" rot="R180"/>
 <smd name="P24" x="-1.25" y="1.975" dx="0.28" dy="0.85" layer="1" roundness="100" rot="R180"/>
 <smd name="PAD" x="0" y="0" dx="2.1" dy="2.1" layer="1"/>
-<pad name="G7" x="-0.75" y="-0.75" drill="0.3" diameter="0.5"/>
-<pad name="G1" x="-0.75" y="0.75" drill="0.3" diameter="0.5"/>
-<pad name="G3" x="0.75" y="0.75" drill="0.3" diameter="0.5"/>
-<pad name="G9" x="0.75" y="-0.75" drill="0.3" diameter="0.5"/>
-<pad name="G6" x="0.75" y="0" drill="0.3" diameter="0.5"/>
-<pad name="G4" x="-0.75" y="0" drill="0.3" diameter="0.5"/>
-<pad name="G8" x="0" y="-0.75" drill="0.3" diameter="0.5"/>
-<pad name="G2" x="0" y="0.75" drill="0.3" diameter="0.5"/>
-<pad name="G5" x="0" y="0" drill="0.3" diameter="0.5"/>
+<pad name="G7" x="-0.75" y="-0.75" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G1" x="-0.75" y="0.75" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G3" x="0.75" y="0.75" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G9" x="0.75" y="-0.75" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G6" x="0.75" y="0" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G4" x="-0.75" y="0" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G8" x="0" y="-0.75" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G2" x="0" y="0.75" drill="0.3" diameter="0.5" stop="no"/>
+<pad name="G5" x="0" y="0" drill="0.3" diameter="0.5" stop="no"/>
 <text x="-2.54" y="2.54" size="1.27" layer="25">&gt;NAME</text>
 <wire x1="-2.5" y1="1.5" x2="-1.5" y2="1.5" width="0.127" layer="21"/>
 <wire x1="-1.5" y1="1.5" x2="-1.5" y2="2.5" width="0.127" layer="21"/>
