@@ -17,6 +17,5 @@ the WDT (watchdog timer) is enabled.
 | 0  		| Multiple	| This is the default, the first MSP430 code that responds to the version request will respond '1' |
 | 1			| 2			| 10 bit ADC, watchdog timer enabled |
 | 2			| 2			| Local calibration, SET SEQ (0x1C) and RST WH (0x1D) no longer valid |
-| 3			| 2			| Fixed zero-measurement when PowerBlade is applied backwards |
 
 
