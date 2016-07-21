@@ -11,9 +11,8 @@ var ini = require('ini');
 var mysql = require('mysql');
 var getmac = require('getmac');
 
-// discover the local MQTT broker
-var MQTTDiscover = require('mqtt-discover');
-MQTTDiscover.start();
+// connect to the local MQTT broker
+var mqtt = require('mqtt');
 var MQTT_DATA_TOPIC = 'gateway-data';
 var MQTT_RSSI_TOPIC = 'ble-advertisements'
 
@@ -111,8 +110,11 @@ var rssi_count = 0;
 var UPLOAD_COUNT = 5000;
 var file_start_time = 0;
 var FILE_TIMEOUT = 30;
-MQTTDiscover.on('mqttBroker', function (mqtt_client) {
-    console.log("Connected to MQTT broker: " + mqtt_client.options.host);
+
+var mqtt_client = mqtt.connect('mqtt://localhost');
+
+mqtt_client.on('connect', function () {
+    console.log("Connected to MQTT");
 
     // subscribe to powerblade data
     mqtt_client.subscribe(MQTT_DATA_TOPIC);
