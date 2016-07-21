@@ -1,8 +1,7 @@
-Gateway to GATD
+Gateway to SQL
 ===============
 
-[GATD](gatd.io) is a data collection, storage, and distribution service. This
-service HTTP POSTs data collected by the gateway to GATD for storage.
+This service sends data from a swarm gateway to a remote SQL server for storage.
 
 Setup
 -----
@@ -21,18 +20,4 @@ Then
     sudo cp gateway-mqtt-sql.service /etc/systemd/system/
     sudo systemctl enable gateway-mqtt-sql
     sudo systemctl start gateway-mqtt-sql
-
-
-Configuration
--------------
-
-You must tell this tool the URL for the HTTP POST Receiver of the desired GATD
-profile. To do this, create `/etc/swarm-gateway/emoncms.conf` and add:
-
-    post_url = <url of GATD HTTP POST receiver>
-
-Example:
-
-    # /etc/swarm-gateway/gatd.conf
-    post_url = http://post.gatd.io/<UUID>
 
