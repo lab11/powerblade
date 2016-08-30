@@ -36,6 +36,7 @@ var pb_csv_current = config.pb_csv0;
 var bl_csv_current = config.bl_csv0;
 var cc_csv_current = config.cc_csv0;
 var rssi_csv_current = config.rssi_csv0;
+var tv_csv_current = config.tv_csv0;
 
 // Erase the temporary files
 fs.writeFile(config.pb_csv0, '', function (err) {
@@ -60,6 +61,12 @@ fs.writeFile(config.rssi_csv0, '', function (err) {
     if (err) throw err;
 });
 fs.writeFile(config.rssi_csv1, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.tv_csv0, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.tv_csv1, '', function (err) {
     if (err) throw err;
 });
 
@@ -106,6 +113,7 @@ var powerblade_count = 0;
 var blees_count = 0;
 var coilcube_count = 0;
 var rssi_count = 0;
+var triumvi_count = 0;
 
 var UPLOAD_COUNT = 5000;
 var file_start_time = 0;
@@ -131,13 +139,13 @@ mqtt_client.on('connect', function () {
 
         // log packets in SQL format
         var curr_time = Date.now()/1000;
-        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0) {      // Mark the start time of the first packet in this file
+        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0 && triumvi_count == 0) {      // Mark the start time of the first packet in this file
             file_start_time = curr_time;
         }
         log_to_sql(topic, adv);
 		
 		// if enough packets have been logged, push to SQL
-        if((powerblade_count + blees_count + coilcube_count + rssi_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+        if((powerblade_count + blees_count + coilcube_count + rssi_count + triumvi_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
             post_to_sql();
         }
     });
@@ -200,6 +208,18 @@ function log_to_sql (topic, adv) {
                 if (err) throw err;
             });
         }
+        else if(adv['device'] == "Triumvi") {
+            triumvi_count += 1;
+            fs.appendFile(tv_csv_current,
+                gatewayID + ',' +
+                adv['_meta']['device_id'] + ',' +
+                adv['Power'] + ',' + 
+                datetime + '\n',
+                encoding='utf8',
+                function (err) {
+                if (err) throw err;
+            });
+        }
     }
     else {
         var timestamp = adv['receivedTime'].split('T');
@@ -232,6 +252,9 @@ function post_to_sql () {
 
     var rssi_count_save = rssi_count;
     rssi_count = 0;
+
+    var triumvi_count_save = triumvi_count
+    triumvi_count = 0;
 
     if(powerblade_count_save > 0) {
         // Switch log files (save current log)
@@ -337,6 +360,31 @@ function post_to_sql () {
             fs.writeFile(cc_csv, '', function (err) {
                 if (err) throw err;
                 console.log('Done erasing Coilcube');
+            });
+        });
+    }
+
+    if(triumvi_count_save > 0) {
+        var tv_csv = tv_csv_current;
+        if(tv_csv_current == config.tv_csv0) {
+            tv_csv_current = config.tv_csv1;
+        }
+        else {
+            tv_csv_current = config.tv_csv0;
+        }
+
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + tv_csv + '\' INTO TABLE dat_triumvi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, power, timestamp);';
+        console.log(loadQuery);
+
+        aws_connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done writing ' + triumvi_count_save + ' packets to Triumvi in AWS');
+
+            // Erase the Coilcube temp file
+            console.log('Erasing Triumvi');
+            fs.writeFile(tv_csv, '', function (err) {
+                if (err) throw err;
+                console.log('Done erasing Triumvi');
             });
         });
     }
