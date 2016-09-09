@@ -37,6 +37,7 @@ var bl_csv_current = config.bl_csv0;
 var cc_csv_current = config.cc_csv0;
 var rssi_csv_current = config.rssi_csv0;
 var tv_csv_current = config.tv_csv0;
+var pir_csv_current = config.pir_csv0;
 
 // Erase the temporary files
 fs.writeFile(config.pb_csv0, '', function (err) {
@@ -67,6 +68,12 @@ fs.writeFile(config.tv_csv0, '', function (err) {
     if (err) throw err;
 });
 fs.writeFile(config.tv_csv1, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.pir_csv0, '', function (err) {
+    if (err) throw err;
+});
+fs.writeFile(config.pir_csv1, '', function (err) {
     if (err) throw err;
 });
 
@@ -114,6 +121,7 @@ var blees_count = 0;
 var coilcube_count = 0;
 var rssi_count = 0;
 var triumvi_count = 0;
+var blink_count = 0;
 
 var UPLOAD_COUNT = 5000;
 var file_start_time = 0;
@@ -139,13 +147,13 @@ mqtt_client.on('connect', function () {
 
         // log packets in SQL format
         var curr_time = Date.now()/1000;
-        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0 && triumvi_count == 0) {      // Mark the start time of the first packet in this file
+        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0 && triumvi_count == 0 && blink_count == 0) {      // Mark the start time of the first packet in this file
             file_start_time = curr_time;
         }
         log_to_sql(topic, adv);
 		
 		// if enough packets have been logged, push to SQL
-        if((powerblade_count + blees_count + coilcube_count + rssi_count + triumvi_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+        if((powerblade_count + blees_count + coilcube_count + rssi_count + triumvi_count + blink_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
             post_to_sql();
         }
     });
@@ -220,6 +228,20 @@ function log_to_sql (topic, adv) {
                 if (err) throw err;
             });
         }
+        else if(adv['device'] == "Blink") {
+            blink_count += 1;
+            fs.appendFile(pir_csv_current,
+                gatewayID + ',' +
+                adv['_meta']['device_id'] + ',' +
+                (adv['current_motion']+0) + ',' +
+                (adv['motion_since_last_adv']+0) + ',' +
+                (adv['motion_last_minute']+0) + ',' +
+                datetime + '\n',
+                encoding='utf8',
+                function (err) {
+                if (err) throw err;
+            });
+        }
     }
     else {
         var timestamp = adv['receivedTime'].split('T');
@@ -255,6 +277,9 @@ function post_to_sql () {
 
     var triumvi_count_save = triumvi_count
     triumvi_count = 0;
+
+    var blink_count_save = blink_count;
+    blink_count = 0;
 
     if(powerblade_count_save > 0) {
         // Switch log files (save current log)
@@ -380,11 +405,36 @@ function post_to_sql () {
             if (err) throw err;
             console.log('Done writing ' + triumvi_count_save + ' packets to Triumvi in AWS');
 
-            // Erase the Coilcube temp file
+            // Erase the Triumvi temp file
             console.log('Erasing Triumvi');
             fs.writeFile(tv_csv, '', function (err) {
                 if (err) throw err;
                 console.log('Done erasing Triumvi');
+            });
+        });
+    }
+
+    if(blink_count_save > 0) {
+        var pir_csv = pir_csv_current;
+        if(pir_csv_current == config.pir_csv0) {
+            pir_csv_current = config.pir_csv1;
+        }
+        else {
+            pir_csv_current = config.pir_csv0;
+        }
+
+        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pir_csv + '\' INTO TABLE dat_blink FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, curMot, advMot, minMot, timestamp);';
+        console.log(loadQuery);
+
+        aws_connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            console.log('Done writing ' + blink_count_save + ' packets to Blink in AWS');
+
+            // Erase the Blink temp file
+            console.log('Erasing Blink');
+            fs.writeFile(pir_csv, '', function (err) {
+                if (err) throw err;
+                console.log('Done erasing Blink');
             });
         });
     }
