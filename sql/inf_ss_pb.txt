@@ -1,0 +1,83 @@
+c098e570010b	 Basement Tech server	Computer
+c098e57000e7	 Conference room Floor strip	Multi
+c098e57000c9	 Workroom Computer	Computer
+c098e57000c7	 Kitchen Fridge	Kitchen
+c098e57000e6	 Conference room Television	Monitor
+c098e57000f1	 Hallway Drink machine	Kitchen
+c098e570010a	 Basement Mysterious grey box	Security
+c098e570010f	 Basement Security system	Security
+c098e5700117	 Basement 3D printer #1	Printer/Shredder
+c098e570010d	 Basement Comcast modem	Networking/Communication
+c098e5700114	 Hallway Big router	Networking/Communication
+c098e57000e4	 Conference room Table strip	Multi
+c098e5700115	 Quiet Rm Air purifier	Other
+c098e57000f2	 Collab Rm Cable box	Networking/Communication
+c098e57000ed	 Hallway Desk #1 other	Computer
+c098e57000e8	 Conference room On Hub	Networking/Communication
+c098e57000fc	 Conference room Phone	Networking/Communication
+c098e57000bb	 Hallway Lobby television	Monitor
+c098e57000ff	 Conference room Air purifier	Other
+c098e570012d	 Basement Western Digital Tower	Peripherals
+c098e57000ba	 Conference room Nuc	Computer
+c098e5700105	 Basement POE module	Networking/Communication
+c098e57000de	 Collab Rm Table strip south	Multi
+c098e57000ee	 Hallway Desk #3 other	Computer
+c098e5700101	 Collab Rm Table Strip North	Multi
+c098e57000f8	 Hallway Desk #4 other	Computer
+c098e57000da	 Collab Rm Television	Monitor
+c098e570012f	 Basement SD tower	Peripherals
+c098e5700119	 Basement Upstairs Ethernet switch	Networking/Communication
+c098e57000f4	 Hallway Desk #5 other	Computer
+c098e57000f0	 Hallway Desk #1 monitor	Monitor
+c098e57000cb	 Hallway Router gateway	Networking/Communication
+c098e57000fd	 Conference room Surge strip #1	Multi
+c098e5700134	 Basement Phone	Networking/Communication
+c098e5700107	 Basement Downstairs Ethernet switch	Networking/Communication
+c098e57000c3	 Kitchen Microwave	Kitchen
+c098e57000d4	 Workroom Monitor	Monitor
+c098e57000ca	 Workroom Sterilizer	Other
+c098e57000df	 Basement Gateway	Networking/Communication
+c098e57000ec	 Conference room Surge strip #2	Multi
+c098e57000fe	 Hallway Lobby chromecast	Computer
+c098e57000cc	 Workroom Cart	Multi
+c098e57000e9	 Conference room Chromecast	Computer
+c098e5700104	 Basement Router	Networking/Communication
+c098e57000cd	 Quiet Rm Desk #3 right power	Computer
+c098e57000cf	 Quiet Rm Desk #4 left power	Computer
+c098e57000d8	 Quiet Rm Desk #4 monitor	Monitor
+c098e57000d6	 Quiet Rm Desk #3 monitor	Monitor
+c098e5700108	 Basement Sec. system monitor	Monitor
+c098e57000f6	 Hallway Desk #5 monitor	Monitor
+c098e57000eb	 Hallway Desk #2 other	Computer
+c098e57000c1	 Kitchen Toaster oven	Kitchen
+c098e57000be	 Quiet Rm Desk #1 left power	Computer
+c098e57000d1	 Quiet Rm Desk #4 right power	Computer
+c098e57000c5	 Quiet Rm Desk #2 monitor	Monitor
+c098e5700116	 Quiet Rm Ethernet switch	Networking/Communication
+c098e57000fb	 Hallway Desk #3 monitor	Monitor
+c098e57000f9	 Hallway Desk #4 monitor	Monitor
+c098e57000e1	 Quiet Rm Desk #2 left power	Computer
+c098e5700138	 Basement Tech server monitor	Monitor
+c098e57000ea	 Hallway Desk #2 monitor	Monitor
+c098e57000ce	 Quiet Rm Desk #3 left power	Computer
+c098e57000e0	 Quiet Rm Desk #2 right power	Computer
+c098e5700136	 Work room New monitor	Monitor
+c098e57000bc	 Quiet Rm Desk #1 right power	Computer
+c098e57000f3	 Hallway Printer	Printer/Shredder
+c098e57000bd	 Quiet Rm Desk #1 monitor	Monitor
+c098e57000dc	 Quiet Rm Desk #1 desk	Computer
+c098e57000f5	 Hallway Lobby speaker	Speaker
+c098e5700139	 Hallway Small coffee maker	Kitchen
+c098e5700102	 Quiet Rm Desk #2 desk	Computer
+c098e57000bf	 Workroom HEPA fan	Other
+c098e57000d5	 Quiet Rm Desk #4 desk	Computer
+c098e57000d9	 Quiet Rm Desk #3 desk	Computer
+c098e5700100	 Hallway Triumvi	Networking/Communication
+c098e570013f	 Work room Drill charger	Other
+c098e57000e3	 Hallway Shredder	Printer/Shredder
+c098e5700135	 Floating 	Other
+c098e57000ef	 Conference room Ethernet switch	Networking/Communication
+c098e570013e	 Floating 	Other
+c098e57000c6	 Workroom Bench lights	Lighting
+c098e57000c0	 Workroom Soldering iron	Other
+c098e570012c	 Basement Comscope	Networking/Communication
