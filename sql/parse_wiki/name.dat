@@ -1,0 +1,232 @@
+===== PowerBlade =====
+^ #     ^ Device Type  ^ Device Hostname              ^ IP Address                             ^ Device ID                 ^ Location              ^ Description                       ^ Notes                                 ^
+| @#FFCB05:PowerBlade  ||||||||
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:02         | 3005 Whisperwood      | Living Room         | Lamps (2)           |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:09         | 3005 Whisperwood      | Living Room         | Amplifier           |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:12         | 3005 Whisperwood      | Kitchen             | Fridge              |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:20         | 3005 Whisperwood      | Bedroom             | Humidifier          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:2d         | 3005 Whisperwood      | Other Bathroom      | Curling Iron        |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:2e         | 4901                  | Projector           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:2f         | 1010 Catherine #404   | TV                  |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:30         | 3005 Whisperwood      | Living Room         | Xbox One            |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:33         | 3005 Whisperwood      | Kitchen             | Microwave           |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:34         | 3005 Whisperwood      | Living Room         | Cable Box           |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:35         | 3005 Whisperwood      |                     | MacBook Charger     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:36         | 3005 Whisperwood      | Outside             | Smoker              |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:37         | 3005 Whisperwood      | Bedroom             | Small Lamp          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:38         | 3005 Whisperwood      | Living Room         | Apple TV            |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:39         | 3005 Whisperwood      | Bedroom             | Android Charger     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:3A         | 3005 Whisperwood      | Kitchen             | Coffee Maker        |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:3B         | 3005 Whisperwood      | Living Room         | Television          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:3C         | 3005 Whisperwood      | Guest Room          | Printer             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:3D         | 3005 Whisperwood      | Living Room         | AT&T Modem/Router   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:3E         | 3005 Whisperwood      | Bedroom             | iPhone charger      |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:3f         | EECS 4436             | Amateur Radio Shack | Yaesu                           |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:40         | EECS 4436             | Amateur Radio Shack | RC2800 M2 (Motor for Antennas)  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:41         | EECS 4436             | Amateur Radio Shack | SteppIR                         |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:42         | EECS 4436             | Amateur Radio Shack | Kenwood                         |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:43         | EECS 4436             | Amateur Radio Shack | IC-910                          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:44         | EECS 4436             | Amateur Radio Shack | IC-746                          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:45         | 4901                  | Power strip under all of the tables |     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:46         | 3005 Whisperwood      | Guest Room          | Aero Garden         |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:47         | 3005 Whisperwood      | Guest Room          | Floor Lamp          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:48         | 3005 Whisperwood      | Guest Room          | Bedside Lamp        |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:49         | 3005 Whisperwood      | Deployment          | NUC                 |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:4A         | 3005 Whisperwood      | Deployment          | USB Hub             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:4B         | 3005 Whisperwood      | Deployment          | Energy Bridge       |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:4C         | 3005 Whisperwood      | Guest Room          | Paper Shredder      |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:4D         | 3005 Whisperwood      | Guest Room          | Clock               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:4E         | 3005 Whisperwood      | Deployment          | BBB 237             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:4F         | 3005 Whisperwood      | Guest Room          | Monitor             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:50         | 3005 Whisperwood      | Guest Room          | Computer            |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:51         | 3005 Whisperwood      | Guest Room          | Speakers            |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:52         | 3005 Whisperwood      | Guest Room          | Cell Phone Charger  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:53         | 3005 Whisperwood      | Deployment          | Eth Switch #2       |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:54         | 3005 Whisperwood      | Deployment          | BBB Phone           |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:55         | 3005 Whisperwood      | Guest Room          | MacBook Charger     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:57         | 3005 Whisperwood      | Living Room         | Sparse Surge Strip  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:58         | 3005 Whisperwood      | Living Room         | Full Surge Strip    |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:59         | 3005 Whisperwood      | Guest Room          | Desk Lamp           |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:5A         | 3005 Whisperwood      | Deployment          | BBB 235             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:5B         | 3005 Whisperwood      | Deployment          | Eth Switch #1       |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:5C         | 3005 Whisperwood      | Guest Room          | Surge Strip         |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:5D         | 3005 Whisperwood      | Living Room         | Harmony Charger     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:5E         | 3005 Whisperwood      | Bedroom             | Floor Lamp          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:60         | 3005 Whisperwood      | Deployment          | BBB 236             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:61         | 3005 Whisperwood      | Bedroom             | Roomba              |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:63         | 3005 Whisperwood      | Guest Room          | Box Fan             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:64         | 3005 Whisperwood      | Guest Room          | Belkin              |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:65         | 3005 Whisperwood      | Bedroom             | Box Fan             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:66         | 3005 Whisperwood      | Bathroom            | LED Night Light     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:68         | 3005 Whisperwood      | Kitchen             | Toaster             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:69         | 3005 Whisperwood      | Living Room         | Reading Lamp        |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:6A         | 3005 Whisperwood      | Other Bathroom      | Curling Iron        |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:6B         | 3005 Whisperwood      | Other Bathroom      | Hair Dryer          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:6D         | 3005 Whisperwood      | Guest Room          | Monitor             |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:6E         | 3005 Whisperwood      | Guest Room          | Sewing Machine      |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:6F         | 3005 Whisperwood      |                     | Laptop Charger      |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:70         | 3005 Whisperwood      | Living Room         | Big Lamp            |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:71         | 3005 Whisperwood      | Living Room         | Small Lamp          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:72         | 3005 Whisperwood      | Bedroom             | Surge Strip         |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:73         | 3005 Whisperwood      | Deployment          | UPS                 |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:74         | 3005 Whisperwood      | Other Bathroom      | Curling Iron        |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:75         | 3005 Whisperwood      |                     | Fast Charger        |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:76         | 3005 Whisperwood      | Kitchen*            | Food Processor/Blender |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:96         | 4901                  | Phone               |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:98         | 4941                  | Table Outlets       |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:9A         | 4941                  | Projector           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:AD         | 2817                  | Keurig              | Chez Betty          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:AE         | 2817                  | Chez Betty Fridge   | Chez Betty          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:99         | 2817                  | Chez Betty UPS      | Chez Betty          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:af         | 2817                  | Chez Betty Freezer  | Chez Betty          |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:97         | 3901                  | Table Outlets       |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:9b         | 3901                  | Projector           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:9c         | 3901                  | A/V Equipment       |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:B6         | 2733                  | Table Outlets       |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:B7         | 2733                  | Projector           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:9E         | 2725                  | Table Outlets       |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:9F         | 2725                  | Projector           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a6         | 4649                  | Fridge              |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ac         | 4649                  | Water Cooler        |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:b5         | 4649                  | Toaster             |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a5         | 4649                  | Microwave           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ab         | 4649                  | Coffee Maker        |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:aa         | 3941                  | Projector           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a4         | 3941                  | Desk 1              |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:b3         | 3941                  | Desk 2              |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a1         | 3941                  | Desk 3              |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a2         | 3941                  | Desk 4              |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:b2         | 3941                  | Power Stalk         |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:31         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:28         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:24         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:1f         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:21         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:2b         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:1d         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:1c         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:1e         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:1b         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:20         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:1a         |                       | Sent to Bjorn at Berkeley |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a9         | 4908                  | ZORTRAX             | DESTROYER OF WORLDS (and serial number ZACA6B1B7) |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:b8         | 3725                  | Projector           |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:b9         | 3725                  | Table outlets       |                     |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:95        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:9d        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a0        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a3        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:a8        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:b1        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:c2        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:c4        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:d0        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:d2        |                       | Sent to Roozbeh at Texas A&M |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:d3        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:d7        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:db        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:e2        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:e5        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f7        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:0c        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:13        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:22        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:23        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:25        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:26        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:27        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:29        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:2e        |                       | Sent to Ken at Berkeley      |               |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:01        | SkySpecs              | Collab Rm                    | Table Strip North       |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:DA        | SkySpecs              | Collab Rm                    | Television       |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:F2        | SkySpecs              | Collab Rm                    | Cable box  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:E3        | SkySpecs              | Hallway                      | Shredder  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:F3        | SkySpecs              | Hallway                      | Printer   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:00        | SkySpecs              | Hallway                      | Triumvi   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:CB        | SkySpecs              | Hallway                      | Router gateway  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:DC        | SkySpecs              | Quiet Rm                     | Desk #1 desk   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:BD        | SkySpecs              | Quiet Rm                     | Desk #1 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:BC        | SkySpecs              | Quiet Rm                     | Desk #1 right power  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:BE        | SkySpecs              | Quiet Rm                     | Desk #1 left power   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:02        | SkySpecs              | Quiet Rm                     | Desk #2 desk   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:C5        | SkySpecs              | Quiet Rm                     | Desk #2 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:E0        | SkySpecs              | Quiet Rm                     | Desk #2 right power  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:E1        | SkySpecs              | Quiet Rm                     | Desk #2 left power  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:D9        | SkySpecs              | Quiet Rm                     | Desk #3 desk   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:D6        | SkySpecs              | Quiet Rm                     | Desk #3 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:CD        | SkySpecs              | Quiet Rm                     | Desk #3 right power  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:CE        | SkySpecs              | Quiet Rm                     | Desk #3 left power  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:D5        | SkySpecs              | Quiet Rm                     | Desk #4 desk  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:D8        | SkySpecs              | Quiet Rm                     | Desk #4 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:CF        | SkySpecs              | Quiet Rm                     | Desk #4 left power  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:D1        | SkySpecs              | Quiet Rm                     | Desk #4 right power  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:D4        | SkySpecs              | Workroom                     | Monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:CC        | SkySpecs              | Workroom                     | Cart  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:C9        | SkySpecs              | Workroom                     | Computer  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:CA        | SkySpecs              | Workroom                     | Sterilizer  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:C6        | SkySpecs              | Workroom                     | Bench lights  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:C0        | SkySpecs              | Workroom                     | Soldering iron  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:BF        | SkySpecs              | Workroom                     | HEPA fan  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:C7        | SkySpecs              | Kitchen                      | Fridge  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:C1        | SkySpecs              | Kitchen                      | Toaster oven  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:C3        | SkySpecs              | Kitchen                      | Microwave  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:DF        | SkySpecs              | Basement                     | Gateway  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:14        | SkySpecs              | Hallway                      | Big router  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:15        | SkySpecs              | Quiet Rm                     | Air purifier  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:16        | SkySpecs              | Quiet Rm                     | Ethernet switch  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:17        | SkySpecs              | Basement                     | 3D printer #1  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:12        | SkySpecs              | Batman room                  | Surge protector  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:11        | SkySpecs              | Batman room                  | ITE power supply  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:10        | SkySpecs              | Batman room                  | Futaba power supply  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:18        | SkySpecs              | Batman room                  | White USB charger #1  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:0E        | SkySpecs              | Batman room                  | White USB charger #2  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:19        | SkySpecs              | Basement                     | Upstairs Ethernet switch  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:07        | SkySpecs              | Basement                     | Downstairs Ethernet switch  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:05        | SkySpecs              | Basement                     | POE module  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:0F        | SkySpecs              | Basement                     | Security system  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:0D        | SkySpecs              | Basement                     | Comcast modem  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:08        | SkySpecs              | Basement                     | Sec. system monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:0A        | SkySpecs              | Basement                     | Mysterious grey box  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:0B        | SkySpecs              | Basement                     | Tech server  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:04        | SkySpecs              | Basement                     | Router  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:38        | SkySpecs              | Basement                     | Tech server monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:2D        | SkySpecs              | Basement                     | Western Digital Tower  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:E8        | SkySpecs              | Conference room              | On Hub  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:fc        | SkySpecs              | Conference room              | Phone  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:fd        | SkySpecs              | Conference room              | Surge strip #1  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ec        | SkySpecs              | Conference room              | Surge strip #2  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ef        | SkySpecs              | Conference room              | Ethernet switch  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:e9        | SkySpecs              | Conference room              | Chromecast  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ff        | SkySpecs              | Conference room              | Air purifier  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ba        | SkySpecs              | Conference room              | Nuc  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:e6        | SkySpecs              | Conference room              | Television  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:e4        | SkySpecs              | Conference room              | Table strip  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:e7        | SkySpecs              | Conference room              | Floor strip  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f1        | SkySpecs              | Hallway                      | Drink machine  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f5        | SkySpecs              | Hallway                      | Lobby speaker  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:bb        | SkySpecs              | Hallway                      | Lobby television  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:fe        | SkySpecs              | Hallway                      | Lobby chromecast  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f0        | SkySpecs              | Hallway                      | Desk #1 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ed        | SkySpecs              | Hallway                      | Desk #1 other  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ea        | SkySpecs              | Hallway                      | Desk #2 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:eb        | SkySpecs              | Hallway                      | Desk #2 other  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:fb        | SkySpecs              | Hallway                      | Desk #3 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:ee        | SkySpecs              | Hallway                      | Desk #3 other  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f9        | SkySpecs              | Hallway                      | Desk #4 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f8        | SkySpecs              | Hallway                      | Desk #4 other  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f6        | SkySpecs              | Hallway                      | Desk #5 monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:f4        | SkySpecs              | Hallway                      | Desk #5 other  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:de        | SkySpecs              | Collab Rm                    | Table strip south  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:2f        | SkySpecs              | Basement                     | SD tower  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:34        | SkySpecs              | Basement                     | Phone  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:2c        | SkySpecs              | Basement                     | Comscope  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:00:B0        | 4908                  | Brad Desk                    | Oscilloscope  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:39        | SkySpecs              | Hallway                      | Small coffee maker  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:3f        | SkySpecs              | Work room                    | Drill charger  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:36        | SkySpecs              | Work room                    | New monitor  |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:33        | SkySpecs              | Floating                     |   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:35        | SkySpecs              | Floating                     |   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:3e        | SkySpecs              | Floating                     |   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:42        | SkySpecs              | Floating                     |   |
+| ~~#~~ | PowerBlade   |                              |                                        | c0:98:e5:70:01:3d        | SkySpecs              | Floating                     |   |
+
