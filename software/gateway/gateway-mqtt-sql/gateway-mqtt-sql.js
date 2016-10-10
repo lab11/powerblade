@@ -20,8 +20,8 @@ var topic_list = [
 ['device/Coilcube/+', 'dat_coilcube'],
 ['device/Solar Monjolo/+', 'dat_monjolo'],
 ['device/Triumvi/+', 'dat_triumvi'],
-['device/Blink/+', 'dat_blink'],
-['ble-advertisements', 'dat_rssi']
+['device/Blink/+', 'dat_blink']//,
+//['ble-advertisements', 'dat_rssi']
 ];
 //var MQTT_DATA_TOPIC = 'gateway-data';
 //var MQTT_RSSI_TOPIC = 'ble-advertisements'
