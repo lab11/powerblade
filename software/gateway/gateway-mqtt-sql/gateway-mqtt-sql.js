@@ -170,12 +170,12 @@ var mqtt_watchdog = new watchout(1*60*1000, function(didCancelWatchdog) {
 });
 
 // connect to MQTT broker
-var powerblade_count = 0;
-var blees_count = 0;
-var coilcube_count = 0;
-var rssi_count = 0;
-var triumvi_count = 0;
-var blink_count = 0;
+// var powerblade_count = 0;
+// var blees_count = 0;
+// var coilcube_count = 0;
+// var rssi_count = 0;
+// var triumvi_count = 0;
+// var blink_count = 0;
 
 var UPLOAD_COUNT = 5000;
 var file_start_time = 0;
