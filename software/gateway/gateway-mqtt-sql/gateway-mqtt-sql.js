@@ -40,8 +40,8 @@ process.argv.forEach(function (val, index, array) {
 
 // configuration
 try {
-    var config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-sql.conf', 'utf-8');
-    var config = ini.parse(config_file);
+    // var config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-sql.conf', 'utf-8');
+    // var config = ini.parse(config_file);
     var aws_config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-aws.conf', 'utf-8');
     var aws_config = ini.parse(aws_config_file);
     // if (config.post_url == undefined || config.post_url == '') {
@@ -49,69 +49,76 @@ try {
     // }
 } catch (e) {
     console.log(e);
-    console.log("\nCannot find /etc/swarm-gateway/powerblade-*.conf or configuration invalid.");
+    console.log("\nCannot find /etc/swarm-gateway/powerblade-aws.conf or configuration invalid.");
     process.exit(1);
 }
 
 // Process topic list, create temp files, zero counts
-topic_files = [];
-topic_counts = [];
+var topic_files = [];
+var topic_counts = [];
 topic_list.forEach(function(value) {
     // Set up two temporary files
     temp_files = [];
-    temp_files.push('/tmp/' + value[1] + '0.csv');
-    temp_files.push('/tmp/' + value[1] + '0.csv');
+    for(var i = 0; i <= 1; i++) {
+        var filename = '/tmp/' + value[1] + i + '.csv';
+        // Erase existing data
+        fs.writeFile(filename, '', function (err) {
+            if (err) throw err;
+        });
+        temp_files.push(filename);
+    }
     topic_files.push(temp_files);
 
     // Initialize count to zero
     topic_counts.push(0);
 });
+var file_current = 0;
 
 // This is used for re-directing the flow during an upload
-var pb_csv_current = config.pb_csv0;
-var bl_csv_current = config.bl_csv0;
-var cc_csv_current = config.cc_csv0;
-var rssi_csv_current = config.rssi_csv0;
-var tv_csv_current = config.tv_csv0;
-var pir_csv_current = config.pir_csv0;
+// var pb_csv_current = config.pb_csv0;
+// var bl_csv_current = config.bl_csv0;
+// var cc_csv_current = config.cc_csv0;
+// var rssi_csv_current = config.rssi_csv0;
+// var tv_csv_current = config.tv_csv0;
+// var pir_csv_current = config.pir_csv0;
 
 // Erase the temporary files
-fs.writeFile(config.pb_csv0, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.pb_csv1, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.bl_csv0, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.bl_csv1, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.cc_csv0, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.cc_csv1, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.rssi_csv0, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.rssi_csv1, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.tv_csv0, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.tv_csv1, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.pir_csv0, '', function (err) {
-    if (err) throw err;
-});
-fs.writeFile(config.pir_csv1, '', function (err) {
-    if (err) throw err;
-});
+// fs.writeFile(config.pb_csv0, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.pb_csv1, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.bl_csv0, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.bl_csv1, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.cc_csv0, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.cc_csv1, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.rssi_csv0, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.rssi_csv1, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.tv_csv0, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.tv_csv1, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.pir_csv0, '', function (err) {
+//     if (err) throw err;
+// });
+// fs.writeFile(config.pir_csv1, '', function (err) {
+//     if (err) throw err;
+// });
 
 /*
 var connection = mysql.createConnection({
