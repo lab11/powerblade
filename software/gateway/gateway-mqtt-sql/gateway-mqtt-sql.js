@@ -41,7 +41,7 @@ try {
     // }
 } catch (e) {
     console.log(e);
-    console.log("\nCannot find /etc/swarm-gateway/powerblade-sql.conf or configuration invalid.");
+    console.log("\nCannot find /etc/swarm-gateway/powerblade-*.conf or configuration invalid.");
     process.exit(1);
 }
 
@@ -99,13 +99,24 @@ var connection = mysql.createConnection({
   database : config.sql_db
 });
 */
-
-var aws_connection = mysql.createConnection({
-  host     : aws_config.sql_ip,
-  user     : aws_config.sql_usr,
-  password : aws_config.sql_pw,
-  database : aws_config.sql_db
-});
+if(test == 0) {
+    console.log("Connecting to " + aws_config.sql_ip);
+    var db_connection = mysql.createConnection({
+      host     : aws_config.sql_ip,
+      user     : aws_config.sql_usr,
+      password : aws_config.sql_pw,
+      database : aws_config.sql_db
+    });
+}
+else {
+    console.log("Connecting to " + aws_config.test_ip);
+    var db_connection = mysql.createConnection({
+      host     : aws_config.test_ip,
+      user     : aws_config.test_usr,
+      password : aws_config.test_pw,
+      database : aws_config.test_db
+    }); 
+}
 
 var gateway_mac;
 getmac.getMac(function(err,macAddress) {
@@ -320,7 +331,7 @@ function post_to_sql () {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE dat_powerblade FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
         console.log(loadQuery)
 
-        aws_connection.query(loadQuery, function(err, rows, fields) {
+        db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in AWS');
 
@@ -355,7 +366,7 @@ function post_to_sql () {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE dat_blees FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
         console.log(loadQuery)
 
-        aws_connection.query(loadQuery, function(err, rows, fields) {
+        db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing ' + blees_count_save + ' packets to BLEES in AWS');
 
@@ -390,7 +401,7 @@ function post_to_sql () {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE dat_coilcube FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
         console.log(loadQuery);
 
-        aws_connection.query(loadQuery, function(err, rows, fields) {
+        db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in AWS');
 
@@ -415,7 +426,7 @@ function post_to_sql () {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + tv_csv + '\' INTO TABLE dat_triumvi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, power, timestamp);';
         console.log(loadQuery);
 
-        aws_connection.query(loadQuery, function(err, rows, fields) {
+        db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing ' + triumvi_count_save + ' packets to Triumvi in AWS');
 
@@ -440,7 +451,7 @@ function post_to_sql () {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pir_csv + '\' INTO TABLE dat_blink FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, curMot, advMot, minMot, timestamp);';
         console.log(loadQuery);
 
-        aws_connection.query(loadQuery, function(err, rows, fields) {
+        db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing ' + blink_count_save + ' packets to Blink in AWS');
 
@@ -475,7 +486,7 @@ function post_to_sql () {
         var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE dat_rssi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
         console.log(loadQuery);
 
-        aws_connection.query(loadQuery, function(err, rows, fields) {
+        db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) throw err;
             console.log('Done writing ' + rssi_count_save + ' packets to RSSI in AWS');
 
