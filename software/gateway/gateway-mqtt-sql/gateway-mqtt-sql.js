@@ -38,6 +38,14 @@ process.argv.forEach(function (val, index, array) {
     }
 });
 
+function sumTopicList() {
+    var sum = 0;
+    for(var key in topic_data) {
+        sum += topic_data[key][2];
+    }
+    return sum;
+}
+
 // configuration
 try {
     // var config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-sql.conf', 'utf-8');
@@ -216,7 +224,9 @@ mqtt_client.on('connect', function () {
 
         // log packets in SQL format
         var curr_time = Date.now()/1000;
-        var topic_sum = topic_counts.reduce(function(total, num) {return total + num}, 0);
+
+        //var topic_sum = topic_counts.reduce(function(total, num) {return total + num}, 0);
+        var topic_sum = sumTopicList();
         if(topic_sum == 0) {// Mark the start time of the first packet in this file
         //if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0 && triumvi_count == 0 && blink_count == 0) {      // Mark the start time of the first packet in this file
             file_start_time = curr_time;
@@ -242,7 +252,8 @@ function log_to_sql (topic, adv) {
         datetime = timestamp[0] + ' ' + timestamp[1];
 
         rssi_count += 1;
-        fs.appendFile(rssi_csv_current,
+        //fs.appendFile(rssi_csv_current,
+        fs.appendFile(topic_data['ble-advertisements'][file_current],
             gateway_mac + ',' + 
             adv['address'] + ',' + 
             adv['rssi'] + ',' + 
@@ -263,7 +274,8 @@ function log_to_sql (topic, adv) {
         //console.log(adv['device']);
         if(adv['device'] == "PowerBlade") {
             powerblade_count += 1;
-            fs.appendFile(pb_csv_current, 
+            //fs.appendFile(pb_csv_current, 
+            fs.appendFile(topic_data['PowerBlade'][file_current],
                 gatewayID + ',' +
                 adv['id'] + ',' +
                 adv['sequence_number'] + ',' +
@@ -279,7 +291,8 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'] == "BLEES"){
             blees_count += 1;
-            fs.appendFile(bl_csv_current, 
+            //fs.appendFile(bl_csv_current, 
+            fs.appendFile(topic_data['BLEES'][file_current],
                 gatewayID + ',' +
                 adv['id'] + ',' +
                 adv['temperature_celcius'] + ',' +
@@ -296,7 +309,8 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'].slice(0,8) == "Coilcube" || adv['device'] == "Solar Monjolo") {
             coilcube_count += 1;
-            fs.appendFile(cc_csv_current,
+            //fs.appendFile(cc_csv_current,
+            fs.appendFile(topic_data['CoilCube'][file_current],
                 gatewayID + ',' +
                 adv['_meta']['device_id'] + ',' + 
                 adv['seq_no'] + ',' + 
@@ -309,7 +323,8 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'] == "Triumvi") {
             triumvi_count += 1;
-            fs.appendFile(tv_csv_current,
+            //fs.appendFile(tv_csv_current,
+            fs.appendFile(topic_data['Triumvi'][file_current],
                 gatewayID + ',' +
                 adv['_meta']['device_id'] + ',' +
                 adv['Power'] + ',' + 
@@ -321,7 +336,8 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'] == "Blink") {
             blink_count += 1;
-            fs.appendFile(pir_csv_current,
+            //fs.appendFile(pir_csv_current,
+            fs.appendFile(topic_data['Blink'][file_current],
                 gatewayID + ',' +
                 adv['_meta']['device_id'] + ',' +
                 (adv['current_motion']+0) + ',' +
