@@ -13,8 +13,17 @@ var getmac = require('getmac');
 
 // connect to the local MQTT broker
 var mqtt = require('mqtt');
-var MQTT_DATA_TOPIC = 'gateway-data';
-var MQTT_RSSI_TOPIC = 'ble-advertisements'
+var topic_list = [
+['device/PowerBlade/+', 'dat_powerblade'],
+['device/BLEES/+', 'dat_blees'],
+['device/Coilcube/+', 'dat_coilcube'],
+['device/Solar Monjolo/+', 'dat_coilcube'],
+['device/Triumvi/+', 'dat_triumvi'],
+['device/Blink/+', 'dat_blink'],
+['ble-advertisements', 'dat_rssi']
+];
+//var MQTT_DATA_TOPIC = 'gateway-data';
+//var MQTT_RSSI_TOPIC = 'ble-advertisements'
 
 var debug = 0;
 var test = 0;
