@@ -13,6 +13,7 @@ var getmac = require('getmac');
 
 // connect to the local MQTT broker
 var mqtt = require('mqtt');
+// TODO this should be in a config - this list determines which data streams are subscribed to
 var topic_list = [
 ['device/PowerBlade/+', 'dat_powerblade'],
 ['device/BLEES/+', 'dat_blees'],
@@ -24,6 +25,16 @@ var topic_list = [
 ];
 //var MQTT_DATA_TOPIC = 'gateway-data';
 //var MQTT_RSSI_TOPIC = 'ble-advertisements'
+
+var field_list = {
+'PowerBlade': '(gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp)',
+'BLEES': '(gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp)',
+'Coilcube': '(gatewayMAC, deviceMAC, seq, count, timestamp)',
+'Solar Monjolo': '(gatewayMAC, deviceMAC, seq, count, timestamp)',
+'Triumvi': '(gatewayMAC, deviceMAC, power, timestamp)',
+'Blink': '(gatewayMAC, deviceMAC, curMot, advMot, minMot, timestamp)',
+'ble-advertisements': '(gatewayMAC, deviceMAC, rssi, timestamp)'
+}
 
 var debug = 0;
 var test = 0;
@@ -86,7 +97,7 @@ topic_list.forEach(function(value) {
     }
 
     // Add table name and initialize count to zero
-    temp_files.push(values[1]);
+    temp_files.push(value[1]);
     temp_files.push(0);
 
     // Save to topic_data
@@ -392,7 +403,7 @@ function post_to_sql () {
         if(count_save[key] > 0) {
             var dat_csv = topic_data[key][file_last];
             var dat_table = topic_data[key][2];
-            var loadQuery = 'LOAD DATA LOCAL INFILE \'' + dat_csv + '\' INTO TABLE ' + dat_table + ' FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
+            var loadQuery = 'LOAD DATA LOCAL INFILE \'' + dat_csv + '\' INTO TABLE ' + dat_table + ' FIELDS TERMINATED BY \',\' ' + field_list[key] + ';';
             console.log(loadQuery);
         }
     }
