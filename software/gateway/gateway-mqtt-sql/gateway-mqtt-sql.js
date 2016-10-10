@@ -27,7 +27,6 @@ var topic_list = [
 
 var debug = 0;
 var test = 0;
-
 process.argv.forEach(function (val, index, array) {
     if(val == "-d" || val == "--debug") {
         debug = 1;
@@ -53,6 +52,20 @@ try {
     console.log("\nCannot find /etc/swarm-gateway/powerblade-*.conf or configuration invalid.");
     process.exit(1);
 }
+
+// Process topic list, create temp files, zero counts
+topic_files = [];
+topic_counts = [];
+topic_list.forEach(function(value) {
+    // Set up two temporary files
+    temp_files = [];
+    temp_files.push('/tmp/' + value[1] + '0.csv');
+    temp_files.push('/tmp/' + value[1] + '0.csv');
+    topic_files.push(temp_files);
+
+    // Initialize count to zero
+    topic_counts.push(0);
+});
 
 // This is used for re-directing the flow during an upload
 var pb_csv_current = config.pb_csv0;
