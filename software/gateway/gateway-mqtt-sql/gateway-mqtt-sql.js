@@ -41,7 +41,7 @@ process.argv.forEach(function (val, index, array) {
 function sumTopicList() {
     var sum = 0;
     for(var key in topic_data) {
-        sum += topic_data[key][2];
+        sum += topic_data[key][3];
     }
     return sum;
 }
@@ -85,7 +85,8 @@ topic_list.forEach(function(value) {
         temp_files.push(filename);
     }
 
-    // Initialize count to zero
+    // Add table name and initialize count to zero
+    temp_files.push(values[1]);
     temp_files.push(0);
 
     // Save to topic_data
@@ -252,7 +253,7 @@ function log_to_sql (topic, adv) {
         datetime = timestamp[0] + ' ' + timestamp[1];
 
         //rssi_count += 1;
-        topic_data['ble-advertisements'][2] += 1;
+        topic_data['ble-advertisements'][3] += 1;
         //fs.appendFile(rssi_csv_current,
         fs.appendFile(topic_data['ble-advertisements'][file_current],
             gateway_mac + ',' + 
@@ -275,7 +276,7 @@ function log_to_sql (topic, adv) {
         //console.log(adv['device']);
         if(adv['device'] == "PowerBlade") {
             //powerblade_count += 1;
-            topic_data['PowerBlade'][2] += 1;
+            topic_data['PowerBlade'][3] += 1;
             //fs.appendFile(pb_csv_current, 
             fs.appendFile(topic_data['PowerBlade'][file_current],
                 gatewayID + ',' +
@@ -293,7 +294,7 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'] == "BLEES"){
             //blees_count += 1;
-            topic_data['BLEES'][2] += 1;
+            topic_data['BLEES'][3] += 1;
             //fs.appendFile(bl_csv_current, 
             fs.appendFile(topic_data['BLEES'][file_current],
                 gatewayID + ',' +
@@ -312,9 +313,9 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'].slice(0,8) == "Coilcube" || adv['device'] == "Solar Monjolo") {
             //coilcube_count += 1;
-            topic_data['CoilCube'][2] += 1;
+            topic_data['Coilcube'][3] += 1;
             //fs.appendFile(cc_csv_current,
-            fs.appendFile(topic_data['CoilCube'][file_current],
+            fs.appendFile(topic_data['Coilcube'][file_current],
                 gatewayID + ',' +
                 adv['_meta']['device_id'] + ',' + 
                 adv['seq_no'] + ',' + 
@@ -327,7 +328,7 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'] == "Triumvi") {
             //triumvi_count += 1;
-            topic_data['Triumvi'][2] += 1;
+            topic_data['Triumvi'][3] += 1;
             //fs.appendFile(tv_csv_current,
             fs.appendFile(topic_data['Triumvi'][file_current],
                 gatewayID + ',' +
@@ -341,7 +342,7 @@ function log_to_sql (topic, adv) {
         }
         else if(adv['device'] == "Blink") {
             //blink_count += 1;
-            topic_data['Blink'][2] += 1;
+            topic_data['Blink'][3] += 1;
             //fs.appendFile(pir_csv_current,
             fs.appendFile(topic_data['Blink'][file_current],
                 gatewayID + ',' +
@@ -359,216 +360,235 @@ function log_to_sql (topic, adv) {
 }
 
 function post_to_sql () {
-    var powerblade_count_save = powerblade_count;
-    powerblade_count = 0;
-
-    var blees_count_save = blees_count;
-    blees_count = 0;
-
-    var coilcube_count_save = coilcube_count;
-    coilcube_count = 0;
-
-    var rssi_count_save = rssi_count;
-    rssi_count = 0;
-
-    var triumvi_count_save = triumvi_count
-    triumvi_count = 0;
-
-    var blink_count_save = blink_count;
-    blink_count = 0;
-
-    if(powerblade_count_save > 0) {
-        // Switch log files (save current log)
-        var pb_csv = pb_csv_current;
-        if(pb_csv_current == config.pb_csv0) {
-            pb_csv_current = config.pb_csv1;
-        }
-        else {
-            pb_csv_current = config.pb_csv0;   
-        }
-
-        /*
-        // Batch upload to SQL
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
-        console.log(loadQuery)
-
-        connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in Umich');
-        });
-        */
-
-        // Batch upload to AWS
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE dat_powerblade FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
-        console.log(loadQuery)
-
-        db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in AWS');
-
-            // Erase the PowerBlade temp file
-            console.log('Erasing PowerBlade');
-            fs.writeFile(pb_csv, '', function (err) {
-                if (err) throw err;
-                console.log('Done erasing PowerBlade');
-            });
-        });
+    var count_save = {};
+    for(var key in topic_data) {
+        count_save[key]= topic_data[key][3];
+        topic_data[key][3] = 0;
     }
 
-    if(blees_count_save > 0) {
-        var bl_csv = bl_csv_current;
-        if(bl_csv_current == config.bl_csv0) {
-            bl_csv_current = config.bl_csv1;
-        }
-        else {
-            bl_csv_current = config.bl_csv0;   
-        }
+    // Switch log files
+    var file_last = file_current;
+    file_current = 1 - file_current;
 
-        /*
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
-        console.log(loadQuery)
+    // var powerblade_count_save = powerblade_count;
+    // powerblade_count = 0;
+
+    // var blees_count_save = blees_count;
+    // blees_count = 0;
+
+    // var coilcube_count_save = coilcube_count;
+    // coilcube_count = 0;
+
+    // var rssi_count_save = rssi_count;
+    // rssi_count = 0;
+
+    // var triumvi_count_save = triumvi_count
+    // triumvi_count = 0;
+
+    // var blink_count_save = blink_count;
+    // blink_count = 0;
+
+    for(var key in count_save) {
+        if(count_save[key] > 0) {
+            var dat_csv = topic_data[key][file_last];
+            var dat_table = topic_data[key][2];
+            var loadQuery = 'LOAD DATA LOCAL INFILE \'' + dat_csv + '\' INTO TABLE ' + dat_table + ' FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
+            console.log(loadQuery);
+        }
+    }
+
+    // if(powerblade_count_save > 0) {
+    //     // Switch log files (save current log)
+    //     var pb_csv = pb_csv_current;
+    //     if(pb_csv_current == config.pb_csv0) {
+    //         pb_csv_current = config.pb_csv1;
+    //     }
+    //     else {
+    //         pb_csv_current = config.pb_csv0;   
+    //     }
+
+    //     /*
+    //     // Batch upload to SQL
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE powerblade_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
+    //     console.log(loadQuery)
+
+    //     connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in Umich');
+    //     });
+    //     */
+
+    //     // Batch upload to AWS
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pb_csv + '\' INTO TABLE dat_powerblade FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp);';
+    //     console.log(loadQuery)
+
+    //     db_connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + powerblade_count_save + ' packets to PowerBlade in AWS');
+
+    //         // Erase the PowerBlade temp file
+    //         console.log('Erasing PowerBlade');
+    //         fs.writeFile(pb_csv, '', function (err) {
+    //             if (err) throw err;
+    //             console.log('Done erasing PowerBlade');
+    //         });
+    //     });
+    // }
+
+    // if(blees_count_save > 0) {
+    //     var bl_csv = bl_csv_current;
+    //     if(bl_csv_current == config.bl_csv0) {
+    //         bl_csv_current = config.bl_csv1;
+    //     }
+    //     else {
+    //         bl_csv_current = config.bl_csv0;   
+    //     }
+
+    //     /*
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE blees_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
+    //     console.log(loadQuery)
         
-        connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + blees_count_save + ' packets to BLEES in Umich');
-        });
-        */
+    //     connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + blees_count_save + ' packets to BLEES in Umich');
+    //     });
+    //     */
 
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE dat_blees FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
-        console.log(loadQuery)
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + bl_csv + '\' INTO TABLE dat_blees FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp);';
+    //     console.log(loadQuery)
 
-        db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + blees_count_save + ' packets to BLEES in AWS');
+    //     db_connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + blees_count_save + ' packets to BLEES in AWS');
 
-            // Erase the BLEES temp file
-            console.log('Erasing BLEES');
-            fs.writeFile(bl_csv, '', function (err) {
-                if (err) throw err;
-                console.log('Done erasing BLEES');
-            });
-        });
-    }
+    //         // Erase the BLEES temp file
+    //         console.log('Erasing BLEES');
+    //         fs.writeFile(bl_csv, '', function (err) {
+    //             if (err) throw err;
+    //             console.log('Done erasing BLEES');
+    //         });
+    //     });
+    // }
 
-    if(coilcube_count_save > 0) {
-        var cc_csv = cc_csv_current;
-        if(cc_csv_current == config.cc_csv0) {
-            cc_csv_current = config.cc_csv1;
-        }
-        else {
-            cc_csv_current = config.cc_csv0;
-        }
+    // if(coilcube_count_save > 0) {
+    //     var cc_csv = cc_csv_current;
+    //     if(cc_csv_current == config.cc_csv0) {
+    //         cc_csv_current = config.cc_csv1;
+    //     }
+    //     else {
+    //         cc_csv_current = config.cc_csv0;
+    //     }
 
-        /*
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE coilcube_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
-        console.log(loadQuery);
+    //     /*
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE coilcube_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
+    //     console.log(loadQuery);
 
-        connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in Umich');
-        });
-        */
+    //     connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in Umich');
+    //     });
+    //     */
 
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE dat_coilcube FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
-        console.log(loadQuery);
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + cc_csv + '\' INTO TABLE dat_coilcube FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, seq, count, timestamp);';
+    //     console.log(loadQuery);
 
-        db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in AWS');
+    //     db_connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + coilcube_count_save + ' packets to Coilcube in AWS');
 
-            // Erase the Coilcube temp file
-            console.log('Erasing Coilcube');
-            fs.writeFile(cc_csv, '', function (err) {
-                if (err) throw err;
-                console.log('Done erasing Coilcube');
-            });
-        });
-    }
+    //         // Erase the Coilcube temp file
+    //         console.log('Erasing Coilcube');
+    //         fs.writeFile(cc_csv, '', function (err) {
+    //             if (err) throw err;
+    //             console.log('Done erasing Coilcube');
+    //         });
+    //     });
+    // }
 
-    if(triumvi_count_save > 0) {
-        var tv_csv = tv_csv_current;
-        if(tv_csv_current == config.tv_csv0) {
-            tv_csv_current = config.tv_csv1;
-        }
-        else {
-            tv_csv_current = config.tv_csv0;
-        }
+    // if(triumvi_count_save > 0) {
+    //     var tv_csv = tv_csv_current;
+    //     if(tv_csv_current == config.tv_csv0) {
+    //         tv_csv_current = config.tv_csv1;
+    //     }
+    //     else {
+    //         tv_csv_current = config.tv_csv0;
+    //     }
 
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + tv_csv + '\' INTO TABLE dat_triumvi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, power, timestamp);';
-        console.log(loadQuery);
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + tv_csv + '\' INTO TABLE dat_triumvi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, power, timestamp);';
+    //     console.log(loadQuery);
 
-        db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + triumvi_count_save + ' packets to Triumvi in AWS');
+    //     db_connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + triumvi_count_save + ' packets to Triumvi in AWS');
 
-            // Erase the Triumvi temp file
-            console.log('Erasing Triumvi');
-            fs.writeFile(tv_csv, '', function (err) {
-                if (err) throw err;
-                console.log('Done erasing Triumvi');
-            });
-        });
-    }
+    //         // Erase the Triumvi temp file
+    //         console.log('Erasing Triumvi');
+    //         fs.writeFile(tv_csv, '', function (err) {
+    //             if (err) throw err;
+    //             console.log('Done erasing Triumvi');
+    //         });
+    //     });
+    // }
 
-    if(blink_count_save > 0) {
-        var pir_csv = pir_csv_current;
-        if(pir_csv_current == config.pir_csv0) {
-            pir_csv_current = config.pir_csv1;
-        }
-        else {
-            pir_csv_current = config.pir_csv0;
-        }
+    // if(blink_count_save > 0) {
+    //     var pir_csv = pir_csv_current;
+    //     if(pir_csv_current == config.pir_csv0) {
+    //         pir_csv_current = config.pir_csv1;
+    //     }
+    //     else {
+    //         pir_csv_current = config.pir_csv0;
+    //     }
 
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pir_csv + '\' INTO TABLE dat_blink FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, curMot, advMot, minMot, timestamp);';
-        console.log(loadQuery);
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + pir_csv + '\' INTO TABLE dat_blink FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, curMot, advMot, minMot, timestamp);';
+    //     console.log(loadQuery);
 
-        db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + blink_count_save + ' packets to Blink in AWS');
+    //     db_connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + blink_count_save + ' packets to Blink in AWS');
 
-            // Erase the Blink temp file
-            console.log('Erasing Blink');
-            fs.writeFile(pir_csv, '', function (err) {
-                if (err) throw err;
-                console.log('Done erasing Blink');
-            });
-        });
-    }
+    //         // Erase the Blink temp file
+    //         console.log('Erasing Blink');
+    //         fs.writeFile(pir_csv, '', function (err) {
+    //             if (err) throw err;
+    //             console.log('Done erasing Blink');
+    //         });
+    //     });
+    // }
 
-    if(rssi_count_save > 0) {
-        var rssi_csv = rssi_csv_current;
-        if(rssi_csv_current == config.rssi_csv0) {
-            rssi_csv_current = config.rssi_csv1;
-        }
-        else {
-            rssi_csv_current = config.rssi_csv0;
-        }
+    // if(rssi_count_save > 0) {
+    //     var rssi_csv = rssi_csv_current;
+    //     if(rssi_csv_current == config.rssi_csv0) {
+    //         rssi_csv_current = config.rssi_csv1;
+    //     }
+    //     else {
+    //         rssi_csv_current = config.rssi_csv0;
+    //     }
 
-        /*
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE rssi_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
-        console.log(loadQuery);
+    //     /*
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE rssi_test FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
+    //     console.log(loadQuery);
 
-        connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + rssi_count_save + ' packets to RSSI in Umich');
-        });
-        */
+    //     connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + rssi_count_save + ' packets to RSSI in Umich');
+    //     });
+    //     */
 
-        var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE dat_rssi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
-        console.log(loadQuery);
+    //     var loadQuery = 'LOAD DATA LOCAL INFILE \'' + rssi_csv + '\' INTO TABLE dat_rssi FIELDS TERMINATED BY \',\' (gatewayMAC, deviceMAC, rssi, timestamp);';
+    //     console.log(loadQuery);
 
-        db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            console.log('Done writing ' + rssi_count_save + ' packets to RSSI in AWS');
+    //     db_connection.query(loadQuery, function(err, rows, fields) {
+    //         if (err) throw err;
+    //         console.log('Done writing ' + rssi_count_save + ' packets to RSSI in AWS');
 
-            // Erase RSSI file
-            console.log('Erasing RSSI');
-            fs.writeFile(rssi_csv, '', function (err) {
-                if (err) throw err;
-                console.log('Done erasing RSSI');
-            });
-        });
-    }
+    //         // Erase RSSI file
+    //         console.log('Erasing RSSI');
+    //         fs.writeFile(rssi_csv, '', function (err) {
+    //             if (err) throw err;
+    //             console.log('Done erasing RSSI');
+    //         });
+    //     });
+    // }
 }
 
 // post JSON advertisements to GATD
