@@ -406,10 +406,10 @@ function post_to_sql () {
         var db_name = 'Test DB (Girard)';
     }
 
-    for(var key in count_save) {
+    Object.keys(topic_data).forEach(function(key, index) {
         if(count_save[key] > 0) {
-            var dat_csv = topic_data[key][file_last];
-            var dat_table = topic_data[key][2];
+            var dat_csv = index[file_last];
+            var dat_table = index[2];
             var loadQuery = 'LOAD DATA LOCAL INFILE \'' + dat_csv + '\' INTO TABLE ' + dat_table + ' FIELDS TERMINATED BY \',\' ' + field_list[key] + ';';
             //console.log(loadQuery);
 
@@ -425,7 +425,7 @@ function post_to_sql () {
                 });
             });
         }
-    }
+    });
 
     // if(powerblade_count_save > 0) {
     //     // Switch log files (save current log)
