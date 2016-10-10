@@ -17,7 +17,7 @@ var topic_list = [
 ['device/PowerBlade/+', 'dat_powerblade'],
 ['device/BLEES/+', 'dat_blees'],
 ['device/Coilcube/+', 'dat_coilcube'],
-['device/Solar Monjolo/+', 'dat_coilcube'],
+['device/Solar Monjolo/+', 'dat_monjolo'],
 ['device/Triumvi/+', 'dat_triumvi'],
 ['device/Blink/+', 'dat_blink'],
 ['ble-advertisements', 'dat_rssi']
@@ -54,24 +54,36 @@ try {
 }
 
 // Process topic list, create temp files, zero counts
-var topic_files = [];
+var topic_data = {};
 var topic_counts = [];
 topic_list.forEach(function(value) {
+    // Get device name, if available
+    var dev_list = value[0].split('/');
+    if(dev_list.length > 1) {
+        var dev_name = dev_list[1];
+    }
+    else {
+        var dev_name = dev_list;
+    }
+
     // Set up two temporary files
     temp_files = [];
     for(var i = 0; i <= 1; i++) {
-        var filename = '/tmp/' + value[1] + i + '.csv';
+        var filename = '/tmp/' + dev_name + i + '.csv';
         // Erase existing data
         fs.writeFile(filename, '', function (err) {
             if (err) throw err;
         });
         temp_files.push(filename);
     }
-    topic_files.push(temp_files);
 
     // Initialize count to zero
-    topic_counts.push(0);
+    temp_files.push(0);
+
+    // Save to topic_data
+    topic_data[dev_name] = temp_files;
 });
+
 var file_current = 0;
 
 // This is used for re-directing the flow during an upload
@@ -187,8 +199,11 @@ mqtt_client.on('connect', function () {
     console.log("Connected to MQTT");
 
     // subscribe to powerblade data
-    mqtt_client.subscribe(MQTT_DATA_TOPIC);
-    mqtt_client.subscribe(MQTT_RSSI_TOPIC);
+    topic_list.forEach(function(value) {
+        mqtt_client(subscribe(value[0]));
+    });
+    // mqtt_client.subscribe(MQTT_DATA_TOPIC);
+    // mqtt_client.subscribe(MQTT_RSSI_TOPIC);
     mqtt_client.on('message', function (topic, message) {
         var adv = JSON.parse(message.toString());
 
@@ -201,22 +216,44 @@ mqtt_client.on('connect', function () {
 
         // log packets in SQL format
         var curr_time = Date.now()/1000;
-        if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0 && triumvi_count == 0 && blink_count == 0) {      // Mark the start time of the first packet in this file
+        var topic_sum = topic_counts.reduce(function(total, num) {return total + num}, 0);
+        if(topic_sum == 0) {// Mark the start time of the first packet in this file
+        //if(powerblade_count == 0 && blees_count == 0 && coilcube_count == 0 && rssi_count == 0 && triumvi_count == 0 && blink_count == 0) {      // Mark the start time of the first packet in this file
             file_start_time = curr_time;
         }
         log_to_sql(topic, adv);
 		
 		// if enough packets have been logged, push to SQL
-        if((powerblade_count + blees_count + coilcube_count + rssi_count + triumvi_count + blink_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+        if(topic_sum >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
+        //if((powerblade_count + blees_count + coilcube_count + rssi_count + triumvi_count + blink_count) >= UPLOAD_COUNT || (curr_time - file_start_time) >= FILE_TIMEOUT) {
             post_to_sql();
         }
     });
 });
 
 // Log csv-formatted advertisements to a temp file
+// TODO this function is hard coded and clunky
+// It might make sense to try to the the parse.js files
 function log_to_sql (topic, adv) {
 
-    if(topic == MQTT_DATA_TOPIC) {
+    if(topic == 'ble-advertisements') {
+        var timestamp = adv['receivedTime'].split('T');
+        timestamp[1] = timestamp[1].slice(0,-1);
+        datetime = timestamp[0] + ' ' + timestamp[1];
+
+        rssi_count += 1;
+        fs.appendFile(rssi_csv_current,
+            gateway_mac + ',' + 
+            adv['address'] + ',' + 
+            adv['rssi'] + ',' + 
+            datetime + '\n',
+            encoding='utf8',
+            function (err) {
+            if (err) throw err;
+        });
+    }
+    else {
+    //if(topic == MQTT_DATA_TOPIC) {
         var timestamp = adv['_meta']['received_time'].split('T');
         timestamp[1] = timestamp[1].slice(0,-1);
         datetime = timestamp[0] + ' ' + timestamp[1];
@@ -297,23 +334,6 @@ function log_to_sql (topic, adv) {
             });
         }
     }
-    else {
-        var timestamp = adv['receivedTime'].split('T');
-        timestamp[1] = timestamp[1].slice(0,-1);
-        datetime = timestamp[0] + ' ' + timestamp[1];
-
-        rssi_count += 1;
-        fs.appendFile(rssi_csv_current,
-            gateway_mac + ',' + 
-            adv['address'] + ',' + 
-            adv['rssi'] + ',' + 
-            datetime + '\n',
-            encoding='utf8',
-            function (err) {
-            if (err) throw err;
-        });
-    }
-    
 }
 
 function post_to_sql () {
