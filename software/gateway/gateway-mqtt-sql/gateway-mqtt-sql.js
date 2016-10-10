@@ -16,6 +16,20 @@ var mqtt = require('mqtt');
 var MQTT_DATA_TOPIC = 'gateway-data';
 var MQTT_RSSI_TOPIC = 'ble-advertisements'
 
+var debug = 0;
+var test = 0;
+
+process.argv.forEach(function (val, index, array) {
+    if(val == "-d" || val == "--debug") {
+        debug = 1;
+        console.log("Running with verbose output");
+    }
+    else if(val == "-t" || val == "--test") {
+        test = 1;
+        console.log("Running with testbed database");
+    }
+});
+
 // configuration
 try {
     var config_file = fs.readFileSync('/etc/swarm-gateway/powerblade-sql.conf', 'utf-8');
