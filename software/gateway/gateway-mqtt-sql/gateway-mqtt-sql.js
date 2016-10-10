@@ -208,7 +208,7 @@ mqtt_client.on('connect', function () {
 
     // subscribe to powerblade data
     topic_list.forEach(function(value) {
-        mqtt_client(subscribe(value[0]));
+        mqtt_client.subscribe(value[0]);
     });
     // mqtt_client.subscribe(MQTT_DATA_TOPIC);
     // mqtt_client.subscribe(MQTT_RSSI_TOPIC);
@@ -251,7 +251,8 @@ function log_to_sql (topic, adv) {
         timestamp[1] = timestamp[1].slice(0,-1);
         datetime = timestamp[0] + ' ' + timestamp[1];
 
-        rssi_count += 1;
+        //rssi_count += 1;
+        topic_data['ble-advertisements'][2] += 1;
         //fs.appendFile(rssi_csv_current,
         fs.appendFile(topic_data['ble-advertisements'][file_current],
             gateway_mac + ',' + 
@@ -273,7 +274,8 @@ function log_to_sql (topic, adv) {
 
         //console.log(adv['device']);
         if(adv['device'] == "PowerBlade") {
-            powerblade_count += 1;
+            //powerblade_count += 1;
+            topic_data['PowerBlade'][2] += 1;
             //fs.appendFile(pb_csv_current, 
             fs.appendFile(topic_data['PowerBlade'][file_current],
                 gatewayID + ',' +
@@ -290,7 +292,8 @@ function log_to_sql (topic, adv) {
             });
         }
         else if(adv['device'] == "BLEES"){
-            blees_count += 1;
+            //blees_count += 1;
+            topic_data['BLEES'][2] += 1;
             //fs.appendFile(bl_csv_current, 
             fs.appendFile(topic_data['BLEES'][file_current],
                 gatewayID + ',' +
@@ -308,7 +311,8 @@ function log_to_sql (topic, adv) {
             });
         }
         else if(adv['device'].slice(0,8) == "Coilcube" || adv['device'] == "Solar Monjolo") {
-            coilcube_count += 1;
+            //coilcube_count += 1;
+            topic_data['CoilCube'][2] += 1;
             //fs.appendFile(cc_csv_current,
             fs.appendFile(topic_data['CoilCube'][file_current],
                 gatewayID + ',' +
@@ -322,7 +326,8 @@ function log_to_sql (topic, adv) {
             });
         }
         else if(adv['device'] == "Triumvi") {
-            triumvi_count += 1;
+            //triumvi_count += 1;
+            topic_data['Triumvi'][2] += 1;
             //fs.appendFile(tv_csv_current,
             fs.appendFile(topic_data['Triumvi'][file_current],
                 gatewayID + ',' +
@@ -335,7 +340,8 @@ function log_to_sql (topic, adv) {
             });
         }
         else if(adv['device'] == "Blink") {
-            blink_count += 1;
+            //blink_count += 1;
+            topic_data['Blink'][2] += 1;
             //fs.appendFile(pir_csv_current,
             fs.appendFile(topic_data['Blink'][file_current],
                 gatewayID + ',' +
