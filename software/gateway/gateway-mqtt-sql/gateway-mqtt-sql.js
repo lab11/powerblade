@@ -27,7 +27,7 @@ var topic_list = [
 //var MQTT_RSSI_TOPIC = 'ble-advertisements'
 
 var field_list = {
-'PowerBlade': '(gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, timestamp)',
+'PowerBlade': '(gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, flags, timestamp)',
 'BLEES': '(gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp)',
 'Coilcube': '(gatewayMAC, deviceMAC, seq, count, timestamp)',
 'Solar Monjolo': '(gatewayMAC, deviceMAC, seq, count, timestamp)',
@@ -297,6 +297,7 @@ function log_to_sql (topic, adv) {
                 adv['power'] + ',' +
                 adv['energy'] + ',' +
                 adv['power_factor'] + ',' +
+                adv['flags'] + ',' +
                 datetime + '\n',
                 encoding='utf8', 
                 function (err) {
