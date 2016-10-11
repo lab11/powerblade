@@ -13,9 +13,16 @@ aws_login = mylogin.get_login_info('aws')
 aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd'], 'powerblade')
 aws_c = aws_db.cursor()
 
-aws_c.execute('select t1.gatewaymac, (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime from dat_powerblade t1 group by t1.gatewaymac')
+# Query for list of gateways that should be active (inf_gw_lookup where now is between dates)
 
+# Query for list of PowerBlades that should be active (inf_pb_lookup where now is between dates)
+
+# Query for most recent time seeing each gateway
+aws_c.execute('select t1.gatewaymac, (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime from dat_powerblade t1 group by t1.gatewaymac')
 gateway_times = aws_c.fetchall()
+
+# Query for most recent time seeing each PowerBlade
+
 
 time_now = datetime.utcnow()
 print(time_now)
