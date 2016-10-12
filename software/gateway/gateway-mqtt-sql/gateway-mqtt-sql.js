@@ -15,7 +15,7 @@ var getmac = require('getmac');
 var mqtt = require('mqtt');
 // TODO this should be in a config - this list determines which data streams are subscribed to
 var topic_list = [
-['device/PowerBlade/+', 'dat_powerblade'],
+['device/PowerBlade/+', 'dat_powerblade_2'],
 ['device/BLEES/+', 'dat_blees'],
 ['device/Coilcube/+', 'dat_coilcube'],
 ['device/Solar Monjolo/+', 'dat_monjolo'],
