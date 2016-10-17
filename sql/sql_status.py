@@ -67,7 +67,7 @@ for gateway, location in gateway_active:
 			email_body.append("<tr><td>" + str(gateway) + "</td><td>" + str(location) + "</td><td>" + str(maxTime) + \
 				"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td></tr>")
 		except IndexError:
-			print("Error: gateway not found - " + str(gateway))
+			# print("Error: gateway not found - " + str(gateway))
 			email_body.append("<tr><td>" + str(gateway) + "</td><td>" + str(location) + "</td><td>" + status_not_found + "</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr><tr><td colspan=\"5\">&nbsp</td></tr><tr><td><b>DeviceMAC</b></td>" \
@@ -88,6 +88,6 @@ for powerblade, permanent in pb_active:
 
 print("Sending results via email")
 email_body.append(email_end)
-yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'PowerBlade Deployment Status Email', email_body)
+yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment Status Email', email_body)
 
 
