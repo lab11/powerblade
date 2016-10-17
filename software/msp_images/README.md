@@ -18,5 +18,5 @@ After connecting to the MSP430, run `./flash_powerblade` to flash a unit.
 
 ### Naming Format
 
-[software name]_[PD_ID]_[MSP Version]_[Minor Version]
+[software name]\_[PD_ID]v[MSP Version]v[Minor Version].hex
 
