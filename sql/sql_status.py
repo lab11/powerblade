@@ -10,6 +10,17 @@ print("Running PowerBlade Deployment Status Script")
 email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email</h1>']
 email_end = '</table></body></html>'
 
+f = open('/etc/swarm-gateway/powerblade-aws.conf', 'r')
+password = 0
+for line in f:
+	lineList = line.strip('\n').split(' = ')
+	if(lineList[0] == 'sql_pw1'):
+		password = lineList[1]
+
+if(password == 0):
+	print("Unable to find password")
+	exit()
+
 def chop_microseconds(delta):
     return delta - timedelta(microseconds=delta.microseconds)
 
@@ -77,6 +88,6 @@ for powerblade, permanent in pb_active:
 
 print("Sending results via email")
 email_body.append(email_end)
-yagmail.SMTP().send('powerblade@umich.edu', 'PowerBlade Deployment Status Email', email_body)
+yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'PowerBlade Deployment Status Email', email_body)
 
 
