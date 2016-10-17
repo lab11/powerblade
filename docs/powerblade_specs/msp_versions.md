@@ -18,9 +18,9 @@ transmitted in the advertisement nor sent when the nRF queries version number fr
 
 | PB_ID 	| Version	| Minor Version 	| Notes		|
 |:----------|:----------|:------------------|:----------|
-| Multiple 	| 0  		| null 				| This is the default, the first MSP430 code that responds to the version request will respond '1' |
-| 2 		| 1			| null 				| 10 bit ADC, watchdog timer enabled |
-| 2 		| 2			| null 				| Local calibration, SET SEQ (0x1C) and RST WH (0x1D) no longer valid |
+| Multiple 	| 0  		| 0					| This is the default, the first MSP430 code that responds to the version request will respond '1' |
+| 2 		| 1			| 0 				| 10 bit ADC, watchdog timer enabled |
+| 2 		| 2			| 0 				| Local calibration, SET SEQ (0x1C) and RST WH (0x1D) no longer valid |
 | 2			| 2			| 1 				| Lowest four bits of flags now contains MSP Version |
 
 
