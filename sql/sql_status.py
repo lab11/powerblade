@@ -14,7 +14,7 @@ f = open('/etc/swarm-gateway/powerblade-aws.conf', 'r')
 password = 0
 for line in f:
 	lineList = line.strip('\n').split(' = ')
-	if(lineList[0] == 'sql_pw1'):
+	if(lineList[0] == 'sql_pw'):
 		password = lineList[1]
 
 if(password == 0):
