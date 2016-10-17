@@ -92,7 +92,7 @@ uint16_t wattageSetpoint;
 uint16_t voltageSetpoint;
 
 #pragma PERSISTENT(flags)
-uint8_t flags = 0x05;
+uint8_t flags = 0x0F & msp_software_version;	// Lowest four bits of flags is software version
 
 // Scale and offset values (configuration/calibration)
 #pragma PERSISTENT(pb_config)
