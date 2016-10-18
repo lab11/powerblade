@@ -6,6 +6,10 @@ import yagmail
 from datetime import datetime, timedelta
 import sys
 
+STATUS_OK = "<font color=\"green\"><b>OK!</b></font>"
+STATUS_DOWN = "<font color=\"orange\"><b>Down</b></font>"
+STATUS_NOT_FOUND = "</td><td></td><td><font color=\"red\"><b>Not Found</b></font>"
+
 f = open('/etc/swarm-gateway/powerblade-aws.conf', 'r')
 password = 0
 for line in f:
@@ -18,7 +22,7 @@ if(password == 0):
 	print("Unable to find password")
 	exit()
 
-short = 1
+longrun = 1
 if len(sys.argv) > 1:
 	if(sys.argv[1] == 'short'):
 		print("Running PowerBlade Deployment Status Script - short check")
@@ -26,14 +30,25 @@ if len(sys.argv) > 1:
 		pb_error_list = []
 		f = open('/tmp/powerblade-error.log', 'r')
 		for line in f:
-			deviceMAC, error = line.strip('\n').split(',')
-			pb_error_list.append((deviceMAC, error))
+			try:
+				deviceMAC, error = line.strip('\n').split(',')
+				pb_error_list.append((deviceMAC, error))
+			except:
+				pass
 		f.close()
 		gw_error_list = []
+		f = open('/tmp/gateway-error.log', 'r')
+		for line in f:
+			try:
+				gatewayMAC, error = line.strip('\n').split(',')
+				gw_error_list.append((gatewayMAC, error))
+			except:
+				pass
+		f.close()
+		longrun = 0
 	elif(sys.argv[1] == 'daily'):
 		print("Running PowerBlade Deployment Status Script - daily run")
 		email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email - Full Update</h1>']
-		short = 0
 	else:
 		print("Unknown parameter")
 		# TODO: send error email
@@ -46,6 +61,53 @@ email_end = '</table></body></html>'
 
 def chop_microseconds(delta):
     return delta - timedelta(microseconds=delta.microseconds)
+
+def print_header(col1, col2):
+	email_body.append("<table style=\"width:80%\"><tr><td><b>" + col1 + "</b></td><td><b>" + col2 + \
+		"</b></td><td><b>Last Seen</b></td><td><b>Offtime</b></td><td><b>Status</b></td></tr>")
+
+def print_row(name, specifier, time_now, maxTime, status):
+	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + str(maxTime) + \
+		"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td></tr>")
+
+def print_error(name, specifier):
+	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + STATUS_NOT_FOUND + "</td></tr>")
+
+def check_list(activelist, timeslist, outfile, col1, col2):
+	time_now = datetime.utcnow()
+
+	if(longrun == 1):
+		print_header(col1, col2)
+
+	new_errors = 0
+	errors = open(outfile, 'w')
+
+	for devname, specifier in activelist:
+		if(specifier is not None):	# Location actually exists
+			try:
+				maxTime = [item for item in timeslist if item[0] == devname][0][1]
+				if((time_now - maxTime) > timedelta(minutes=15)):	# If it has been more than fifteen minutes for a gateway
+					status = STATUS_DOWN
+				else:
+					status = STATUS_OK
+
+				if(longrun == 1):
+					print_row(devname, specifier, time_now, maxTime, status)
+				else:
+					if(status != STATUS_OK):
+						try:
+							[item for item in gw_error_list if item[0] == devname and item[1] == status]
+						except:
+							if(new_gw_errors == 0):
+								print_header(col1, col2)
+								new_gw_errors += 1
+							print_row(devname, specifier, time_now, maxTime, status)
+							gw_errors.write(str(devname) + ',' + str(status) + '\n')
+				
+			except IndexError:
+				# print("Error: gateway not found - " + str(gateway))
+				if(longrun == 1):
+					print_error(gateway, specifier)
 
 # Set up connection
 aws_login = mylogin.get_login_info('aws')
@@ -71,43 +133,10 @@ aws_c.execute('select t1.deviceMAC, (select t2.timestamp from dat_powerblade t2 
 	'from dat_powerblade t1 group by t1.deviceMAC')
 pb_times = aws_c.fetchall()
 
-time_now = datetime.utcnow()
 
-# Set up gateway status table
-email_body.append("<table style=\"width:80%\"><tr><td><b>GatewayMAC</b></td>" \
-	"<td><b>Location</b></td><td><b>Last Seen</b></td><td><b>Offtime</b></td><td><b>Status</b></td></tr>")
+check_list(gateway_active, gateway_times, '/tmp/gateway-error.log', "GatewayMAC", "Location")
+check_list(pb_active, pb_times, '/tmp/powerblade-error.log', "DeviceMAC", "Permanent")
 
-status_not_found = "</td><td></td><td><font color=\"red\"><b>Not Found</b></font>"
-
-for gateway, location in gateway_active:
-	if(location is not None):	# Location actually exists
-		try:
-			maxTime = [item for item in gateway_times if item[0] == gateway][0][1]
-			if((time_now - maxTime) > timedelta(minutes=15)):	# If it has been more than fifteen minutes for a gateway
-				status = "<font color=\"orange\"><b>Down</b></font>"
-			else:
-				status = "<font color=\"green\"><b>OK!</b></font>"
-			email_body.append("<tr><td>" + str(gateway) + "</td><td>" + str(location) + "</td><td>" + str(maxTime) + \
-				"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td></tr>")
-		except IndexError:
-			# print("Error: gateway not found - " + str(gateway))
-			email_body.append("<tr><td>" + str(gateway) + "</td><td>" + str(location) + "</td><td>" + status_not_found + "</td></tr>")
-
-email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr><tr><td colspan=\"5\">&nbsp</td></tr><tr><td><b>DeviceMAC</b></td>" \
-	"<td><b>Permanent</b></td><td><b>Last Seen</b></td><td><b>Offtime</b></td><td><b>Status</b></td></tr>")
-
-for powerblade, permanent in pb_active:
-	try:
-		maxTime = [item for item in pb_times if item[0] == powerblade][0][1]
-		if((time_now - maxTime) > timedelta(minutes=15)):
-			status = "<font color=\"orange\"><b>Down</b></font>"
-		else:
-			status = "<font color=\"green\"><b>OK!</b></font>"
-		email_body.append("<tr><td>" + str(powerblade) + "</td><td>" + str(permanent) + "</td><td>" + str(maxTime) + \
-			"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td></tr")
-	except IndexError:
-		print("Error: PowerBlade not found - " + str(powerblade))
-		email_body.append("<tr><td>" + str(powerblade) + "</td><td>" + str(permanent) + "</td><td>" + status_not_found + "</td></tr>")
 
 print("Sending results via email")
 email_body.append(email_end)
