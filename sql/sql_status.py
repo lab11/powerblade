@@ -102,7 +102,10 @@ def check_list(activelist, timeslist, errorlist, outfile, col1, col2):
 					print_row(devname, specifier, time_now, maxTime, status)
 				else:
 					if(status != STATUS_OK):
-						if(![item for item in errorlist if item[0] == devname and item[1] == status]):
+						finditem = [item for item in errorlist if item[0] == devname and item[1] == status]
+						if(finditem):
+							print(finditem)
+						else:
 							if(new_errors == 0):
 								print_header(col1, col2)
 								new_errors += 1
