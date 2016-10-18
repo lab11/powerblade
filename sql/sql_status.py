@@ -23,11 +23,12 @@ if(password == 0):
 	exit()
 
 longrun = 1
+pb_error_list = []
+gw_error_list = []
 if len(sys.argv) > 1:
 	if(sys.argv[1] == 'short'):
 		print("Running PowerBlade Deployment Status Script - short check")
 		email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email - New Error Found</h1>']
-		pb_error_list = []
 		f = open('/tmp/powerblade-error.log', 'r')
 		for line in f:
 			try:
@@ -36,7 +37,6 @@ if len(sys.argv) > 1:
 			except:
 				pass
 		f.close()
-		gw_error_list = []
 		f = open('/tmp/gateway-error.log', 'r')
 		for line in f:
 			try:
@@ -55,6 +55,7 @@ if len(sys.argv) > 1:
 		exit()
 else:
 	print("Need to run with either \'short\' or \'daily\'")
+	exit()
 
 #print(pb_error_list)
 #exit()
