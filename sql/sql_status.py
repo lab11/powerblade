@@ -170,7 +170,10 @@ email_body.append(email_end)
 
 if(total_errors > 0):
 	print("Sending results via email")
-	yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment Status Email', email_body)
+	if(longrun == 1):
+		yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment Status Email', email_body)
+	else:
+		yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment New Device Error', email_body)
 else:
 	print("No errors, no email")
 
