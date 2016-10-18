@@ -126,12 +126,24 @@ aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd
 aws_c = aws_db.cursor()
 
 # Query for list of gateways that should be active (inf_gw_lookup where now is between dates)
-aws_c.execute('select gatewayMAC, location from inf_gw_lookup where utc_timestamp between startTime and ' \
-	'endTime order by GatewayMAC desc')
+aws_c.execute('select gatewayMAC, location from ' \
+	'(select t1.* from inf_gw_lookup t1 where t1.id = ' \
+	'(select max(t2.id) from inf_gw_lookup t2 where t1.gatewayMAC=t2.gatewayMAC)) t1 ' \
+	'where ((utc_timestamp between startTime and endTime) or ' \
+	'(utc_timestamp > startTime and endTime is null) or ' \
+	'(utc_timestamp < endTime and startTime is null)) order by GatewayMAC desc;')
+# aws_c.execute('select gatewayMAC, location from inf_gw_lookup where ((utc_timestamp between startTime and ' \
+# 	'endTime) or (utc_timestamp > startTime and endTime is null) or (utc_timestamp < endTime and startTime is null)) order by GatewayMAC desc')
 gateway_active = aws_c.fetchall()
 
 # Query for list of PowerBlades that should be active (inf_pb_lookup where now is between dates)
-aws_c.execute('select deviceMAC, permanent from inf_pb_lookup where utc_timestamp between startTime and endTime')
+aws_c.execute('select deviceMAC, permanent from ' \
+	'(select t1.* from inf_pb_lookup t1 where t1.id = ' \
+	'(select max(t2.id) from inf_pb_lookup t2 where t1.deviceMAC=t2.deviceMAC)) t1 ' \
+	'where ((utc_timestamp between startTime and endTime) or ' \
+	'(utc_timestamp > startTime and endTime is null) or ' \
+	'(utc_timestamp < endTime and startTime is null)) order by deviceMAC desc;')
+#aws_c.execute('select deviceMAC, permanent from inf_pb_lookup where utc_timestamp between startTime and endTime')
 pb_active = aws_c.fetchall()
 
 # Query for most recent time seeing each gateway
