@@ -80,7 +80,7 @@ def print_row(name, specifier, time_now, maxTime, status):
 def print_error(name, specifier):
 	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + STATUS_NOT_FOUND + "</td></tr>")
 
-def check_list(activelist, timeslist, outfile, col1, col2):
+def check_list(activelist, timeslist, errorlist, outfile, col1, col2):
 	time_now = datetime.utcnow()
 
 	if(longrun == 1):
@@ -102,10 +102,8 @@ def check_list(activelist, timeslist, outfile, col1, col2):
 					print_row(devname, specifier, time_now, maxTime, status)
 				else:
 					if(status != STATUS_OK):
-						try:
-							[item for item in gw_error_list if item[0] == devname and item[1] == status]
-						except:
-							if(new_gw_errors == 0):
+						if(![item for item in errorlist if item[0] == devname and item[1] == status]):
+							if(new_errors == 0):
 								print_header(col1, col2)
 								new_errors += 1
 							print_row(devname, specifier, time_now, maxTime, status)
@@ -141,8 +139,8 @@ aws_c.execute('select t1.deviceMAC, (select t2.timestamp from dat_powerblade t2 
 pb_times = aws_c.fetchall()
 
 
-check_list(gateway_active, gateway_times, '/tmp/gateway-error.log', "GatewayMAC", "Location")
-check_list(pb_active, pb_times, '/tmp/powerblade-error.log', "DeviceMAC", "Permanent")
+check_list(gateway_active, gateway_times, gw_error_list, '/tmp/gateway-error.log', "GatewayMAC", "Location")
+check_list(pb_active, pb_times, pb_error_list, '/tmp/powerblade-error.log', "DeviceMAC", "Permanent")
 
 
 print("Sending results via email")
