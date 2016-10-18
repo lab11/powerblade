@@ -64,12 +64,14 @@ def chop_microseconds(delta):
 
 first_header = 1
 def print_header(col1, col2):
+	global first_header
 	if(first_header == 1):
 		email_body.append("<table style=\"width:80%\">")
 		first_header = 0
 	else:
-		email_body.append("<tr><td><b>" + col1 + "</b></td><td><b>" + col2 + \
-			"</b></td><td><b>Last Seen</b></td><td><b>Offtime</b></td><td><b>Status</b></td></tr>")
+		email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr><tr><td colspan=\"5\">&nbsp</td></tr>")
+	email_body.append("<tr><td><b>" + col1 + "</b></td><td><b>" + col2 + \
+		"</b></td><td><b>Last Seen</b></td><td><b>Offtime</b></td><td><b>Status</b></td></tr>")
 
 def print_row(name, specifier, time_now, maxTime, status):
 	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + str(maxTime) + \
