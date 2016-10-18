@@ -28,7 +28,7 @@ gw_error_list = []
 if len(sys.argv) > 1:
 	if(sys.argv[1] == 'short'):
 		print("Running PowerBlade Deployment Status Script - short check")
-		email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email - New Error Found</h1>']
+		email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - New Error Found</h2>']
 		f = open('/tmp/powerblade-error.log', 'r')
 		for line in f:
 			try:
@@ -48,7 +48,7 @@ if len(sys.argv) > 1:
 		longrun = 0
 	elif(sys.argv[1] == 'daily'):
 		print("Running PowerBlade Deployment Status Script - daily run")
-		email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email - Full Update</h1>']
+		email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - Full Update</h2>']
 	else:
 		print("Unknown parameter")
 		# TODO: send error email
