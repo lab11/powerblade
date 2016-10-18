@@ -53,6 +53,8 @@ if len(sys.argv) > 1:
 		print("Unknown parameter")
 		# TODO: send error email
 		exit()
+else:
+	print("Need to run with either \'short\' or \'daily\'")
 
 #print(pb_error_list)
 #exit()
