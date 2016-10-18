@@ -104,13 +104,13 @@ def check_list(activelist, timeslist, errorlist, outfile, col1, col2):
 					if(status != STATUS_OK):
 						finditem = [item for item in errorlist if item[0] == devname and item[1] == status]
 						if(finditem):
-							print(finditem)
+							pass
 						else:
 							if(new_errors == 0):
 								print_header(col1, col2)
 								new_errors += 1
 							print_row(devname, specifier, time_now, maxTime, status)
-							errors.write(str(devname) + ',' + str(status) + '\n')
+						errors.write(str(devname) + ',' + str(status) + '\n')
 				
 			except IndexError:
 				# print("Error: gateway not found - " + str(gateway))
