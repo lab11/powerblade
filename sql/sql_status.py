@@ -59,7 +59,8 @@ else:
 
 #print(pb_error_list)
 #exit()
-
+email_body.append('<style>\n\t.bottom-three {\n\t\tmargin-bottom: 3cm;\n\t}\n</style>')
+email_body.append('<p class=\"bottom-three\">' + str(datetime.utcnow()) + '</p>')
 email_end = '</table></body></html>'
 
 def chop_microseconds(delta):
