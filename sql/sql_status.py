@@ -91,7 +91,8 @@ def check_list(activelist, timeslist, errorlist, outfile, col1, col2):
 		print_header(col1, col2)
 
 	new_errors = 0
-	errors = open(outfile, 'w')
+	if(longrun != 1):
+		errors = open(outfile, 'w')
 
 	for devname, specifier in activelist:
 		if(specifier is not None):	# Location actually exists
