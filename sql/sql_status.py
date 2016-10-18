@@ -4,11 +4,7 @@ import mylogin
 import MySQLdb
 import yagmail
 from datetime import datetime, timedelta
-
-print("Running PowerBlade Deployment Status Script")
-
-email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email</h1>']
-email_end = '</table></body></html>'
+import sys
 
 f = open('/etc/swarm-gateway/powerblade-aws.conf', 'r')
 password = 0
@@ -16,10 +12,37 @@ for line in f:
 	lineList = line.strip('\n').split(' = ')
 	if(lineList[0] == 'sql_pw'):
 		password = lineList[1]
+f.close()
 
 if(password == 0):
 	print("Unable to find password")
 	exit()
+
+short = 1
+if len(sys.argv) > 1:
+	if(sys.argv[1] == 'short'):
+		print("Running PowerBlade Deployment Status Script - short check")
+		email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email - New Error Found</h1>']
+		pb_error_list = []
+		f = open('/tmp/powerblade-error.log', 'r')
+		for line in f:
+			deviceMAC, error = line.strip('\n').split(',')
+			pb_error_list.append((deviceMAC, error))
+		f.close()
+		gw_error_list = []
+	elif(sys.argv[1] == 'daily'):
+		print("Running PowerBlade Deployment Status Script - daily run")
+		email_body = ['<!DOCTYPE html><html><body><h1> PowerBlade Deployment Status Email - Full Update</h1>']
+		short = 0
+	else:
+		print("Unknown parameter")
+		# TODO: send error email
+		exit()
+
+print(pb_error_list)
+exit()
+
+email_end = '</table></body></html>'
 
 def chop_microseconds(delta):
     return delta - timedelta(microseconds=delta.microseconds)
