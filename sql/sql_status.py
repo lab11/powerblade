@@ -54,8 +54,8 @@ if len(sys.argv) > 1:
 		# TODO: send error email
 		exit()
 
-print(pb_error_list)
-exit()
+#print(pb_error_list)
+#exit()
 
 email_end = '</table></body></html>'
 
@@ -100,14 +100,14 @@ def check_list(activelist, timeslist, outfile, col1, col2):
 						except:
 							if(new_gw_errors == 0):
 								print_header(col1, col2)
-								new_gw_errors += 1
+								new_errors += 1
 							print_row(devname, specifier, time_now, maxTime, status)
-							gw_errors.write(str(devname) + ',' + str(status) + '\n')
+							errors.write(str(devname) + ',' + str(status) + '\n')
 				
 			except IndexError:
 				# print("Error: gateway not found - " + str(gateway))
 				if(longrun == 1):
-					print_error(gateway, specifier)
+					print_error(devname, specifier)
 
 # Set up connection
 aws_login = mylogin.get_login_info('aws')
