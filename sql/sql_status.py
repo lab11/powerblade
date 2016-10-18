@@ -100,6 +100,7 @@ def check_list(activelist, timeslist, errorlist, outfile, col1, col2):
 
 				if(longrun == 1):
 					print_row(devname, specifier, time_now, maxTime, status)
+					new_errors += 1
 				else:
 					if(status != STATUS_OK):
 						finditem = [item for item in errorlist if item[0] == devname and item[1] == status]
@@ -108,7 +109,7 @@ def check_list(activelist, timeslist, errorlist, outfile, col1, col2):
 						else:
 							if(new_errors == 0):
 								print_header(col1, col2)
-								new_errors += 1
+							new_errors += 1
 							print_row(devname, specifier, time_now, maxTime, status)
 						errors.write(str(devname) + ',' + str(status) + '\n')
 				
@@ -116,6 +117,8 @@ def check_list(activelist, timeslist, errorlist, outfile, col1, col2):
 				# print("Error: gateway not found - " + str(gateway))
 				if(longrun == 1):
 					print_error(devname, specifier)
+
+	return new_errors
 
 # Set up connection
 aws_login = mylogin.get_login_info('aws')
@@ -141,13 +144,17 @@ aws_c.execute('select t1.deviceMAC, (select t2.timestamp from dat_powerblade t2 
 	'from dat_powerblade t1 group by t1.deviceMAC')
 pb_times = aws_c.fetchall()
 
+total_errors = 0
 
-check_list(gateway_active, gateway_times, gw_error_list, '/tmp/gateway-error.log', "GatewayMAC", "Location")
-check_list(pb_active, pb_times, pb_error_list, '/tmp/powerblade-error.log', "DeviceMAC", "Permanent")
+total_errors += check_list(gateway_active, gateway_times, gw_error_list, '/tmp/gateway-error.log', "GatewayMAC", "Location")
+total_errors += check_list(pb_active, pb_times, pb_error_list, '/tmp/powerblade-error.log', "DeviceMAC", "Permanent")
 
-
-print("Sending results via email")
 email_body.append(email_end)
-yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment Status Email', email_body)
+
+if(total_errors > 0):
+	print("Sending results via email")
+	yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment Status Email', email_body)
+else:
+	print("No errors, no email")
 
 
