@@ -27,14 +27,20 @@ def print_header(col1, col2):
 		"<td><b>Status</b></td><td><b>Count</b></td></tr>")
 
 def print_row(name, specifier, time_now, maxTime, status, count):
-	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + str(maxTime) + \
-		"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td><td>" + str(count) + "</td></tr>")
+	if(time_now == 0):
+		t1 = ""
+		t2 = ""
+	else:
+		t1 = str(maxTime)
+		t2 = str(chop_microseconds(time_now - maxTime))
+	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + t1 + \
+		"</td><td>" + t2 + "</td><td>" + status + "</td><td>" + str(count) + "</td></tr>")
 
 #def print_error(name, specifier):
 #	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + STATUS_NOT_FOUND + "</td></tr>")
 
 def print_list(status_list, col1, col2):
-	if(~longrun):
+	if(longrun == False):
 		return 0	# Not supposed to happen
 
 	print_header(col1, col2)
@@ -85,7 +91,7 @@ def check_list(activelist, timeslist, yest_statuslist, today_statuslist, outfile
 							new_error += 1
 							print_row(devname, specifier, time_now, maxTime, status, 1)
 			except IndexError:
-				print("Error: gateway not found - " + str(device))
+				print("Error: device not found - " + str(devname))
 				status = STATUS_NOT_FOUND
 				today_statuslist[devname] = [specifier, 0, 0, status, 0]
 
@@ -96,17 +102,23 @@ def check_list(activelist, timeslist, yest_statuslist, today_statuslist, outfile
 			statuss.write(',' + str(field))
 		statuss.write('\n')
 
-	return new_statuss
+	return new_error
 
 def read_file(status_list, listType, day):
 	try:
 		infile = open(logpath + listType + '-status-' + day.strftime("%Y-%m-%d") + '.log', 'r')
 		for line in infile:
 			deviceMAC, specifier, time_status, avgstatusTime, status, count = line.strip('\n').split(',')
-			status_list[deviceMAC] = [specifier, time_status, avgstatusTime, status, count]
+			if(time_status == '0'):
+				time_status = 0
+				avgstatusTime = 0
+			else:
+				time_status = datetime.strptime(time_status, "%Y-%m-%d %H:%M:%S.%f")
+				avgstatusTime = datetime.strptime(avgstatusTime, "%Y-%m-%d %H:%M:%S")
+			status_list[deviceMAC] = [specifier, time_status, avgstatusTime, status, int(count)]
 		infile.close()
-	except:
-		print("Unknown file")
+	except IOError:
+		print("Unknown file - " + logpath + listType + '-status-' + day.strftime("%Y-%m-%d") + '.log')
 
 
 # Start of execution
