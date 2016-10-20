@@ -28,13 +28,13 @@ def print_header(col1, col2):
 
 def print_row(name, specifier, time_now, maxTime, status, count):
 	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + str(maxTime) + \
-		"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td><td>" + count + "</td></tr>")
+		"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td><td>" + str(count) + "</td></tr>")
 
 def print_error(name, specifier):
 	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + STATUS_NOT_FOUND + "</td></tr>")
 
 def print_list(error_list, col1, col2):
-	if(!longrun):
+	if(~longrun):
 		return 0	# Not supposed to happen
 
 	print_header(col1, col2)
@@ -86,17 +86,20 @@ def check_list(activelist, timeslist, yest_errorlist, today_errorlist, outfile, 
 	for devname in today_errorlist:
 		errors.write(devname)
 		for field in today_errorlist[devname]:
-			errors.write(',' + field)
+			errors.write(',' + str(field))
 		errors.write('\n')
 
 	return new_errors
 
 def read_file(error_list, listType, day):
-	infile = open('/tmp/' + listType + '-error-' + day.strftime("%Y-%m-%d") + '.log', 'r')
-	for line in infile:
-		deviceMAC, specifier, time_error, avgErrorTime, error, count = line.strip('\n').split(',')
-		error_list[deviceMAC] = [specifier, time_error, avgErrorTime, error, count]
-	infile.close()
+	try:
+		infile = open(logpath + listType + '-error-' + day.strftime("%Y-%m-%d") + '.log', 'r')
+		for line in infile:
+			deviceMAC, specifier, time_error, avgErrorTime, error, count = line.strip('\n').split(',')
+			error_list[deviceMAC] = [specifier, time_error, avgErrorTime, error, count]
+		infile.close()
+	except:
+		print("Unknown file")
 
 
 # Start of execution
@@ -127,35 +130,15 @@ yesterday = today - timedelta(1)
 
 pb_yest_list = {}
 read_file(pb_yest_list, 'powerblade', yesterday)
-# pb_f_yesterday = open('/tmp/powerblade-error-' + yesterday.strftime("%Y-%m-%d") + '.log', 'r')
-# for line in pb_f_yesterday:
-# 	deviceMAC, specifier, time_error, avgErrorTime, error, count = line.strip('\n').split(',')
-# 	pb_yest_list[deviceMAC] = [error, count]
-# pb_f_yesterday.close()
 
 gw_yest_list = {}
 read_file(gw_yest_list, 'gateway', yesterday)
-# gw_f_yesterday = open('/tmp/gateway-error-' + yesterday.strftime("%Y-%m-%d") + '.log', 'r')
-# for line in gw_f_yesterday:
-# 	deviceMAC, specifier, time_error, avgErrorTime, error, count = line.strip('\n').split(',')
-# 	gw_yest_list[deviceMAC] = [error, count]
-# gw_f_yesterday.close()
 
 pb_today_list = {}
 read_file(pb_today_list, 'powerblade', today)
-# pb_f_today = open('/tmp/powerblade-error-' + today.strftime("%Y-%m-%d") + '.log', 'r')
-# for line in pb_f_today:
-# 	deviceMAC, specifier, time_error, avgErrorTime, error, count = line.strip('\n').split(',')
-# 	pb_today_list[deviceMAC] = [error, count]
-# pb_f_today.close()
 
 gw_today_list = {}
 read_file(gw_today_list, 'gateway', today)
-# gw_f_today = open('/tmp/gateway-error-' + today.strftime("%Y-%m-%d") + '.log', 'r')
-# for line in gw_f_today:
-# 	deviceMAC, specifier, time_error, avgErrorTime, error, count = line.strip('\n').split(',')
-# 	gw_today_list[deviceMAC] = [error, count]
-# gw_f_today.close()
 
 
 longrun = True
@@ -226,9 +209,8 @@ else:
 
 	total_errors = 0
 
-	check_list(activelist, timeslist, yest_errorlist, today_errorlist, outfile, col1, col2):
-	total_errors += check_list(gateway_active, gateway_times, gw_yest_list, gw_today_list, '/tmp/gateway-error-' + today.strftime("%Y-%m-%d") + '.log', "GatewayMAC", "Location")
-	total_errors += check_list(pb_active, pb_times, pb_yest_list, pb_today_list, '/tmp/powerblade-error-' + today.strftime("%Y-%m-%d") + '.log', "DeviceMAC", "Permanent")
+	total_errors += check_list(gateway_active, gateway_times, gw_yest_list, gw_today_list, logpath + 'gateway-error-' + today.strftime("%Y-%m-%d") + '.log', "GatewayMAC", "Location")
+	total_errors += check_list(pb_active, pb_times, pb_yest_list, pb_today_list, logpath + 'powerblade-error-' + today.strftime("%Y-%m-%d") + '.log', "DeviceMAC", "Permanent")
 
 	email_body.append(email_end)
 
