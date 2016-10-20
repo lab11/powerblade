@@ -9,7 +9,7 @@ from os.path import expanduser
 
 STATUS_OK = "<font color=\"green\"><b>OK!</b></font>"
 STATUS_DOWN = "<font color=\"orange\"><b>Down</b></font>"
-STATUS_NOT_FOUND = "</td><td></td><td><font color=\"red\"><b>Not Found</b></font>"
+STATUS_NOT_FOUND = "<font color=\"red\"><b>Not Found</b></font>"
 
 def chop_microseconds(delta):
     return delta - timedelta(microseconds=delta.microseconds)
@@ -30,8 +30,8 @@ def print_row(name, specifier, time_now, maxTime, status, count):
 	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + str(maxTime) + \
 		"</td><td>" + str(chop_microseconds(time_now - maxTime)) + "</td><td>" + status + "</td><td>" + str(count) + "</td></tr>")
 
-def print_error(name, specifier):
-	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + STATUS_NOT_FOUND + "</td></tr>")
+#def print_error(name, specifier):
+#	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + STATUS_NOT_FOUND + "</td></tr>")
 
 def print_list(status_list, col1, col2):
 	if(~longrun):
@@ -43,7 +43,7 @@ def print_list(status_list, col1, col2):
 		this_statuslist = status_list[devname]
 		print_row(devname, this_statuslist[0], this_statuslist[1], this_statuslist[2], this_statuslist[3], this_statuslist[4])
 
-def check_list(activelist, timeslist, yest_statuslist, today_statuslist, outfile, col1, col2):
+def check_list(activelist, timeslist, yest_statuslist, today_statuslist, outfile, col1, col2, timeout):
 	if(longrun):
 		return 0	# Not supposed to happen
 
@@ -51,36 +51,43 @@ def check_list(activelist, timeslist, yest_statuslist, today_statuslist, outfile
 
 	print_header(col1, col2)
 
-	new_statuss = 0
+	new_error = 0
 
 	for devname, specifier in activelist:	# Specifier is either location or permanent
 		if(specifier is not None):	# Location actually exists
 			try:
 				maxTime = [item for item in timeslist if item[0] == devname][0][1]
-				if((time_now - maxTime) > timedelta(minutes=15)):	# If it has been more than fifteen minutes for a gateway
+				if((time_now - maxTime) > timedelta(minutes=timeout)):	# If it has been more than fifteen minutes for a gateway
 					status = STATUS_DOWN
 				else:
 					status = STATUS_OK
 
-				if(status != STATUS_OK):
-					try:
-						# Check if this status has happened today, and if so increment count
-						today_statuslist[devname][4] += 1
-					except:
-						# New device/status for today, add new element
-						today_statuslist[devname] = [specifier, time_now, maxTime, status, 1]
+				# Store this in the today list
+				try:
+					# Check if we have an entry for this device today
+					today_statuslist[devname]
+				except:
+					# New device for today
+					today_statuslist[devname] = [specifier, time_now, maxTime, status, 0]
+					
+				# If this is an error increment the count and overwrite the status
+				if(status == STATUS_DOWN):
+					today_statuslist[devname][3] = status
+					today_statuslist[devname][4] += 1
+
+					# If the count is 1, this is a new error for today
+					if(today_statuslist[devname][4] == 1):
 						try:
-							# Check if this status also didnt happen yesterday, in which case it would have already been sent
+							# Check if this error was already sent in the yesterday email
 							yest_statuslist[devname]
 						except:
-							# status did not happen yesterday or today, OK to send
-							new_statuss += 1
+							# New error for both yesterday and today
+							new_error += 1
 							print_row(devname, specifier, time_now, maxTime, status, 1)
 			except IndexError:
 				print("Error: gateway not found - " + str(device))
-				pass
-				#if(longrun == 1):
-				#	print_error(devname, specifier)
+				status = STATUS_NOT_FOUND
+				today_statuslist[devname] = [specifier, 0, 0, status, 0]
 
 	statuss = open(outfile, 'w')
 	for devname in today_statuslist:
@@ -177,7 +184,7 @@ else:
 	aws_c = aws_db.cursor()
 
 	# Query for list of gateways that should be active (inf_gw_lookup where now is between dates)
-	aws_c.execute('select gatewayMAC, location from ' \
+	aws_c.execute('select lower(gatewayMAC), location from ' \
 		'(select t1.* from inf_gw_lookup t1 where t1.id = ' \
 		'(select max(t2.id) from inf_gw_lookup t2 where t1.gatewayMAC=t2.gatewayMAC)) t1 ' \
 		'where ((utc_timestamp between startTime and endTime) or ' \
@@ -188,7 +195,7 @@ else:
 	gateway_active = aws_c.fetchall()
 
 	# Query for list of PowerBlades that should be active (inf_pb_lookup where now is between dates)
-	aws_c.execute('select deviceMAC, permanent from ' \
+	aws_c.execute('select lower(deviceMAC), permanent from ' \
 		'(select t1.* from inf_pb_lookup t1 where t1.id = ' \
 		'(select max(t2.id) from inf_pb_lookup t2 where t1.deviceMAC=t2.deviceMAC)) t1 ' \
 		'where ((utc_timestamp between startTime and endTime) or ' \
@@ -198,19 +205,19 @@ else:
 	pb_active = aws_c.fetchall()
 
 	# Query for most recent time seeing each gateway
-	aws_c.execute('select t1.gatewaymac, (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime ' \
+	aws_c.execute('select lower(t1.gatewaymac), (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime ' \
 		'from dat_powerblade t1 group by t1.gatewaymac')
 	gateway_times = aws_c.fetchall()
 
 	# Query for most recent time seeing each PowerBlade
-	aws_c.execute('select t1.deviceMAC, (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime ' \
+	aws_c.execute('select lower(t1.deviceMAC), (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime ' \
 		'from dat_powerblade t1 group by t1.deviceMAC')
 	pb_times = aws_c.fetchall()
 
 	total_statuss = 0
 
-	total_statuss += check_list(gateway_active, gateway_times, gw_yest_list, gw_today_list, logpath + 'gateway-status-' + today.strftime("%Y-%m-%d") + '.log', "GatewayMAC", "Location")
-	total_statuss += check_list(pb_active, pb_times, pb_yest_list, pb_today_list, logpath + 'powerblade-status-' + today.strftime("%Y-%m-%d") + '.log', "DeviceMAC", "Permanent")
+	total_statuss += check_list(gateway_active, gateway_times, gw_yest_list, gw_today_list, logpath + 'gateway-status-' + today.strftime("%Y-%m-%d") + '.log', "GatewayMAC", "Location", 15)
+	total_statuss += check_list(pb_active, pb_times, pb_yest_list, pb_today_list, logpath + 'powerblade-status-' + today.strftime("%Y-%m-%d") + '.log', "DeviceMAC", "Permanent", 30)
 
 	email_body.append(email_end)
 
