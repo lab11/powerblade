@@ -65,7 +65,7 @@ uint32_t voltAmpsToAverage;
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 2;
-char msp_software_version = 2;
+const char msp_software_version = 2;
 
 // Transmitted values
 uint32_t sequence;
@@ -428,7 +428,7 @@ void transmitTry(void) {
 				case GET_VER:
 					uart_len += 2;						// Add length of data type and version
 					uart_stuff(OFFSET_DATATYPE+(txIndex*UARTBLOCK), &captureType, sizeof(captureType));
-					uart_stuff(1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), &msp_software_version, sizeof(msp_software_version));
+					uart_stuff(1 + OFFSET_DATATYPE+(txIndex*UARTBLOCK), (char*)&msp_software_version, sizeof(msp_software_version));
 					break;
 				case SET_SEQ:
 				{

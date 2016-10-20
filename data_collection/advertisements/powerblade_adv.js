@@ -154,6 +154,7 @@ noble.on('discover', function (peripheral) {
         console.log('       Apparent Power: ' + app_power_disp.toFixed(2) + ' VA');
         console.log('Cumulative Energy Use: ' + watt_hours_disp.toFixed(2) + ' Wh');
         console.log('         Power Factor: ' + pf_disp.toFixed(2));
+        console.log('                Flags: ' + flags);
         // console.log('Raw voltage: ' + v_rms.toFixed(2));
         // console.log('Volt scale: ' + volt_scale.toFixed(2));
         // console.log('Pscale: ' + pscale.toFixed(2));
