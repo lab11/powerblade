@@ -33,17 +33,17 @@ def print_row(name, specifier, time_now, maxTime, status, count):
 def print_error(name, specifier):
 	email_body.append("<tr><td>" + str(name) + "</td><td>" + str(specifier) + "</td><td>" + STATUS_NOT_FOUND + "</td></tr>")
 
-def print_list(error_list, col1, col2):
+def print_list(status_list, col1, col2):
 	if(~longrun):
 		return 0	# Not supposed to happen
 
 	print_header(col1, col2)
 
-	for devname in error_list:
-		this_errorlist = error_list[devname]
-		print_row(devname, this_errorlist[0], this_errorlist[1], this_errorlist[2], this_errorlist[3], this_errorlist[4])
+	for devname in status_list:
+		this_statuslist = status_list[devname]
+		print_row(devname, this_statuslist[0], this_statuslist[1], this_statuslist[2], this_statuslist[3], this_statuslist[4])
 
-def check_list(activelist, timeslist, yest_errorlist, today_errorlist, outfile, col1, col2):
+def check_list(activelist, timeslist, yest_statuslist, today_statuslist, outfile, col1, col2):
 	if(longrun):
 		return 0	# Not supposed to happen
 
@@ -51,7 +51,7 @@ def check_list(activelist, timeslist, yest_errorlist, today_errorlist, outfile, 
 
 	print_header(col1, col2)
 
-	new_errors = 0
+	new_statuss = 0
 
 	for devname, specifier in activelist:	# Specifier is either location or permanent
 		if(specifier is not None):	# Location actually exists
@@ -64,39 +64,39 @@ def check_list(activelist, timeslist, yest_errorlist, today_errorlist, outfile, 
 
 				if(status != STATUS_OK):
 					try:
-						# Check if this error has happened today, and if so increment count
-						today_errorlist[devname][4] += 1
+						# Check if this status has happened today, and if so increment count
+						today_statuslist[devname][4] += 1
 					except:
-						# New device/error for today, add new element
-						today_errorlist[devname] = [specifier, time_now, maxTime, status, 1]
+						# New device/status for today, add new element
+						today_statuslist[devname] = [specifier, time_now, maxTime, status, 1]
 						try:
-							# Check if this error also didnt happen yesterday, in which case it would have already been sent
-							yest_errorlist[devname]
+							# Check if this status also didnt happen yesterday, in which case it would have already been sent
+							yest_statuslist[devname]
 						except:
-							# Error did not happen yesterday or today, OK to send
-							new_errors += 1
+							# status did not happen yesterday or today, OK to send
+							new_statuss += 1
 							print_row(devname, specifier, time_now, maxTime, status, 1)
 			except IndexError:
-				# print("Error: gateway not found - " + str(gateway))
+				print("Error: gateway not found - " + str(device))
 				pass
 				#if(longrun == 1):
 				#	print_error(devname, specifier)
 
-	errors = open(outfile, 'w')
-	for devname in today_errorlist:
-		errors.write(devname)
-		for field in today_errorlist[devname]:
-			errors.write(',' + str(field))
-		errors.write('\n')
+	statuss = open(outfile, 'w')
+	for devname in today_statuslist:
+		statuss.write(devname)
+		for field in today_statuslist[devname]:
+			statuss.write(',' + str(field))
+		statuss.write('\n')
 
-	return new_errors
+	return new_statuss
 
-def read_file(error_list, listType, day):
+def read_file(status_list, listType, day):
 	try:
-		infile = open(logpath + listType + '-error-' + day.strftime("%Y-%m-%d") + '.log', 'r')
+		infile = open(logpath + listType + '-status-' + day.strftime("%Y-%m-%d") + '.log', 'r')
 		for line in infile:
-			deviceMAC, specifier, time_error, avgErrorTime, error, count = line.strip('\n').split(',')
-			error_list[deviceMAC] = [specifier, time_error, avgErrorTime, error, count]
+			deviceMAC, specifier, time_status, avgstatusTime, status, count = line.strip('\n').split(',')
+			status_list[deviceMAC] = [specifier, time_status, avgstatusTime, status, count]
 		infile.close()
 	except:
 		print("Unknown file")
@@ -124,7 +124,7 @@ if(password == 0):
 
 # Read in the yesterday and today files
 # If this is a long run the entire yesterday file is emailed
-# If this is a short run the error is only emailed if not in the yesterday file
+# If this is a short run the status is only emailed if not in the yesterday file
 today = datetime.now()
 yesterday = today - timedelta(1)
 
@@ -145,14 +145,14 @@ longrun = True
 if len(sys.argv) > 1:
 	if(sys.argv[1] == 'short'):
 		print("Running PowerBlade Deployment Status Script - short check")
-		email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - New Error Found</h2>']
+		email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - New status Found</h2>']
 		longrun = False
 	elif(sys.argv[1] == 'daily'):
 		print("Running PowerBlade Deployment Status Script - daily run")
 		email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - Full Update</h2>']
 	else:
 		print("Unknown parameter")
-		# TODO: send error email
+		# TODO: send status email
 		exit()
 else:
 	print("Need to run with either \'short\' or \'daily\'")
@@ -163,7 +163,7 @@ email_body.append('<p class=\"bottom-three\">Script start time: ' + str(datetime
 email_end = '</table></body></html>'
 
 # If this is a daily run the database is not connected, instead only the yesterday file is sent
-# If a shortrun, the database is connected and new errors are found
+# If a shortrun, the database is connected and new statuss are found
 if(longrun):
 	print_list(gw_yest_list, "GatewayMAC", "Location")
 	print_list(pb_yest_list, "DeviceMAC", "Permanent")
@@ -207,14 +207,14 @@ else:
 		'from dat_powerblade t1 group by t1.deviceMAC')
 	pb_times = aws_c.fetchall()
 
-	total_errors = 0
+	total_statuss = 0
 
-	total_errors += check_list(gateway_active, gateway_times, gw_yest_list, gw_today_list, logpath + 'gateway-error-' + today.strftime("%Y-%m-%d") + '.log', "GatewayMAC", "Location")
-	total_errors += check_list(pb_active, pb_times, pb_yest_list, pb_today_list, logpath + 'powerblade-error-' + today.strftime("%Y-%m-%d") + '.log', "DeviceMAC", "Permanent")
+	total_statuss += check_list(gateway_active, gateway_times, gw_yest_list, gw_today_list, logpath + 'gateway-status-' + today.strftime("%Y-%m-%d") + '.log', "GatewayMAC", "Location")
+	total_statuss += check_list(pb_active, pb_times, pb_yest_list, pb_today_list, logpath + 'powerblade-status-' + today.strftime("%Y-%m-%d") + '.log', "DeviceMAC", "Permanent")
 
 	email_body.append(email_end)
 
-	if(total_errors > 0):
+	if(total_statuss > 0):
 		print("Sending results via email")
 		yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment New Device Error', email_body)
 	else:
