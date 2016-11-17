@@ -23,21 +23,20 @@ significantly lower), as well as safety.
 How Do I View My PowerBlade's Data?
 -----------------------------------
 
-**Option 1**: Install [Summon](https://github.com/lab11/summon)
+- **Option 1**: Install [Summon](https://github.com/lab11/summon)
 [[Android](https://play.google.com/store/apps/details?id=edu.umich.eecs.lab11.summon&hl=en),
 [iOS](https://itunes.apple.com/us/app/summon-lab11/id1051205682?mt=8)].
 
-**Option 2**: Run a node.js script to view packets on your computer.
+- **Option 2**: Run a node.js script to view packets on your computer.
 
-To run:
-```
-cd data_collection/advertisements/
-npm install
-sudo node powerblade_adv.js
-```
+        ```
+        cd data_collection/advertisements/
+        npm install
+        sudo node powerblade_adv.js
+        ```
 
-This requires that you have support for running as a BLE
-master on your machine. To get setup, see the instructions below.
+    This requires that you have support for running as a BLE
+    master on your machine. To get setup, see the instructions below.
 
 ### BLE and node.js Setup
 
