@@ -20,11 +20,14 @@ significantly lower), as well as safety.
 <img src="https://raw.github.com/lab11/powerblade/master/images/powerblade_front_799x800.jpg" width="300">
 <img src="https://raw.github.com/lab11/powerblade/master/images/powerblade_plug_profile_1000x423.jpg" width="500">
 
-Applications
-------------
-To quickly gather PowerBlade data, you can run a Node.js script
-that will collect all of the PowerBlade BLE advertisements and
-parse all of the metering data from them.
+How Do I View My PowerBlade's Data?
+-----------------------------------
+
+**Option 1**: Install [Summon](https://github.com/lab11/summon)
+[[Android](https://play.google.com/store/apps/details?id=edu.umich.eecs.lab11.summon&hl=en),
+[iOS](https://itunes.apple.com/us/app/summon-lab11/id1051205682?mt=8)].
+
+**Option 2**: Run a node.js script to view packets on your computer.
 
 To run:
 ```
@@ -34,12 +37,9 @@ sudo node powerblade_adv.js
 ```
 
 This requires that you have support for running as a BLE
-master on your machine. To get setup, see the Installation
-section below.
+master on your machine. To get setup, see the instructions below.
 
-Installation
-------------
-
+### BLE and node.js Setup
 
 1. Install [Node.js](https://nodejs.org/en/download/package-manager/) for your platform.
 Node.js provides a JavaScript runtime to execute the data collection script in.
@@ -48,17 +48,17 @@ Node.js provides a JavaScript runtime to execute the data collection script in.
 
     - **OS X**: Install [Xcode](https://itunes.apple.com/ca/app/xcode/id497799835?mt=12)
     - **Ubuntu/Debian/Raspbian**:
-        
+
         ```sh
-        sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev
+        sudo apt install bluetooth bluez libbluetooth-dev libudev-dev
         ```
-        
+
     - **Fedora / Other-RPM based**:
-        
+
         ```sh
         sudo yum install bluez bluez-libs bluez-libs-devel
         ```
-        
+
     - **Intel Edison**: See [Configure Intel Edison for Bluetooth LE (Smart) Development](http://rexstjohn.com/configure-intel-edison-for-bluetooth-le-smart-development/)
 
 
