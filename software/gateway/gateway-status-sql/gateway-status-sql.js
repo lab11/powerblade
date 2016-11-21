@@ -11,7 +11,7 @@ var mqtt = require('mqtt'); // connect to the local MQTT broker
 
 var schedule = require('node-schedule');
 var os = require('os');
-var getIP = require('external-ip');
+var getIP = require('external-ip')();
 
 var debug = false;
 var test = false;
@@ -78,14 +78,15 @@ var j = schedule.scheduleJob('*/1 * * * *', function() {
     getIP( function(err, ip) {
         if(err) throw err;
         public_ip = ip;
-    });
+    
+        // Post all three values to SQL
+        console.log(gateway_mac);
+        console.log(gateway_ip);
+        console.log(public_ip);
+        var loadQuery = 'INSERT INTO inf_gw_status (gatewayMAC, gatewayIP, publicIP) VALUES (' + gateway_mac + ', INET_ATON(' + gateway_ip + '), INET_ATON(' + public_ip + '))';
+        console.log(loadQuery);
 
-    // Post all three values to SQL
-    console.log(gateway_mac);
-    console.log(gateway_ip);
-    console.log(public_ip);
-    var loadQuery = 'INSERT INTO inf_gw_status (gatewayMAC, gatewayIP, publicIP) VALUES (' + gateway_mac + ',' + gateway_ip + ',' + public_ip + ')';
-    console.log(loadQuery);
+    });
 
     // db_connection.query(loadQuery, function(err, rows, fields) {
     //     if (err) throw err;
