@@ -1,0 +1,13 @@
+[Unit]
+Description=Push BLE data to an SQL server.
+After=bluetooth.target mosquitto.service
+
+[Service]
+ExecStart=/home/debian/powerblade/software/gateway/gateway-status-sql/gateway-status-sql.js
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=gateway-status-sql
+
+[Install]
+WantedBy=multi-user.target
