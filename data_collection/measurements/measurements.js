@@ -3,6 +3,7 @@
 var noble = require('noble');
 var fs = require('fs');
 var dateFormat = require('dateformat');
+var prompt = require('prompt');
 
 var debug = false;
 var dedup = true;
@@ -10,6 +11,7 @@ var pb_address = 0;
 var pb_tag = "";
 var count = 0;
 var rx_count = 0;
+var load = 0;
 for(var i = 0; i < process.argv.length; i++) {
     var val = process.argv[i];
     if(val == "-d" || val == "--debug") {
@@ -36,9 +38,53 @@ for(var i = 0; i < process.argv.length; i++) {
             console.log("Collecting " + count + " advertisements");
         }
     }
+    else if(val == "-l" || val == "--load") {
+    	load = process.argv[++i];
+    	console.log("Measuring the AC load: " + load);
+    }
 }
 
 // Check for the required parameter
+if(load == 0) {
+	console.log("Error: Must be run with a certain AC load (lamp, television, etc)");
+	console.log("Use -l [load] or --load [load] to specify");
+	process.exit();
+}
+
+var schema = {
+	properties: {
+		powerblade_mac: {
+			pattern: /^[a-fA-F0-9\:]+$/,
+			message: 'Name must be valid hex, with or without \':\''
+		}
+	}
+}
+
+prompt.start();
+
+// Collect samples unit the user tells the system to stop
+var usr_input;
+while(usr_input != "Exit" && usr_input != "exit") {
+	prompt.get(schema, function(err, result) {
+		console.log(result.powerblade_mac);
+		usr_input = result.powerblade_mac;
+	});
+}
+
+
+process.exit();
+
+
+
+
+
+
+
+
+
+
+
+
 if(pb_address == 0) {
     console.log("Error: Must run with a certain PowerBlade");
     console.log("Use \"-m c0:98:e5:70:xx:xx\" or \"--mac c0:98:e5:70:xx:xx\" to specify");
