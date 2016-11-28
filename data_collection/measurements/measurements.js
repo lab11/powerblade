@@ -85,33 +85,33 @@ mqtt_client.on('connect', function () {
     mqtt_client.on('message', function (topic, message) {
         var adv = JSON.parse(message.toString());
 
-        console.log(adv);
+        //console.log(adv);
 
-        // var writeObject = {
-        //     seq: sequence_num, 
-        //     vrms: v_rms_disp.toFixed(2),
-        //     power: real_power_disp.toFixed(2),
-        //     app: app_power_disp.toFixed(2),
-        //     wh: watt_hours_disp.toFixed(2),
-        //     pf: pf_disp.toFixed(2),
-        //     fg: flags
-        // }
+        var writeObject = {
+            seq: adv['sequence_number'], 
+            vrms: adv['rms_voltage'].toFixed(2),
+            power: adv['power'].toFixed(2),
+            app: adv['apparent_power'].toFixed(2),
+            wh: adv['energy'].toFixed(2),
+            pf: adv['power_factor'].toFixed(2),
+            fg: adv['flags']
+        }
 
-        // fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
+        fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
 
-        // rx_count = rx_count + 1;
-        // process.stdout.write(rx_count + "/50: " + real_power_disp + "\n");
-        // total = total + real_power_disp;
-        // if(rx_count == count) {
-        //     process.stdout.write("\n");
-        //     console.log("Average power: " + (total/count))
+        rx_count = rx_count + 1;
+        process.stdout.write(rx_count + "/50: " + real_power_disp + "\n");
+        total = total + real_power_disp;
+        if(rx_count == count) {
+            process.stdout.write("\n");
+            console.log("Average power: " + (total/count))
 
-        //     process.exit();
-        // }
+            process.exit();
+        }
     });
 });
 
-noble.on('stateChange', function(state) {
+/*noble.on('stateChange', function(state) {
     if (state === 'poweredOn') {
         console.log("Starting scan...");
         noble.startScanning([], true);
@@ -263,7 +263,7 @@ noble.on('discover', function (peripheral) {
         	process.exit();
         }
     }
-});
+});*/
 
 
 
