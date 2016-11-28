@@ -4,6 +4,8 @@ var noble = require('noble');
 var fs = require('fs');
 var dateFormat = require('dateformat');
 
+var mqtt = require('mqtt');
+
 var debug = false;
 var dedup = true;
 var pb_address = 0;
@@ -74,6 +76,40 @@ var OLD_COMPANY_ID = 0x4908;
 var powerblade_sequences = {};
 
 var total = 0;
+
+var mqtt_client = mqtt.connect('mqtt://localhost');
+mqtt_client.on('connect', function () {
+    console.log("Connected to MQTT");
+    mqtt_client.subscribe('gateway-data');
+
+    mqtt_client.on('message', function (topic, message) {
+        var adv = JSON.parse(message.toString());
+
+        console.log(adv);
+
+        // var writeObject = {
+        //     seq: sequence_num, 
+        //     vrms: v_rms_disp.toFixed(2),
+        //     power: real_power_disp.toFixed(2),
+        //     app: app_power_disp.toFixed(2),
+        //     wh: watt_hours_disp.toFixed(2),
+        //     pf: pf_disp.toFixed(2),
+        //     fg: flags
+        // }
+
+        // fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
+
+        // rx_count = rx_count + 1;
+        // process.stdout.write(rx_count + "/50: " + real_power_disp + "\n");
+        // total = total + real_power_disp;
+        // if(rx_count == count) {
+        //     process.stdout.write("\n");
+        //     console.log("Average power: " + (total/count))
+
+        //     process.exit();
+        // }
+    });
+});
 
 noble.on('stateChange', function(state) {
     if (state === 'poweredOn') {
@@ -223,8 +259,6 @@ noble.on('discover', function (peripheral) {
         if(rx_count == count) {
         	process.stdout.write("\n");
         	console.log("Average power: " + (total/count))
-
-            data_check.
 
         	process.exit();
         }
