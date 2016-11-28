@@ -87,28 +87,31 @@ mqtt_client.on('connect', function () {
 
         //console.log(adv);
 
-        var writeObject = {
-            seq: adv['sequence_number'], 
-            vrms: adv['rms_voltage'].toFixed(2),
-            power: adv['power'].toFixed(2),
-            app: adv['apparent_power'].toFixed(2),
-            wh: adv['energy'].toFixed(2),
-            pf: adv['power_factor'].toFixed(2),
-            fg: adv['flags']
+        if(adv['_meta'] && adv['_meta']['device_id'] == pb_address.replace(new RegExp(':', 'g'), '')) {
+
+            var writeObject = {
+                seq: adv['sequence_number'], 
+                vrms: parseFloat(adv['rms_voltage']).toFixed(2),
+                power: parseFloat(adv['power']).toFixed(2),
+                app: parseFloat(adv['apparent_power']).toFixed(2),
+                wh: parseFloat(adv['energy']).toFixed(2),
+                pf: parseFloat(adv['power_factor']).toFixed(2),
+                fg: adv['flags']
+            }
+
+            fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
+
+            rx_count = rx_count + 1;
+            process.stdout.write(rx_count + "/50: " + adv['power'] + "\n");
+            total = total + parseFloat(adv['power']);
+            if(rx_count == count) {
+                process.stdout.write("\n");
+                console.log("Average power: " + (total/count))
+
+                process.exit();
+            }
         }
-
-        fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
-
-        rx_count = rx_count + 1;
-        process.stdout.write(rx_count + "/50: " + real_power_disp + "\n");
-        total = total + real_power_disp;
-        if(rx_count == count) {
-            process.stdout.write("\n");
-            console.log("Average power: " + (total/count))
-
-            process.exit();
-        }
-    });
+	});
 });
 
 /*noble.on('stateChange', function(state) {

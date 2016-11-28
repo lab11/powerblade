@@ -7,7 +7,7 @@ const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 
 const configList = ['jumper', 'outlet', 'surge'];
 
 function printDevice(device) {
-	console.log(chalk.bold.white(device + "\t\tOutlet\t\tSurge\t\tJumper"))
+	console.log(chalk.bold.white(device + "\t\tJumper\t\tOutlet\t\tSurge"))
 	if(file_info[device]['actual']) {
 		console.log(chalk.bold.white("Actual: ") + chalk.green(file_info[device]['actual'].toFixed(1)))
 	}
