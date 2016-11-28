@@ -3,7 +3,6 @@
 var noble = require('noble');
 var fs = require('fs');
 var dateFormat = require('dateformat');
-var prompt = require('prompt');
 
 var debug = false;
 var dedup = true;
@@ -11,7 +10,6 @@ var pb_address = 0;
 var pb_tag = "";
 var count = 0;
 var rx_count = 0;
-var load = 0;
 for(var i = 0; i < process.argv.length; i++) {
     var val = process.argv[i];
     if(val == "-d" || val == "--debug") {
@@ -38,56 +36,12 @@ for(var i = 0; i < process.argv.length; i++) {
             console.log("Collecting " + count + " advertisements");
         }
     }
-    else if(val == "-l" || val == "--load") {
-    	load = process.argv[++i];
-    	console.log("Measuring the AC load: " + load);
-    }
 }
 
 // Check for the required parameter
-if(load == 0) {
-	console.log("Error: Must be run with a certain AC load (lamp, television, etc)");
-	console.log("Use -l [load] or --load [load] to specify");
-	process.exit();
-}
-
-var schema = {
-	properties: {
-		powerblade_mac: {
-			pattern: /^[a-fA-F0-9\:]+$/,
-			message: 'Name must be valid hex, with or without \':\''
-		}
-	}
-}
-
-prompt.start();
-
-// Collect samples unit the user tells the system to stop
-var usr_input;
-while(usr_input != "Exit" && usr_input != "exit") {
-	prompt.get(schema, function(err, result) {
-		console.log(result.powerblade_mac);
-		usr_input = result.powerblade_mac;
-	});
-}
-
-
-process.exit();
-
-
-
-
-
-
-
-
-
-
-
-
 if(pb_address == 0) {
     console.log("Error: Must run with a certain PowerBlade");
-    console.log("Use \"-m c0:98:e5:70:xx:xx\" or \"--mac c0:98:e5:70:xx:xx\" to specify");
+    console.log("Use \"-m xx:xx\" or \"--mac c0:98:e5:70:xx:xx\" to specify");
     process.exit();
 }
 
@@ -102,7 +56,13 @@ console.log("Looking for PowerBlade " + pb_address);
 
 var g_time_start = new Date();
 
-filename = dateFormat(g_time_start, "yyyy-mm-dd_h-MM-ss") + "_" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".txt";
+//filename = dateFormat(g_time_start, "yyyy-mm-dd_h-MM-ss") + "_" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".txt";
+filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".dat";
+
+if(fs.existsSync(filename)) {
+	console.log("Error: file exists");
+	process.exit();
+}
 
 console.log("Logging to " + filename);
 
@@ -112,6 +72,8 @@ var OLD_COMPANY_ID = 0x4908;
 
 // {BLE Address: Most recent sequence number} for each PowerBlade
 var powerblade_sequences = {};
+
+var total = 0;
 
 noble.on('stateChange', function(state) {
     if (state === 'poweredOn') {
@@ -254,6 +216,20 @@ noble.on('discover', function (peripheral) {
         }
 
         fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
+
+        rx_count = rx_count + 1;
+        process.stdout.write(rx_count + "/50: " + real_power_disp + "\n");
+        total = total + real_power_disp;
+        if(rx_count == count) {
+        	process.stdout.write("\n");
+        	console.log("Average power: " + (total/count))
+
+            data_check.
+
+        	process.exit();
+        }
     }
 });
+
+
 

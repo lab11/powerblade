@@ -1,9 +1,9 @@
 {
-  "name": "advertisement",
+  "name": "measurement",
   "version": "1.0.0",
-  "description": "Display advertisement data collected from PowerBlade devices",
-  "main": "powerblade_data.js",
-  "author": "Branden Ghena",
+  "description": "Collect measurements from PowerBlade devices",
+  "main": "measurements.js",
+  "author": "Sam DeBruin",
   "dependencies": {
     "async": "^1.5.0",
     "dateformat": "^1.0.12",
