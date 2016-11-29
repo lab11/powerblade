@@ -239,6 +239,64 @@ else {
 	printDevice(device_save, missing);
 }
 
+// For each device, find the maximum difference between any two measurements
+for(device in file_info) {
+	var maxVal = 0;
+	var minVal = 2500;
+	var maxPb, maxConfig;
+	var minPb, minConfig;
+	var average = 0;
+	var avcount = 0;
+	for(pb in pbList) {
+		for(config in configList) {
+			if(file_info[device][pbList[pb]][configList[config]] != -1 && file_info[device][pbList[pb]][configList[config]] != -2) {
+				average += file_info[device][pbList[pb]][configList[config]];
+				avcount += 1;
+
+				if(file_info[device][pbList[pb]][configList[config]] < minVal) {
+					minVal = file_info[device][pbList[pb]][configList[config]];
+					minPb = pbList[pb];
+					minConfig = configList[config];
+				}
+				if(file_info[device][pbList[pb]][configList[config]] > maxVal) {
+					maxVal = file_info[device][pbList[pb]][configList[config]];
+					maxPb = pbList[pb];
+					maxConfig = configList[config];
+				}
+			}
+		}
+	}
+	console.log(device + "\t" + maxVal + "\t" + minVal)
+	// Actuall calculate maximum
+	file_info[device]['maxDiff'] = maxVal - minVal;
+	file_info[device]['average'] = average / avcount;
+}
+
+var file_copy = JSON.parse(JSON.stringify(file_info));
+
+var writeString = "";
+
+console.log(file_copy['vac'])
+
+// Output the maxDiff data, sorted by maximum difference
+for(burner in file_info) {	// Do this for the number of devices
+	var maxVal = 0;
+	var maxDevice;
+	for(device in file_copy) {	// For any device not yet printed
+		if(file_copy[device]['maxDiff'] > maxVal) {
+			maxVal = file_copy[device]['maxDiff'];
+			maxDevice = device;
+		}
+	}
+	writeString += maxDevice + "\t" + maxVal + "\t" + maxVal/file_copy[maxDevice]['average'] + "\n";
+	delete file_copy[maxDevice];
+}
+
+fs.writeFileSync("sorted_maxDiff.dat", writeString);
+
+
+
+
 
 
 
