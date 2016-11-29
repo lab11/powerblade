@@ -12,6 +12,7 @@ var pb_address = 0;
 var pb_tag = "";
 var count = 0;
 var rx_count = 0;
+var host = 'mqtt://localhost';
 for(var i = 0; i < process.argv.length; i++) {
     var val = process.argv[i];
     if(val == "-d" || val == "--debug") {
@@ -37,6 +38,10 @@ for(var i = 0; i < process.argv.length; i++) {
         if(count > 0) {
             console.log("Collecting " + count + " advertisements");
         }
+    }
+    else if(val == "-s" || val == "--server") {
+        host = 'mqtt://' + process.argv[++i];
+        console.log("Connecting to " + host);
     }
 }
 
@@ -77,7 +82,7 @@ var powerblade_sequences = {};
 
 var total = 0;
 
-var mqtt_client = mqtt.connect('mqtt://localhost');
+var mqtt_client = mqtt.connect(host);
 mqtt_client.on('connect', function () {
     console.log("Connected to MQTT");
     mqtt_client.subscribe('gateway-data');
