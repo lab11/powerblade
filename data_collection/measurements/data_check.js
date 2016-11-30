@@ -266,7 +266,7 @@ for(device in file_info) {
 			}
 		}
 	}
-	console.log(device + "\t" + maxVal + "\t" + minVal)
+	//console.log(device + "\t" + maxVal + "\t" + minVal)
 	// Actuall calculate maximum
 	file_info[device]['maxDiff'] = maxVal - minVal;
 	file_info[device]['average'] = average / avcount;
@@ -276,7 +276,7 @@ var file_copy = JSON.parse(JSON.stringify(file_info));
 
 var writeString = "";
 
-console.log(file_copy['vac'])
+//console.log(file_copy['vac'])
 
 // Output the maxDiff data, sorted by maximum difference
 for(burner in file_info) {	// Do this for the number of devices
