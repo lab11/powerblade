@@ -61,7 +61,7 @@ getmac.getMac(function(err,macAddress) {
     gateway_mac = macAddress.replace(new RegExp(':', 'g'), '');
 });
 
-var j = schedule.scheduleJob('*/1 * * * *', function() {
+var j = schedule.scheduleJob('* */4 * * *', function() {
 
     // Get local gateway IP address
     var gateway_ip;
@@ -83,12 +83,12 @@ var j = schedule.scheduleJob('*/1 * * * *', function() {
         var loadQuery = 'INSERT INTO inf_gw_status (gatewayMAC, gatewayIP, gatewayStrIP, publicIP, publicStrIP) VALUES (\'' + gateway_mac + '\', INET_ATON(\'' + gateway_ip + '\'), \'' + gateway_ip + '\', INET_ATON(\'' + public_ip + '\'), \'' + public_ip + '\');';
         console.log(loadQuery);
 
-        // db_connection.query(loadQuery, function(err, rows, fields) {
-        //     if (err) throw err;
-        //     if(debug) {
-        //         console.log("Done uploading status for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
-        //     }
-        // });
+        db_connection.query(loadQuery, function(err, rows, fields) {
+            if (err) throw err;
+            if(debug) {
+                console.log("Done uploading status for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
+            }
+        });
     });
 });
 
