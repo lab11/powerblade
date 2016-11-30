@@ -274,7 +274,7 @@ for(device in file_info) {
 
 var file_copy = JSON.parse(JSON.stringify(file_info));
 
-var writeString = "";
+var writeString_power = "";
 
 //console.log(file_copy['vac'])
 
@@ -288,11 +288,11 @@ for(burner in file_info) {	// Do this for the number of devices
 			maxDevice = device;
 		}
 	}
-	writeString += maxDevice + "\t" + maxVal + "\t" + maxVal/file_copy[maxDevice]['average'] + "\n";
+	writeString_power += maxDevice + "\t" + maxVal + "\t" + maxVal/file_copy[maxDevice]['average'] + "\n";
 	delete file_copy[maxDevice];
 }
 
-fs.writeFileSync("sorted_maxDiff.dat", writeString);
+fs.writeFileSync("sorted_maxDiff_power.dat", writeString_power);
 
 
 
