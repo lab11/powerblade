@@ -80,7 +80,7 @@ var j = schedule.scheduleJob('*/1 * * * *', function() {
         public_ip = ip;
     
         // Post all three values to SQL
-        var loadQuery = 'INSERT INTO inf_gw_status (gatewayMAC, gatewayIP, gatewayStrIP, publicIP, publicStrIP) VALUES (\'' + gateway_mac + '\', INET_ATON(\'' + gateway_ip + '\'), \'' + gateway_ip + ',INET_ATON(\'' + public_ip + '\'), \'' + publicIP + '\');';
+        var loadQuery = 'INSERT INTO inf_gw_status (gatewayMAC, gatewayIP, gatewayStrIP, publicIP, publicStrIP) VALUES (\'' + gateway_mac + '\', INET_ATON(\'' + gateway_ip + '\'), \'' + gateway_ip + '\', INET_ATON(\'' + public_ip + '\'), \'' + public_ip + '\');';
         console.log(loadQuery);
 
         // db_connection.query(loadQuery, function(err, rows, fields) {
