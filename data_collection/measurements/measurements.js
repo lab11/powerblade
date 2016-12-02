@@ -3,6 +3,7 @@
 var noble = require('noble');
 var fs = require('fs');
 var dateFormat = require('dateformat');
+var readlineSync = require('readline-sync');
 
 var mqtt = require('mqtt');
 
@@ -67,8 +68,13 @@ var g_time_start = new Date();
 filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".dat";
 
 if(fs.existsSync(filename)) {
-	console.log("Error: file exists");
-	process.exit();
+    var overwrite;
+    while(overwrite != 'y' && overwrite != 'Y') {
+        overwrite = readlineSync.question("File exists, overwrite (y/n)? ");
+        if(overwrite == 'n' || overwrite == 'N') {
+            process.exit();
+        }
+    }
 }
 
 console.log("Logging to " + filename);
