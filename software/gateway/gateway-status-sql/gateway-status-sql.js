@@ -61,7 +61,11 @@ getmac.getMac(function(err,macAddress) {
     gateway_mac = macAddress.replace(new RegExp(':', 'g'), '');
 });
 
-var j = schedule.scheduleJob('0 */4 * * *', function() {
+var j = schedule.scheduleJob('45 * * * *', function() {
+
+	if(debug) {
+		console.log("Running status process")
+	}
 
     // Get local gateway IP address
     var gateway_ip;
