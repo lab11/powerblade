@@ -61,7 +61,7 @@ getmac.getMac(function(err,macAddress) {
     gateway_mac = macAddress.replace(new RegExp(':', 'g'), '');
 });
 
-var j = schedule.scheduleJob('45 * * * *', function() {
+var j = schedule.scheduleJob('0,45 * * * *', function() {
 
 	if(debug) {
 		console.log("Running status process")
@@ -88,8 +88,19 @@ var j = schedule.scheduleJob('45 * * * *', function() {
         console.log(loadQuery);
 
         db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) throw err;
-            if(debug) {
+            if (err) {
+            	if(err == "ETIMEDOUT") {
+            		console.log("Error " + err + ": retrying");
+            		db_connection.query(loadQuery, function(err, rows, fields) {
+            			if (err) throw err;
+            			console.log("Uploaded on second try for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
+            		});
+            	}
+            	else {
+            		throw err;
+            	}
+            }
+            else if(debug) {
                 console.log("Done uploading status for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
             }
         });
