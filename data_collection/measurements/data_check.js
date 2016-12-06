@@ -240,6 +240,7 @@ else {
 }
 
 // For each device, find the maximum difference between any two measurements
+// Also sort the measurements in decreasing order
 for(device in file_info) {
 	var maxVal = 0;
 	var minVal = 2500;
@@ -269,7 +270,7 @@ for(device in file_info) {
 	//console.log(device + "\t" + maxVal + "\t" + minVal)
 	// Actuall calculate maximum
 	file_info[device]['maxDiff'] = maxVal - minVal;
-	file_info[device]['average'] = average / avcount;
+	file_info[device]['average'] = average / avcount;	// Used to calculate percent error
 }
 
 var file_copy = JSON.parse(JSON.stringify(file_info));
@@ -279,6 +280,8 @@ var writeString_power = "";
 //console.log(file_copy['vac'])
 
 // Output the maxDiff data, sorted by maximum difference
+console.log("plot \"sorted_maxDiff_power.dat\" u :xtic(2) notitle, \\")
+var count = 1
 for(burner in file_info) {	// Do this for the number of devices
 	var maxVal = 0;
 	var maxDevice;
@@ -288,14 +291,74 @@ for(burner in file_info) {	// Do this for the number of devices
 			maxDevice = device;
 		}
 	}
-	writeString_power += maxDevice + "\t" + maxVal + "\t" + maxVal/file_copy[maxDevice]['average'] + "\n";
+
+	var minVal = 2500;
+	for(pb in pbList) {
+		for(config in configList) {
+			var this_val = file_copy[maxDevice][pbList[pb]][configList[config]]
+			if(this_val < minVal && this_val > 0) {
+				minVal = file_copy[maxDevice][pbList[pb]][configList[config]];
+			}
+		}
+	}
+
+	writeString_power += count + "\t" + maxDevice + "\t";
+	// Found the device with the greatest overall difference, now sort its members
+	for(var i = 0; i < (pbList.length * configList.length); i++) {
+		var maxConfigVal = -3;
+		var maxPB;
+		var maxConfig;
+		for(pb in pbList) {
+			for(config in file_copy[maxDevice][pbList[pb]]) {
+				if(file_copy[maxDevice][pbList[pb]][config] > maxConfigVal) {
+					maxConfigVal = file_copy[maxDevice][pbList[pb]][config];
+					maxPB = pbList[pb];
+					maxConfig = config;
+				}
+			}
+		}
+		if(maxConfigVal >= 0) {
+			writeString_power += (maxConfigVal-minVal) + "\t";
+		} else {
+			writeString_power += "0\t";
+		}
+		console.log('\t\"\" u ($' + (i+3) + '+offset) with boxes, \\\n\t\"\" u ($' + (i+3) + ') with boxes lc \"grey\" notitle, \\')
+		delete file_copy[maxDevice][maxPB][maxConfig];
+	}
+
+	//writeString_power += count + "\t" + maxDevice + "\t" + maxVal + "\t" + maxVal/file_copy[maxDevice]['average'] + "\n";
+	writeString_power += maxVal/file_copy[maxDevice]['average'] + "\n";
+	count += 1;
 	delete file_copy[maxDevice];
 }
 
 fs.writeFileSync("sorted_maxDiff_power.dat", writeString_power);
 
+// Get the total errors for each of the three configs
+var avgErr = {};
+var avgErrCt = {};
+for(config in configList) {
+	avgErr[configList[config]] = 0;
+	avgErrCt[configList[config]] = 0;
+}
+for(device in file_info) {
+	for(config in configList) {
+		var actual;
+		if(typeof file_info[device]['actual'] == "number") {
+			actual = file_info[device]['actual'];
+		} else {
+			actual = file_info[device]['actual'][configList[config]];
+		}
+		for(pb in pbList) {
+			avgErr[configList[config]] += Math.abs(actual - file_info[device][pbList[pb]][configList[config]]);
+			avgErrCt[configList[config]] += 1;
+		}
+	}
+}
 
-
+console.log("Outlet Average Error: " + (avgErr['outlet']/avgErrCt['outlet']));
+console.log("Jumper Average Error: " + (avgErr['jumper']/avgErrCt['jumper']));
+console.log("Surge Average Error: " + (avgErr['surge']/avgErrCt['surge']));
 
 
 
