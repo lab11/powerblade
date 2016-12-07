@@ -1,19 +1,22 @@
-set terminal postscript enhanced eps solid color font "Helvetica,14" size 6.2in,4.2in
+set terminal postscript enhanced eps solid color font "Helvetica,14" size 5.2in,3.1in
 set output "max_diff.eps"
 
 set boxwidth 0.4
 set style fill solid
 
-set ylabel "Absolute Error (W)"
-set y2label "Percent Error (%)"
+set title "Maximum Difference Between any Two of the 15 configurations"
+set ylabel "Difference Absolute Error (W)"
+#set y2label "Percent Error (%)"
 
 #set logscale y
 
 offset = 5
 
-set y2tics
+#set y2tics
 
-set y2range [0:100]
+#set y2range [0:100]
+
+unset key
 
 #plot "sorted_maxDiff_power.dat" u :xtic(2) notitle, \
 #	"" u ($1-1.2):3 with boxes axes x1y1 title "Absolute Error", \

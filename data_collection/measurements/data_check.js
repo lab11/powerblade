@@ -5,6 +5,7 @@ var fs = require('fs');
 
 const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c'];
 const configList = ['jumper', 'outlet', 'surge'];
+const calibList = ['jumper', 'outlet', 'home'];
 
 function printDevice(device, missing) {
 	var misCount = 0;
@@ -280,7 +281,7 @@ var writeString_power = "";
 //console.log(file_copy['vac'])
 
 // Output the maxDiff data, sorted by maximum difference
-console.log("plot \"sorted_maxDiff_power.dat\" u :xtic(2) notitle, \\")
+//console.log("plot \"sorted_maxDiff_power.dat\" u :xtic(2) notitle, \\")
 var count = 1
 for(burner in file_info) {	// Do this for the number of devices
 	var maxVal = 0;
@@ -322,7 +323,7 @@ for(burner in file_info) {	// Do this for the number of devices
 		} else {
 			writeString_power += "0\t";
 		}
-		console.log('\t\"\" u ($' + (i+3) + '+offset) with boxes, \\\n\t\"\" u ($' + (i+3) + ') with boxes lc \"grey\" notitle, \\')
+		//console.log('\t\"\" u ($' + (i+3) + '+offset) with boxes, \\\n\t\"\" u ($' + (i+3) + ') with boxes lc \"grey\" notitle, \\')
 		delete file_copy[maxDevice][maxPB][maxConfig];
 	}
 
@@ -334,14 +335,24 @@ for(burner in file_info) {	// Do this for the number of devices
 
 fs.writeFileSync("sorted_maxDiff_power.dat", writeString_power);
 
-// Get the total errors for each of the three configs
+// Get the total errors for each of the three configs for each of the three types of calibration
 var avgErr = {};
 var avgErrCt = {};
-for(config in configList) {
-	avgErr[configList[config]] = 0;
-	avgErrCt[configList[config]] = 0;
+
+for(calib in calibList) {
+	avgErr[calibList[calib]] = {};
+	avgErrCt[calibList[calib]] = {};
+	for(config in configList) {
+		avgErr[calibList[calib]][configList[config]] = 0;
+		avgErrCt[calibList[calib]][configList[config]] = 0;
+	}
 }
+
 for(device in file_info) {
+	for(calib in calibList) {
+		file_info[device][calibList[calib]] = {};
+	}
+
 	for(config in configList) {
 		var actual;
 		if(typeof file_info[device]['actual'] == "number") {
@@ -349,16 +360,40 @@ for(device in file_info) {
 		} else {
 			actual = file_info[device]['actual'][configList[config]];
 		}
-		for(pb in pbList) {
-			avgErr[configList[config]] += Math.abs(actual - file_info[device][pbList[pb]][configList[config]]);
-			avgErrCt[configList[config]] += 1;
+
+		file_info[device]['outlet'][configList[config]] = (file_info[device]['c098e5700053'][configList[config]] + file_info[device]['c098e5700048'][configList[config]]) / 2;
+		file_info[device]['jumper'][configList[config]] = (file_info[device]['c098e570004a'][configList[config]] + file_info[device]['c098e570004e'][configList[config]]) / 2;
+		file_info[device]['home'][configList[config]] = file_info[device]['c098e570013c'][configList[config]];
+
+		for(calib in calibList) {
+			avgErr[calibList[calib]][configList[config]] += Math.abs(actual - file_info[device][calibList[calib]][configList[config]]);
+			avgErrCt[calibList[calib]][configList[config]] += 1;
 		}
 	}
 }
 
-console.log("Outlet Average Error: " + (avgErr['outlet']/avgErrCt['outlet']));
-console.log("Jumper Average Error: " + (avgErr['jumper']/avgErrCt['jumper']));
-console.log("Surge Average Error: " + (avgErr['surge']/avgErrCt['surge']));
+var avg_copy = JSON.parse(JSON.stringify(avgErr));
+var writeString_config = "";
+
+for(var i = 0; i < (calibList.length * configList.length); i++) {
+	var maxVal = 0;
+	var maxCalib;
+	var maxConfig;
+	for(calib in avg_copy) {
+		for(config in avg_copy[calib]) {
+			if(avg_copy[calib][config] > maxVal) {
+				maxVal = avg_copy[calib][config];
+				maxCalib = calib;
+				maxConfig = config;
+			}
+		}
+	}
+	console.log(maxCalib + "\t" + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]));
+	writeString_config += maxCalib + "." + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]) + "\n";
+	delete avg_copy[maxCalib][maxConfig];
+}
+
+fs.writeFileSync("sorted_configs.dat", writeString_config);
 
 
 
