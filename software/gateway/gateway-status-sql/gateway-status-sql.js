@@ -89,7 +89,7 @@ cron.schedule('0,45 * * * *', function() {
 
         db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) {
-            	if(err == "ETIMEDOUT") {
+            	if(err == "Error: read ETIMEDOUT") {
             		console.log("Error " + err + ": retrying");
             		db_connection.query(loadQuery, function(err, rows, fields) {
             			if (err) throw err;
