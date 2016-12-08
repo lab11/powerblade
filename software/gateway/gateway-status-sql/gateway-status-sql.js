@@ -9,7 +9,7 @@ var mysql = require('mysql');
 var getmac = require('getmac');
 var mqtt = require('mqtt'); // connect to the local MQTT broker
 
-var schedule = require('node-schedule');
+var cron = require('node-cron');
 var os = require('os');
 
 var debug = false;
@@ -61,7 +61,7 @@ getmac.getMac(function(err,macAddress) {
     gateway_mac = macAddress.replace(new RegExp(':', 'g'), '');
 });
 
-var j = schedule.scheduleJob('0,45 * * * *', function() {
+cron.schedule('0,45 * * * *', function() {
 
 	if(debug) {
 		console.log("Running status process")
