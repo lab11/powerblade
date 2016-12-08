@@ -61,8 +61,12 @@ getmac.getMac(function(err,macAddress) {
     gateway_mac = macAddress.replace(new RegExp(':', 'g'), '');
 });
 
+process_status();
 cron.schedule('0,45 * * * *', function() {
+	process_status();
+});
 
+function process_status() {
 	if(debug) {
 		console.log("Running status process")
 	}
@@ -90,11 +94,8 @@ cron.schedule('0,45 * * * *', function() {
         db_connection.query(loadQuery, function(err, rows, fields) {
             if (err) {
             	if(err == "Error: read ETIMEDOUT") {
-            		console.log("Error " + err + ": retrying");
-            		db_connection.query(loadQuery, function(err, rows, fields) {
-            			if (err) throw err;
-            			console.log("Uploaded on second try for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
-            		});
+            		console.log(err);
+            		process.exit();
             	}
             	else {
             		throw err;
@@ -105,5 +106,5 @@ cron.schedule('0,45 * * * *', function() {
             }
         });
     });
-});
+}
 
