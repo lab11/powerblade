@@ -46,7 +46,7 @@ for(var i = 0; i < process.argv.length; i++) {
         console.log("Connecting to " + host);
     }
     else if(val == "-d" || val == "--device") {
-
+        device = "_" + process.argv[++i];
     }
 }
 
@@ -54,6 +54,12 @@ for(var i = 0; i < process.argv.length; i++) {
 if(pb_address == 0) {
     console.log("Error: Must run with a certain PowerBlade");
     console.log("Use \"-m xx:xx\" or \"--mac c0:98:e5:70:xx:xx\" to specify");
+    process.exit();
+}
+
+if(device == "") {
+    console.log("Error: Must run with a certain device");
+    console.log("Use \"-d [device]\" or \"--device [device]\" to specify");
     process.exit();
 }
 
@@ -69,7 +75,7 @@ console.log("Looking for PowerBlade " + pb_address);
 var g_time_start = new Date();
 
 //filename = dateFormat(g_time_start, "yyyy-mm-dd_h-MM-ss") + "_" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".txt";
-filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".dat";
+filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
 
 if(fs.existsSync(filename)) {
     var replace = readlineSync.question("File exists, replace (y/n)? ");
