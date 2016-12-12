@@ -109,17 +109,20 @@ filenames.forEach( function(file) {
 		//console.log(shortname);
 		filelist = shortname.split('_');
 
+		// Read data from the file
 		if(filelist.length >= 1 && filelist.length <= 3) {
 			var data = fs.readFileSync(process.env.PB_DATA + "/" + file, 'utf8');
 			var avgPower = 0;
-			var countPower = 0;
+			var avgVoltage = 0;
+			var count = 0;
 			var readLines = data.split('\n');
 			for (var i = 0; i < readLines.length; i++) {
 				try {
 					//console.log(readLines[i])
 					//console.log(JSON.parse(readLines[i]))
 					avgPower += parseFloat(JSON.parse(readLines[i])['power']);
-					countPower += 1;
+					avgVoltage += parseFloat(JSON.parse(readLines[i])['vrms']);
+					count += 1;
 				} catch (e) {
 					if(e != "SyntaxError: Unexpected end of input" && e != "SyntaxError: Unexpected end of JSON input") {
 						console.log(e);
@@ -129,7 +132,7 @@ filenames.forEach( function(file) {
 			}
 		}
 
-		if(filelist.length == 3) {
+		if(filelist.length == 3) {			// This is a Powerblade measurement
 			//console.log(filelist);
 			var device = filelist[1];
 			var pb = filelist[0];
@@ -142,11 +145,11 @@ filenames.forEach( function(file) {
 				file_info[device][pb] = {};
 			}
 			if(!file_info[device][pb][config]) {
-				if(countPower == 0) {
+				if(count == 0) {
 					file_info[device][pb][config] = -2;
 				}
-				else if(countPower == 50) {
-					file_info[device][pb][config] = avgPower / countPower;
+				else if(count == 50) {
+					file_info[device][pb][config] = avgPower / count;
 				}
 				else {
 					file_info[device][pb][config] = -1;
@@ -157,7 +160,7 @@ filenames.forEach( function(file) {
 			process.exit();
 			}
 		}
-		else if(filelist.length == 2) {
+		else if(filelist.length == 2) {		// This is a WattsUp measurement with multiple configs
 			var device = filelist[0];
 			var config = filelist[1];
 			if(!file_info[device]) {
@@ -171,11 +174,11 @@ filenames.forEach( function(file) {
 				process.exit();
 			}
 			if(!file_info[device]['actual'][config]) {
-				if(countPower == 0) {
+				if(count == 0) {
 					file_info[device]['actual'][config] = -2;
 				}
-				else if(countPower == 10) {
-					file_info[device]['actual'][config] = avgPower / countPower;
+				else if(count == 10) {
+					file_info[device]['actual'][config] = avgPower / count;
 				}
 				else {
 					file_info[device]['actual'][config] = -1;
@@ -186,13 +189,13 @@ filenames.forEach( function(file) {
 				process.exit();
 			}
 		}
-		else if(filelist.length == 1) {
+		else if(filelist.length == 1) {		// This is a WattsUp measurement with only one config
 			var device = filelist[0];
 			if(!file_info[device]) {
 				file_info[device] = {};
 			}
 			if(!file_info[device]['actual']) {
-				file_info[device]['actual'] = avgPower / countPower;
+				file_info[device]['actual'] = avgPower / count;
 			}
 			else {
 				console.log("Error: repeat ground truth: " + device);	
@@ -388,7 +391,7 @@ for(var i = 0; i < (calibList.length * configList.length); i++) {
 			}
 		}
 	}
-	console.log(maxCalib + "\t" + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]));
+	//console.log(maxCalib + "\t" + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]));
 	writeString_config += maxCalib + "." + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]) + "\n";
 	delete avg_copy[maxCalib][maxConfig];
 }
