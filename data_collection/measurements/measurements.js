@@ -78,17 +78,18 @@ var g_time_start = new Date();
 filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
 
 if(fs.existsSync(filename)) {
-    var replace = readlineSync.question("File exists, replace (y/n)? ");
-    if(replace == 'y') {
+    var replace = readlineSync.question("File exists: overwrite, replace, or exit? (o/r/e): ");
+    if(replace == 'r') {
         var newfileNum = 0
         var newfile = filename.split('.')[0] + '.bak'
         while(fs.existsSync(newfile)) {
             newfileNum += 1
             newfile = filename.split('.')[0] + '_' + newfileNum + '.bak'
         }
-        fs.renameSync(filename, newfile)
+        console.log("Copying existing log to " + newfile);
+        fs.renameSync(filename, newfile);
     } 
-    else {
+    else if(replace != 'o') {
         process.exit()
     }
 }
