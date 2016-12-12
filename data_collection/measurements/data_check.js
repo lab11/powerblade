@@ -3,7 +3,7 @@
 var chalk = require('chalk');
 var fs = require('fs');
 
-const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c', 'c098e570005d'];
+const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c', 'c098e570004b', 'c098e570005d'];
 const configList = ['jumper', 'outlet', 'surge'];
 const calibList = ['jumper', 'outlet', 'home'];
 
@@ -252,9 +252,12 @@ else {
 
 
 
-
 if(missing_count != 0) {
 	console.log("Missing data, clear or collect before generating reports");
+	process.exit();
+}
+if(device_save != "") {
+	console.log("Report only generated on full dataset");
 	process.exit();
 }
 
