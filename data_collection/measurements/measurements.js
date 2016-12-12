@@ -11,12 +11,13 @@ var debug = false;
 var dedup = true;
 var pb_address = 0;
 var pb_tag = "";
+var device = "";
 var count = 0;
 var rx_count = 0;
 var host = 'mqtt://localhost';
 for(var i = 0; i < process.argv.length; i++) {
     var val = process.argv[i];
-    if(val == "-d" || val == "--debug") {
+    if(val == "-v" || val == "--verbose") {
         console.log("Running with verbose output (printing PowerBlade advertisements)");
         debug = true;
     }
@@ -44,6 +45,9 @@ for(var i = 0; i < process.argv.length; i++) {
         host = 'mqtt://' + process.argv[++i];
         console.log("Connecting to " + host);
     }
+    else if(val == "-d" || val == "--device") {
+
+    }
 }
 
 // Check for the required parameter
@@ -68,12 +72,18 @@ var g_time_start = new Date();
 filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".dat";
 
 if(fs.existsSync(filename)) {
-    var overwrite;
-    while(overwrite != 'y' && overwrite != 'Y') {
-        overwrite = readlineSync.question("File exists, overwrite (y/n)? ");
-        if(overwrite == 'n' || overwrite == 'N') {
-            process.exit();
+    var replace = readlineSync.question("File exists, replace (y/n)? ");
+    if(replace == 'y') {
+        var newfileNum = 0
+        var newfile = filename.split('.')[0] + '.bak'
+        while(fs.existsSync(newfile)) {
+            newfileNum += 1
+            newfile = filename.split('.')[0] + '_' + newfileNum + '.bak'
         }
+        fs.renameSync(filename, newfile)
+    } 
+    else {
+        process.exit()
     }
 }
 
