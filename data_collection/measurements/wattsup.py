@@ -89,8 +89,16 @@ else:
 	outfile = directory + '/wattsup.dat'
 
 if os.path.isfile(outfile):
-	print("Error: file exists")
-	exit()
+	replace = raw_input("Warning: file exists. Replace? (y/n): ")
+	if replace == 'y':
+		newfileNum = 0
+		newfile = outfile.split('.')[0] + '.bak'
+		while(os.path.isfile(newfile)):
+			newfileNum += 1
+			newfile = outfile.split('.')[0] + '_' + str(newfileNum) + '.bak'
+		os.rename(outfile, newfile)
+	else:
+		exit()
 
 # if len(sys.argv) > 1:
 # 	ser = serial.Serial(
