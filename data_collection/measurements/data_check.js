@@ -3,9 +3,14 @@
 var chalk = require('chalk');
 var fs = require('fs');
 
-const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c'];
+const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c', 'c098e570005d'];
 const configList = ['jumper', 'outlet', 'surge'];
 const calibList = ['jumper', 'outlet', 'home'];
+
+const INCOM = -1
+const CLEARED = -2
+
+var missing_count = 0;
 
 function printDevice(device, missing) {
 	var misCount = 0;
@@ -23,11 +28,11 @@ function printDevice(device, missing) {
 			var locMis = 0;
 			for(var j = 0; j < configList.length; j++) {
 				if(file_info[device]['actual'][configList[j]]) {
-					if(file_info[device]['actual'][configList[j]] == -1) {
+					if(file_info[device]['actual'][configList[j]] == INCOM) {
 						string += chalk.yellow("Incomplete\t");
 						locMis += 1;
 					}
-					else if(file_info[device]['actual'][configList[j]] == -2) {
+					else if(file_info[device]['actual'][configList[j]] == CLEARED) {
 						string += chalk.grey("--\t\t");
 					}
 					else {
@@ -61,11 +66,11 @@ function printDevice(device, missing) {
 			config = configList[j];
 
 			if(file_info[device][pb] && file_info[device][pb][config]) {
-				if(file_info[device][pb][config] == -1) {
+				if(file_info[device][pb][config] == INCOM) {
 					string += chalk.yellow("Incomplete\t");
 					locMis += 1;
 				}
-				else if(file_info[device][pb][config] == -2) {
+				else if(file_info[device][pb][config] == CLEARED) {
 					string += chalk.grey("--\t\t");
 				}
 				else {
@@ -82,6 +87,7 @@ function printDevice(device, missing) {
 			misCount += locMis;
 			//console.log(string);
 		}
+		missing_count += locMis;
 	}
 	if(missing == false || misCount > 0) {
 		console.log(printString);
@@ -146,13 +152,13 @@ filenames.forEach( function(file) {
 			}
 			if(!file_info[device][pb][config]) {
 				if(count == 0) {
-					file_info[device][pb][config] = -2;
+					file_info[device][pb][config] = CLEARED;
 				}
 				else if(count == 50) {
 					file_info[device][pb][config] = avgPower / count;
 				}
 				else {
-					file_info[device][pb][config] = -1;
+					file_info[device][pb][config] = INCOM;
 				}
 			}
 			else {
@@ -175,13 +181,13 @@ filenames.forEach( function(file) {
 			}
 			if(!file_info[device]['actual'][config]) {
 				if(count == 0) {
-					file_info[device]['actual'][config] = -2;
+					file_info[device]['actual'][config] = CLEARED;
 				}
 				else if(count == 10) {
 					file_info[device]['actual'][config] = avgPower / count;
 				}
 				else {
-					file_info[device]['actual'][config] = -1;
+					file_info[device]['actual'][config] = INCOM;
 				}
 			}
 			else {
@@ -243,6 +249,17 @@ else {
 	printDevice(device_save, missing);
 }
 
+
+
+
+
+if(missing_count != 0) {
+	console.log("Missing data, clear or collect before generating reports");
+	process.exit();
+}
+
+// Data processing phase
+
 // For each device, find the maximum difference between any two measurements
 // Also sort the measurements in decreasing order
 for(device in file_info) {
@@ -254,7 +271,7 @@ for(device in file_info) {
 	var avcount = 0;
 	for(pb in pbList) {
 		for(config in configList) {
-			if(file_info[device][pbList[pb]][configList[config]] != -1 && file_info[device][pbList[pb]][configList[config]] != -2) {
+			if(file_info[device][pbList[pb]][configList[config]] != INCOM && file_info[device][pbList[pb]][configList[config]] != CLEARED) {
 				average += file_info[device][pbList[pb]][configList[config]];
 				avcount += 1;
 
