@@ -78,7 +78,7 @@ var g_time_start = new Date();
 filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
 
 if(fs.existsSync(filename)) {
-    var replace = readlineSync.question("File exists: overwrite, replace, or exit? (o/r/e): ");
+    var replace = readlineSync.question("File exists: overwrite, rename, or exit? (o/r/e): ");
     if(replace == 'r') {
         var newfileNum = 0
         var newfile = filename.split('.')[0] + '.bak'
