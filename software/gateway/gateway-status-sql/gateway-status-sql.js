@@ -62,7 +62,7 @@ getmac.getMac(function(err,macAddress) {
 });
 
 process_status();
-cron.schedule('30 */4 * * *', function() {
+cron.schedule('30 0 */12 * * *', function() {
 	process_status();
 });
 
