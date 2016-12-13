@@ -91,20 +91,26 @@ function process_status() {
         var loadQuery = 'INSERT INTO inf_gw_status (timestamp, gatewayMAC, gatewayIP, gatewayStrIP, publicIP, publicStrIP) VALUES (now(), \'' + gateway_mac + '\', INET_ATON(\'' + gateway_ip + '\'), \'' + gateway_ip + '\', INET_ATON(\'' + public_ip + '\'), \'' + public_ip + '\');';
         console.log(loadQuery);
 
-        db_connection.query(loadQuery, function(err, rows, fields) {
-            if (err) {
-            	if(err == "Error: read ETIMEDOUT") {
-            		console.log(err);
-            		process.exit();
-            	}
-            	else {
-            		throw err;
-            	}
-            }
-            else if(debug) {
-                console.log("Done uploading status for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
-            }
-        });
+        db_connection.connect(function(err) {
+        	if (err) {
+				console.error('Error connecting: ' + err.stack);
+				return;
+			}
+
+	        db_connection.query(loadQuery, function(err, rows, fields) {
+	            if (err) {
+	            	console.log('Query error: ' + err.message);
+	            }
+	            else if(debug) {
+	                console.log("Done uploading status for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
+	            }
+	            connection.end(function(err) {
+					if (err) {
+						console.log('Error closing connection: ' + err.message)
+					}
+				});
+	        });
+    	});
     });
 }
 
