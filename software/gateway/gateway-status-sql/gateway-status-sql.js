@@ -104,7 +104,7 @@ function process_status() {
 	            else if(debug) {
 	                console.log("Done uploading status for " + gateway_mac + " at " + gateway_ip + ", " + public_ip);
 	            }
-	            connection.end(function(err) {
+	            db_connection.end(function(err) {
 					if (err) {
 						console.log('Error closing connection: ' + err.message)
 					}
