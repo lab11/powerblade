@@ -35,25 +35,6 @@ try {
     process.exit(1);
 }
 
-if(test == false) {
-    console.log("Connecting to " + aws_config.sql_ip);
-    var db_connection = mysql.createConnection({
-      host     : aws_config.sql_ip,
-      user     : aws_config.sql_usr,
-      password : aws_config.sql_pw,
-      database : aws_config.sql_db
-    });
-}
-else {
-    console.log("Connecting to " + aws_config.test_ip);
-    var db_connection = mysql.createConnection({
-      host     : aws_config.test_ip,
-      user     : aws_config.test_usr,
-      password : aws_config.test_pw,
-      database : aws_config.test_db
-    }); 
-}
-
 // Get gateway mac address
 var gateway_mac;
 getmac.getMac(function(err,macAddress) {
@@ -89,7 +70,26 @@ function process_status() {
     
         // Post all three values to SQL
         var loadQuery = 'INSERT INTO inf_gw_status (timestamp, gatewayMAC, gatewayIP, gatewayStrIP, publicIP, publicStrIP) VALUES (now(), \'' + gateway_mac + '\', INET_ATON(\'' + gateway_ip + '\'), \'' + gateway_ip + '\', INET_ATON(\'' + public_ip + '\'), \'' + public_ip + '\');';
-        console.log(loadQuery);
+        console.log("INSERT INTO inf_gw_status ...");
+
+        if(test == false) {
+		    console.log("Connecting to " + aws_config.sql_ip);
+		    var db_connection = mysql.createConnection({
+		      host     : aws_config.sql_ip,
+		      user     : aws_config.sql_usr,
+		      password : aws_config.sql_pw,
+		      database : aws_config.sql_db
+		    });
+		}
+		else {
+		    console.log("Connecting to " + aws_config.test_ip);
+		    var db_connection = mysql.createConnection({
+		      host     : aws_config.test_ip,
+		      user     : aws_config.test_usr,
+		      password : aws_config.test_pw,
+		      database : aws_config.test_db
+		    }); 
+		}
 
         db_connection.connect(function(err) {
         	if (err) {
