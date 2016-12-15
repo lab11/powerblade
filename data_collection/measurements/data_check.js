@@ -3,7 +3,7 @@
 var chalk = require('chalk');
 var fs = require('fs');
 
-const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c', 'c098e570004b', 'c098e570005d'];
+const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c'];//, 'c098e570004b', 'c098e570005d'];
 const configList = ['jumper', 'outlet', 'surge'];
 const calibList = ['jumper', 'outlet', 'home'];
 
@@ -14,7 +14,7 @@ var missing_count = 0;
 
 function printDevice(device, missing) {
 	var misCount = 0;
-	var printString = chalk.bold.white(device + "\t\tJumper\t\tOutlet\t\tSurge\n");
+	var printString = chalk.bold.white(device + "\t\tJumper\t\t\tOutlet\t\t\tSurge\n");
 	//console.log(chalk.bold.white(device + "\t\tJumper\t\tOutlet\t\tSurge"));
 	if(file_info[device]['actual']) {
 		if(typeof file_info[device]['actual'] == "number") {
@@ -29,18 +29,18 @@ function printDevice(device, missing) {
 			for(var j = 0; j < configList.length; j++) {
 				if(file_info[device]['actual'][configList[j]]) {
 					if(file_info[device]['actual'][configList[j]] == INCOM) {
-						string += chalk.yellow("Incomplete\t");
+						string += chalk.yellow("Incomplete\t\t");
 						locMis += 1;
 					}
 					else if(file_info[device]['actual'][configList[j]] == CLEARED) {
-						string += chalk.grey("--\t\t");
+						string += chalk.grey("--\t\t\t");
 					}
 					else {
-						string += chalk.green(file_info[device]['actual'][configList[j]].toFixed(1)) + "\t\t";
+						string += chalk.green(file_info[device]['actual'][configList[j]].toFixed(1)) + "\t\t\t";
 					}
 				}
 				else {
-					string += chalk.bold.red("Missing") + "\t\t";
+					string += chalk.bold.red("Missing") + "\t\t\t";
 					locMis += 1;
 				}
 			}
@@ -66,19 +66,22 @@ function printDevice(device, missing) {
 			config = configList[j];
 
 			if(file_info[device][pb] && file_info[device][pb][config]) {
-				if(file_info[device][pb][config] == INCOM) {
-					string += chalk.yellow("Incomplete\t");
+				if(file_info[device][pb][config]['power'] == INCOM) {
+					string += chalk.yellow("Incomplete\t\t");
 					locMis += 1;
 				}
-				else if(file_info[device][pb][config] == CLEARED) {
-					string += chalk.grey("--\t\t");
+				else if(file_info[device][pb][config]['power'] == CLEARED) {
+					string += chalk.grey("--\t\t\t");
 				}
 				else {
-					string += chalk.green(file_info[device][pb][config].toFixed(1)) + "\t\t";
+					string += chalk.green(file_info[device][pb][config]['power'].toFixed(1) + " W") + ", " + chalk.green(file_info[device][pb][config]['vrms'].toFixed(1) + " V") + "\t";
+					if(file_info[device][pb][config]['power'] < 100) {
+						string += "\t"
+					}
 				}
 			}
 			else {
-				string += chalk.bold.red("Missing") + "\t\t";
+				string += chalk.bold.red("Missing") + "\t\t\t";
 				locMis += 1;
 			}
 		}
@@ -151,14 +154,16 @@ filenames.forEach( function(file) {
 				file_info[device][pb] = {};
 			}
 			if(!file_info[device][pb][config]) {
+				file_info[device][pb][config] = {};
 				if(count == 0) {
-					file_info[device][pb][config] = CLEARED;
+					file_info[device][pb][config]['power'] = CLEARED;
 				}
 				else if(count == 50) {
-					file_info[device][pb][config] = avgPower / count;
+					file_info[device][pb][config]['power'] = avgPower / count;
+					file_info[device][pb][config]['vrms'] = avgVoltage / count;
 				}
 				else {
-					file_info[device][pb][config] = INCOM;
+					file_info[device][pb][config]['power'] = INCOM;
 				}
 			}
 			else {
@@ -274,17 +279,17 @@ for(device in file_info) {
 	var avcount = 0;
 	for(pb in pbList) {
 		for(config in configList) {
-			if(file_info[device][pbList[pb]][configList[config]] != INCOM && file_info[device][pbList[pb]][configList[config]] != CLEARED) {
-				average += file_info[device][pbList[pb]][configList[config]];
+			if(file_info[device][pbList[pb]][configList[config]]['power'] != INCOM && file_info[device][pbList[pb]][configList[config]]['power'] != CLEARED) {
+				average += file_info[device][pbList[pb]][configList[config]]['power'];
 				avcount += 1;
 
-				if(file_info[device][pbList[pb]][configList[config]] < minVal) {
-					minVal = file_info[device][pbList[pb]][configList[config]];
+				if(file_info[device][pbList[pb]][configList[config]]['power'] < minVal) {
+					minVal = file_info[device][pbList[pb]][configList[config]]['power'];
 					minPb = pbList[pb];
 					minConfig = configList[config];
 				}
-				if(file_info[device][pbList[pb]][configList[config]] > maxVal) {
-					maxVal = file_info[device][pbList[pb]][configList[config]];
+				if(file_info[device][pbList[pb]][configList[config]]['power'] > maxVal) {
+					maxVal = file_info[device][pbList[pb]][configList[config]]['power'];
 					maxPb = pbList[pb];
 					maxConfig = configList[config];
 				}
@@ -319,9 +324,9 @@ for(burner in file_info) {	// Do this for the number of devices
 	var minVal = 2500;
 	for(pb in pbList) {
 		for(config in configList) {
-			var this_val = file_copy[maxDevice][pbList[pb]][configList[config]]
+			var this_val = file_copy[maxDevice][pbList[pb]][configList[config]]['power'];
 			if(this_val < minVal && this_val > 0) {
-				minVal = file_copy[maxDevice][pbList[pb]][configList[config]];
+				minVal = file_copy[maxDevice][pbList[pb]][configList[config]]['power'];
 			}
 		}
 	}
@@ -334,8 +339,8 @@ for(burner in file_info) {	// Do this for the number of devices
 		var maxConfig;
 		for(pb in pbList) {
 			for(config in file_copy[maxDevice][pbList[pb]]) {
-				if(file_copy[maxDevice][pbList[pb]][config] > maxConfigVal) {
-					maxConfigVal = file_copy[maxDevice][pbList[pb]][config];
+				if(file_copy[maxDevice][pbList[pb]][config]['power'] > maxConfigVal) {
+					maxConfigVal = file_copy[maxDevice][pbList[pb]][config]['power'];
 					maxPB = pbList[pb];
 					maxConfig = config;
 				}
@@ -384,13 +389,15 @@ for(device in file_info) {
 			actual = file_info[device]['actual'][configList[config]];
 		}
 
-		file_info[device]['outlet'][configList[config]] = (file_info[device]['c098e5700053'][configList[config]] + file_info[device]['c098e5700048'][configList[config]]) / 2;
-		file_info[device]['jumper'][configList[config]] = (file_info[device]['c098e570004a'][configList[config]] + file_info[device]['c098e570004e'][configList[config]]) / 2;
-		file_info[device]['home'][configList[config]] = file_info[device]['c098e570013c'][configList[config]];
+		file_info[device]['outlet'][configList[config]] = (file_info[device]['c098e5700053'][configList[config]]['power'] + file_info[device]['c098e5700048'][configList[config]]['power']) / 2;
+		file_info[device]['jumper'][configList[config]] = (file_info[device]['c098e570004a'][configList[config]]['power'] + file_info[device]['c098e570004e'][configList[config]]['power']) / 2;
+		file_info[device]['home'][configList[config]] = file_info[device]['c098e570013c'][configList[config]]['power'];
 
-		for(calib in calibList) {
-			avgErr[calibList[calib]][configList[config]] += Math.abs(actual - file_info[device][calibList[calib]][configList[config]]);
-			avgErrCt[calibList[calib]][configList[config]] += 1;
+		if(device != 'vac' && device != 'hairGF' && device != 'toastGF') {
+			for(calib in calibList) {
+				avgErr[calibList[calib]][configList[config]] += Math.abs(actual - file_info[device][calibList[calib]][configList[config]]);
+				avgErrCt[calibList[calib]][configList[config]] += 1;
+			}
 		}
 	}
 }
