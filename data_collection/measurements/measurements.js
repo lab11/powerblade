@@ -4,6 +4,7 @@ var noble = require('noble');
 var fs = require('fs');
 var dateFormat = require('dateformat');
 var readlineSync = require('readline-sync');
+var childProcess = require('child_process');
 
 var mqtt = require('mqtt');
 
@@ -94,6 +95,8 @@ if(fs.existsSync(filename)) {
     }
 }
 
+fs.closeSync(fs.openSync(filename, 'w'));
+
 console.log("Logging to " + filename);
 
 var UMICH_COMPANY_ID = 0x02E0;
@@ -136,11 +139,39 @@ mqtt_client.on('connect', function () {
                 process.stdout.write("\n");
                 console.log("Average power: " + (total/count))
 
-                process.exit();
+                runScript('./data_check.js', device.substr(1), function (err) {
+				    if (err) throw err;
+				    console.log('finished running data_check.js');
+				    process.exit();
+				});
             }
         }
 	});
 });
+
+function runScript(scriptPath, arg, callback) {
+
+    // keep track of whether callback has been invoked to prevent multiple invocations
+    var invoked = false;
+
+	var opts = [arg];
+    var cprocess = childProcess.fork(scriptPath, opts);
+
+    // listen for errors as they may prevent the exit event from firing
+    cprocess.on('error', function (err) {
+        if (invoked) return;
+        invoked = true;
+        callback(err);
+    });
+
+    // execute the callback once the process has finished running
+    cprocess.on('exit', function (code) {
+        if (invoked) return;
+        invoked = true;
+        var err = code === 0 ? null : new Error('exit code ' + code);
+        callback(err);
+    });
+}
 
 /*noble.on('stateChange', function(state) {
     if (state === 'poweredOn') {
