@@ -3,9 +3,10 @@
 var chalk = require('chalk');
 var fs = require('fs');
 
-const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c'];//, 'c098e570004b', 'c098e570005d'];
-const configList = ['jumper', 'outlet', 'surge'];
-const calibList = ['jumper', 'outlet', 'home'];
+//const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c'];//, 'c098e570004b', 'c098e570005d'];
+const pbList = ['c098e570004f', 'c098e5700080', 'c098e5700081', 'c098e5700065'];
+const configList = ['jumper', 'outlet', 'surge', 'gfci'];
+const calibList = ['jumper', 'outlet', 'surge'];
 
 const INCOM = -1
 const CLEARED = -2
@@ -14,7 +15,7 @@ var missing_count = 0;
 
 function printDevice(device, missing) {
 	var misCount = 0;
-	var printString = chalk.bold.white(device + "\t\tJumper\t\t\tOutlet\t\t\tSurge\n");
+	var printString = chalk.bold.white(device + "\t\tJumper\t\t\tOutlet\t\t\tSurge\t\t\tGFCI\n");
 	//console.log(chalk.bold.white(device + "\t\tJumper\t\tOutlet\t\tSurge"));
 	if(file_info[device]['actual']) {
 		if(typeof file_info[device]['actual'] == "number") {
@@ -49,11 +50,13 @@ function printDevice(device, missing) {
 				misCount += locMis;
 				//console.log(string);
 			}
+			missing_count += locMis;
 		}
 	}
 	else {
 		printString += chalk.bold.white("Actual: ") + chalk.bold.red("Missing\n")
 		misCount += 1;
+		missing_count += 1;
 		//console.log(chalk.bold.white("Actual: ") + chalk.bold.red("Missing"))
 	}
 
@@ -389,9 +392,12 @@ for(device in file_info) {
 			actual = file_info[device]['actual'][configList[config]];
 		}
 
-		file_info[device]['outlet'][configList[config]] = (file_info[device]['c098e5700053'][configList[config]]['power'] + file_info[device]['c098e5700048'][configList[config]]['power']) / 2;
-		file_info[device]['jumper'][configList[config]] = (file_info[device]['c098e570004a'][configList[config]]['power'] + file_info[device]['c098e570004e'][configList[config]]['power']) / 2;
-		file_info[device]['home'][configList[config]] = file_info[device]['c098e570013c'][configList[config]]['power'];
+		// file_info[device]['outlet'][configList[config]] = (file_info[device]['c098e5700053'][configList[config]]['power'] + file_info[device]['c098e5700048'][configList[config]]['power']) / 2;
+		// file_info[device]['jumper'][configList[config]] = (file_info[device]['c098e570004a'][configList[config]]['power'] + file_info[device]['c098e570004e'][configList[config]]['power']) / 2;
+		// file_info[device]['home'][configList[config]] = file_info[device]['c098e570013c'][configList[config]]['power'];
+		file_info[device]['outlet'][configList[config]] = file_info[device]['c098e5700080'][configList[config]]['power'];
+		file_info[device]['jumper'][configList[config]] = file_info[device]['c098e5700081'][configList[config]]['power'];
+		file_info[device]['surge'][configList[config]] = file_info[device]['c098e570004f'][configList[config]]['power'];
 
 		if(device != 'vac' && device != 'hairGF' && device != 'toastGF') {
 			for(calib in calibList) {
