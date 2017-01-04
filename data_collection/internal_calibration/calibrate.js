@@ -85,23 +85,30 @@ noble.on('disconnect', function () {
 });
 
 // find correct device and connect to it
+var restart_count = 0;
+var found_peripheral;
 noble.on('discover', function (peripheral) {
     //console.log(peripheral.address);
     if (peripheral.address == target_device) {
-        noble.stopScanning();
+        noble.stopScanning( function() {
+	        console.log('Found PowerBlade (' + peripheral.address +')\n');
+	        console.log('Connecting...');
+	        powerblade_periph = peripheral;
+	        
+	        found_peripheral = peripheral;
+	        peripheral.connect(function (error) {
+	            console.log('\tConnected\n');
 
-        console.log('Found PowerBlade (' + peripheral.address +')\n');
-        console.log('Connecting...');
-        powerblade_periph = peripheral;
-        
-        peripheral.connect(function (error) {
-            console.log('\tConnected\n');
-
-            // delay before discovering services so that connection
-            //  parameters can be established
-            setTimeout(discover_calibration, 1000);
-        });
+	            // delay before discovering services so that connection
+	            //  parameters can be established
+	            setTimeout(discover_calibration, 100);
+	        });
+    	});
     }
+});
+
+noble.on('warning', function () {
+	console.log("Noble Warning Captured");
 });
 
 // print errors if they occur during service/characteristic discovery
@@ -127,36 +134,53 @@ function discover_char(service, char_uuid, callback) {
 
 function discover_calibration() {
     console.log("Discovering calibration service");
-    powerblade_periph.discoverServices([calibration_service_uuid], function(error, services) {
-        if (error) throw error;
-        if (services.length != 1) {
-            log_discovery_error(calibration_service_uuid, services);
-            return;
-        }
-        var calibration_service = services[0];
+    if(powerblade_periph['state']  != 'connected') {
+    	if(restart_count++ >= 10) {
+    		console.log('Restart limit reached, exiting');
+    		console.log('\nXXXXXXXXXXXXX Calibration Not Complete! XXXXXXXXXXXXX')
+    		process.exit();
+    	}
+    	console.log('Restarting... (' + restart_count + ')')
+    	found_peripheral.connect(function (error) {
+			console.log('\tConnected\n');
 
-        discover_char(calibration_service, calibration_wattage_uuid, function(characteristic) {
-            calibration_wattage_char = characteristic;
+			// delay before discovering services so that connection
+			//  parameters can be established
+			setTimeout(discover_calibration, 100);
+		});
+    }
+    else {
+	    powerblade_periph.discoverServices([calibration_service_uuid], function(error, services) {
+	        if (error) throw error;
+	        if (services.length != 1) {
+	            log_discovery_error(calibration_service_uuid, services);
+	            return;
+	        }
+	        var calibration_service = services[0];
 
-            discover_char(calibration_service, calibration_voltage_uuid, function(characteristic) {
-                calibration_voltage_char = characteristic;
+	        discover_char(calibration_service, calibration_wattage_uuid, function(characteristic) {
+	            calibration_wattage_char = characteristic;
 
-                discover_char(calibration_service, calibration_control_uuid, function(characteristic) {
-                    calibration_control_char = characteristic;
-                    calibration_control_char.on('data', Calibration_status_receive);
-                    calibration_control_char.notify(true);
-                    console.log("\tComplete\n");
+	            discover_char(calibration_service, calibration_voltage_uuid, function(characteristic) {
+	                calibration_voltage_char = characteristic;
 
-                    // only bother discovering config service if we need it
-                    if (read_config) {
-                        discover_config();
-                    } else {
-                        start_calibration();
-                    }
-                });
-            });
-        });
-    });
+	                discover_char(calibration_service, calibration_control_uuid, function(characteristic) {
+	                    calibration_control_char = characteristic;
+	                    calibration_control_char.on('data', Calibration_status_receive);
+	                    calibration_control_char.notify(true);
+	                    console.log("\tComplete\n");
+
+	                    // only bother discovering config service if we need it
+	                    if (read_config) {
+	                        discover_config();
+	                    } else {
+	                        start_calibration();
+	                    }
+	                });
+	            });
+	        });
+	    });
+	}
 }
 
 function discover_config() {
