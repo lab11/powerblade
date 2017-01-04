@@ -92,12 +92,12 @@ noble.on('discover', function (peripheral) {
     if (peripheral.address == target_device) {
         noble.stopScanning( function() {
 	        console.log('Found PowerBlade (' + peripheral.address +')\n');
-	        console.log('Connecting...');
+	        process.stdout.write('Connecting... ');
 	        powerblade_periph = peripheral;
 	        
 	        found_peripheral = peripheral;
 	        peripheral.connect(function (error) {
-	            console.log('\tConnected\n');
+	            console.log('done\n');
 
 	            // delay before discovering services so that connection
 	            //  parameters can be established
@@ -133,16 +133,15 @@ function discover_char(service, char_uuid, callback) {
 }
 
 function discover_calibration() {
-    console.log("Discovering calibration service");
     if(powerblade_periph['state']  != 'connected') {
     	if(restart_count++ >= 10) {
     		console.log('Restart limit reached, exiting');
     		console.log('\nXXXXXXXXXXXXX Calibration Not Complete! XXXXXXXXXXXXX')
     		process.exit();
     	}
-    	console.log('Restarting... (' + restart_count + ')')
+    	process.stdout.write('Connection error, re-trying connection (Attempt #' + restart_count + ')...')
     	found_peripheral.connect(function (error) {
-			console.log('\tConnected\n');
+			console.log('done\n');
 
 			// delay before discovering services so that connection
 			//  parameters can be established
@@ -150,6 +149,7 @@ function discover_calibration() {
 		});
     }
     else {
+    	process.stdout.write("Discovering calibration service... ");
 	    powerblade_periph.discoverServices([calibration_service_uuid], function(error, services) {
 	        if (error) throw error;
 	        if (services.length != 1) {
@@ -157,18 +157,25 @@ function discover_calibration() {
 	            return;
 	        }
 	        var calibration_service = services[0];
+	        console.log('done');
 
+	        process.stdout.write('Discovering wattage characteristic... ');
 	        discover_char(calibration_service, calibration_wattage_uuid, function(characteristic) {
 	            calibration_wattage_char = characteristic;
+	            console.log('done');
 
+	            process.stdout.write('Discovering voltage characteristic... ');
 	            discover_char(calibration_service, calibration_voltage_uuid, function(characteristic) {
 	                calibration_voltage_char = characteristic;
+	                console.log('done');
 
+	                process.stdout.write('Discovering control characteristic... ');
 	                discover_char(calibration_service, calibration_control_uuid, function(characteristic) {
 	                    calibration_control_char = characteristic;
+	                    console.log('done\n');
+
 	                    calibration_control_char.on('data', Calibration_status_receive);
 	                    calibration_control_char.notify(true);
-	                    console.log("\tComplete\n");
 
 	                    // only bother discovering config service if we need it
 	                    if (read_config) {
@@ -266,9 +273,9 @@ function Calibration_status_receive(data, isNotify) {
 
     // check value
     if (data[0] == 1) {
-        console.log("Calibrating...");
+        process.stdout.write("Calibrating... ");
     } else if (data[0] == 2) {
-        console.log("\tComplete\n");
+        console.log("done\n");
 
         if (read_config) {
             setTimeout(read_calibration, 1200);
@@ -282,7 +289,7 @@ function Calibration_status_receive(data, isNotify) {
 
 function complete_calibration() {
     // calibration is complete
-    console.log("Calibration Finished!");
+    //console.log("Calibration Finished!");
     powerblade_periph.disconnect();
     process.exit(0);
 }
