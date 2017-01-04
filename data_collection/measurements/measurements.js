@@ -133,7 +133,7 @@ mqtt_client.on('connect', function () {
             fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
 
             rx_count = rx_count + 1;
-            process.stdout.write(rx_count + "/50: " + adv['power'] + "\n");
+            process.stdout.write(rx_count + "/50 (" + adv['sequence_number'] + "): " + adv['power'] + "\n");
             total = total + parseFloat(adv['power']);
             if(rx_count == count) {
                 process.stdout.write("\n");
