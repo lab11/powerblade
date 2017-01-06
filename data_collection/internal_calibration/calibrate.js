@@ -3,27 +3,73 @@
 // imports
 var noble = require('noble');
 var fs = require('fs');
+var SSH = require('simple-ssh');
 
 // input from user
 var target_device = 'c0:98:e5:70:45:36';
 var wattage = 200;
 var voltage = 120;
-if (process.argv.length >= 5) {
-    target_device = process.argv[2];
-    wattage = process.argv[3];
-    voltage = process.argv[4];
-} else {
-    console.log("Missing arguments: ");
-    console.log("Expected: address wattage voltage [display config]");
-    console.log("Ex: ./calibrate.js c0:98:e5:70:00:01 200.0 120.0 --read");
-    process.exit(1);
-}
 var read_config = false;
-if (process.argv.length >= 6) {
-    if (process.argv[5] == '--read') {
+var local = false;
+var server = false;
+for(var i = 0; i < process.argv.length; i++) {
+    var val = process.argv[i];
+    if(val == "-m") {
+        pb_address = "c0:98:e5:70:" + process.argv[++i];  // Additional increment of i
+    }
+    else if(val == "--mac") {
+        pb_address = process.argv[++i];   // Additional increment of i
+    }
+    else if(val == "-v" || val == "--voltage") {
+        if(server) {
+            console.log("Error: cannot specify both -s (server) and -v (voltage) or -p (power)");
+            process.exit();
+        }
+        else {
+            local = true;
+        }
+
+        voltage = process.argv[++i];        // Additional increment of i
+    }
+    else if(val == "-p" || val == "--power") {
+        if(server) {
+            console.log("Error: cannot specify both -s (server) and -v (voltage) or -p (power)");
+            process.exit();
+        }
+        else {
+            local = true;
+        }
+
+        wattage = process.argv[++i];        // Additional increment of i
+    }
+    else if(val == "-r" || val == "--read") {
         read_config = true;
     }
+    else if(val == "-s" || val == "server") {
+        if(local) {
+            console.log("Error: cannot specify both -s (server) and -v (voltage) or -p (power)");
+            process.exit();
+        }
+        else {
+            server = true;
+        }
+
+        var ssh = new SSH ({
+            host: 'lab11power.ddns.net',
+            user: 'pi',
+            key: require('fs').readFileSync('/home/sdebruin/.ssh/id_rsa')
+        });
+
+        ssh.execSync('./aps-3b12/aps_3B12.py read', {
+            out: function(stdout) {
+                stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
+                voltage = parseFloat(stdlist[0]);
+                wattage = parseFloat(stdlist[1]);
+            }
+        }).start();
+    }
 }
+
 console.log("Looking for " + target_device);
 console.log("Calibrating at " + wattage + " W and " + voltage + " V");
 
