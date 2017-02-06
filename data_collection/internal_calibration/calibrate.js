@@ -51,6 +51,7 @@ for(var i = 0; i < process.argv.length; i++) {
             process.exit();
         }
         else {
+            console.log("Connecting to load...")
             server = true;
         }
 
