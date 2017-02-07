@@ -101,8 +101,60 @@ function start_process() {
 	// Step #1: Determine the device's ID, or assign a new ID
 	/*************************************************************/
 	console.log("\nStep 1: Checking for Device ID");
-	//if(/* Check if device has ID */) {
-	if(false) {
+	var JLinkExe = "JLinkExe";
+	var JLinkOptions = "-device nrf51822 -if swd -speed 1000 -AutoConnect 1".split(" ");
+
+	var terminal = spawn(JLinkExe, JLinkOptions);
+
+	var jlink_output = "";
+
+	terminal.stdout.on('data', function (data) {
+		jlink_output += data.toString('utf8');
+	});
+
+	terminal.stderr.on('data', function (data) {
+		console.log("Got error: " + data);
+	});
+
+	terminal.on('exit', function (code) {
+		if (jlink_output.indexOf("USB...FAILED") !== -1) {
+			throw "ERROR: Cannot find JLink hardware. Is USB attached?";
+		} else if (jlink_output.indexOf("Can not connect to target.") !== -1) {
+			throw "ERROR: Cannot find PowerBlade. Is JTAG connected?";
+		} else if (code != 0) {
+			console.log(jlink_output);
+			throw "ERROR: JTAG returned with error code " + code;
+		} else {
+			var data_index = jlink_output.indexOf("0001FFF8 =");
+			if (data_index === -1) {
+				console.log(jlink_output);
+				throw "ERROR: JTAG read of BLE address failed";
+			} else {
+				var hex_str_MSB = jlink_output.substring(data_index+20, data_index+39).trim();
+				var hex_str_LSB = jlink_output.substring(data_index+11, data_index+19).trim();
+				if (hex_str_MSB == '' || hex_str_LSB == '') {
+					throw "ERROR: Could not read address from flash";
+				}
+				var hex_str = hex_str_MSB.concat(hex_str_LSB).replace(/^0+/, '').toLowerCase();
+				if (hex_str == "ffffffffffffffff") {
+					gather_device_id(false);
+				} else {
+					hex_str = hex_str.replace(/(.{2})/g,"$1:").slice(0,-1);
+					device_id = hex_str;
+					gather_device_id(true);
+				}
+			}
+		}
+	});
+
+	terminal.stdin.write("r\n");
+	terminal.stdin.write("mem32 0x1FFF8, 2 \n");
+	terminal.stdin.write("q\n");
+	terminal.stdin.end();
+}
+
+function gather_device_id(is_success) {
+	if(is_success) {
 		//device_id = // Device ID;
 		console.log("\nDevice ID Found: " + device_id + "\n");
 		program_nrf();
