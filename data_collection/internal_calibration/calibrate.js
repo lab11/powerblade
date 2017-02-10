@@ -58,7 +58,7 @@ for(var i = 0; i < process.argv.length; i++) {
         var ssh = new SSH ({
             host: 'lab11power.ddns.net',
             user: 'pi',
-            key: require('fs').readFileSync('/home/sdebruin/.ssh/id_rsa')
+            key: require('fs').readFileSync('/home/powerblade/.ssh/id_rsa_pb')
         });
 
         ssh.exec('./aps-3b12/aps_3B12.py read', {
