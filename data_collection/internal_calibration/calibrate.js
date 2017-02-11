@@ -67,7 +67,19 @@ for(var i = 0; i < process.argv.length; i++) {
                 voltage = parseFloat(stdlist[0]);
                 wattage = parseFloat(stdlist[1]);
 
-                startScanningOnPowerOn(voltage, wattage, target_device);
+                if(wattage < 98 || wattage > 102) {
+                    ssh.exec('./aps-3b12/aps_3B12.py 100', {
+                        out: function(stdout) {
+                            stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
+                            voltage = parseFloat(stdlist[0]);
+                            wattage = parseFloat(stdlist[1]);
+                            startScanningOnPowerOn(voltage, wattage, target_device);
+                        }
+                    }).start();
+                }
+                else {
+                    startScanningOnPowerOn(voltage, wattage, target_device);
+                }
             }
         }).start();
     }
