@@ -62,7 +62,7 @@ for(var i = 0; i < process.argv.length; i++) {
         });
 
         console.log("Reading power and voltage values from load...")
-        ssh.exec('./aps-3b12/aps_3B12.py read', {
+        ssh.exec('./aps2/aps_3B12.py read', {
             out: function(stdout) {
                 stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
                 voltage = parseFloat(stdlist[0]);
@@ -70,7 +70,7 @@ for(var i = 0; i < process.argv.length; i++) {
 
                 if(wattage < 98 || wattage > 102) {
                     console.log("Wattage out of correct band, setting to 100 W...")
-                    ssh.exec('./aps-3b12/aps_3B12.py 100', {
+                    ssh.exec('./aps2/aps_3B12.py 100', {
                         out: function(stdout) {
                             stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
                             voltage = parseFloat(stdlist[0]);
