@@ -77,7 +77,7 @@ for(var i = 0; i < process.argv.length; i++) {
                             wattage = parseFloat(stdlist[1]);
                             startScanningOnPowerOn(voltage, wattage, target_device);
                         }
-                    }).start();
+                    });
                 }
                 else {
                     startScanningOnPowerOn(voltage, wattage, target_device);

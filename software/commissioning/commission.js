@@ -224,11 +224,12 @@ function program_msp() {
 	console.log("\nProgramming the MSP430");
 	var child = exec(process.env.PB_ROOT + "/software/msp_images/flash_powerblade", function(error, stdout, stderr) {
 		if (error) {
-			console.log("STDOUT")
-			console.log(stdout)
-			console.log("STDERR")
-			console.log(stderr)
-			throw error;
+			if(stdout.split('\n').slice(-4, -3)[0].indexOf('Could not reset device') > -1) {
+				console.log("Warning: could not reset the MSP430 - likely OK unless problem persists");
+			}
+			else {
+				throw error;
+			}
 		}
 		console.log("Done programming MSP430");
 		if(argval != '-a') {
