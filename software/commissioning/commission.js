@@ -140,7 +140,7 @@ function start_process() {
 					gather_device_id(false);
 				} else {
 					hex_str = hex_str.replace(/(.{2})/g,"$1:").slice(0,-1);
-					device_id = hex_str;
+					device_id_format = hex_str;
 					gather_device_id(true);
 				}
 			}
@@ -156,7 +156,9 @@ function start_process() {
 function gather_device_id(is_success) {
 	if(is_success) {
 		//device_id = // Device ID;
-		console.log("\nDevice ID Found: " + device_id + "\n");
+		console.log("\nDevice ID Found: " + device_id_format + "\n");
+		device_id = device_id_format.replace(':', '');
+		device_id_short = device_id_format.slice(12, 17);
 		program_nrf();
 	}
 	else {

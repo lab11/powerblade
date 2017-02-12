@@ -61,6 +61,7 @@ for(var i = 0; i < process.argv.length; i++) {
             key: require('fs').readFileSync('/home/powerblade/.ssh/id_rsa_pb')
         });
 
+        console.log("Reading power and voltage values from load...")
         ssh.exec('./aps-3b12/aps_3B12.py read', {
             out: function(stdout) {
                 stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
@@ -68,6 +69,7 @@ for(var i = 0; i < process.argv.length; i++) {
                 wattage = parseFloat(stdlist[1]);
 
                 if(wattage < 98 || wattage > 102) {
+                    console.log("Wattage out of correct band, setting to 100 W...")
                     ssh.exec('./aps-3b12/aps_3B12.py 100', {
                         out: function(stdout) {
                             stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
