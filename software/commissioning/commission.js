@@ -86,7 +86,7 @@ else if(argval == '-m') {
 
 	argval = '-a';	// Used to note that the full process will still run (for database purposes)
 	device_id_short = process.argv[3];
-	device_id = 'c098e570' + device_id_short.replace(':', '');
+	device_id = 'c098e570' + device_id_short.split(':').join('');
 	device_id_format = 'c0:98:e5:70:' + device_id_short;
 	console.log("\nStep 1: Running with device ID " + device_id_format);
 	prepare_nrf();
