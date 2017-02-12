@@ -91,6 +91,10 @@ else if(argval == '-m') {
 	console.log("\nStep 1: Running with device ID " + device_id_format);
 	prepare_nrf();
 }
+else if(argval == '-n') {	// Want a new MAC address (overwrite existing)
+	argval = '-a';	// Used to note that the full process will still run (for database purposes)
+	gather_device_id(false);
+}
 else {
 	console.log("Unknown input argument: " + argval);
 	process.exit();
