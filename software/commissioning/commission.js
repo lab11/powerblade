@@ -223,7 +223,13 @@ function switch_to_msp() {
 function program_msp() {
 	console.log("\nProgramming the MSP430");
 	var child = exec(process.env.PB_ROOT + "/software/msp_images/flash_powerblade", function(error, stdout, stderr) {
-		if (error) throw error;
+		if (error) {
+			console.log("STDOUT")
+			console.log(stdout)
+			console.log("STDERR")
+			console.log(stderr)
+			throw error;
+		}
 		console.log("Done programming MSP430");
 		if(argval != '-a') {
 			console.log("Adding database entry");
