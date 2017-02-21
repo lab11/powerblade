@@ -19,6 +19,7 @@ var topic_list = [
 ['device/BLEES/+', 'dat_blees'],
 ['device/Coilcube/+', 'dat_coilcube'],
 ['device/Solar Monjolo/+', 'dat_monjolo'],
+['device/Ligeiro/+', 'dat_ligeiro'],
 ['device/Triumvi/+', 'dat_triumvi'],
 ['device/Blink/+', 'dat_blink']//,
 //['ble-advertisements', 'dat_rssi']
@@ -31,6 +32,7 @@ var field_list = {
 'BLEES': '(gatewayMAC, deviceMAC, temp, lux, pascals, humid, accel_ad, accel_int, timestamp)',
 'Coilcube': '(gatewayMAC, deviceMAC, seq, count, timestamp)',
 'Solar Monjolo': '(gatewayMAC, deviceMAC, seq, count, timestamp)',
+'Ligeiro': '(gatewayMAC, deviceMAC, seq, count, timestamp)',
 'Triumvi': '(gatewayMAC, deviceMAC, power, timestamp)',
 'Blink': '(gatewayMAC, deviceMAC, curMot, advMot, minMot, timestamp)',
 'ble-advertisements': '(gatewayMAC, deviceMAC, rssi, timestamp)'
@@ -328,6 +330,21 @@ function log_to_sql (topic, adv) {
             topic_data['Coilcube'][3] += 1;
             //fs.appendFile(cc_csv_current,
             fs.appendFile(topic_data['Coilcube'][file_current],
+                gatewayID + ',' +
+                adv['_meta']['device_id'] + ',' + 
+                adv['seq_no'] + ',' + 
+                adv['counter'] + ',' +
+                datetime + '\n',
+                encoding='utf8',
+                function (err) {
+                if (err) throw err;
+            });
+        }
+        else if(adv['device'] == "Ligeiro") {
+            //coilcube_count += 1;
+            topic_data['Ligeiro'][3] += 1;
+            //fs.appendFile(cc_csv_current,
+            fs.appendFile(topic_data['Ligeiro'][file_current],
                 gatewayID + ',' +
                 adv['_meta']['device_id'] + ',' + 
                 adv['seq_no'] + ',' + 
