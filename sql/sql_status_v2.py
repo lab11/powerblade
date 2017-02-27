@@ -35,7 +35,10 @@ def print_row(mac, name, location, status, count, seen):
 def check_devices(col1, col2, col3, list):
 	print_header(col1, col2, col3)
 
+	save_loc = 0
 	for mac, name, location, permanent, count, seen in list:
+		if location != save_loc:
+			email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr><tr><td colspan=\"5\">&nbsp</td></tr>")
 		if permanent == 1:
 			if count > 400:
 				print_row(mac, name, location, STATUS_OK, count, '')
