@@ -1,0 +1,12 @@
+{
+  "name": "commission",
+  "version": "1.0.0",
+  "description": "Internal calibration and programming of PowerBlades",
+  "main": "commission.js",
+  "author": "Sam DeBruin",
+  "dependencies": {
+    "ini": "^1.3.4",
+    "mysql": "^2.13.0",
+    "readline": "^1.3.0"
+  }
+}

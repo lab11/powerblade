@@ -3,30 +3,106 @@
 // imports
 var noble = require('noble');
 var fs = require('fs');
+var SSH = require('simple-ssh');
 
 // input from user
 var target_device = 'c0:98:e5:70:45:36';
 var wattage = 200;
 var voltage = 120;
-if (process.argv.length >= 5) {
-    target_device = process.argv[2];
-    wattage = process.argv[3];
-    voltage = process.argv[4];
-} else {
-    console.log("Missing arguments: ");
-    console.log("Expected: address wattage voltage [display config]");
-    console.log("Ex: ./calibrate.js c0:98:e5:70:00:01 200.0 120.0 --read");
-    process.exit(1);
-}
 var read_config = false;
-if (process.argv.length >= 6) {
-    if (process.argv[5] == '--read') {
+var local = false;
+var server = false;
+for(var i = 0; i < process.argv.length; i++) {
+    var val = process.argv[i];
+    if(val == "-m") {
+        target_device = "c0:98:e5:70:" + process.argv[++i];  // Additional increment of i
+    }
+    else if(val == "--mac") {
+        target_device = process.argv[++i];   // Additional increment of i
+    }
+    else if(val == "-v" || val == "--voltage") {
+        if(server) {
+            console.log("Error: cannot specify both -s (server) and -v (voltage) or -p (power)");
+            process.exit();
+        }
+        else {
+            local = true;
+        }
+
+        voltage = process.argv[++i];        // Additional increment of i
+    }
+    else if(val == "-p" || val == "--power") {
+        if(server) {
+            console.log("Error: cannot specify both -s (server) and -v (voltage) or -p (power)");
+            process.exit();
+        }
+        else {
+            local = true;
+        }
+
+        wattage = process.argv[++i];        // Additional increment of i
+    }
+    else if(val == "-r" || val == "--read") {
         read_config = true;
     }
-}
-console.log("Looking for " + target_device);
-console.log("Calibrating at " + wattage + " W and " + voltage + " V");
+    else if(val == "-s" || val == "server") {
+        if(local) {
+            console.log("Error: cannot specify both -s (server) and -v (voltage) or -p (power)");
+            process.exit();
+        }
+        else {
+            console.log("Connecting to load...")
+            server = true;
+        }
 
+        var ssh = new SSH ({
+            host: 'lab11power.ddns.net',
+            user: 'pi',
+            key: require('fs').readFileSync('/home/powerblade/.ssh/id_rsa_pb')
+        });
+
+        console.log("Reading power and voltage values from load...")
+        ssh.exec('./aps2/aps_3B12.py read', {
+            out: function(stdout) {
+                stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
+                voltage = parseFloat(stdlist[0]);
+                wattage = parseFloat(stdlist[1]);
+
+                if(wattage < 98 || wattage > 102) {
+                    console.log("Wattage out of correct band, setting to 100 W...")
+                    ssh.exec('./aps2/aps_3B12.py 100', {
+                        out: function(stdout) {
+                            stdlist = stdout.replace('[','').replace(']','').replace('\n','').split(',');
+                            voltage = parseFloat(stdlist[0]);
+                            wattage = parseFloat(stdlist[1]);
+                            startScanningOnPowerOn(voltage, wattage, target_device);
+                        }
+                    });
+                }
+                else {
+                    startScanningOnPowerOn(voltage, wattage, target_device);
+                }
+            }
+        }).start();
+    }
+}
+
+if(server == false) {
+	startScanningOnPowerOn(voltage, wattage, target_device);
+}
+
+// Start up BLE scanning
+function startScanningOnPowerOn(voltage, wattage, target_device) {
+    if (noble.state === 'poweredOn') {
+        noble.startScanning([], true);
+        console.log("Looking for " + target_device);
+		console.log("Calibrating at " + wattage + " W and " + voltage + " V");
+    } else {
+        noble.once('stateChange', startScanningOnPowerOn);
+    }
+};
+
+// function fn_calibrate(voltage, wattage, target_device) {
 // reference to discovered peripheral
 var powerblade_periph;
 
@@ -69,14 +145,14 @@ var config_vscale_char;
 var config_whscale_char;
 
 // start BLE scanning
-noble.on('stateChange', function(state) {
-    if (state === 'poweredOn') {
-        console.log("Starting scan...\n");
-        noble.startScanning([], true);
-    } else {
-        noble.stopScanning();
-    }
-});
+// noble.on('stateChange', function(state) {
+if (noble.state === 'poweredOn') {
+    console.log("Starting scan...\n");
+    noble.startScanning([], true);
+} else {
+    noble.stopScanning();
+}
+// });
 
 // exit when disconnected
 noble.on('disconnect', function () {
@@ -85,23 +161,30 @@ noble.on('disconnect', function () {
 });
 
 // find correct device and connect to it
+var restart_count = 0;
+var found_peripheral;
 noble.on('discover', function (peripheral) {
     //console.log(peripheral.address);
     if (peripheral.address == target_device) {
-        noble.stopScanning();
+        noble.stopScanning( function() {
+	        console.log('Found PowerBlade (' + peripheral.address +')\n');
+	        process.stdout.write('Connecting... ');
+	        powerblade_periph = peripheral;
+	        
+	        found_peripheral = peripheral;
+	        peripheral.connect(function (error) {
+	            console.log('done\n');
 
-        console.log('Found PowerBlade (' + peripheral.address +')\n');
-        console.log('Connecting...');
-        powerblade_periph = peripheral;
-        
-        peripheral.connect(function (error) {
-            console.log('\tConnected\n');
-
-            // delay before discovering services so that connection
-            //  parameters can be established
-            setTimeout(discover_calibration, 1000);
-        });
+	            // delay before discovering services so that connection
+	            //  parameters can be established
+	            setTimeout(discover_calibration, 100);
+	        });
+    	});
     }
+});
+
+noble.on('warning', function () {
+	console.log("Noble Warning Captured");
 });
 
 // print errors if they occur during service/characteristic discovery
@@ -126,37 +209,61 @@ function discover_char(service, char_uuid, callback) {
 }
 
 function discover_calibration() {
-    console.log("Discovering calibration service");
-    powerblade_periph.discoverServices([calibration_service_uuid], function(error, services) {
-        if (error) throw error;
-        if (services.length != 1) {
-            log_discovery_error(calibration_service_uuid, services);
-            return;
-        }
-        var calibration_service = services[0];
+    if(powerblade_periph['state']  != 'connected') {
+    	if(restart_count++ >= 10) {
+    		console.log('Restart limit reached, exiting');
+    		console.log('\nXXXXXXXXXXXXX Calibration Not Complete! XXXXXXXXXXXXX')
+    		process.exit();
+    	}
+    	process.stdout.write('Connection error, re-trying connection (Attempt #' + restart_count + ')...')
+    	found_peripheral.connect(function (error) {
+			console.log('done\n');
 
-        discover_char(calibration_service, calibration_wattage_uuid, function(characteristic) {
-            calibration_wattage_char = characteristic;
+			// delay before discovering services so that connection
+			//  parameters can be established
+			setTimeout(discover_calibration, 100);
+		});
+    }
+    else {
+    	process.stdout.write("Discovering calibration service... ");
+	    powerblade_periph.discoverServices([calibration_service_uuid], function(error, services) {
+	        if (error) throw error;
+	        if (services.length != 1) {
+	            log_discovery_error(calibration_service_uuid, services);
+	            return;
+	        }
+	        var calibration_service = services[0];
+	        console.log('done');
 
-            discover_char(calibration_service, calibration_voltage_uuid, function(characteristic) {
-                calibration_voltage_char = characteristic;
+	        process.stdout.write('Discovering wattage characteristic... ');
+	        discover_char(calibration_service, calibration_wattage_uuid, function(characteristic) {
+	            calibration_wattage_char = characteristic;
+	            console.log('done');
 
-                discover_char(calibration_service, calibration_control_uuid, function(characteristic) {
-                    calibration_control_char = characteristic;
-                    calibration_control_char.on('data', Calibration_status_receive);
-                    calibration_control_char.notify(true);
-                    console.log("\tComplete\n");
+	            process.stdout.write('Discovering voltage characteristic... ');
+	            discover_char(calibration_service, calibration_voltage_uuid, function(characteristic) {
+	                calibration_voltage_char = characteristic;
+	                console.log('done');
 
-                    // only bother discovering config service if we need it
-                    if (read_config) {
-                        discover_config();
-                    } else {
-                        start_calibration();
-                    }
-                });
-            });
-        });
-    });
+	                process.stdout.write('Discovering control characteristic... ');
+	                discover_char(calibration_service, calibration_control_uuid, function(characteristic) {
+	                    calibration_control_char = characteristic;
+	                    console.log('done\n');
+
+	                    calibration_control_char.on('data', Calibration_status_receive);
+	                    calibration_control_char.notify(true);
+
+	                    // only bother discovering config service if we need it
+	                    if (read_config) {
+	                        discover_config();
+	                    } else {
+	                        start_calibration();
+	                    }
+	                });
+	            });
+	        });
+	    });
+	}
 }
 
 function discover_config() {
@@ -242,9 +349,9 @@ function Calibration_status_receive(data, isNotify) {
 
     // check value
     if (data[0] == 1) {
-        console.log("Calibrating...");
+        process.stdout.write("Calibrating... ");
     } else if (data[0] == 2) {
-        console.log("\tComplete\n");
+        console.log("done\n");
 
         if (read_config) {
             setTimeout(read_calibration, 1200);
@@ -258,7 +365,7 @@ function Calibration_status_receive(data, isNotify) {
 
 function complete_calibration() {
     // calibration is complete
-    console.log("Calibration Finished!");
+    //console.log("Calibration Finished!");
     powerblade_periph.disconnect();
     process.exit(0);
 }
@@ -301,4 +408,7 @@ function read_calibration() {
         });
     });
 }
+
+
+//}
 

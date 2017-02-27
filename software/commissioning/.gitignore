@@ -1,0 +1,5 @@
+*.bin
+*.dat
+*.pdf
+*.eps
+node_modules/

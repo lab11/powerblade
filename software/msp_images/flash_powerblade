@@ -1,1 +1,1 @@
-MSP430Flasher -n MSP430FR5738 -w low_power_v2.hex -v -z [VCC] -i USB -e ERASE_ALL -g
+MSP430Flasher -n MSP430FR5738 -w ${PB_ROOT}/software/msp_images/low_power_2v2v1.hex -v -z [VCC] -i USB -e ERASE_ALL -g
