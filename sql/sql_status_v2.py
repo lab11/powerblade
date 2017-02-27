@@ -22,13 +22,14 @@ def print_header(col1, col2, col3):
 		"<td><b>" + col3 + "</b></td>" \
 		"</tr>")
 
-def print_row(mac, name, location, status, count):
+def print_row(mac, name, location, status, count, seen):
 	email_body.append("<tr>" \
 		"<td>" + str(mac) + "</td>" \
 		"<td>" + str(name) + "</td>" \
 		"<td>" + str(location) + "</td>" \
 		"<td>" + status + "</td>" \
 		"<td>" + str(count) + "</td>" \
+		"<td>" + str(seen) + "</td>" \
 		"</tr>")
 
 def check_devices(col1, col2, col3, list):
