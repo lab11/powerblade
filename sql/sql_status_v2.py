@@ -32,13 +32,14 @@ def print_row(mac, name, location, status, count, seen):
 		"<td>" + str(seen) + "</td>" \
 		"</tr>")
 
-def check_devices(col1, col2, col3, list):
+def check_devices(printLines, col1, col2, col3, list):
 	print_header(col1, col2, col3)
 
-	save_loc = 0
+	save_loc = -1
 	for mac, name, location, permanent, count, seen in list:
-		if location != save_loc:
+		if printLines and (location != save_loc):
 			email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr><tr><td colspan=\"5\">&nbsp</td></tr>")
+			save_loc = location
 		if permanent == 1:
 			if count > 400:
 				print_row(mac, name, location, STATUS_OK, count, '')
@@ -66,8 +67,8 @@ email_body.append('<p>Script start time: ' + str(datetime.utcnow()) + '</p>')
 
 email_body.append("<table style=\"width:80%\">")
 
-check_devices('gatewayMAC', '', '', gateway_success)
-check_devices('deviceMAC', 'Name', 'Last Seen', powerblade_success)
+check_devices(False, 'gatewayMAC', '', '', gateway_success)
+check_devices(True, 'deviceMAC', 'Name', 'Last Seen', powerblade_success)
 
 email_body.append('</table></body></html>')
 
