@@ -8,8 +8,8 @@ import sys
 from os.path import expanduser
 
 STATUS_OK = "<font color=\"green\"><b>OK!</b></font>"
-STATUS_WARNING = "<font color=\"orange\"><b>Down</b></font>"
-STATUS_NOT_FOUND = "<font color=\"red\"><b>Not Found</b></font>"
+STATUS_WARNING = "<font color=\"orange\"><b>Warning</b></font>"
+STATUS_NOT_FOUND = "<font color=\"red\">Not Found</font>"
 
 def print_header(col1, col2, col3):
 	email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
@@ -38,11 +38,11 @@ def check_devices(col1, col2, col3, list):
 	for mac, name, location, permanent, count, seen in list:
 		if permanent == 1:
 			if count > 400:
-				print_row(mac, name, location, STATUS_OK, count, seen)
+				print_row(mac, name, location, STATUS_OK, count, '')
 			elif count > 0:
 				print_row(mac, name, location, STATUS_WARNING, count, seen)
 			else:
-				print_row(mac, name, location, STATUS_NOT_FOUND, count, seen)
+				print_row(mac, name, location, STATUS_NOT_FOUND, '', seen)
 
 # Set up connection
 aws_login = mylogin.get_login_info('aws')
@@ -57,8 +57,9 @@ powerblade_success = aws_c.fetchall()
 
 # Prepare email for sending
 email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - Full Update</h2>']
-email_body.append('<style>\n\t.bottom-three {\n\t\tmargin-bottom: 3cm;\n\t}\n</style>')
-email_body.append('<p class=\"bottom-three\">Script start time: ' + str(datetime.utcnow()) + '</p>')
+#email_body.append('<style>\n\t.bottom-three {\n\t\tmargin-bottom: 3cm;\n\t}\n</style>')
+#email_body.append('<p class=\"bottom-three\">Script start time: ' + str(datetime.utcnow()) + '</p>')
+email_body.append('<p>Script start time: ' + str(datetime.utcnow()) + '</p>')
 
 email_body.append("<table style=\"width:80%\">")
 
