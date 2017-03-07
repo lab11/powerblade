@@ -18,7 +18,7 @@ def print_header(col1, col2, col3):
 		"<td><b>" + col2 + "</b></td>" \
 		"<td><b>Location</b></td>" \
 		"<td><b>Status</b></td>" \
-		"<td><b>Count</b></td>" \
+		"<td><b>Avg. Count in 15 mins</b></td>" \
 		"<td><b>" + col3 + "</b></td>" \
 		"</tr>")
 
@@ -38,7 +38,7 @@ def check_devices(printLines, col1, col2, col3, list):
 	save_loc = -1
 	for mac, name, location, permanent, count, seen in list:
 		if printLines and (location != save_loc):
-			email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr><tr><td colspan=\"5\">&nbsp</td></tr>")
+			email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 			save_loc = location
 		if permanent == 1:
 			if count > 400:
@@ -53,22 +53,28 @@ aws_login = mylogin.get_login_info('aws')
 aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd'], 'powerblade')
 aws_c = aws_db.cursor()
 
-aws_c.execute('select *,\'\' from gateway_success')
-gateway_success = aws_c.fetchall()
+aws_c.execute('select *,\'\' from success_gateway')
+success_gateway = aws_c.fetchall()
 
-aws_c.execute('select t1.*, t2.maxTime as last_seen from powerblade_success t1 left join last_seen_pb t2 on t1.deviceMAC=t2.deviceMAC;')
-powerblade_success = aws_c.fetchall()
+aws_c.execute('select t1.*, t2.maxTime as last_seen from success_powerblade t1 left join last_seen_pb t2 on t1.deviceMAC=t2.deviceMAC;')
+success_powerblade = aws_c.fetchall()
+
+aws_c.execute('select t1.*, t2.maxTime as last_seen from success_blink t1 left join last_seen_blink t2 on t1.deviceMAC=t2.deviceMAC;')
+success_blink = aws_c.fetchall()
+
+aws_c.execute('select t1.*, t2.maxTime as last_seen from success_light t1 left join last_seen_light t2 on t1.deviceMAC=t2.deviceMAC')
+success_light = aws_c.fetchall()
 
 # Prepare email for sending
 email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - Full Update</h2>']
-#email_body.append('<style>\n\t.bottom-three {\n\t\tmargin-bottom: 3cm;\n\t}\n</style>')
-#email_body.append('<p class=\"bottom-three\">Script start time: ' + str(datetime.utcnow()) + '</p>')
 email_body.append('<p>Script start time: ' + str(datetime.utcnow()) + '</p>')
 
 email_body.append("<table style=\"width:80%\">")
 
-check_devices(False, 'gatewayMAC', '', '', gateway_success)
-check_devices(True, 'deviceMAC', 'Name', 'Last Seen', powerblade_success)
+check_devices(False, 'gatewayMAC', '', '', success_gateway)
+check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_powerblade)
+check_devices(True, 'deviceMAC', 'Room', 'Last Seen', success_blink)
+check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_light)
 
 email_body.append('</table></body></html>')
 
