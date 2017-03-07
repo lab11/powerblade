@@ -12,7 +12,6 @@ STATUS_WARNING = "<font color=\"orange\"><b>Warning</b></font>"
 STATUS_NOT_FOUND = "<font color=\"red\">Not Found</font>"
 
 def print_header(col1, col2, col3):
-	email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 	email_body.append("<tr>" \
 		"<td><b>" + col1 + "</b></td>" \
 		"<td><b>" + col2 + "</b></td>" \
@@ -72,9 +71,16 @@ email_body.append('<p>Script start time: ' + str(datetime.utcnow()) + '</p>')
 email_body.append("<table style=\"width:80%\">")
 
 check_devices(False, 'gatewayMAC', '', '', success_gateway)
+email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
+
 check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_powerblade)
+email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
+
 check_devices(True, 'deviceMAC', 'Room', 'Last Seen', success_blink)
+email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
+
 check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_light)
+email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append('</table></body></html>')
 
