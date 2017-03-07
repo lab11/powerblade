@@ -47,6 +47,16 @@ def check_devices(printLines, col1, col2, col3, list):
 			else:
 				print_row(mac, name, location, STATUS_NOT_FOUND, '', seen)
 
+
+
+
+# Prepare email for sending
+email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - Full Update</h2>']
+email_body.append('<p>Script start time: ' + str(datetime.utcnow()) + '</p>')	
+
+
+
+
 # Set up connection
 aws_login = mylogin.get_login_info('aws')
 aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd'], 'powerblade')
@@ -64,9 +74,8 @@ success_blink = aws_c.fetchall()
 aws_c.execute('select t1.*, t2.maxTime as last_seen from success_light t1 left join last_seen_light t2 on t1.deviceMAC=t2.deviceMAC')
 success_light = aws_c.fetchall()
 
-# Prepare email for sending
-email_body = ['<!DOCTYPE html><html><body><h2> PowerBlade Deployment Status Email - Full Update</h2>']
-email_body.append('<p>Script start time: ' + str(datetime.utcnow()) + '</p>')
+
+
 
 email_body.append("<table style=\"width:80%\">")
 
@@ -99,7 +108,12 @@ if(password == 0):
 	print("Unable to find password")
 	exit()
 
+
+
 yagmail.SMTP('powerblade.lab11@gmail.com', password).send('powerblade@umich.edu', 'Re: PowerBlade Deployment Status Email', email_body)
+
+
+
 
 
 
