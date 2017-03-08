@@ -58,8 +58,8 @@ def print_parameters():
 print_parameters()
 
 print("\nTo confirm, push enter. To modify:")
-print("\t'devices: [comma separated 12 or 6 digit macs]' or")
-print("\t'location: #'")
+print("\t'devices [comma separated 12 or 6 digit macs]' or")
+print("\t'location #'")
 print("\t'start yyyy-mm-dd HH:mm:ss' or")
 print("\t'end yyyy-mm-dd HH:mm:ss' or")
 print("\t'sum [true:false]'")
@@ -75,21 +75,54 @@ while(confirm != ""):
 
 	error = False
 
-	if(confirm_list[0] == 'devices'):
-		pass
+	if(confirm_list[0] == 'dev' or confirm_list[0] == 'devices'):
+		devType = 'replace'
+		devOffset = 1
+		if(confirm_list[1] == 'add' or confirm_list[1] == 'drop'):
+			devType = confirm_list[1]
+			devOffset = 2
+		devList = "".join(confirm_list[devOffset:]).replace('[',' ').replace(']',' ').replace(',',' ').split()
+
+		# Deal with shortened mac addresses
+		for idx, dev in enumerate(devList):
+			if(len(dev) == 3):
+				devList[idx] = 'c098e5700' + dev
+			elif(len(dev) == 6):
+				devList[idx] = 'c098e5' + dev
+			elif((len(dev) != 12) or (dev[0:5] != 'c098e5')):
+				print("Unknown device: " + dev)
+
+		if(devType == 'replace'):
+			config['devices'] = devList
+		elif(devType == 'add'):
+			config['devices'] = config['devices'] + devList
+		else:
+			config['devices'] = [x for x in config['devices'] if x not in devList]
+		changes = True
 	elif(confirm_list[0] == 'location'):
+		devType = 'replace'
+		devOffset = 1
+		if(confirm_list[1] == 'add' or confirm_list[1] == 'drop'):
+			devType = confirm_list[1]
+			devOffset = 2
+
 		# Set up connection
 		aws_login = mylogin.get_login_info('aws')
 		aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd'], 'powerblade')
 		aws_c = aws_db.cursor()
 		connected = True
 
-		aws_c.execute('select deviceMAC from active_powerblades where location=' + confirm_list[1] + ';')
+		aws_c.execute('select lower(deviceMAC) from active_powerblades where location=' + confirm_list[devOffset] + ';')
 		device_list = aws_c.fetchall()
-		print(device_list)
-		print(config['devices'])
-		config['devices'] = [i[0] for i in device_list]
-		#exit()
+		devList = [i[0] for i in device_list]
+
+		if(devType == 'replace'):
+			config['devices'] = devList
+		elif(devType == 'add'):
+			config['devices'] = config['devices'] + devList
+		else:
+			config['devices'] = [x for x in config['devices'] if x not in devList]
+		changes = True
 	elif(confirm_list[0] == 'start' or confirm_list[0] == 'end'):
 		try:
 			if(len(confirm_list) == 2):
@@ -190,9 +223,10 @@ if(connected == False):
 	aws_c = aws_db.cursor()
 
 if(query_powerblade):
-	aws_c.execute("select deviceMAC, timestamp, power from dat_powerblade where deviceMAC in " + \
+	print("select deviceMAC, timestamp, power from dat_powerblade where deviceMAC in " + \
 		dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\"" + \
 		"order by deviceMAC, timestamp;")
+	exit()
 	data_pb = aws_c.fetchall()
 	
 	if(config['sum']):
