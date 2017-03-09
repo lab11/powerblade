@@ -12,6 +12,10 @@ SELECT t1.* FROM inf_gw_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_gw_lookup t2 WHERE t1.gatewayMAC=t2.gatewayMAC) AND
 ((startTime < subdate(curdate(),1)) AND ((endTime is NULL) OR (endtime > curdate())));
 
+CREATE VIEW most_recent_powerblades AS
+SELECT t1.* FROM inf_pb_lookup t1 WHERE 
+t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
 CREATE VIEW active_powerblades AS
 SELECT t1.* FROM inf_pb_lookup t1 WHERE 
 t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
