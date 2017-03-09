@@ -20,7 +20,11 @@ try:
 		json_txt += line
 	config = json.loads(json_txt)
 except:
-	pass
+	config['type'] = 'plot'
+	config['start'] = '2017-01-01 00:00:00'
+	config['end'] = '2017-01-01 23:59:59'
+	config['devices'] = ['c098e5700000']
+	config['sum'] = False
 
 # Check device list
 
@@ -255,8 +259,8 @@ if(config['type'] == 'plot'):
 
 	if(query_powerblade):
 		aws_c.execute("select deviceMAC, timestamp, power from dat_powerblade where deviceMAC in " + \
-			dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\"")# + \
-			#"order by deviceMAC, timestamp;")
+			dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\"" + \
+			"order by deviceMAC, timestamp;")
 		data_pb = aws_c.fetchall()
 		
 		if(config['sum']):
