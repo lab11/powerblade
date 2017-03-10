@@ -203,6 +203,8 @@ while(confirm != ""):
 		changes = True
 	elif(confirm_list[0] == 'start' or confirm_list[0] == 'end'):
 		try:
+			if(len(confirm_list[1].split('-')) == 2):
+				confirm_list[1] = '2017-' + confirm_list[1]
 			if(len(confirm_list) == 2):
 				try:
 					datetime.datetime.strptime(confirm_list[1], '%Y-%m-%d')
