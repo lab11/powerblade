@@ -49,7 +49,7 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 			tot_count = tot_count + 1
 			countTh = 400
 			if(mac[6] == 'd'):
-				countTh = 5
+				countTh = 10
 			if count > countTh:
 				if printOK:
 					print_row(mac, name, location, STATUS_OK, count, '')
@@ -103,7 +103,7 @@ check_devices(True, False, 'deviceMAC', 'Room', 'Last Seen', success_blink)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>BLEES & Ligeiro</b></td></tr>")
-check_devices(True, True, 'deviceMAC', 'Name', 'Last Seen', success_light)
+check_devices(True, False, 'deviceMAC', 'Name', 'Last Seen', success_light)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append('</table></body></html>')
