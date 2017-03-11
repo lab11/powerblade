@@ -40,7 +40,7 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 	for mac, name, location, permanent, count, seen in list:
 		if printLines and (location != save_loc):
 			if(save_loc != -1):
-				print_row("", str(ok_count) + " devices OK", save_loc, STATUS_OK, '', '')
+				print_row("", str(ok_count) + "/" + str(tot_count) + " devices OK", save_loc, STATUS_OK, '', '')
 			ok_count = 0
 			tot_count = 0
 			email_body.append("<tr><td colspan=\"5\"><b>Location " + str(location) + "</b></td></tr>")
