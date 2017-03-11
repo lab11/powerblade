@@ -37,7 +37,7 @@ def check_devices(printLines, col1, col2, col3, list):
 	save_loc = -1
 	for mac, name, location, permanent, count, seen in list:
 		if printLines and (location != save_loc):
-			email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
+			email_body.append("<tr><td colspan=\"5\"><b>Location " + str(location) + "</b></td></tr>")
 			save_loc = location
 		if permanent == 1:
 			if count > 400:
@@ -82,12 +82,15 @@ email_body.append("<table style=\"width:80%\">")
 check_devices(False, 'gatewayMAC', '', '', success_gateway)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
+email_body.append("<tr><td colspan=\"5\"><b>PowerBlade</b></td></tr>")
 check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_powerblade)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
+email_body.append("<tr><td colspan=\"5\"><b>Blink</b></td></tr>")
 check_devices(True, 'deviceMAC', 'Room', 'Last Seen', success_blink)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
+email_body.append("<tr><td colspan=\"5\"><b>BLEES & Ligeiro</b></td></tr>")
 check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_light)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
