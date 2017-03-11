@@ -10,7 +10,7 @@ SHOW FULL TABLES IN powerblade WHERE TABLE_TYPE LIKE 'VIEW';
 CREATE VIEW active_gateways AS
 SELECT t1.* FROM inf_gw_lookup t1 WHERE 
 t1.id=(SELECT MAX(t2.id) FROM inf_gw_lookup t2 WHERE t1.gatewayMAC=t2.gatewayMAC) AND
-((startTime < subdate(curdate(),1)) AND ((endTime is NULL) OR (endtime > curdate())));
+((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endtime > utc_timestamp())));
 
 CREATE VIEW most_recent_powerblades AS
 SELECT t1.* FROM inf_pb_lookup t1 WHERE 
@@ -19,35 +19,35 @@ t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
 CREATE VIEW active_powerblades AS
 SELECT t1.* FROM inf_pb_lookup t1 WHERE 
 t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < subdate(curdate(),1)) AND ((endTime is NULL) OR (endtime > curdate())));
+((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endtime > utc_timestamp())));
 
 CREATE VIEW active_blinks AS
 SELECT t1.* FROM inf_blink_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_blink_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < subdate(curdate(),1)) AND ((endTime is NULL) OR (endTime > curdate())));
+((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endTime > utc_timestamp())));
 
 CREATE VIEW active_lights AS
 SELECT t1.* FROM inf_light_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < subdate(curdate(),1)) AND ((endTime is NULL) OR (endTime > curdate())));
+((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endTime > utc_timestamp())));
 
 
 # Create views for yesterday's data
 
 CREATE VIEW yest_data_pb AS
 SELECT * FROM dat_powerblade
-WHERE timestamp>subdate(curdate(),1) AND timestamp<curdate();
+WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp();
 
 CREATE VIEW yest_data_blink AS
 SELECT * FROM dat_blink
-WHERE timestamp>subdate(curdate(),1) AND timestamp<curdate();
+WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp();
 
 CREATE VIEW yest_data_light AS
 SELECT gatewayMAC, deviceMAC, timestamp FROM dat_ligeiro
-WHERE timestamp>subdate(curdate(),1) AND timestamp<curdate()
+WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp()
 UNION
 SELECT gatewayMAC, deviceMAC, timestamp FROM dat_blees
-WHERE timestamp>subdate(curdate(),1) AND timestamp<curdate();
+WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp();
 
 
 # Create view for yesterday's gateway data
