@@ -37,19 +37,26 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 	save_loc = -1
 	ok_count = 0
 	tot_count = 0
+	nonperm_count = 0
 	for mac, name, location, permanent, count, seen in list:
 		if printLines and (location != save_loc):
 			if(save_loc != -1) and printOK == False:
-				print_row("", str(ok_count) + "/" + str(tot_count) + " devices OK", save_loc, STATUS_OK, '', '')
+				email_body.append("<tr><td colspan=\"3\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + str(nonperm_count) + " other non-permanent devices</td><td>" + STATUS_OK + "</td></tr>")
 			ok_count = 0
 			tot_count = 0
+			nonperm_count = 0
 			email_body.append("<tr><td colspan=\"5\"><b>Location " + str(location) + "</b></td></tr>")
 			save_loc = location
 		if permanent == 1:
 			tot_count = tot_count + 1
+
 			countTh = 400
 			if(mac[6] == 'd'):
 				countTh = 10
+				name = name + " Ligeiro"
+			elif(mac[6] == '3'):
+				name = name + " BLEES"
+
 			if count > countTh:
 				if printOK:
 					print_row(mac, name, location, STATUS_OK, count, '')
@@ -59,7 +66,7 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 			else:
 				print_row(mac, name, location, STATUS_NOT_FOUND, '', seen)
 	if(printOK == False):
-		print_row("", str(ok_count) + "/" + str(tot_count) + " devices OK", save_loc, STATUS_OK, '', '')
+		email_body.append("<tr><td colspan=\"3\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + str(nonperm_count) + " other non-permanent devices</td><td>" + STATUS_OK + "</td></tr>")
 
 
 # Prepare email for sending
@@ -103,7 +110,7 @@ check_devices(True, False, 'deviceMAC', 'Room', 'Last Seen', success_blink)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>BLEES & Ligeiro</b></td></tr>")
-check_devices(True, False, 'deviceMAC', 'Name', 'Last Seen', success_light)
+check_devices(True, True, 'deviceMAC', 'Name', 'Last Seen', success_light)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append('</table></body></html>')
