@@ -44,13 +44,15 @@ def check_devices(printLines, printOK, printPerm, col1, col2, col3, list):
 			# Print last device
 			if(save_loc != -1) and printOK == False:
 				email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
-				email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
-					"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK")
 				if(printPerm):
-					email_body.append(" with " + str(nonperm_count) + " other non-permanent devices</td>")
+					email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
+						"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
+						str(nonperm_count) + " other non-permanent devices</td>" \
+						"<td>" + STATUS_OK + "</td></tr>")
 				else:
-					email_body.append("</td>")
-				email_body.append("<td>" + STATUS_OK + "</td></tr>")
+					email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
+						"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
+						"<td>" + STATUS_OK + "</td></tr>")
 				email_body.extend(text_body)
 
 			# Start new device
@@ -83,10 +85,15 @@ def check_devices(printLines, printOK, printPerm, col1, col2, col3, list):
 
 	if(printOK == False):
 		email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
-		email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
-			"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
-			str(nonperm_count) + " other non-permanent devices</td>" \
-			"<td>" + STATUS_OK + "</td></tr>")
+		if(printPerm):
+			email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
+				"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
+				str(nonperm_count) + " other non-permanent devices</td>" \
+				"<td>" + STATUS_OK + "</td></tr>")
+		else:
+			email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
+				"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
+				"<td>" + STATUS_OK + "</td></tr>")
 	email_body.extend(text_body)
 
 
