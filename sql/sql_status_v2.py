@@ -35,19 +35,22 @@ def check_devices(printLines, col1, col2, col3, list):
 	print_header(col1, col2, col3)
 
 	save_loc = -1
+	ok_count = 0
 	for mac, name, location, permanent, count, seen in list:
 		if printLines and (location != save_loc):
+			print_row("", ok_count + " devices OK", save_loc, STATUS_OK, '', '')
+			ok_count = 0
 			email_body.append("<tr><td colspan=\"5\"><b>Location " + str(location) + "</b></td></tr>")
 			save_loc = location
 		if permanent == 1:
 			if count > 400:
-				print_row(mac, name, location, STATUS_OK, count, '')
+				pass
+				ok_count = ok_count + 1
+				#print_row(mac, name, location, STATUS_OK, count, '')
 			elif count > 0:
 				print_row(mac, name, location, STATUS_WARNING, count, seen)
 			else:
-				print_row(mac, name, location, STATUS_NOT_FOUND, '', seen)
-
-
+				print_row(mac, name, location, STATUS_NOT_FOUND, '', seen)	
 
 
 # Prepare email for sending
