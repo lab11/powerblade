@@ -43,6 +43,7 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 		if printLines and (location != save_loc):	# New device
 			# Print last device
 			if(save_loc != -1) and printOK == False:
+				email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 				email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
 					"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
 					str(nonperm_count) + " other non-permanent devices</td>" \
@@ -78,11 +79,12 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 			nonperm_count = nonperm_count + 1
 
 	if(printOK == False):
+		email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 		email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
 			"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
 			str(nonperm_count) + " other non-permanent devices</td>" \
 			"<td>" + STATUS_OK + "</td></tr>")
-		email_body.extend(text_body)
+	email_body.extend(text_body)
 
 
 # Prepare email for sending
