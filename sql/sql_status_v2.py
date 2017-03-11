@@ -31,28 +31,31 @@ def print_row(mac, name, location, status, count, seen):
 		"<td>" + str(seen) + "</td>" \
 		"</tr>")
 
-def check_devices(printLines, col1, col2, col3, list):
+def check_devices(printLines, printOK, col1, col2, col3, list):
 	print_header(col1, col2, col3)
 
 	save_loc = -1
 	ok_count = 0
+	tot_count = 0
 	for mac, name, location, permanent, count, seen in list:
 		if printLines and (location != save_loc):
 			if(save_loc != -1):
 				print_row("", str(ok_count) + " devices OK", save_loc, STATUS_OK, '', '')
 			ok_count = 0
+			tot_count = 0
 			email_body.append("<tr><td colspan=\"5\"><b>Location " + str(location) + "</b></td></tr>")
 			save_loc = location
 		if permanent == 1:
+			tot_count = tot_count + 1
 			if count > 400:
-				pass
+				if printOK:
+					print_row(mac, name, location, STATUS_OK, count, '')
 				ok_count = ok_count + 1
-				#print_row(mac, name, location, STATUS_OK, count, '')
 			elif count > 0:
 				print_row(mac, name, location, STATUS_WARNING, count, seen)
 			else:
 				print_row(mac, name, location, STATUS_NOT_FOUND, '', seen)
-	print_row("", str(ok_count) + " devices OK", save_loc, STATUS_OK, '', '')
+	print_row("", str(ok_count) + "/" + str(tot_count) + " devices OK", save_loc, STATUS_OK, '', '')
 
 
 # Prepare email for sending
@@ -84,19 +87,19 @@ success_light = aws_c.fetchall()
 
 email_body.append("<table style=\"width:80%\">")
 
-check_devices(False, 'gatewayMAC', '', '', success_gateway)
+check_devices(False, True, 'gatewayMAC', '', '', success_gateway)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>PowerBlade</b></td></tr>")
-check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_powerblade)
+check_devices(True, True, 'deviceMAC', 'Name', 'Last Seen', success_powerblade)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>Blink</b></td></tr>")
-check_devices(True, 'deviceMAC', 'Room', 'Last Seen', success_blink)
+check_devices(True, True, 'deviceMAC', 'Room', 'Last Seen', success_blink)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>BLEES & Ligeiro</b></td></tr>")
-check_devices(True, 'deviceMAC', 'Name', 'Last Seen', success_light)
+check_devices(True, True, 'deviceMAC', 'Name', 'Last Seen', success_light)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append('</table></body></html>')
