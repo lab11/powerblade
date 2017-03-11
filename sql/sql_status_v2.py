@@ -50,7 +50,7 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 			countTh = 400
 			if(mac[6] == 'd'):
 				countTh = 5
-			if count > 400:
+			if count > countTh:
 				if printOK:
 					print_row(mac, name, location, STATUS_OK, count, '')
 				ok_count = ok_count + 1
