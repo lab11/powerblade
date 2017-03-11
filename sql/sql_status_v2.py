@@ -47,11 +47,11 @@ def check_devices(printLines, printOK, printPerm, col1, col2, col3, list):
 					email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
 						"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
 						str(nonperm_count) + " other non-permanent devices</td>" \
-						"<td>" + STATUS_OK + "</td></tr>")
+						"</tr>")
 				else:
 					email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
 						"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
-						"<td>" + STATUS_OK + "</td></tr>")
+						"</tr>")
 				email_body.extend(text_body)
 
 			# Start new device
@@ -87,11 +87,11 @@ def check_devices(printLines, printOK, printPerm, col1, col2, col3, list):
 			email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
 				"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
 				str(nonperm_count) + " other non-permanent devices</td>" \
-				"<td>" + STATUS_OK + "</td></tr>")
+				"</tr>")
 		else:
 			email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
 				"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
-				"<td>" + STATUS_OK + "</td></tr>")
+				"</tr>")
 	email_body.extend(text_body)
 
 
