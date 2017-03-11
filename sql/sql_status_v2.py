@@ -64,7 +64,7 @@ def check_devices(printLines, printOK, printPerm, col1, col2, col3, list):
 		if permanent == 1:
 			tot_count = tot_count + 1
 
-			countTh = 400
+			countTh = 450
 			if(mac[6] == 'd'):
 				countTh = 10
 				name = name + " Ligeiro"
