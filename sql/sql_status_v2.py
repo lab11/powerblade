@@ -21,8 +21,8 @@ def print_header(col1, col2, col3):
 		"<td><b>" + col3 + "</b></td>" \
 		"</tr>")
 
-def print_row(mac, name, location, status, count, seen):
-	email_body.append("<tr>" \
+def print_row(bodytext, mac, name, location, status, count, seen):
+	bodytext.append("<tr>" \
 		"<td>" + str(mac) + "</td>" \
 		"<td>" + str(name) + "</td>" \
 		"<td>" + str(location) + "</td>" \
@@ -38,15 +38,24 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 	ok_count = 0
 	tot_count = 0
 	nonperm_count = 0
+	text_body = []
 	for mac, name, location, permanent, count, seen in list:
-		if printLines and (location != save_loc):
+		if printLines and (location != save_loc):	# New device
+			# Print last device
 			if(save_loc != -1) and printOK == False:
-				email_body.append("<tr><td colspan=\"3\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + str(nonperm_count) + " other non-permanent devices</td><td>" + STATUS_OK + "</td></tr>")
+				email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
+					"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
+					str(nonperm_count) + " other non-permanent devices</td>" \
+					"<td>" + STATUS_OK + "</td></tr>")
+			email_body.append(text_body)
+
+			# Start new device
 			ok_count = 0
 			tot_count = 0
 			nonperm_count = 0
-			email_body.append("<tr><td colspan=\"5\"><b>Location " + str(location) + "</b></td></tr>")
+			text_body = []
 			save_loc = location
+
 		if permanent == 1:
 			tot_count = tot_count + 1
 
@@ -59,14 +68,15 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 
 			if count > countTh:
 				if printOK:
-					print_row(mac, name, location, STATUS_OK, count, '')
+					print_row(text_body, mac, name, location, STATUS_OK, count, '')
 				ok_count = ok_count + 1
 			elif count > 0:
-				print_row(mac, name, location, STATUS_WARNING, count, seen)
+				print_row(text_body, mac, name, location, STATUS_WARNING, count, seen)
 			else:
-				print_row(mac, name, location, STATUS_NOT_FOUND, '', seen)
+				print_row(text_body, mac, name, location, STATUS_NOT_FOUND, '', seen)
+
 	if(printOK == False):
-		email_body.append("<tr><td colspan=\"3\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + str(nonperm_count) + " other non-permanent devices</td><td>" + STATUS_OK + "</td></tr>")
+		email_body.append("<tr><td> </td><td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + str(nonperm_count) + " other non-permanent devices</td><td>" + STATUS_OK + "</td></tr>")
 
 
 # Prepare email for sending
