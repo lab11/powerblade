@@ -47,7 +47,7 @@ def check_devices(printLines, printOK, col1, col2, col3, list):
 					"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
 					str(nonperm_count) + " other non-permanent devices</td>" \
 					"<td>" + STATUS_OK + "</td></tr>")
-			email_body.append(text_body)
+			email_body.extend(text_body)
 
 			# Start new device
 			ok_count = 0
