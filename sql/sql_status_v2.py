@@ -136,7 +136,7 @@ check_devices(True, False, False, 'deviceMAC', 'Room', 'Last Seen', success_blin
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>BLEES & Ligeiro</b></td></tr>")
-check_devices(True, False, False, 'deviceMAC', 'Name', 'Last Seen', success_light)
+check_devices(True, True, False, 'deviceMAC', 'Name', 'Last Seen', success_light)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append('</table></body></html>')
