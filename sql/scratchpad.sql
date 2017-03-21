@@ -145,24 +145,29 @@ group by deviceMAC order by avgEnergy;
 
 alter view avgPower_pb as
 select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devPower)
-where timestamp>='2017-03-01 00:00:00' and timestamp<='2017-03-10 23:59:59'
+where timestamp>='2017-03-18 00:00:00' and timestamp<='2017-03-20 23:59:59'
 and deviceMAC in ("c098e570006b","c098e5700115","c098e57000c0","c098e57000bf","c098e57000cd","c098e57000cf","c098e57000d5","c098e57000d1","c098e57000ce","c098e57000d9","c098e57000e1","c098e57000d6","c098e57000f6","c098e57000f9","c098e57000ed","c098e57000f3","c098e57000ea","c098e57000ee","c098e5700100","c098e57000e3","c098e57000d8","c098e57000f4","c098e57000fb","c098e57000eb","c098e57000ec","c098e57000e8","c098e57000e9")
 and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC)
 group by deviceMAC
 order by avgPower;
 
-select t1.deviceMAC, t2.deviceName, t1.avgPower
-from avgPower_pb t1
-join most_recent_powerblades t2
+select t1.deviceMAC, t1.deviceName, t1.location, t1.permanent, t2.avgPower
+from (select * from most_recent_powerblades where location=3) t1
+left join avgPower_pb t2
 on t1.deviceMAC=t2.deviceMAC
-order by t1.avgPower;
+order by t2.avgPower;
 
 
 select * from dat_powerblade where deviceMAC='c098e57000fb' order by id desc;
 
-create view maxPower_pb as
+select * from maxPower_pb;
+select * from avgPower_pb;
+select * from most_recent_powerblades where location=3;
+
+alter view maxPower_pb as
 select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower)
-where timestamp>date_sub(utc_timestamp(), interval 10 day) and power != 120.13
+where timestamp>date_sub(utc_timestamp(), interval 4 day) and power != 120.13
+and deviceMAC in ("c098e570006b","c098e5700115","c098e57000c0","c098e57000bf","c098e57000cd","c098e57000cf","c098e57000d5","c098e57000d1","c098e57000ce","c098e57000d9","c098e57000e1","c098e57000d6","c098e57000f6","c098e57000f9","c098e57000ed","c098e57000f3","c098e57000ea","c098e57000ee","c098e5700100","c098e57000e3","c098e57000d8","c098e57000f4","c098e57000fb","c098e57000eb","c098e57000ec","c098e57000e8","c098e57000e9")
 group by deviceMAC;
 
 select t1.deviceMAC, t2.deviceName, t1.maxPower from 
@@ -176,5 +181,6 @@ select * from inf_pb_lookup where deviceMAC='c098e570019c' or deviceMAC='c098e57
 
 select * from dat_powerblade where deviceMAC='c098e57000f6' order by id desc;
 
+show processlist;
 
 
