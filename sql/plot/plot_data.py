@@ -344,6 +344,40 @@ if(config['type'] == 'plot'):
 
 elif(config['type'] == 'energy'):
 
+	# Step 0: Alter the views acccording to the specified query paremeters
+	# Day energy: maximum energy minus minimum energy for each device for each day
+	aws_c.execute('alter view day_energy as ' \
+		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devEnergy) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst;')
+	# Max power - maximum power per device over the time period
+	aws_c.execute('alter view maxPower_pb as ' \
+		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power != 120.13 ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+	aws_c.execute('alter view avgPower_pb as ' \
+		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devPower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+
+	# Step 1: Unified query for energy and power
+	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.varEnergy, t3.avgPower from ' \
+		'(select * from most_recent_powerblades where deviceMAC in ' + dev_powerblade + ') t1 ' \
+		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, var_pop(dayEnergy) as varEnergy ' \
+		'from day_energy group by deviceMAC) t2 ' \
+		'on t1.deviceMAC=t2.deviceMAC '
+		'join avgPower_pb t3 ' \
+		'on t1.deviceMAC=t3.deviceMAC ' \
+		'order by t2.avgEnergy;')
+	expData = aws_c.fetchall()
+
+	for datum in expData:
+		print(datum)
+
+	exit()
+
 	# Step 1: starting energy for each device (min energy)
 	aws_c.execute('select date(timestamp) as dayst, deviceMAC, min(energy) as energy from dat_powerblade force index(devEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['startDay'] + ' 12:00:00\' ' \
