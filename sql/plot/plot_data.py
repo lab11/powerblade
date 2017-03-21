@@ -345,21 +345,21 @@ if(config['type'] == 'plot'):
 elif(config['type'] == 'energy'):
 
 	# Step 1: starting energy for each device (min energy)
-	aws_c.execute('select date(timestamp) as dayst, deviceMAc, min(energy) as energy from dat_powerblade force index(devEnergy) ' \
+	aws_c.execute('select date(timestamp) as dayst, deviceMAC, min(energy) as energy from dat_powerblade force index(devEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['startDay'] + ' 12:00:00\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst order by deviceMAC, dayst')
 	startEnergy = aws_c.fetchall()
 
 
 	# Step 2: end energy per device per day in the time period (max energy)
-	aws_c.execute('select date(timestamp) as dayst, deviceMAc, max(energy) as energy from dat_powerblade force index(devEnergy) ' \
+	aws_c.execute('select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index(devEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst order by deviceMAC, dayst')
 	dayEnergy = aws_c.fetchall()
 
 	
 	# Step 3: end energy per device overall (used to ensure the data exists in the second half of the day)
-	aws_c.execute('select date(timestamp) as dayst, deviceMAc, max(energy) as energy from dat_powerblade force index(devEnergy) ' \
+	aws_c.execute('select date(timestamp) as dayst, deviceMAC, max(energy) as energy from dat_powerblade force index(devEnergy) ' \
 		'where timestamp>=\'' + config['endDay'] + ' 12:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst order by deviceMAC, dayst')
 	endEnergy = aws_c.fetchall()
@@ -393,6 +393,8 @@ elif(config['type'] == 'energy'):
 
 	print(total_energy)
 	print(energy_array)
+	for day in dayEnergy:
+		print(day)
 
 	exit()
 
