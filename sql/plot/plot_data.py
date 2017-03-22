@@ -196,7 +196,7 @@ while(confirm != ""):
 			devType = confirm_list[1]
 			devOffset = 2
 
-		aws_c.execute('select lower(deviceMAC) from active_powerblades where location=' + confirm_list[devOffset] + ';')
+		aws_c.execute('select lower(deviceMAC) from most_recent_powerblades where location=' + confirm_list[devOffset] + ';')
 		device_list = aws_c.fetchall()
 		devList = [i[0] for i in device_list]
 
@@ -252,6 +252,9 @@ if(changes):
 	if(raw_input("\nSave changes to config file? [y/n]: ") == "y"):
 		with open('.plotconfig', 'w') as outfile:
 		    json.dump(config, outfile)
+
+
+print("\nRunning queries...\n")
 
 
 
@@ -346,10 +349,11 @@ elif(config['type'] == 'energy'):
 
 	# Step 0: Alter the views acccording to the specified query paremeters
 	# Day energy: maximum energy minus minimum energy for each device for each day
+	print("Altering views for energy query...\n")
 	aws_c.execute('alter view day_energy as ' \
 		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst;')
+		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
 	# Max power - maximum power per device over the time period
 	aws_c.execute('alter view maxPower_pb as ' \
 		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower) ' \
@@ -363,9 +367,10 @@ elif(config['type'] == 'energy'):
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 
 	# Step 1: Unified query for energy and power
-	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.varEnergy, t3.avgPower from ' \
+	print("Running data query...\n")
+	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t3.avgPower from ' \
 		'(select * from most_recent_powerblades where deviceMAC in ' + dev_powerblade + ') t1 ' \
-		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, var_pop(dayEnergy) as varEnergy ' \
+		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC '
 		'join avgPower_pb t3 ' \
@@ -373,8 +378,61 @@ elif(config['type'] == 'energy'):
 		'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
 
-	for datum in expData:
-		print(datum)
+	outfile = open('energy.dat', 'w')
+
+	labelstr = ""
+	energyCutoff = 1000
+
+	for idx, (mac, name, energy, var, power) in enumerate(expData):
+		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(energy) + " " + str(var) + " " + str(power))
+		outfile.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(energy) + "\t" + str(var) + "\t" + str(power) + "\n")
+		if(energy > energyCutoff):
+			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(energy)) + '\" center font \", 8\"\n'
+
+	outfile.close()
+
+	outfile = open('breakdown.plt', 'w')
+	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 8in,2.0in\n')
+	outfile.write('set output \"breakdown.eps\"\n\n')
+
+	outfile.write('# General setup\n\n')
+	outfile.write('unset key\n')
+	outfile.write('set boxwidth 0.5\n')
+	outfile.write('set style fill solid 1.00 border lt -1\n')
+	outfile.write('\n')
+
+	outfile.write('set multiplot layout 2,1\n\n')
+
+	outfile.write('# Top plot (energy)\n\n')
+	outfile.write('unset xtics\n')
+	outfile.write('set lmargin 10\n')
+	outfile.write('set ylabel \"Average Daily\\nEnergy (Wh)\" offset 1,0 font \", 12\"\n')
+	outfile.write('set yrange[0:' + str(energyCutoff) + ']\n')
+	outfile.write('set size 1,0.38\n')
+	outfile.write('set origin 0,0.60\n')
+	outfile.write('set key top left font \", 12\"\n')
+	outfile.write('\n')
+
+	outfile.write(labelstr)
+
+	outfile.write('plot \"energy.dat\" using 1:4 with boxes fc rgb \"#ac0a0f\" title \"PowerBlade\"\n\n')
+
+	outfile.write('# Bottom plot (power)\n\n')
+	outfile.write('unset label\n')
+	outfile.write('unset key\n')
+	outfile.write('set logscale y\n')
+	outfile.write('set bmargin 5.5\n')
+	outfile.write('set xtics  rotate by 45 right font \", 10\"\n')
+	outfile.write('set size 1,0.66\n')
+	outfile.write('set origin 0,0\n')
+	outfile.write('set yrange[1:5000]\n')
+	outfile.write('set ylabel \"Average Active\\nPower (w)\" offset 1,-1 font \", 12\"\n')
+
+	outfile.write('plot \"energy.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
+
+	outfile.write('unset multiplot\n')
+
+	outfile.close()
 
 	exit()
 
