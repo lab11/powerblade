@@ -293,12 +293,12 @@ if(config['type'] == 'plot'):
 	dEnd = datetime.datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S")
 
 	duration = (dEnd - dStart).total_seconds()
-	downsample = int(duration/1000)
+	downsample = int(duration/10000)
 
 	if(query_powerblade):
-		aws_c.execute("select t2.deviceName, t1.timest, t1.maxPower from " \
+		aws_c.execute("select t2.deviceName, t1.timest, t1.avgPower from " \
 			"(select round(unix_timestamp(timestamp)/(" + str(downsample) + ")) as timekey, " \
-			"deviceMAC, max(timestamp) as timest, max(power) as maxPower from dat_powerblade force index (devPower) where deviceMAC in " + \
+			"deviceMAC, max(timestamp) as timest, avg(power) as avgPower from dat_powerblade force index (devPower) where deviceMAC in " + \
 			dev_powerblade + " and timestamp between \"" + str(config['start']) + "\" and \"" + str(config['end']) + "\"" + \
 			"group by deviceMAC, timekey) t1 " \
 			"join most_recent_powerblades t2 on t1.deviceMAC=t2.deviceMAC " \
