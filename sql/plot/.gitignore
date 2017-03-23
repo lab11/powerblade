@@ -1,3 +1,6 @@
 datfile.*
-
+!*.pdf
 .plotconfig
+breakdown.pdf
+energy.dat
+datfile.pdf
