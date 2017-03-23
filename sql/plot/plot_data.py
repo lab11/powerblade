@@ -360,10 +360,14 @@ if(config['type'] == 'plot'):
 
 elif(config['type'] == 'energy'):
 
+	if(query_powerblade == False):
+		print("Error: At least one PowerBlade required for energy printing")
+		exit()
+
 	# Step 0: Alter the views acccording to the specified query paremeters
 	# Day energy: maximum energy minus minimum energy for each device for each day
 	print("Altering views for energy query...\n")
-	aws_c.execute('alter view day_energy as ' \
+	aws_c.execute('alter view day_energy_pb as ' \
 		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
@@ -379,30 +383,57 @@ elif(config['type'] == 'energy'):
 		'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 
+	day_en_str = ''
+	avg_pwr_str = ''
+	# Step 0.5: Handle light data
+	if(query_ligeiro):
+		aws_c.execute('alter view energy_ligeiro as ' \
+			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
+			'case when (1+max(count)-min(count)) >= 1 then '\
+			'(select power*5/60 from most_recent_lights t2 where t1.deviceMAC=t2.deviceMAC) else 0 end as \'onoff\' ' \
+			'from dat_ligeiro t1 ' \
+			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+			'and deviceMAC in ' + dev_ligeiro + ' group by deviceMAC, timekey;')
+		aws_c.execute('alter view day_energy_ligeiro as ' \
+			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
+			'energy_ligeiro group by deviceMAC, dayst;')
+		day_en_str += ' union select * from day_energy_ligeiro'
+		avg_pwr_str += ' union (select deviceMAC, power from most_recent_lights where deviceMAC in ' + dev_ligeiro + ')'
+
+	aws_c.execute('alter view day_energy as select * from day_energy_pb' + day_en_str + ';')
+	aws_c.execute('alter view avg_power as select * from avgPower_pb' + avg_pwr_str + ';')
+
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
 	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t3.avgPower from ' \
-		'(select * from most_recent_powerblades where deviceMAC in ' + dev_powerblade + ') t1 ' \
+		'most_recent_devices t1 ' \
 		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC '
-		'join avgPower_pb t3 ' \
+		'join avg_power t3 ' \
 		'on t1.deviceMAC=t3.deviceMAC ' \
 		'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
 
-	outfile = open('energy.dat', 'w')
+	outfile_pb = open('energy_pb.dat', 'w')
+	outfile_li = open('energy_li.dat', 'w')
+
+	#'(select * from most_recent_devices where deviceMAC in ' + dev_powerblade + ') t1 ' \
 
 	labelstr = ""
 	energyCutoff = 1000
 
 	for idx, (mac, name, energy, var, power) in enumerate(expData):
 		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(energy) + " " + str(var) + " " + str(power))
-		outfile.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(energy) + "\t" + str(var) + "\t" + str(power) + "\n")
+		if(mac[6:8] == '70'):
+			outfile_pb.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(energy) + "\t" + str(var) + "\t" + str(power) + "\n")
+		else:
+			outfile_li.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(energy) + "\t" + str(var) + "\t" + str(power) + "\n")
 		if(energy > energyCutoff):
 			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(energy)) + '\" center font \", 8\"\n'
 
-	outfile.close()
+	outfile_pb.close()
+	outfile_li.close()
 
 	outfile = open('breakdown.plt', 'w')
 	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 8in,2.0in\n')
@@ -428,7 +459,8 @@ elif(config['type'] == 'energy'):
 
 	outfile.write(labelstr)
 
-	outfile.write('plot \"energy.dat\" using 1:4 with boxes fc rgb \"#ac0a0f\" title \"PowerBlade\"\n\n')
+	outfile.write('plot \"energy_li.dat\" using 1:4 with boxes fc rgb \"#4b97c8\" title \"BLEES\", \\\n'
+		'\t\"energy_pb.dat\" using 1:4 with boxes fc rgb \"#ac0a0f\" title \"PowerBlade\"\n\n')
 
 	outfile.write('# Bottom plot (power)\n\n')
 	outfile.write('unset label\n')
@@ -441,7 +473,8 @@ elif(config['type'] == 'energy'):
 	outfile.write('set yrange[1:5000]\n')
 	outfile.write('set ylabel \"Average Active\\nPower (w)\" offset 1,-1 font \", 12\"\n')
 
-	outfile.write('plot \"energy.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
+	outfile.write('plot \"energy_li.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#4b97c8\" title \"BLEES\", \\\n'
+		'\t\"energy_pb.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
 
 	outfile.write('unset multiplot\n')
 

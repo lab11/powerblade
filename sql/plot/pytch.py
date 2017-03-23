@@ -4,9 +4,9 @@ import readline
 import logging
 import os
 
-#histfile = open('/tmp/completer.hist', 'w')
-#histfile.write('add \ndrop \ndevices \nlocation \nstart \nstop \nsum \n')
-#histfile.close()
+histfile = open('/tmp/completer.hist', 'w')
+histfile.write('add \ndrop \ndevices \nlocation \nstart \nstop \nsum \n')
+histfile.close()
 
 LOG_FILENAME = '/tmp/completer.log'
 HISTORY_FILENAME = '/tmp/completer.hist'
