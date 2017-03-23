@@ -19,7 +19,11 @@ set size 1,0.38
 set origin 0,0.60
 set key top left font ", 12"
 
-plot "energy_li.dat" using 1:4 with boxes fc rgb "#4b97c8" title "BLEES", \
+set label at 55, 1100.0 "1046" center font ", 8"
+set label at 56, 1100.0 "1778" center font ", 8"
+set label at 57, 1100.0 "5948" center font ", 8"
+set label at 58, 1100.0 "6024" center font ", 8"
+plot "energy_li.dat" using 1:4 with boxes fc rgb "#4b97c8" title "BLEES/Ligeiro", \
 	"energy_pb.dat" using 1:4 with boxes fc rgb "#ac0a0f" title "PowerBlade"
 
 # Bottom plot (power)
@@ -33,6 +37,6 @@ set size 1,0.66
 set origin 0,0
 set yrange[1:5000]
 set ylabel "Average Active\nPower (w)" offset 1,-1 font ", 12"
-plot "energy_li.dat" using 1:6:xticlabels(3) with boxes fc rgb "#4b97c8" title "BLEES", \
+plot "energy_li.dat" using 1:6:xticlabels(3) with boxes fc rgb "#4b97c8" title "BLEES/Ligeiro", \
 	"energy_pb.dat" using 1:6:xticlabels(3) with boxes fc rgb "#ac0a0f"
 unset multiplot

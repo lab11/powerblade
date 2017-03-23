@@ -57,6 +57,11 @@ def dev_print():
 	dev_ligeiro = ["("]
 	dev_blink = ["("]
 
+	query_powerblade = False
+	query_blees = False
+	query_ligeiro = False
+	query_blink = False
+
 	for dev in config['devices']:
 
 		devType = dev[6:8]
@@ -209,9 +214,12 @@ while(confirm != ""):
 			devType = confirm_list[1]
 			devOffset = 2
 
-		aws_c.execute('select lower(deviceMAC) from most_recent_powerblades where location=' + confirm_list[devOffset] + ';')
+		aws_c.execute('select lower(deviceMAC) from most_recent_devices where location=' + confirm_list[devOffset] + ';')
 		device_list = aws_c.fetchall()
 		devList = [i[0] for i in device_list]
+
+		print(device_list)
+		print(devList)
 
 		if(devType == 'replace'):
 			config['devices'] = devList
@@ -386,6 +394,19 @@ elif(config['type'] == 'energy'):
 	day_en_str = ''
 	avg_pwr_str = ''
 	# Step 0.5: Handle light data
+	if(query_blees):
+		aws_c.execute('alter view energy_blees as ' \
+			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
+			'case when lux>(select avgLux from avg_lux t2 where t1.deviceMAC=t2.deviceMAC) then ' \
+			'(select power*5/60 from most_recent_lights t3 where t1.deviceMAC=t3.deviceMAC) else 0 end as \'onoff\' ' \
+			'from dat_blees t1 force index (devLux) ' \
+			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+			'and deviceMAC in ' + dev_blees + ' group by deviceMAC, timekey;')
+		aws_c.execute('alter view day_energy_blees as ' \
+			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
+			'energy_blees group by deviceMAC, dayst;')
+		day_en_str += ' union select * from day_energy_blees'
+		avg_pwr_str += ' union (select deviceMAC, power from most_recent_lights where deviceMAC in ' + dev_blees + ')'
 	if(query_ligeiro):
 		aws_c.execute('alter view energy_ligeiro as ' \
 			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
@@ -459,7 +480,7 @@ elif(config['type'] == 'energy'):
 
 	outfile.write(labelstr)
 
-	outfile.write('plot \"energy_li.dat\" using 1:4 with boxes fc rgb \"#4b97c8\" title \"BLEES\", \\\n'
+	outfile.write('plot \"energy_li.dat\" using 1:4 with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
 		'\t\"energy_pb.dat\" using 1:4 with boxes fc rgb \"#ac0a0f\" title \"PowerBlade\"\n\n')
 
 	outfile.write('# Bottom plot (power)\n\n')
@@ -473,7 +494,7 @@ elif(config['type'] == 'energy'):
 	outfile.write('set yrange[1:5000]\n')
 	outfile.write('set ylabel \"Average Active\\nPower (w)\" offset 1,-1 font \", 12\"\n')
 
-	outfile.write('plot \"energy_li.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#4b97c8\" title \"BLEES\", \\\n'
+	outfile.write('plot \"energy_li.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
 		'\t\"energy_pb.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
 
 	outfile.write('unset multiplot\n')
