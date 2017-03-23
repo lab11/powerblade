@@ -8,6 +8,7 @@ import datetime
 import pytch
 
 import os
+import sys
 import subprocess
 from sh import epstopdf, gnuplot
 
@@ -69,27 +70,27 @@ def dev_print():
 
 		elif(devType == "30"):	# BLEES
 			query_blees = True
-			dev_powerblade.append("\"")
+			dev_blees.append("\"")
 			dev_blees.append(dev)
-			dev_powerblade.append("\"")
+			dev_blees.append("\"")
 			dev_blees.append(",")
 
 		elif(devType == "d0"):	# Ligeiro
 			query_ligeiro = True
-			dev_powerblade.append("\"")
+			dev_ligeiro.append("\"")
 			dev_ligeiro.append(dev)
-			dev_powerblade.append("\"")
+			dev_ligeiro.append("\"")
 			dev_ligeiro.append(",")
 
 		elif(devType == "90"):	# Blink	
 			query_blink = True
-			dev_powerblade.append("\"")
+			dev_blink.append("\"")
 			dev_blink.append(dev)
-			dev_powerblade.append("\"")
+			dev_blink.append("\"")
 			dev_blink.append(",")
 
 		else:
-			print("Unknown device: " + dev)
+			print("Unknown device type: " + dev)
 
 	dev_powerblade[-1] = ")"
 	dev_blees[-1] = ")"
@@ -102,11 +103,19 @@ def dev_print():
 	dev_ligeiro = "".join(dev_ligeiro)
 	dev_blink = "".join(dev_blink)
 
-	aws_c.execute('select deviceMAC, deviceName from most_recent_powerblades where deviceMAC in ' + dev_powerblade + ";")
-	devNames = aws_c.fetchall();
+	devNames = []
+	if(query_powerblade):
+		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from most_recent_powerblades where deviceMAC in ' + dev_powerblade + ';')
+		devNames.extend(aws_c.fetchall())
+	if(query_blees):
+		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from most_recent_lights where deviceMAC in ' + dev_blees + ';')
+		devNames.extend(aws_c.fetchall())
+	if(query_ligeiro):
+		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from most_recent_lights where deviceMAC in ' + dev_ligeiro + ';')
+		devNames.extend(aws_c.fetchall())
 
 	for line in devNames:
-		print("\t" + line[0] + "\t" + line[1])
+		print("\t" + str(line[0]) + "\t" + str(line[1]) + "\tLocation " + str(line[2]) + "\t" + str(line[3]))
 
 	# for dev in config['devices']:
 	# 	print("\t" + str(dev))
@@ -141,7 +150,7 @@ def print_parameters():
 print_parameters()
 
 print("\nTo confirm, push enter. To modify:")
-print("\t'type [plot, energy]'")
+print("\t'type [plot, energy, light]'")
 print("\t'devices [comma separated 12 or 6 digit macs]' or")
 print("\t'location #'")
 print("\t'start yyyy-mm-dd HH:mm:ss' or")
@@ -158,12 +167,14 @@ while(confirm != ""):
 
 	error = False
 
-	if(confirm_list[0] == 'type'):
-		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy'):
+	if(confirm_list[0] == 'exit'):
+		sys.exit()
+	elif(confirm_list[0] == 'type'):
+		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'light'):
 			config['type'] = confirm_list[1]
 			changes = True
 		else:
-			print("Usage is type [plot:energy]")
+			print("Usage is type [plot, energy, light]")
 			error = True
 	elif(confirm_list[0] == 'dev' or confirm_list[0] == 'devices'):
 		devType = 'replace'
@@ -179,7 +190,9 @@ while(confirm != ""):
 				devList[idx] = 'c098e5700' + dev
 			elif(len(dev) == 6):
 				devList[idx] = 'c098e5' + dev
-			elif((len(dev) != 12) or (dev[0:5] != 'c098e5')):
+			elif((len(dev) != 12) or (dev[0:6] != 'c098e5')):
+				print(len(dev))
+				print(dev[0:5])
 				print("Unknown device: " + dev)
 
 		if(devType == 'replace'):
@@ -434,85 +447,16 @@ elif(config['type'] == 'energy'):
 
 	outfile.close()
 
-	exit()
-
-	# Step 1: starting energy for each device (min energy)
-	aws_c.execute('select date(timestamp) as dayst, deviceMAC, min(energy) as energy from dat_powerblade force index(devEnergy) ' \
-		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['startDay'] + ' 12:00:00\' ' \
-		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst order by deviceMAC, dayst')
-	startEnergy = aws_c.fetchall()
 
 
-	# Step 2: end energy per device per day in the time period (max energy)
-	aws_c.execute('select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index(devEnergy) ' \
-		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst order by deviceMAC, dayst')
-	dayEnergy = aws_c.fetchall()
+####################################################################
+#
+# This section is for the light option (temporary)
+#
+####################################################################
 
-	
-	# Step 3: end energy per device overall (used to ensure the data exists in the second half of the day)
-	aws_c.execute('select date(timestamp) as dayst, deviceMAC, max(energy) as energy from dat_powerblade force index(devEnergy) ' \
-		'where timestamp>=\'' + config['endDay'] + ' 12:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC, dayst order by deviceMAC, dayst')
-	endEnergy = aws_c.fetchall()
-
-	total_energy = 0
-	energy_array = []
-	errors = 0
-
-	for dev in config['devices']:
-		dev_startEnergy = -1
-		for day, mac, energy in startEnergy:
-			if(dev == mac):
-				dev_startEnergy = energy
-				break
-		if(dev_startEnergy == -1):
-			print("Error: No start energy value for " + dev)
-			errors = errors + 1
-
-		dev_endEnergy = -1
-		for day, mac, energy in endEnergy:
-			if(dev == mac):
-				dev_endEnergy = energy
-				break
-		if(dev_endEnergy == -1):
-			print("Error: No end energy value for " + dev)
-			errors = errors + 1
-
-		dev_energy = dev_endEnergy - dev_startEnergy
-		total_energy = total_energy + dev_energy
-		energy_array.append([dev, dev_energy])
-
-	print(total_energy)
-	print(energy_array)
-	for day in dayEnergy:
-		print(day)
-
-	exit()
-
-	# for day, mac, energy in dayEnergy:
-	# 	for 
+elif(config['type'] == 'light'):
 
 
-
-	# 	print(str(day) + " " + str(mac) + " " + str(energy))
-
-	# exit()
-
-	aws_c.execute('select t2.deviceMAC, t2.deviceName, t2.location from ' \
-		'(select deviceMAC, max(id) as id ' \
-		'from dat_powerblade where timestamp>date_sub(\'' + config['end'] + '\', interval 1 hour) AND timestamp<\'' + config['end'] + '\' ' \
-		' group by deviceMAC) t1 ' \
-		'join most_recent_powerblades t2 on t1.deviceMAC=t2.deviceMAC;')
-	devNames = aws_c.fetchall();
-
-	for idx, val in enumerate(startEnergy):
-		print(str(idx) + " " + str(val[0]) + " " + str(endEnergy[idx][0]) + " " + str(devNames[idx][1]) + " " + str(devNames[idx][2]) + "\t" + str(val[1]) + " " + str(endEnergy[idx][1]) + " " + str(endEnergy[idx][1] - val[1]))
-
-
-	# Print error message if missing the first part of the first day or last part of last day
-
-
-
-
+	print("Running light")
 
