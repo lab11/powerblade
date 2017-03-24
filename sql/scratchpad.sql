@@ -81,9 +81,16 @@ select * from dat_blees where deviceMAC='c098e5300034' order by id desc;
 
 select deviceMAC, avg(lux) from dat_blees force index (devLux) group by deviceMAC;
 
-select * from most_recent_lights where location=3;
+select * from most_recent_lights where location=5;
 
 select * from most_recent_powerblades where deviceMAC>'c098e570024b' and deviceMAC<'c098e570026e';
 
+select * from most_recent_powerblades where location=5 order by deviceMAC;
 
+select * from dat_powerblade where deviceMAC='c098e570017B' and power>200 order by id desc limit 10;
+select * from inf_gw_status order by id desc;
+
+select * from pb_calib order by id asc;
+
+show processlist;
 

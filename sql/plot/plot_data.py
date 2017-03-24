@@ -289,15 +289,25 @@ print("\nRunning queries...\n")
 
 if(config['type'] == 'plot'):
 
+	dStart = datetime.datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S")
+	dEnd = datetime.datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S")
+
+	duration = (dEnd - dStart).total_seconds()
+	downsample = int(duration/10000)
+
 	if(query_powerblade):
-		aws_c.execute("select deviceMAC, timestamp, power from dat_powerblade where deviceMAC in " + \
-			dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\"" + \
-			"order by deviceMAC, timestamp;")
+		aws_c.execute("select t2.deviceName, t1.timest, t1.avgPower from " \
+			"(select round(unix_timestamp(timestamp)/(" + str(downsample) + ")) as timekey, " \
+			"deviceMAC, max(timestamp) as timest, avg(power) as avgPower from dat_powerblade force index (devPower) where deviceMAC in " + \
+			dev_powerblade + " and timestamp between \"" + str(config['start']) + "\" and \"" + str(config['end']) + "\"" + \
+			"group by deviceMAC, timekey) t1 " \
+			"join most_recent_powerblades t2 on t1.deviceMAC=t2.deviceMAC " \
+			"order by t2.deviceName, t1.timest;")
 		data_pb = aws_c.fetchall()
 		
 		if(config['sum']):
 			aws_c.execute("select timestamp, sum(power) from dat_powerblade where deviceMAC in " + \
-				dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\"" + \
+				dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\" " + \
 				"group by timestamp order by timestamp;")
 			sum_pb = aws_c.fetchall();
 
@@ -326,10 +336,11 @@ if(config['type'] == 'plot'):
 
 	# Create .plt file and fill
 	plt = open('datfile.plt', 'w')
-	plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 3in,2in\n')
+	plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 6in,4in\n')
 	plt.write('set output "datfile.eps"\n')
 
 	plt.write('set xdata time\n')
+	plt.write('set key under\n')
 	plt.write('set timefmt \"\\\"%Y-%m-%d %H:%M:%S\\\"\"\n')
 	plt.write('set format x \"%m-%d\\n%H:%M\"\n')
 

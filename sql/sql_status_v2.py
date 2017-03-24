@@ -15,7 +15,7 @@ def print_header(col1, col2, col3):
 	email_body.append("<tr>" \
 		"<td><b>" + col1 + "</b></td>" \
 		"<td><b>" + col2 + "</b></td>" \
-		"<td><b>Location</b></td>" \
+		"<td><b>Loc</b></td>" \
 		"<td><b>Status</b></td>" \
 		"<td><b>Avg. Count in 15 mins</b></td>" \
 		"<td><b>" + col3 + "</b></td>" \
@@ -45,12 +45,12 @@ def check_devices(printLines, printOK, printPerm, col1, col2, col3, list):
 			if(save_loc != -1) and printOK == False:
 				if(printPerm):
 					email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
-						"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
+						"<td colspan=\"5\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
 						str(nonperm_count) + " other non-permanent devices</td>" \
 						"</tr>")
 				else:
 					email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
-						"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
+						"<td colspan=\"5\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
 						"</tr>")
 				email_body.extend(text_body)
 
@@ -64,33 +64,33 @@ def check_devices(printLines, printOK, printPerm, col1, col2, col3, list):
 		if permanent == 1:
 			tot_count = tot_count + 1
 
-			countTh = 450
+			countTh = 300
 			if(mac[6] == 'd'):
-				countTh = 10
+				countTh = 6
 				name = name + " Ligeiro"
 			elif(mac[6] == '3'):
 				name = name + " BLEES"
 
-			if count > countTh:
+			if count >= countTh:
 				if printOK:
-					print_row(text_body, mac, name, location, STATUS_OK, count, '')
+					print_row(text_body, mac[6:], name, location, STATUS_OK, int(count), '')
 				ok_count = ok_count + 1
 			elif count > 0:
-				print_row(text_body, mac, name, location, STATUS_WARNING, count, seen)
+				print_row(text_body, mac[6:], name, location, STATUS_WARNING, int(count), str(seen)[5:-3])
 			else:
-				print_row(text_body, mac, name, location, STATUS_NOT_FOUND, '', seen)
+				print_row(text_body, mac[6:], name, location, STATUS_NOT_FOUND, '', str(seen)[5:-3])
 		else:
 			nonperm_count = nonperm_count + 1
 
 	if(printOK == False):
 		if(printPerm):
 			email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
-				"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
+				"<td colspan=\"5\">" + str(ok_count) + "/" + str(tot_count) + " devices OK with " + \
 				str(nonperm_count) + " other non-permanent devices</td>" \
 				"</tr>")
 		else:
 			email_body.append("<tr><td><b>Location " + str(save_loc) + "</b></td>" \
-				"<td colspan=\"2\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
+				"<td colspan=\"5\">" + str(ok_count) + "/" + str(tot_count) + " devices OK</td>" \
 				"</tr>")
 	email_body.extend(text_body)
 
@@ -122,21 +122,21 @@ success_light = aws_c.fetchall()
 
 
 
-email_body.append("<table style=\"width:80%\">")
+email_body.append("<table style=\"width:99%\">")
 
 check_devices(False, True, False, 'gatewayMAC', '', '', success_gateway)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>PowerBlade</b></td></tr>")
-check_devices(True, False, True, 'deviceMAC', 'Name', 'Last Seen', success_powerblade)
+check_devices(True, False, True, 'deviceMAC', 'Name', 'LastSeen', success_powerblade)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>Blink</b></td></tr>")
-check_devices(True, False, False, 'deviceMAC', 'Room', 'Last Seen', success_blink)
+check_devices(True, False, False, 'deviceMAC', 'Room', 'LastSeen', success_blink)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append("<tr><td colspan=\"5\"><b>BLEES & Ligeiro</b></td></tr>")
-check_devices(True, True, False, 'deviceMAC', 'Name', 'Last Seen', success_light)
+check_devices(True, False, False, 'deviceMAC', 'Name', 'LastSeen', success_light)
 email_body.append("<tr><td colspan=\"5\">&nbsp</td></tr>")
 
 email_body.append('</table></body></html>')
