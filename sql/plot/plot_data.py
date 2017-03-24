@@ -118,6 +118,9 @@ def dev_print():
 	if(query_ligeiro):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from most_recent_lights where deviceMAC in ' + dev_ligeiro + ';')
 		devNames.extend(aws_c.fetchall())
+	if(query_blink):
+		aws_c.execute('select \'Blink\\t\', deviceMAC, location, room from most_recent_blinks where deviceMAC in ' + dev_blink + ';')
+		devNames.extend(aws_c.fetchall())
 
 	for line in devNames:
 		print("\t" + str(line[0]) + "\t" + str(line[1]) + "\tLocation " + str(line[2]) + "\t" + str(line[3]))
@@ -214,7 +217,7 @@ while(confirm != ""):
 			devType = confirm_list[1]
 			devOffset = 2
 
-		aws_c.execute('select lower(deviceMAC) from most_recent_devices where location=' + confirm_list[devOffset] + ';')
+		aws_c.execute('select lower(deviceMAC) from most_recent_devices_2 where location=' + confirm_list[devOffset] + ';')
 		device_list = aws_c.fetchall()
 		devList = [i[0] for i in device_list]
 
@@ -438,7 +441,7 @@ elif(config['type'] == 'energy'):
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
 	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t3.avgPower from ' \
-		'most_recent_devices t1 ' \
+		'most_recent_devices_2 t1 ' \
 		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC '
