@@ -83,6 +83,7 @@ select deviceMAC, avg(lux) from dat_blees force index (devLux) group by deviceMA
 
 select * from most_recent_lights where location=5;
 
+select * from most_recent_powerblades where deviceMAC>='c098e57001a0' and deviceMAC<'c098e57001ab';
 select * from most_recent_powerblades where deviceMAC>'c098e570024b' and deviceMAC<'c098e570026e';
 
 select * from most_recent_powerblades where location=5 order by deviceMAC;
