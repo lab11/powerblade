@@ -83,10 +83,10 @@ select deviceMAC, avg(lux) from dat_blees force index (devLux) group by deviceMA
 
 select * from most_recent_lights where location=5;
 
-select * from most_recent_powerblades where deviceMAC>='c098e57001a0' and deviceMAC<'c098e57001ab';
+select * from most_recent_powerblades where deviceMAC>='c098e57001a0' and deviceMAC<='c098e57001ab';
 select * from most_recent_powerblades where deviceMAC>'c098e570024b' and deviceMAC<'c098e570026e';
 
-select * from most_recent_powerblades where location=5 order by deviceMAC;
+select * from most_recent_powerblades where location=0 order by deviceMAC;
 
 select * from dat_powerblade where deviceMAC='c098e570017B' and power>200 order by id desc limit 10;
 select * from inf_gw_status order by id desc;
@@ -94,4 +94,37 @@ select * from inf_gw_status order by id desc;
 select * from pb_calib order by id asc;
 
 show processlist;
+
+
+
+
+select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy 
+from dat_powerblade force index (devEnergy) 
+where timestamp>='2017-3-19  00:00:00' and timestamp<='2017-3-24  23:59:59' 
+and deviceMAC in ("c098e570017b") 
+and energy!=999999.99 
+group by deviceMAC, dayst;
+
+select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower)
+where timestamp>='2017-3-19  00:00:00' and timestamp<='2017-3-24  23:59:59' 
+and power != 120.13 and deviceMAC in ("c098e570017b") 
+group by deviceMAC;
+
+select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devPower) 
+where timestamp>='2017-3-19  00:00:00' and timestamp<='2017-3-24  23:59:59' 
+and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) 
+and deviceMAC in ("c098e570017b") group by deviceMAC;
+
+select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t3.avgPower 
+from most_recent_devices t1 
+join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy from day_energy group by deviceMAC) t2 
+on t1.deviceMAC=t2.deviceMAC 
+join avg_power t3 
+on t1.deviceMAC=t3.deviceMAC 
+order by t2.avgEnergy;
+
+
+
+
+
 
