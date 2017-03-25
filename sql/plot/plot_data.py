@@ -440,9 +440,9 @@ elif(config['type'] == 'energy'):
 
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
-	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t3.avgPower from ' \
+	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, t3.avgPower from ' \
 		'active_devices t1 ' \
-		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy ' \
+		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC '
 		'join avg_power t3 ' \
@@ -456,14 +456,18 @@ elif(config['type'] == 'energy'):
 	labelstr = ""
 	energyCutoff = 1000
 
-	for idx, (mac, name, energy, var, power) in enumerate(expData):
-		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(energy) + " " + str(var) + " " + str(power))
+	total_measured_energy = 0
+
+	# Energy Printout
+	for idx, (mac, name, dayEnergy, var, totEnergy, power) in enumerate(expData):
+		total_measured_energy += totEnergy
+		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(dayEnergy) + " " + str(var) + " " + str(totEnergy) + " " + str(power))
 		if(mac[6:8] == '70'):
-			outfile_pb.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(energy) + "\t" + str(var) + "\t" + str(power) + "\n")
+			outfile_pb.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + " " + str(power) + "\n")
 		else:
-			outfile_li.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(energy) + "\t" + str(var) + "\t" + str(power) + "\n")
-		if(energy > energyCutoff):
-			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(energy)) + '\" center font \", 8\"\n'
+			outfile_li.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + " " + str(power) + "\n")
+		if(dayEnergy > energyCutoff):
+			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
 
 	outfile_pb.close()
 	outfile_li.close()
@@ -506,13 +510,46 @@ elif(config['type'] == 'energy'):
 	outfile.write('set yrange[1:5000]\n')
 	outfile.write('set ylabel \"Average Active\\nPower (w)\" offset 1,-1 font \", 12\"\n')
 
-	outfile.write('plot \"energy_li.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
-		'\t\"energy_pb.dat\" using 1:6:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
+	outfile.write('plot \"energy_li.dat\" using 1:7:xticlabels(3) with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
+		'\t\"energy_pb.dat\" using 1:7:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
 
 	outfile.write('unset multiplot\n')
 
 	outfile.close()
 
+	# CDF Printout
+	pwrData = sorted(expData, key=lambda dev: dev[5])
+
+	outfile_pwr = open('energy_pwr.dat', 'w')
+
+	curPower = 0
+	cdfEnergy = 0
+	for mac, name, dayEnergy, var, totEnergy, power in pwrData:
+		# Test if this power is the same as the one before it
+		if power != curPower:
+			print(str(curPower) + " " + str(cdfEnergy) + " " + str(cdfEnergy/total_measured_energy))		# Print the last device and the energy sum
+			outfile_pwr.write(str(curPower) + "\t" + str(cdfEnergy) + "\t" + str(cdfEnergy/total_measured_energy) + "\n")
+			curPower = power
+
+		cdfEnergy += totEnergy 	# Either way, increment total energy (done after printing because that prints the previous power level)
+
+	print(str(curPower) + " " + str(cdfEnergy) + " " + str(cdfEnergy/total_measured_energy))		# Print the last device and the energy sum
+	outfile_pwr.write(str(curPower) + "\t" + str(cdfEnergy) + "\t" + str(cdfEnergy/total_measured_energy) + "\n")
+
+	outfile_pwr.close()
+
+	outfile = open('cdfplot.plt', 'w')
+	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 8in,2.0in\n')
+	outfile.write('set output \"cdfplot.eps\"\n\n')
+
+	outfile.write('unset key\n\n')
+
+	outfile.write('set xlabel \"Device power (W)\"\n')
+	outfile.write('set ylabel \"Percent of Total Energy (%)\"\n')
+
+	outfile.write('plot \"energy_pwr.dat\" using 1:2 with lines\n\n')
+
+	outfile.close()
 
 
 ####################################################################
