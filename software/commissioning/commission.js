@@ -290,7 +290,7 @@ function calibrate() {
 			console.log("Adding database entry");
 			var calib_query;
 			if(argval == '-a') {
-				calib_query = 'INSERT INTO pb_calib (deviceMAC, nrf_prog_date, msp_prog_date, msp_calib_date) values (\'' + device_id + '\', now(), now(), now());'
+				calib_query = 'INSERT INTO pb_calib (deviceMAC, nrf_prog_date, msp_prog_date, msp_prog_val, msp_calib_date) values (\'' + device_id + '\', now(), now(), \'2.3.0\', now());'
 			}
 			else {
 				calib_query = 'INSERT INTO pb_calib (deviceMAC, msp_calib_date) values (\'' + device_id + '\', now());'

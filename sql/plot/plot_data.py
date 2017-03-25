@@ -118,6 +118,9 @@ def dev_print():
 	if(query_ligeiro):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_ligeiro + ';')
 		devNames.extend(aws_c.fetchall())
+	if(query_blink):
+		aws_c.execute('select \'Blink\\t\', deviceMAC, location, room from active_blinks where deviceMAC in ' + dev_blink + ';')
+		devNames.extend(aws_c.fetchall())
 
 	for line in devNames:
 		print("\t" + str(line[0]) + "\t" + str(line[1]) + "\tLocation " + str(line[2]) + "\t" + str(line[3]))

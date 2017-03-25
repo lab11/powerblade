@@ -22,5 +22,6 @@ transmitted in the advertisement nor sent when the nRF queries version number fr
 | 2 		| 1			| 0 				| 10 bit ADC, watchdog timer enabled |
 | 2 		| 2			| 0 				| Local calibration, SET SEQ (0x1C) and RST WH (0x1D) no longer valid |
 | 2			| 2			| 1 				| Lowest four bits of flags now contains MSP Version |
+| 2			| 3			| 0 				| Watt Hours now being stored in non-volatile |
 
 

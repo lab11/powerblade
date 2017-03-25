@@ -65,7 +65,7 @@ uint32_t voltAmpsToAverage;
 uint16_t uart_len;
 uint8_t ad_len = ADLEN;
 uint8_t powerblade_id = 2;
-const char msp_software_version = 2;
+const char msp_software_version = 3;
 
 // Transmitted values
 uint32_t sequence;
@@ -73,7 +73,8 @@ uint32_t scale;
 uint8_t Vrms;
 uint16_t truePower;
 uint16_t apparentPower;
-uint64_t wattHours;
+#pragma PERSISTENT(wattHours)
+uint64_t wattHours = 0;
 
 // Local calibration values
 int32_t voff_local;
