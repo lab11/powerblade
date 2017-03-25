@@ -176,6 +176,11 @@ GROUP BY deviceMAC;
 
 
 
+CREATE VIEW most_recent_gnd_truth AS
+SELECT t1.* FROM dat_gnd_truth t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM dat_gnd_truth t2
+WHERE t1.location=t2.location AND t1.dayst=t2.dayst);
+
 
 
 

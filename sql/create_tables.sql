@@ -21,6 +21,9 @@ CREATE TABLE dat_blink
 primary key (id), index(gatewayMAC), index(deviceMAC), index(timestamp));
 describe dat_blink;
 
+CREATE TABLE dat_gnd_truth 
+(id int(11) not null auto_increment, location int(1), dayst datetime, energy decimal(8,2), primary key (id), index(location), index(dayst), index locTime (location, dayst));
+
 # pb_lookup
 create table inf_ss_pb_lookup (deviceMAC char(16), deviceName varchar(50));
 alter table inf_ss_pb_lookup add column devType varchar(20);
