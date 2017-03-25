@@ -110,13 +110,13 @@ def dev_print():
 
 	devNames = []
 	if(query_powerblade):
-		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from most_recent_powerblades where deviceMAC in ' + dev_powerblade + ';')
+		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from active_powerblades where deviceMAC in ' + dev_powerblade + ';')
 		devNames.extend(aws_c.fetchall())
 	if(query_blees):
-		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from most_recent_lights where deviceMAC in ' + dev_blees + ';')
+		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_blees + ';')
 		devNames.extend(aws_c.fetchall())
 	if(query_ligeiro):
-		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from most_recent_lights where deviceMAC in ' + dev_ligeiro + ';')
+		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_ligeiro + ';')
 		devNames.extend(aws_c.fetchall())
 
 	for line in devNames:
@@ -214,7 +214,7 @@ while(confirm != ""):
 			devType = confirm_list[1]
 			devOffset = 2
 
-		aws_c.execute('select lower(deviceMAC) from most_recent_devices where location=' + confirm_list[devOffset] + ';')
+		aws_c.execute('select lower(deviceMAC) from active_devices where location=' + confirm_list[devOffset] + ';')
 		device_list = aws_c.fetchall()
 		devList = [i[0] for i in device_list]
 
@@ -301,7 +301,7 @@ if(config['type'] == 'plot'):
 			"deviceMAC, max(timestamp) as timest, avg(power) as avgPower from dat_powerblade force index (devPower) where deviceMAC in " + \
 			dev_powerblade + " and timestamp between \"" + str(config['start']) + "\" and \"" + str(config['end']) + "\"" + \
 			"group by deviceMAC, timekey) t1 " \
-			"join most_recent_powerblades t2 on t1.deviceMAC=t2.deviceMAC " \
+			"join active_powerblades t2 on t1.deviceMAC=t2.deviceMAC " \
 			"order by t2.deviceName, t1.timest;")
 		data_pb = aws_c.fetchall()
 		
@@ -409,7 +409,7 @@ elif(config['type'] == 'energy'):
 		aws_c.execute('alter view energy_blees as ' \
 			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
 			'case when lux>(select avgLux from avg_lux t2 where t1.deviceMAC=t2.deviceMAC) then ' \
-			'(select power*5/60 from most_recent_lights t3 where t1.deviceMAC=t3.deviceMAC) else 0 end as \'onoff\' ' \
+			'(select power*5/60 from active_lights t3 where t1.deviceMAC=t3.deviceMAC) else 0 end as \'onoff\' ' \
 			'from dat_blees t1 force index (devLux) ' \
 			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 			'and deviceMAC in ' + dev_blees + ' group by deviceMAC, timekey;')
@@ -417,12 +417,12 @@ elif(config['type'] == 'energy'):
 			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
 			'energy_blees group by deviceMAC, dayst;')
 		day_en_str += ' union select * from day_energy_blees'
-		avg_pwr_str += ' union (select deviceMAC, power from most_recent_lights where deviceMAC in ' + dev_blees + ')'
+		avg_pwr_str += ' union (select deviceMAC, power from active_lights where deviceMAC in ' + dev_blees + ')'
 	if(query_ligeiro):
 		aws_c.execute('alter view energy_ligeiro as ' \
 			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
 			'case when (1+max(count)-min(count)) >= 1 then '\
-			'(select power*5/60 from most_recent_lights t2 where t1.deviceMAC=t2.deviceMAC) else 0 end as \'onoff\' ' \
+			'(select power*5/60 from active_lights t2 where t1.deviceMAC=t2.deviceMAC) else 0 end as \'onoff\' ' \
 			'from dat_ligeiro t1 ' \
 			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 			'and deviceMAC in ' + dev_ligeiro + ' group by deviceMAC, timekey;')
@@ -430,7 +430,7 @@ elif(config['type'] == 'energy'):
 			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
 			'energy_ligeiro group by deviceMAC, dayst;')
 		day_en_str += ' union select * from day_energy_ligeiro'
-		avg_pwr_str += ' union (select deviceMAC, power from most_recent_lights where deviceMAC in ' + dev_ligeiro + ')'
+		avg_pwr_str += ' union (select deviceMAC, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
 
 	aws_c.execute('alter view day_energy as select * from day_energy_pb' + day_en_str + ';')
 	aws_c.execute('alter view avg_power as select * from avgPower_pb' + avg_pwr_str + ';')
@@ -438,7 +438,7 @@ elif(config['type'] == 'energy'):
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
 	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t3.avgPower from ' \
-		'most_recent_devices t1 ' \
+		'active_devices t1 ' \
 		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC '
@@ -449,8 +449,6 @@ elif(config['type'] == 'energy'):
 
 	outfile_pb = open('energy_pb.dat', 'w')
 	outfile_li = open('energy_li.dat', 'w')
-
-	#'(select * from most_recent_devices where deviceMAC in ' + dev_powerblade + ') t1 ' \
 
 	labelstr = ""
 	energyCutoff = 1000
