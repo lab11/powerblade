@@ -7,3 +7,8 @@ load data local infile '/Users/sdebruin/Downloads/Gateways.csv' into table inf_g
 load data local infile '/Users/sdebruin/Downloads/Blinks.csv' into table inf_blink_lookup fields terminated by ',' (deviceMAC, room, location, startTime, endTime);
 load data local infile '/Users/sdebruin/Downloads/BLEES.csv' into table inf_light_lookup fields terminated by ',' (deviceMAC, deviceName, power, deviceType, room, location, startTime, endTime);
 
+load data local infile '/Users/sdebruin/Downloads/GndTruth.csv' into table dat_gnd_truth fields terminated by ',' (location, dayst, energy);
+
+
+
+

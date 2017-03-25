@@ -25,6 +25,7 @@ except:
 	config['start'] = '2017-01-01 00:00:00'
 	config['end'] = '2017-01-01 23:59:59'
 	config['devices'] = ['c098e5700000']
+	config['locations'] = ['0']
 	config['sum'] = False
 
 # Check device list
@@ -42,6 +43,8 @@ aws_c = aws_db.cursor()
 connected = True
 
 def dev_print():
+	global loc_list
+
 	global dev_powerblade
 	global dev_blees
 	global dev_ligeiro
@@ -52,6 +55,8 @@ def dev_print():
 	global query_ligeiro
 	global query_blink
 
+	loc_list = ["("]
+
 	dev_powerblade = ["("]
 	dev_blees = ["("]
 	dev_ligeiro = ["("]
@@ -61,6 +66,13 @@ def dev_print():
 	query_blees = False
 	query_ligeiro = False
 	query_blink = False
+
+	for loc in config['locations']:
+		loc_list.append(loc)
+		loc_list.append(",")
+
+	loc_list[-1] = ")"
+	loc_list = "".join(loc_list)
 
 	for dev in config['devices']:
 
@@ -140,6 +152,10 @@ def print_parameters():
 		print("\nQuerying energy from the following devices")
 	dev_print()
 
+	print("\nFrom the following locations")
+	for loc in sorted(config['locations']):
+		print("\tLocation " + loc)
+
 	print("\nOver the following time period:")
 	config['startDay'] = config['start'][0:10]
 	config['endDay'] = config['end'][0:10]
@@ -150,10 +166,11 @@ def print_parameters():
 		print("From\t" + config['startDay'])
 		print("To\t" + config['endDay'])
 
-	if(config['sum']):
-		print("\nWith sum of power also plotted")
-	else:
-		print("\nWithout sum of power plotted")
+	if(config['type'] == 'plot'):
+		if(config['sum']):
+			print("\nWith sum of power also plotted")
+		else:
+			print("\nWithout sum of power plotted")
 
 print_parameters()
 
@@ -221,15 +238,16 @@ while(confirm != ""):
 		device_list = aws_c.fetchall()
 		devList = [i[0] for i in device_list]
 
-		print(device_list)
-		print(devList)
-
 		if(devType == 'replace'):
 			config['devices'] = devList
+			config['locations'] = confirm_list[devOffset]
 		elif(devType == 'add'):
 			config['devices'] = config['devices'] + devList
+			if confirm_list[devOffset] not in config['locations']:
+				config['locations'] = config['locations'] + confirm_list[devOffset]
 		else:
 			config['devices'] = [x for x in config['devices'] if x not in devList]
+			config['locations'] = [x for x in config['locations'] if x != confirm_list[devOffset]]
 		changes = True
 	elif(confirm_list[0] == 'start' or confirm_list[0] == 'end'):
 		try:
@@ -450,6 +468,11 @@ elif(config['type'] == 'energy'):
 		'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
 
+	# Step 2: Ground Truth
+	aws_c.execute('select sum(energy) from most_recent_gnd_truth where location in ' + loc_list + ' and ' \
+		'date(dayst)>=\'' + config['startDay'] + '\' and date(dayst)<=\'' + config['endDay'] + '\';')
+	gndTruth = aws_c.fetchall()[0][0]
+
 	outfile_pb = open('energy_pb.dat', 'w')
 	outfile_li = open('energy_li.dat', 'w')
 
@@ -468,6 +491,8 @@ elif(config['type'] == 'energy'):
 			outfile_li.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + " " + str(power) + "\n")
 		if(dayEnergy > energyCutoff):
 			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
+
+	total_measured_percent = (total_measured_energy / gndTruth) * 100
 
 	outfile_pb.close()
 	outfile_li.close()
@@ -539,15 +564,29 @@ elif(config['type'] == 'energy'):
 	outfile_pwr.close()
 
 	outfile = open('cdfplot.plt', 'w')
-	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 8in,2.0in\n')
+	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 4in,2.8in\n')
 	outfile.write('set output \"cdfplot.eps\"\n\n')
 
 	outfile.write('unset key\n\n')
 
-	outfile.write('set xlabel \"Device power (W)\"\n')
-	outfile.write('set ylabel \"Percent of Total Energy (%)\"\n')
+	outfile.write('set logscale x\n\n')
 
-	outfile.write('plot \"energy_pwr.dat\" using 1:2 with lines\n\n')
+	outfile.write('set xlabel \"Device power (W)\"\n')
+	outfile.write('set ylabel \"Percent of MELs Energy (%)\"\n')
+	outfile.write('set y2label \"Percent of Total Energy (%)\"\n\n')
+
+	outfile.write('set grid x y mxtics\n\n')
+
+	outfile.write('set xtics .1\n\n')
+
+	outfile.write('set y2tics ' + str(total_measured_percent/10) + '\n')
+	outfile.write('set y2range [0:' + str(total_measured_percent) + ']\n')
+	outfile.write('set format y2 \"\%.0f\"\n\n')
+
+	outfile.write('set xrange [:2000]\n\n')
+
+	outfile.write('plot \"energy_pwr.dat\" using 1:($3*100) axes x1y1 with lines, \\\n')
+	outfile.write('\t\"energy_pwr.dat\" using 1:(100*$2/' + str(gndTruth) + ') axes x1y2 with lines\n')
 
 	outfile.close()
 
