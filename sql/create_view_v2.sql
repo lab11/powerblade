@@ -7,33 +7,40 @@ SHOW FULL TABLES IN powerblade WHERE TABLE_TYPE LIKE 'VIEW';
 # This is a list of the devices that should be active
 # The body of the query selects the highest id value for each device MAC address
 
-CREATE VIEW active_gateways AS
-SELECT t1.* FROM inf_gw_lookup t1 WHERE 
-t1.id=(SELECT MAX(t2.id) FROM inf_gw_lookup t2 WHERE t1.gatewayMAC=t2.gatewayMAC) AND
-((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endtime > utc_timestamp())));
+alter VIEW most_recent_gateways AS
+SELECT t1.* from inf_gw_lookup t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM inf_gw_lookup t2 WHERE t1.gatewayMAC=t2.gatewayMAC and t1.location=t2.location)
+and t1.room is not null;
 
-CREATE VIEW most_recent_powerblades AS
-SELECT t1.* FROM inf_pb_lookup t1 WHERE 
-t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
+ALTER VIEW active_gateways AS
+SELECT * from most_recent_gateways WHERE
+startTime < utc_timestamp() AND
+(remTime is NULL OR remTime > utc_timestamp()) AND
+endTime > utc_timestamp();
 
-CREATE VIEW active_powerblades AS
+ALTER VIEW most_recent_powerblades AS
 SELECT t1.* FROM inf_pb_lookup t1 WHERE 
-t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endtime > utc_timestamp())));
+t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC and t1.deviceName=t2.deviceName);
+
+ALTER VIEW active_powerblades AS
+SELECT * from most_recent_powerblades WHERE
+startTime < utc_timestamp() AND
+(remTime is NULL OR remTime > utc_timestamp()) AND
+endTime > utc_timestamp();
 
 CREATE VIEW most_recent_blinks AS
 SELECT t1.* FROM inf_blink_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_blink_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
-CREATE VIEW active_blinks AS
+ALTER VIEW active_blinks AS
 SELECT t1.* FROM inf_blink_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_blink_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endTime > utc_timestamp())));
+((startTime < utc_timestamp()) AND ((remTime is NULL) OR (remTime > utc_timestamp())));
 
-CREATE VIEW active_lights AS
+ALTER VIEW active_lights AS
 SELECT t1.* FROM inf_light_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < utc_timestamp()) AND ((endTime is NULL) OR (endTime > utc_timestamp())));
+((startTime < utc_timestamp()) AND ((remTime is NULL) OR (remTime > utc_timestamp())));
 
 CREATE VIEW most_recent_lights AS 
 SELECT t1.* FROM inf_light_lookup t1 WHERE

@@ -24,6 +24,11 @@ describe dat_blink;
 CREATE TABLE dat_gnd_truth 
 (id int(11) not null auto_increment, location int(1), dayst datetime, energy decimal(8,2), primary key (id), index(location), index(dayst), index locTime (location, dayst));
 
+alter table inf_pb_lookup add column remTime datetime after startTime;
+alter table inf_gw_lookup add column remTime datetime after startTime;
+alter table inf_light_lookup add column remTime datetime after startTime;
+alter table inf_blink_lookup add column remTime datetime after startTime;
+
 # pb_lookup
 create table inf_ss_pb_lookup (deviceMAC char(16), deviceName varchar(50));
 alter table inf_ss_pb_lookup add column devType varchar(20);
