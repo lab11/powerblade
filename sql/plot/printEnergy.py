@@ -18,7 +18,7 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 
 	curPower = 0
 	cdfEnergy = 0
-	print(str(cdfEnergy) + " " + str(total_measured_energy) + " " + str(gndTruth))
+	#print(str(cdfEnergy) + " " + str(total_measured_energy) + " " + str(gndTruth))
 	measPct = cdfEnergy/total_measured_energy
 	gndPct = cdfEnergy/gndTruth
 	for mac, name, dayEnergy, var, totEnergy, power in pwrData:

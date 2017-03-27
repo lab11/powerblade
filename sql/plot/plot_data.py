@@ -4,15 +4,20 @@ import mylogin
 import MySQLdb
 import json
 
-import datetime
+from datetime import datetime
 import pytch
 
 import os
 import sys
 import subprocess
-from sh import epstopdf, gnuplot
+from sh import epstopdf, gnuplot, mkdir, cp, mv
 
 from printEnergy import printEnergy
+
+query_startDay = datetime.utcnow().strftime('%Y_%m_%d_')
+
+master_saveDir = ".savetest/" + str(query_startDay)
+
 
 # Read config file for start time, end time, and devices
 config = {}
@@ -22,6 +27,7 @@ try:
 	for line in config_file:
 		json_txt += line
 	config = json.loads(json_txt)
+	config['tag'] = ''
 except:
 	config['type'] = 'plot'
 	config['start'] = '2017-01-01 00:00:00'
@@ -29,6 +35,7 @@ except:
 	config['devices'] = ['c098e5700000']
 	config['locations'] = ['0']
 	config['sum'] = False
+	config['tag'] = ''
 
 # Check device list
 
@@ -151,7 +158,7 @@ def print_parameters():
 	if(config['type'] == 'plot'):
 		print("\nPlotting data from the following devices:")
 	else:
-		print("\nQuerying energy from the following devices")
+		print("\nQuerying " + config['type'] + " from the following devices")
 	dev_print()
 
 	print("\nFrom the following locations")
@@ -174,10 +181,13 @@ def print_parameters():
 		else:
 			print("\nWithout sum of power plotted")
 
+	if(config['tag'] != ''):
+		print('\nTag for save file: ' + config['tag'])
+
 print_parameters()
 
 print("\nTo confirm, push enter. To modify:")
-print("\t'type [plot, energy, light]'")
+print("\t'type [plot, energy, power]'")
 print("\t'devices [comma separated 12 or 6 digit macs]' or")
 print("\t'location #'")
 print("\t'start yyyy-mm-dd HH:mm:ss' or")
@@ -197,11 +207,11 @@ while(confirm != ""):
 	if(confirm_list[0] == 'exit'):
 		sys.exit()
 	elif(confirm_list[0] == 'type'):
-		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'light'):
+		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'power'):
 			config['type'] = confirm_list[1]
 			changes = True
 		else:
-			print("Usage is type [plot, energy, light]")
+			print("Usage is type [plot, energy, power]")
 			error = True
 	elif(confirm_list[0] == 'dev' or confirm_list[0] == 'devices'):
 		devType = 'replace'
@@ -257,16 +267,16 @@ while(confirm != ""):
 				confirm_list[1] = '2017-' + confirm_list[1]
 			if(len(confirm_list) == 2):
 				try:
-					datetime.datetime.strptime(confirm_list[1], '%Y-%m-%d')
+					datetime.strptime(confirm_list[1], '%Y-%m-%d')
 					config[confirm_list[0]] = confirm_list[1] + " " + config[confirm_list[0]].split(" ")[1]
 					changes = True
 				except:
-					datetime.datetime.strptime(confirm_list[1], '%H:%M:%S')
+					datetime.strptime(confirm_list[1], '%H:%M:%S')
 					config[confirm_list[0]] = config[confirm_list[0]].split(" ")[0] + " " + confirm_list[1]
 					changes = True
 			else:
 				date_text = confirm_list[1] + " " + confirm_list[2]
-				datetime.datetime.strptime(date_text, '%Y-%m-%d %H:%M:%S')
+				datetime.strptime(date_text, '%Y-%m-%d %H:%M:%S')
 				config[confirm_list[0]] = date_text
 				changes = True
 		except:
@@ -282,6 +292,17 @@ while(confirm != ""):
 		else:
 			config['sum'] = False
 			changes = True
+	elif(confirm_list[0] == 'tag'):
+		if(len(confirm_list) != 2):
+			error = True
+			print("Usage is 'tag [tag]'")
+		elif(confirm_list[1] == '' or confirm_list[1] == 'clear'):
+			config['tag'] = ''
+		elif(os.path.isdir(master_saveDir + confirm_list[1])):
+			error = True
+			print("Error: save directory already exists")
+		else:
+			config['tag'] = confirm_list[1]
 	else:
 		error = True
 		print("Unknown command")
@@ -300,7 +321,31 @@ if(changes):
 
 print("\nRunning queries...\n")
 
+if(config['tag'] == ''):
+	query_startTime = datetime.utcnow().strftime('%H_%M_%S')
+	qu_saveDir = master_saveDir + str(query_startTime) + "/"
+else:
+	qu_saveDir = master_saveDir + config['tag'] + '/'
 
+mkdir(qu_saveDir)
+
+cp('.plotconfig', qu_saveDir)
+
+# Create human readable tag for the test
+configTxt = open(qu_saveDir + 'plotConfig.txt', 'w')
+configTxt.write('PowerBlade Deployment Experiment Data\n\n')
+configTxt.write('\tType:\t\t' + config['type'] + '\n\n')
+configTxt.write('\tStart:\t\t' + config['start'] + '\n')
+configTxt.write('\tEnd:\t\t' + config['end'] + '\n')
+configTxt.write('\tLocations:\t')
+for locs in config['locations']:
+	configTxt.write(locs + ' ')
+configTxt.write('\n\n')
+configTxt.write('\tDevices:\t')
+for devs in config['devices']:
+	configTxt.write(devs + '\n\t\t\t\t')
+configTxt.write('\n')
+configTxt.close()
 
 
 
@@ -312,8 +357,8 @@ print("\nRunning queries...\n")
 
 if(config['type'] == 'plot'):
 
-	dStart = datetime.datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S")
-	dEnd = datetime.datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S")
+	dStart = datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S")
+	dEnd = datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S")
 
 	duration = (dEnd - dStart).total_seconds()
 	downsample = int(duration/10000)
@@ -372,24 +417,26 @@ if(config['type'] == 'plot'):
 
 
 	# Clean up anything left from last time (in the case of errors)
-	if(os.path.exists('datfile.eps')):
-		os.remove('datfile.eps')
-	if(os.path.exists('datfile.pdf')):
-		os.remove('datfile.pdf')
+	# if(os.path.exists('datfile.eps')):
+	# 	os.remove('datfile.eps')
+	# if(os.path.exists('datfile.pdf')):
+	# 	os.remove('datfile.pdf')
 
 	# Generate plot and convert to PDF
 	gnuplot('datfile.plt')
 	epstopdf('datfile.eps')
 
 	# Show plot file
-	img = subprocess.Popen(['open', 'datfile.pdf'])
-	img.wait()
+	# img = subprocess.Popen(['open', 'datfile.pdf'])
+	# img.wait()
 
-	# Remove temporary files
+	# Remove temporary file
 	os.remove('datfile.eps')
-	os.remove('datfile.plt')
 
-
+	# Move data to saveDir
+	mv('datfile.dat', qu_saveDir)
+	mv('datfile.plt', qu_saveDir)
+	mv('datfile.pdf', qu_saveDir)
 
 
 
@@ -415,12 +462,12 @@ elif(config['type'] == 'energy'):
 		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
 	# Max power - maximum power per device over the time period
 	aws_c.execute('alter view maxPower_pb as ' \
-		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower) ' \
+		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devDevPower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power != 120.13 ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 	aws_c.execute('alter view avgPower_pb as ' \
-		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devPower) ' \
+		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devDevPower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
@@ -549,17 +596,65 @@ elif(config['type'] == 'energy'):
 
 	outfile.close()
 
+	# Clean up anything left from last time (in the case of errors)
+	# if(os.path.exists('breakdown.eps')):
+	# 	os.remove('breakdown.eps')
+	# if(os.path.exists('breakdown.pdf')):
+	# 	os.remove('breakdown.pdf')
+
+	# Generate plot and convert to PDF
+	gnuplot('breakdown.plt')
+	epstopdf('breakdown.eps')
+
+	# Show plot file
+	# img = subprocess.Popen(['open', 'datfile.pdf'])
+	# img.wait()
+
+	# Remove temporary file
+	os.remove('breakdown.eps')
+
+	# Move data to saveDir
+	mv('energy.dat', qu_saveDir)
+	mv('energy_pb.dat', qu_saveDir)
+	mv('energy_li.dat', qu_saveDir)
+	mv('breakdown.plt', qu_saveDir)
+	mv('breakdown.pdf', qu_saveDir)
+
 	printEnergy(expData, total_measured_energy, gndTruth, 'energy')
 
+	gnuplot('energy_pwr.plt')
+	epstopdf('energy_pwr.eps')
+
+	os.remove('energy_pwr.eps')
+
+	mv('energy_pwr.dat', qu_saveDir)
+	mv('energy_pwr.plt', qu_saveDir)
+	mv('energy_pwr.pdf', qu_saveDir)
+
 
 ####################################################################
 #
-# This section is for the light option (temporary)
+# This section is for the power option (temporary)
 #
 ####################################################################
 
-elif(config['type'] == 'light'):
+elif(config['type'] == 'power'):
+
+	print("Running power")
+
+	# Max power - maximum power per device over the time period
+	print('insert into perm_maxPower_pb (deviceMAC, maxPower) ' \
+		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devDevPower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power != 120.13 ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 
 
-	print("Running light")
+
+
+
+
+
+
+
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 from printEnergy import printEnergy
 
 total_measured = 0
@@ -8,7 +9,11 @@ gndTruth = 0
 pwrData = []
 
 for inData in sys.argv[1:]:
-	infile = open(inData, 'r')
+
+	if os.path.isdir(inData):
+		infile = open(inData + 'energy.dat', 'r')
+	else:
+		infile = open(inData, 'r')
 
 	for line in infile:
 		if(line[0] == '#'):

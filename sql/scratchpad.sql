@@ -137,11 +137,12 @@ and deviceMAC in ("c098e570015e","c098e57001b1")
 and energy!=999999.99 
 group by deviceMAC, dayst;
 
-explain select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower) 
-where timestamp>='2017-3-20  00:00:00' and timestamp<='2017-03-22 23:59:59' 
-and power != 120.13 
+select deviceMAC, avg(power) as maxPower from dat_powerblade force index (devDevPower) 
+where power != 120.13 
 and deviceMAC in ("c098e570021a") 
 group by deviceMAC;
+
+where timestamp>='2017-3-20  00:00:00' and timestamp<='2017-03-22 23:59:59' ;
 
 show processlist;
 
