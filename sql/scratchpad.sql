@@ -86,7 +86,7 @@ select * from most_recent_lights where location=5;
 select * from most_recent_powerblades where deviceMAC>='c098e57001a0' and deviceMAC<='c098e57001ab';
 select * from most_recent_powerblades where deviceMAC>'c098e570024b' and deviceMAC<'c098e570026e';
 
-select * from most_recent_powerblades where location=0 order by deviceMAC;
+select * from active_powerblades where location=0 order by deviceMAC;
 
 select * from dat_powerblade where deviceMAC='c098e570017B' and power>200 order by id desc limit 10;
 select * from inf_gw_status order by id desc;
@@ -124,7 +124,25 @@ on t1.deviceMAC=t3.deviceMAC
 order by t2.avgEnergy;
 
 
+select * from day_energy;
+
+select * from dat_powerblade where deviceMAC='c098e57001bb' order by id desc limit 1000000;
+select * from dat_powerblade where flags>66 limit 10;
 
 
+alter view day_energy_pb as
+select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devEnergy) 
+where timestamp>='2017-03-20 00:00:00' and timestamp<='2017-03-22 23:59:59' 
+and deviceMAC in ("c098e570015e","c098e57001b1")
+and energy!=999999.99 
+group by deviceMAC, dayst;
+
+explain select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower) 
+where timestamp>='2017-3-20  00:00:00' and timestamp<='2017-03-22 23:59:59' 
+and power != 120.13 
+and deviceMAC in ("c098e570021a") 
+group by deviceMAC;
+
+show processlist;
 
 

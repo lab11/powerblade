@@ -4,8 +4,8 @@ select t1.location, case when t3.gndTruth is not null then 1 else 0 end as gndTr
 inf_dep_pb t1
 join inf_dep_gw t2
 on t1.location=t2.location
-left join (select location as gndTruth from dat_gnd_truth group by location) t3
-on t1.location=t3.gndTruth
+left join inf_gnd_truth_lookup t3
+on t1.location=t3.location
 order by location;
 
 create view inf_dep_pb as
@@ -52,4 +52,25 @@ describe inf_pb_lookup;
 
 select * from dat_powerblade where deviceMAC='c098e5700139' order by id asc limit 100;
 select * from dat_powerblade where gatewayMAC in ('c098e5c00029', 'c098e5c00029') and deviceMAC='c098e570005b' order by id desc;
+
+
+
+'alter view maxPower_pb as ' \
+		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power != 120.13 ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;'
+        
+select deviceMAC, max(power) as maxPower from dat_powerblade force index (devPower)
+where timestamp>(select startTime from ;
+
+select deviceMAC, count(*) as count from most_recent_powerblades group by deviceMAC order by count desc;
+
+select * from most_recent_powerblades where deviceMAC='c098e57000f3';
+
+
+select * from dat_powerblade force index (devEnergy)
+where timestamp<'2017-03-26 23:59:59'
+and deviceMAC='c098e57000f3';
+
 
