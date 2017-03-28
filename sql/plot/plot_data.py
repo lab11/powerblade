@@ -456,21 +456,25 @@ elif(config['type'] == 'energy'):
 	# Step 0: Alter the views acccording to the specified query paremeters
 	# Day energy: maximum energy minus minimum energy for each device for each day
 	print("Altering views for energy query...\n")
-	aws_c.execute('alter view day_energy_pb as ' \
+	#aws_c.execute
+	print('alter view day_energy_pb as ' \
 		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
 	# Max power - maximum power per device over the time period
-	aws_c.execute('alter view maxPower_pb as ' \
+	#aws_c.execute
+	print('alter view maxPower_pb as ' \
 		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devDevPower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power != 120.13 ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-	aws_c.execute('alter view avgPower_pb as ' \
+	#aws_c.execute
+	print('alter view avgPower_pb as ' \
 		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devDevPower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+	exit()
 
 	day_en_str = ''
 	avg_pwr_str = ''

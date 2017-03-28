@@ -137,12 +137,24 @@ and deviceMAC in ("c098e570015e","c098e57001b1")
 and energy!=999999.99 
 group by deviceMAC, dayst;
 
-select deviceMAC, avg(power) as maxPower from dat_powerblade force index (devDevPower) 
-where power != 120.13 
+explain select deviceMAC, avg(power) as maxPower from dat_powerblade# force index (devDevPower) 
+where timestamp>='2017-3-20  00:00:00' and timestamp<='2017-03-22 23:59:59'
+and power != 120.13 
 and deviceMAC in ("c098e570021a") 
 group by deviceMAC;
 
-where timestamp>='2017-3-20  00:00:00' and timestamp<='2017-03-22 23:59:59' ;
+select t1.deviceMAC, t2.deviceName, t1.maxPower from 
+(select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) 
+where timestamp>='2017-3-25  00:00:00' and timestamp<='2017-3-27  23:59:59' 
+and power != 120.13 
+and deviceMAC in ("c098e570015e","c098e57001b1","c098e570019f","c098e57001c4","c098e57001f5","c098e570015e","c098e57001b6","c098e57001c3","c098e5700197","c098e57001b9","c098e57001c0","c098e57001c9","c098e57001be","c098e5700286","c098e570027d","c098e57001b0","c098e570027f","c098e5700284","c098e57001b2","c098e5700190","c098e570019d","c098e570005d","c098e57001bb","c098e57001c2","c098e57001f4","c098e57001b8","c098e57001c1","c098e5700198","c098e57001bd","c098e57001c7","c098e57001f6","c098e57001b3","c098e570027e","c098e5700285","c098e57001af","c098e570027b","c098e5700280","c098e570019b","c098e57001ba","c098e57001c5","c098e57001ed","c098e57001b7","c098e57001c8","c098e57001ee","c098e57001bc","c098e57001c6","c098e57001f3","c098e57001bf","c098e5700283","c098e5700281","c098e57001b4","c098e5700282","c098e570027c") 
+group by deviceMAC) t1
+join most_recent_powerblades t2
+on t1.deviceMAC=t2.deviceMAC;
+
+
+
+select * from dat_blink where gatewayMAC='c098e5c00034' and deviceMAC not in ('c098e59000d3', 'c098e59000dd', 'c098e59000d8', 'c098e59000d4') order by id desc;
 
 show processlist;
 
