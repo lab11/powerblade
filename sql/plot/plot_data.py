@@ -27,7 +27,8 @@ try:
 	for line in config_file:
 		json_txt += line
 	config = json.loads(json_txt)
-	config['tag'] = ''
+	if(config['tag'] != '' and config['tag'] != 'info'):
+		config['tag'] = ''
 except:
 	config['type'] = 'plot'
 	config['start'] = '2017-01-01 00:00:00'
@@ -298,11 +299,16 @@ while(confirm != ""):
 			print("Usage is 'tag [tag]'")
 		elif(confirm_list[1] == '' or confirm_list[1] == 'clear'):
 			config['tag'] = ''
+			changes = True
+		elif(confirm_list[1] == 'info'):
+			config['tag'] = 'info'
+			changes = True
 		elif(os.path.isdir(master_saveDir + confirm_list[1])):
 			error = True
 			print("Error: save directory already exists")
 		else:
 			config['tag'] = confirm_list[1]
+			changes = True
 	else:
 		error = True
 		print("Unknown command")
@@ -324,6 +330,12 @@ print("\nRunning queries...\n")
 if(config['tag'] == ''):
 	query_startTime = datetime.utcnow().strftime('%H_%M_%S')
 	qu_saveDir = master_saveDir + str(query_startTime) + "/"
+elif(config['tag'] == 'info'):
+	qu_saveDir = master_saveDir + 'l'
+	for loc in config['locations']:
+		qu_saveDir += '_' + loc
+	qu_saveDir += '_s_' + datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S").strftime('%m_%d')
+	qu_saveDir += '_e_' + datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S").strftime('%m_%d')
 else:
 	qu_saveDir = master_saveDir + config['tag'] + '/'
 
@@ -511,14 +523,15 @@ elif(config['type'] == 'energy'):
 
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
-	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, t3.avgPower from ' \
+	# aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, t3.avgPower from ' \
+	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, 0 from ' \
 		'active_devices t1 ' \
 		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
-		'on t1.deviceMAC=t2.deviceMAC '
-		'join avg_power t3 ' \
-		'on t1.deviceMAC=t3.deviceMAC ' \
-		'order by t2.avgEnergy;')
+		'on t1.deviceMAC=t2.deviceMAC;')
+		# 'join avg_power t3 ' \
+		# 'on t1.deviceMAC=t3.deviceMAC ' \
+		# 'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
 
 	# Step 2: Ground Truth
@@ -651,6 +664,20 @@ elif(config['type'] == 'power'):
 		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devDevPower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power != 120.13 ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+
+		# Max power - maximum power per device over the time period
+	#aws_c.execute
+	print('alter view maxPower_pb as ' \
+		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devDevPower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power != 120.13 ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+	#aws_c.execute
+	print('alter view avgPower_pb as ' \
+		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devDevPower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 
 
