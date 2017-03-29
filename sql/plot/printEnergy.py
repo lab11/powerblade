@@ -5,7 +5,7 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 		return
 
 	# CDF Printout
-	pwrData = sorted(expData, key=lambda dev: dev[5])
+	pwrData = sorted(expData, key=lambda dev: dev[7])
 
 	total_measured_percent = (total_measured_energy / gndTruth) * 100
 
@@ -24,14 +24,14 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 	#print(str(cdfEnergy) + " " + str(total_measured_energy) + " " + str(gndTruth))
 	measPct = cdfEnergy/total_measured_energy
 	gndPct = cdfEnergy/gndTruth
-	for mac, name, dayEnergy, var, totEnergy, power in pwrData:
+	for mac, name, devCat, devType, dayEnergy, var, totEnergy, power in pwrData:
 		# Test if this power is the same as the one before it
 		if power != curPower:
 			print(str(curPower) + " " + str(cdfEnergy) + " " + str(measPct) + " " + str(gndPct))		# Print the last device and the energy sum
 			outfile_pwr.write(str(curPower) + "\t" + str(cdfEnergy) + "\t" + str(measPct) + "\t" + str(gndPct) + "\n")
 			curPower = power
 
-		cdfEnergy += float(totEnergy) 	# Either way, increment total energy (done after printing because that prints the previous power level)
+		cdfEnergy += float(dayEnergy) 	# Either way, increment total energy (done after printing because that prints the previous power level)
 
 		measPct = cdfEnergy/total_measured_energy
 		gndPct = cdfEnergy/gndTruth
