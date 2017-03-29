@@ -124,6 +124,12 @@ and power != 120.13
 and deviceMAC in ("c098e57000f6","c098e57000d9","c098e57000e8","c098e57000d5","c098e57000fb","c098e57000bf","c098e57000e3","c098e570006b","c098e57000ea","c098e57000f9","c098e57000e1","c098e57000e9","c098e57000d1","c098e57000eb","c098e57000cd","c098e57000d8","c098e5700115","c098e57000ee","c098e57000ed","c098e57000d6","c098e57000ce","c098e57000ec","c098e57000cf","c098e57000f4","c098e57000c0","c098e5700100","c098e57000f3") 
 group by deviceMAC;
 
+select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devTimePower) 
+where timestamp>='2017-1-13  00:00:00' and timestamp<='2017-3-27  23:59:59' 
+and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) 
+and deviceMAC in ("c098e57000f6","c098e57000d9","c098e57000e8","c098e57000d5","c098e57000fb","c098e57000bf","c098e57000e3","c098e570006b","c098e57000ea","c098e57000f9","c098e57000e1","c098e57000e9","c098e57000d1","c098e57000eb","c098e57000cd","c098e57000d8","c098e5700115","c098e57000ee","c098e57000ed","c098e57000d6","c098e57000ce","c098e57000ec","c098e57000cf","c098e57000f4","c098e57000c0","c098e5700100","c098e57000f3") 
+group by deviceMAC;
+
 
 select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devTimePower) 
 where timestamp>='2017-3-01  00:00:00' and timestamp<='2017-3-27  23:59:59' 
@@ -131,8 +137,38 @@ and power>(select 0.1*maxPower from mr_maxPower_pb t2 where t1.deviceMAC=t2.devi
 and deviceMAC in ("c098e57000f6","c098e57000d9","c098e57000e8","c098e57000d5","c098e57000fb","c098e57000bf","c098e57000e3","c098e570006b","c098e57000ea","c098e57000f9","c098e57000e1","c098e57000e9","c098e57000d1","c098e57000eb","c098e57000cd","c098e57000d8","c098e5700115","c098e57000ee","c098e57000ed","c098e57000d6","c098e57000ce","c098e57000ec","c098e57000cf","c098e57000f4","c098e57000c0","c098e5700100","c098e57000f3") 
 group by deviceMAC;
 
+select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devTimeEnergy) 
+where timestamp>='2017-1-13  00:00:00'# and timestamp<='2017-3-27  23:59:59' 
+and deviceMAC in ("c098e57000f6","c098e57000d9","c098e57000e8","c098e57000d5","c098e57000fb","c098e57000bf","c098e57000e3","c098e570006b","c098e57000ea","c098e57000f9","c098e57000e1","c098e57000e9","c098e57000d1","c098e57000eb","c098e57000cd","c098e57000d8","c098e5700115","c098e57000ee","c098e57000ed","c098e57000d6","c098e57000ce","c098e57000ec","c098e57000cf","c098e57000f4","c098e57000c0","c098e5700100","c098e57000f3") 
+and energy!=999999.99 
+group by deviceMAC, dayst;
 
 
+
+select * from day_energy_pb;
+
+select deviceMAC, timestamp from dat_powerblade force index (devDevPower) where power=0 group by deviceMAC;
+
+select deviceMAC, avg(power) from dat_powerblade force index (devDevPower) group by deviceMAC;
+
+select * from dat_powerblade force index (devTimePower) where deviceMAC='c098e5700195' and date(timestamp)<='2017-03-27' order by timestamp desc;# ;
+
+
+alter view dev_resets as 
+select date(timestamp) as dayst, deviceMAC,
+case when min(energy)<1 then 1 else 0 end as devReset
+from dat_powerblade force index(devTimeEnergy)
+where timestamp>'2017-02-27 00:00:00'
+and deviceMAC in ('c098e5700193', 'c098e5700195')
+group by dayst, deviceMAC;
+
+# DONT DELETE THIS - not saved elsewhere
+alter view days_w_resets as
+select dayst from dev_resets where devReset=1
+group by dayst;
+
+select * from dev_resets order by deviceMAC asc, dayst asc;
+select * from days_w_resets order by dayst asc;
 
 
 

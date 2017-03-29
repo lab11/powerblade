@@ -497,6 +497,13 @@ elif(config['type'] == 'energy'):
 		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devTimeEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
+	aws_c.execute('alter view dev_resets as ' \
+		'select date(timestamp) as dayst, deviceMAC, ' \
+		'case when min(energy)<1 then 1 else 0 end as devReset ' \
+		'from dat_powerblade force index(devTimeEnergy) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and deviceMAC in ' + dev_powerblade + ' ' \
+		'group by dayst, deviceMAC;')
 	# Max power - maximum power per device over the time period
 	aws_c.execute('alter view maxPower_pb as ' \
 		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
