@@ -1,11 +1,15 @@
 # Deployment stats
 alter view inf_dep_stats as
-select t1.location, case when t3.gndTruth is not null then 1 else 0 end as gndTruth, greatest(t1.startTime, t2.startTime) as startTime, least(t1.endTime, t2.endTime) as endTime, least(t1.duration, t2.duration) as duration, t1.pb_count, t2.gw_count from
+select t1.location, case when t3.gndTruth is not null then 1 else 0 end as gndTruth, greatest(t1.startTime, t2.startTime) as startTime, least(t1.endTime, t2.endTime) as endTime, least(t1.duration, t2.duration) as duration, t1.pb_count, t2.gw_count, t4.bl_count, t5.li_count from
 inf_dep_pb t1
 join inf_dep_gw t2
 on t1.location=t2.location
 left join inf_gnd_truth_lookup t3
 on t1.location=t3.location
+left join inf_dep_blees t4
+on t1.location=t4.location
+left join inf_dep_lig t5
+on t1.location=t5.location
 order by location;
 
 create view inf_dep_pb as
@@ -16,7 +20,25 @@ from most_recent_powerblades
 where location!=10
 group by location;
 
+create view inf_dep_blees as 
+select location, count(*) as bl_count
+from most_recent_lights
+where location!=10
+and deviceType='BLEES'
+group by location;
+
+create view inf_dep_lig as 
+select location, count(*) as li_count
+from most_recent_lights
+where location!=10
+and deviceType='Ligeiro'
+group by location;
+
+select * from inf_dep_blees;
+
 select * from inf_dep_pb;
+
+select * from inf_dep_lig;
 
 create view inf_dep_gw as
 select location, min(startTime) as startTime, least(utc_date(), max(endTime)) as endTime,
@@ -33,10 +55,17 @@ select * from inf_dep_stats;
 
 select count(*) as numDeps, avg(duration) as avgDuration, stddev(duration) as stdDuration, min(duration) as minDuration, max(duration) as maxDuration, 
 sum(pb_count) as sumPb, avg(pb_count) as  avgPb, stddev(pb_count) as stdPb, min(pb_count) as minPb, max(pb_count) as maxPb,
-sum(gw_count) as sumGw, avg(gw_count) as avgGw, min(gw_count) as minGw, max(gw_count) as maxGw 
+sum(gw_count) as sumGw, avg(gw_count) as avgGw, min(gw_count) as minGw, max(gw_count) as maxGw,
+sum(bl_count) as sumBl, avg(bl_count) as avgBl, min(bl_count) as minBl, max(bl_count) as maxBl,
+sum(li_count) as sumLi, avg(li_count) as avgLi, min(li_count) as minLi, max(li_count) as maxLi
 from inf_dep_stats;
 where duration > 7;
  and duration < 168;
+ 
+select max(t1.id)/1E9 as countPb, max(t2.id)/1E6 as countBl, max(t3.id)/1E3 as countLi
+from dat_powerblade t1
+join dat_blees t2
+join dat_ligeiro t3;
 
 select * from most_recent_powerblades where location=3;
 
