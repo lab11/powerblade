@@ -46,15 +46,15 @@ CREATE VIEW most_recent_lights AS
 SELECT t1.* FROM inf_light_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
-CREATE VIEW active_devices AS
-SELECT deviceMAC, deviceName, location from active_powerblades
-UNION SELECT deviceMAC, deviceName, location from active_lights
-UNION SELECT deviceMAC, room, location from active_blinks;
+ALTER VIEW active_devices AS
+SELECT deviceMAC, deviceName, location, category, deviceType from active_powerblades
+UNION SELECT deviceMAC, deviceName, location, 'overhead', 'light' from active_lights
+UNION SELECT deviceMAC, room, location, 'overhead', 'light' from active_blinks;
 
-create VIEW most_recent_devices_2 AS
-SELECT deviceMAC, deviceName, location from most_recent_powerblades
-UNION SELECT deviceMAC, deviceName, location from most_recent_lights
-UNION SELECT deviceMAC, room, location from most_recent_blinks;
+ALTER VIEW most_recent_devices AS
+SELECT deviceMAC, deviceName, location, category, deviceType from most_recent_powerblades
+UNION SELECT deviceMAC, deviceName, location, 'overhead', 'light' from most_recent_lights
+UNION SELECT deviceMAC, room, location, 'overhead', 'light' from most_recent_blinks;
 
 CREATE VIEW avg_lux AS
 SELECT deviceMAC, avg(lux) as avgLux FROM dat_blees FORCE INDEX (devLux)
@@ -191,13 +191,16 @@ WHERE t1.location=t2.location AND t1.dayst=t2.dayst);
 
 
 
-CREATE VIEW mr_maxPower_pb AS
+ALTER VIEW mr_maxPower_pb AS
 SELECT t1.* from perm_maxPower_pb t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM perm_maxPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
 CREATE VIEW mr_avgPower_pb AS
 SELECT t1.* from perm_avgPower_pb t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM perm_avgPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
+drop view mr_maxPower_pb;
+drop view mr_avgPower_pb;
 
 
 show processlist;
