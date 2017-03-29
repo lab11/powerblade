@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
 def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
+	if gndTruth == 0 or gndTruth == None:
+		return
+
 	# CDF Printout
 	pwrData = sorted(expData, key=lambda dev: dev[5])
 
 	total_measured_percent = (total_measured_energy / gndTruth) * 100
 
-	outfilePath = outfileStr + '_pwr.dat'
-	pltFilePath = outfileStr + '_pwr.plt'
+	outfilePath = outfileStr + '_pwrCDF.dat'
+	pltFilePath = outfileStr + '_pwrCDF.plt'
 
 	outfile_pwr = open(outfilePath, 'w')
 	outfile_pwr.write('# total measured energy: ' + str(total_measured_energy) + '\n')
@@ -40,7 +43,7 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 
 	outfile = open(pltFilePath, 'w')
 	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 4in,2.8in\n')
-	outfile.write('set output \"' + outfileStr + '_pwr.eps\"\n\n')
+	outfile.write('set output \"' + outfileStr + '_pwrCDF.eps\"\n\n')
 
 	outfile.write('unset key\n\n')
 

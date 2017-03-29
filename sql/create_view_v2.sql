@@ -191,7 +191,19 @@ WHERE t1.location=t2.location AND t1.dayst=t2.dayst);
 
 
 
+CREATE VIEW mr_maxPower_pb AS
+SELECT t1.* from perm_maxPower_pb t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM perm_maxPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
+CREATE VIEW mr_avgPower_pb AS
+SELECT t1.* from perm_avgPower_pb t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM perm_avgPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
+
+show processlist;
+select * from perm_maxPower_pb;
+select * from mr_maxPower_pb;
+select * from mr_avgPower_pb;
 
 
 
