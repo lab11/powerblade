@@ -15,6 +15,8 @@ from sh import epstopdf, gnuplot, mkdir, cp, mv
 from printEnergy import printEnergy
 from breakdown import breakdown
 
+import math
+
 query_startDay = datetime.utcnow().strftime('%Y_%m_%d_')
 
 master_saveDir = os.environ['PB_DATA'] + "/savetest/" + str(query_startDay)
@@ -61,24 +63,35 @@ def check_tag():
 	global qu_saveDir
 	global config
 
-	if(config['tag'] == ''):
-		query_startTime = datetime.utcnow().strftime('%H_%M_%S')
-		qu_saveDir = master_saveDir + str(query_startTime) + '/'
-	elif(config['tag'] == 'info'):
-		qu_saveDir = master_saveDir + 'l'
-		for loc in config['locations']:
-			qu_saveDir += loc
-		qu_saveDir += '_' + config['type']
-		if(config['type'] != 'power'):
-			qu_saveDir += '_s' + datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S").strftime('%m%d')
-			qu_saveDir += '_e' + datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S").strftime('%m%d')
-		qu_saveDir += '/'
-		if(os.path.isdir(qu_saveDir)):
-			#print("Error: cant save to this folder, experiment already exists. Changing to time tagging")
-			#error = True
-			config['tag'] = ''
-	else:
-		qu_saveDir = master_saveDir + config['tag'] + '/'
+	query_startTime = datetime.utcnow().strftime('%H_%M_%S')
+	qu_saveDir = master_saveDir + str(query_startTime)
+	qu_saveDir += '_l'
+	for loc in config['locations']:
+		qu_saveDir += loc
+	qu_saveDir += '_' + config['type']
+	if(config['type'] != 'results'):
+		qu_saveDir += '_s' + datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S").strftime('%m%d')
+		qu_saveDir += '_e' + datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S").strftime('%m%d')
+	qu_saveDir += '/'
+
+	# if(config['tag'] == ''):
+	# 	query_startTime = datetime.utcnow().strftime('%H_%M_%S')
+	# 	qu_saveDir = master_saveDir + str(query_startTime) + '/'
+	# elif(config['tag'] == 'info'):
+	# 	qu_saveDir = master_saveDir + 'l'
+	# 	for loc in config['locations']:
+	# 		qu_saveDir += loc
+	# 	qu_saveDir += '_' + config['type']
+	# 	if(config['type'] != 'power'):
+	# 		qu_saveDir += '_s' + datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S").strftime('%m%d')
+	# 		qu_saveDir += '_e' + datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S").strftime('%m%d')
+	# 	qu_saveDir += '/'
+	# 	if(os.path.isdir(qu_saveDir)):
+	# 		#print("Error: cant save to this folder, experiment already exists. Changing to time tagging")
+	# 		#error = True
+	# 		config['tag'] = ''
+	# else:
+	# 	qu_saveDir = master_saveDir + config['tag'] + '/'
 
 def dev_print():
 	global loc_list
@@ -188,23 +201,29 @@ def print_parameters():
 
 	if(config['type'] == 'plot'):
 		print("\nPlotting data from the following devices:")
-	else:
+		dev_print()
+	elif(config['type'] == 'energy'):
 		print("\nQuerying " + config['type'] + " from the following devices")
-	dev_print()
-
-	print("\nFrom the following locations")
-	for loc in sorted(config['locations']):
-		print("\tLocation " + loc)
-
-	print("\nOver the following time period:")
-	config['startDay'] = config['start'][0:10]
-	config['endDay'] = config['end'][0:10]
-	if(config['type'] == 'plot'):
-		print("From\t" + config['start'])
-		print("To\t" + config['end'])
+		dev_print()
 	else:
-		print("From\t" + config['startDay'])
-		print("To\t" + config['endDay'])
+		print("\nQuerying " + config['type'])
+
+	if(config['type'] != 'results'):
+		print("\nFrom the following locations")
+		for loc in sorted(config['locations']):
+			print("\tLocation " + loc)
+
+	if(config['type'] != 'results'):
+		print("\nOver the following time period:")
+		config['startDay'] = config['start'][0:10]
+		config['endDay'] = config['end'][0:10]
+		if(config['type'] == 'plot'):
+			print("From\t" + config['start'])
+			print("To\t" + config['end'])
+		#elif(config['type'] == 'energy'):
+		else:
+			print("From\t" + config['startDay'])
+			print("To\t" + config['endDay'])
 
 	if(config['type'] == 'plot'):
 		if(config['sum']):
@@ -212,13 +231,13 @@ def print_parameters():
 		else:
 			print("\nWithout sum of power plotted")
 
-	if(config['tag'] != ''):
+	if(config['type'] == 'energy' and config['tag'] != ''):
 		print('\nTag for save file: ' + config['tag'])
 
 print_parameters()
 
 print("\nTo confirm, push enter. To modify:")
-print("\t'type [plot, energy, power]'")
+print("\t'type [plot, energy, results]'")
 print("\t'devices [comma separated 12 or 6 digit macs]' or")
 print("\t'location #'")
 print("\t'start yyyy-mm-dd HH:mm:ss' or")
@@ -238,11 +257,11 @@ while(confirm != ""):
 	if(confirm_list[0] == 'exit'):
 		sys.exit()
 	elif(confirm_list[0] == 'type'):
-		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'power'):
+		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'results'):
 			config['type'] = confirm_list[1]
 			changes = True
 		else:
-			print("Usage is type [plot, energy, power]")
+			print("Usage is type [plot, energy, results]")
 			error = True
 	elif(confirm_list[0] == 'dev' or confirm_list[0] == 'devices'):
 		devType = 'replace'
@@ -323,22 +342,22 @@ while(confirm != ""):
 		else:
 			config['sum'] = False
 			changes = True
-	elif(confirm_list[0] == 'tag'):
-		if(len(confirm_list) != 2):
-			error = True
-			print("Usage is 'tag [tag]'")
-		elif(confirm_list[1] == '' or confirm_list[1] == 'clear'):
-			config['tag'] = ''
-			changes = True
-		elif(confirm_list[1] == 'info'):
-			config['tag'] = 'info'
-			changes = True
-		elif(os.path.isdir(master_saveDir + confirm_list[1])):
-			error = True
-			print("Error: save directory already exists")
-		else:
-			config['tag'] = confirm_list[1]
-			changes = True
+	# elif(confirm_list[0] == 'tag'):
+	# 	if(len(confirm_list) != 2):
+	# 		error = True
+	# 		print("Usage is 'tag [tag]'")
+	# 	elif(confirm_list[1] == '' or confirm_list[1] == 'clear'):
+	# 		config['tag'] = ''
+	# 		changes = True
+	# 	elif(confirm_list[1] == 'info'):
+	# 		config['tag'] = 'info'
+	# 		changes = True
+	# 	elif(os.path.isdir(master_saveDir + confirm_list[1])):
+	# 		error = True
+	# 		print("Error: save directory already exists")
+	# 	else:
+	# 		config['tag'] = confirm_list[1]
+	# 		changes = True
 	elif(confirm_list[0] == 'pass'):
 		error = True
 	else:
@@ -359,6 +378,12 @@ if(changes):
 	if(raw_input("\nSave changes to config file? [y/n]: ") == "y"):
 		with open('.plotconfig', 'w') as outfile:
 		    json.dump(config, outfile)
+
+if(config['type'] == 'energy'):
+	if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
+		save_to_final = True
+	else:
+		save_to_final = False
 
 
 print("\nRunning queries...\n")
@@ -499,7 +524,8 @@ elif(config['type'] == 'energy'):
 		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
 	aws_c.execute('alter view dev_resets as ' \
 		'select date(timestamp) as dayst, deviceMAC, ' \
-		'case when min(energy)<1 then 1 else 0 end as devReset ' \
+		'min(energy) as minEnergy, '
+		'case when min(energy)<1.75 then 1 else 0 end as devReset ' \
 		'from dat_powerblade force index(devTimeEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' ' \
@@ -546,7 +572,8 @@ elif(config['type'] == 'energy'):
 		day_en_str += ' union select * from day_energy_ligeiro'
 		avg_pwr_str += ' union (select deviceMAC, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
 
-	aws_c.execute('alter view day_energy as select * from day_energy_pb' + day_en_str + ';')
+	aws_c.execute('alter view day_energy as select * from day_energy_pb tta where ' \
+		'(select devReset from dev_resets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0' + day_en_str + ';')
 	aws_c.execute('alter view avg_power as select * from avgPower_pb' + avg_pwr_str + ';')
 
 	# Step 1: Unified query for energy and power
@@ -560,18 +587,27 @@ elif(config['type'] == 'energy'):
 		'on t1.deviceMAC=t3.deviceMAC ' \
 		'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
-	# aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, 0 from ' \
+	#aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, 0 from ' \
 
 	# Step 2: Ground Truth
-	aws_c.execute('select avg(energy), count(*) from most_recent_gnd_truth where location in ' + loc_list + ' and ' \
-		'date(dayst)>=\'' + config['startDay'] + '\' and date(dayst)<=\'' + config['endDay'] + '\';')
-	gndTruth = aws_c.fetchall()[0]
+	aws_c.execute('select location, avg(energy), count(*) from most_recent_gnd_truth where location in ' + loc_list + ' and ' \
+		'date(dayst)>=\'' + config['startDay'] + '\' and date(dayst)<=\'' + config['endDay'] + '\' ' \
+		'group by location;')
+	gndTruth = aws_c.fetchall()
 
-	duration_days = duration / 86400
-	missing_days = duration_days - gndTruth[1]
+	duration_days = int(math.ceil(duration / 86400))
 
-	outfile_pb = open('energy_pb.dat', 'w')
-	outfile_li = open('energy_li.dat', 'w')
+	tot_gndTruth = 0
+	min_days = duration_days
+	for truth in gndTruth:
+		tot_gndTruth += truth[1]
+		if truth[2] < min_days:
+			min_days = truth[2]
+
+	missing_days = duration_days - min_days
+
+	outfile_pb = open('breakdown_pb.dat', 'w')
+	outfile_li = open('breakdown_li.dat', 'w')
 	outfile = open ('tot_energy.dat', 'w')
 
 	labelstr = ""
@@ -584,70 +620,23 @@ elif(config['type'] == 'energy'):
 		total_measured_energy += dayEnergy
 		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(loc) + " " + str(devCat) + " " + str(devType) + " " + str(dayEnergy) + " " + str(var) + " " + str(totEnergy) + " " + str(power))
 		outfile.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(loc) + "\t" + str(devCat) + "\t" + str(devType) + "\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + "\t" + str(power) + "\n")
+		
 		if(mac[6:8] == '70'):
-			outfile_pb.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + "\t" + str(power) + "\n")
+			outfile_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
 		else:
-			outfile_li.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + "\t" + str(power) + "\n")
+			outfile_li.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
+		
 		if(dayEnergy > energyCutoff):
 			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
 
 	outfile.write('# total measured energy: ' + str(total_measured_energy) + '\n')
-	outfile.write('# gnd truth: ' + str(gndTruth[0]) + '\n')
+	outfile.write('# gnd truth: ' + str(tot_gndTruth) + '\n')
 	outfile.write('# missing days: ' + str(missing_days) + '\n')
 
 	outfile_pb.close()
 	outfile_li.close()
 
-	outfile = open('breakdown.plt', 'w')
-	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 8in,2.0in\n')
-	outfile.write('set output \"breakdown.eps\"\n\n')
-
-	outfile.write('# General setup\n\n')
-	outfile.write('unset key\n')
-	outfile.write('set boxwidth 0.5\n')
-	outfile.write('set style fill solid 1.00 border lt -1\n')
-	outfile.write('\n')
-
-	outfile.write('set multiplot layout 2,1\n\n')
-
-	outfile.write('# Top plot (energy)\n\n')
-	outfile.write('unset xtics\n')
-	outfile.write('set lmargin 10\n')
-	outfile.write('set ylabel \"Average Daily\\nEnergy (Wh)\" offset 1,0 font \", 12\"\n')
-	outfile.write('set yrange[0:' + str(energyCutoff) + ']\n')
-	outfile.write('set size 1,0.38\n')
-	outfile.write('set origin 0,0.60\n')
-	outfile.write('set key top left font \", 12\"\n')
-	outfile.write('\n')
-
-	outfile.write(labelstr)
-
-	outfile.write('plot \"energy_li.dat\" using 1:4 with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
-		'\t\"energy_pb.dat\" using 1:4 with boxes fc rgb \"#ac0a0f\" title \"PowerBlade\"\n\n')
-
-	outfile.write('# Bottom plot (power)\n\n')
-	outfile.write('unset label\n')
-	outfile.write('unset key\n')
-	outfile.write('set logscale y\n')
-	outfile.write('set bmargin 5.5\n')
-	outfile.write('set xtics  rotate by 45 right font \", 10\"\n')
-	outfile.write('set size 1,0.66\n')
-	outfile.write('set origin 0,0\n')
-	outfile.write('set yrange[1:5000]\n')
-	outfile.write('set ylabel \"Average Active\\nPower (w)\" offset 1,-1 font \", 12\"\n')
-
-	outfile.write('plot \"energy_li.dat\" using 1:7:xticlabels(3) with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
-		'\t\"energy_pb.dat\" using 1:7:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
-
-	outfile.write('unset multiplot\n')
-
-	outfile.close()
-
-	# Clean up anything left from last time (in the case of errors)
-	# if(os.path.exists('breakdown.eps')):
-	# 	os.remove('breakdown.eps')
-	# if(os.path.exists('breakdown.pdf')):
-	# 	os.remove('breakdown.pdf')
+	breakdown(energyCutoff, labelstr, 'breakdown')
 
 	# Generate plot and convert to PDF
 	gnuplot('breakdown.plt')
@@ -662,14 +651,14 @@ elif(config['type'] == 'energy'):
 
 	# Move data to saveDir
 	mv('tot_energy.dat', qu_saveDir)
-	mv('energy_pb.dat', qu_saveDir)
-	mv('energy_li.dat', qu_saveDir)
+	mv('breakdown_pb.dat', qu_saveDir)
+	mv('breakdown_li.dat', qu_saveDir)
 	mv('breakdown.plt', qu_saveDir)
 	mv('breakdown.pdf', qu_saveDir)
 
-	printEnergy(expData, total_measured_energy, gndTruth[0], 'energy')
+	printEnergy(expData, total_measured_energy, tot_gndTruth, 'energy')
 
-	if gndTruth[0] != 0 and gndTruth[0] != None:
+	if tot_gndTruth != 0 and tot_gndTruth != None:
 		gnuplot('energy_pwrCDF.plt')
 		epstopdf('energy_pwrCDF.eps')
 
@@ -681,11 +670,21 @@ elif(config['type'] == 'energy'):
 
 
 	# Upload to final results table
-	if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
+	#if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
+	if(save_to_final):
 		uploadStr = ''
 		for mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power in expData:
 			aws_c.execute('insert into final_results (addedDate, deviceMAC, deviceName, location, category, deviceType, avgEnergy, stdEnergy, totEnergy, avgPower) values (utc_timestamp(), \"' + \
-				str(mac) + '\", \"' + str(name) + '\", ' + str(loc) + ', \"' + str(devCat) + '\", \"' + str(devType) + '\", ' + str(dayEnergy) + ', ' + str(var) + ', ' + str(totEnergy) + ', ' + str(power) + ');')
+				str(mac) + '\", \"' + str(name) + '\", ' + str(loc) + ', \"' + str(devCat) + '\", \"' + str(devType) + '\", ' + str(round(dayEnergy,2)) + ', ' + str(round(var,2)) + ', ' + str(round(totEnergy,2)) + ', ' + str(round(power,2)) + ');')
+			aws_db.commit()
+		for loc in config['locations']:
+			try:
+				loc2, totEnergy, missing = gndTruth[[x[0] for x in gndTruth].index(int(loc))]
+			except:
+				totEnergy = 0
+				missing = duration_days
+			aws_c.execute('insert into final_gnd (addedDate, location, startDate, duration, missingDays, totEnergy) values (utc_timestamp(), ' + \
+				str(loc) + ', \'' + config['startDay'] + '\', ' + str(duration_days) + ', ' + str(missing) + ', ' + str(round(totEnergy,2)) + ');')
 			aws_db.commit()
 			
 
@@ -696,66 +695,141 @@ elif(config['type'] == 'energy'):
 #
 ####################################################################
 
-elif(config['type'] == 'power'):
+elif(config['type'] == 'results'):
 
-	print("Running power...\n")
+	# aws_c.execute('select t1.catName, sum(t1.energy) as energy, avg(t1.power) as power from ' \
+	# 	'(select location, concat_ws(\' \', category, deviceType) as catName, ' \
+	# 	'sum(avgEnergy) as energy, avg(avgPower) as power ' \
+	# 	'from mr_final_results ' \
+	# 	'group by location, category, deviceType) t1 ' \
+	# 	'group by catName '
+	# 	'order by energy asc;')
+	aws_c.execute('select concat_ws(\' \', category, deviceType) as catName, ' \
+		'avg(avgEnergy) as energy, avg(avgPower) as power ' \
+		'from mr_final_results ' \
+		'group by category, deviceType ' \
+		'order by energy asc;')
+	expData = aws_c.fetchall()
 
-	print("Acquiring max power...\n")
+	aws_c.execute('select sum(totEnergy) from mr_final_gnd;')
+	final_gnd = aws_c.fetchall()[0][0]
 
-	# # Max power - maximum power per device over the time period
-	# aws_c.execute('insert into perm_maxPower_pb (deviceMAC, maxPower) ' \
+	outfile_pb = open('results_pb.dat', 'w')
+	outfile_li = open('results_li.dat', 'w')
+
+	labelstr = ""
+	energyCutoff = 1000
+
+	total_measured_energy = 0
+
+	# Energy Printout
+	for idx, (name, dayEnergy, power) in enumerate(expData):
+
+		print(str(idx) + " \"" + str(name) + "\" " + str(dayEnergy) + " " + str(power))
+
+		total_measured_energy += dayEnergy
+		
+		if(name[0:8] == 'overhead'):
+			outfile_li.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
+		else:
+			outfile_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
+		
+		if(dayEnergy > energyCutoff):
+			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
+
+	outfile_pb.close()
+	outfile_li.close()
+
+	breakdown(energyCutoff, labelstr, 'results')
+
+	# Generate plot and convert to PDF
+	gnuplot('results.plt')
+	epstopdf('results.eps')
+
+	# Show plot file
+	# img = subprocess.Popen(['open', 'datfile.pdf'])
+	# img.wait()
+
+	# Remove temporary file
+	os.remove('results.eps')
+
+	# Move data to saveDir
+	mv('results_pb.dat', qu_saveDir)
+	mv('results_li.dat', qu_saveDir)
+	mv('results.plt', qu_saveDir)
+	mv('results.pdf', qu_saveDir)
+
+	print(final_gnd)
+
+	printEnergy([[0, row[0], 0, 0, 0, row[1], 0, 0, row[2]] for row in expData], total_measured_energy, final_gnd, 'total')
+
+	gnuplot('total_pwrCDF.plt')
+	epstopdf('total_pwrCDF.eps')
+
+	os.remove('total_pwrCDF.eps')
+
+	mv('total_pwrCDF.dat', qu_saveDir)
+	mv('total_pwrCDF.plt', qu_saveDir)
+	mv('total_pwrCDF.pdf', qu_saveDir)
+
+	# print("Running power...\n")
+
+	# print("Acquiring max power...\n")
+
+	# # # Max power - maximum power per device over the time period
+	# # aws_c.execute('insert into perm_maxPower_pb (deviceMAC, maxPower) ' \
+	# # 	'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
+	# # 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+	# # 	'and power != 120.13 ' \
+	# # 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+
+	# # print("Acquiring avg power...\n")
+
+	# # aws_c.execute('insert into perm_avgPower_pb (deviceMAC, avgPower) ' \
+	# # 	'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devDevPower) ' \
+	# # 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+	# # 	'and power>(select 0.1*maxPower from mr_maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
+	# # 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+
+	# aws_c.execute('alter view maxPower_pb as ' \
 	# 	'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
 	# 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 	# 	'and power != 120.13 ' \
 	# 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-
-	# print("Acquiring avg power...\n")
-
-	# aws_c.execute('insert into perm_avgPower_pb (deviceMAC, avgPower) ' \
-	# 	'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devDevPower) ' \
+	# aws_c.execute('alter view avgPower_pb as ' \
+	# 	'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devTimePower) ' \
 	# 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# 	'and power>(select 0.1*maxPower from mr_maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
+	# 	'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 	# 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 
-	aws_c.execute('alter view maxPower_pb as ' \
-		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
-		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-		'and power != 120.13 ' \
-		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-	aws_c.execute('alter view avgPower_pb as ' \
-		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devTimePower) ' \
-		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-		'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
-		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-
-	aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgPower from ' \
-		'active_devices t1 ' \
-		'join avgPower_pb t2 ' \
-		'on t1.deviceMAC=t2.deviceMAC ' \
-		'order by t1.deviceMAC;')
-	expData = aws_c.fetchall()
+	# aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgPower from ' \
+	# 	'active_devices t1 ' \
+	# 	'join avgPower_pb t2 ' \
+	# 	'on t1.deviceMAC=t2.deviceMAC ' \
+	# 	'order by t1.deviceMAC;')
+	# expData = aws_c.fetchall()
 
 
-	outfile_pwr = open('tot_power.dat', 'w')
+	# outfile_pwr = open('tot_power.dat', 'w')
 
-	pwrData = sorted(expData, key=lambda dev: dev[2])
+	# pwrData = sorted(expData, key=lambda dev: dev[2])
 
-	for idx, (mac, name, avgPower) in enumerate(pwrData):
-		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(avgPower))
-		outfile_pwr.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(avgPower) + "\n")
+	# for idx, (mac, name, avgPower) in enumerate(pwrData):
+	# 	print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(avgPower))
+	# 	outfile_pwr.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(avgPower) + "\n")
 
-	outfile_pwr.close()
+	# outfile_pwr.close()
 
-	breakdown([['tot_power.dat', '#4b97c8', 'BLEES/Ligeiro']], True, 'tot_power')
+	# breakdown([['tot_power.dat', '#4b97c8', 'BLEES/Ligeiro']], True, 'tot_power')
 	
-	gnuplot('tot_power.plt')
-	epstopdf('tot_power.eps')
+	# gnuplot('tot_power.plt')
+	# epstopdf('tot_power.eps')
 
-	os.remove('tot_power.eps')
+	# os.remove('tot_power.eps')
 
-	mv('tot_power.dat', qu_saveDir)
-	mv('tot_power.plt', qu_saveDir)
-	mv('tot_power.pdf', qu_saveDir)
+	# mv('tot_power.dat', qu_saveDir)
+	# mv('tot_power.plt', qu_saveDir)
+	# mv('tot_power.pdf', qu_saveDir)
 
 
 

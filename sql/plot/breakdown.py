@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def breakdown(datfiles, logscale, outfileStr):
+def breakdown(energyCutoff, labelstr, outfileStr):
 
 	outfile = open(outfileStr + '.plt', 'w')
 	outfile.write('set terminal postscript enhanced eps solid color font \"Helvetica,14\" size 8in,2.0in\n')
@@ -12,29 +12,38 @@ def breakdown(datfiles, logscale, outfileStr):
 	outfile.write('set style fill solid 1.00 border lt -1\n')
 	outfile.write('\n')
 
+	outfile.write('set multiplot layout 2,1\n\n')
+
+	outfile.write('# Top plot (energy)\n\n')
+	outfile.write('unset xtics\n')
+	outfile.write('set lmargin 10\n')
+	outfile.write('set ylabel \"Average Daily\\nEnergy (Wh)\" offset 1,0 font \", 12\"\n')
+	outfile.write('set yrange[0:' + str(energyCutoff) + ']\n')
+	outfile.write('set size 1,0.38\n')
+	outfile.write('set origin 0,0.60\n')
+	outfile.write('set key top left font \", 12\"\n')
+	outfile.write('\n')
+
+	outfile.write(labelstr)
+
+	outfile.write('plot \"' + outfileStr + '_li.dat\" using 1:3 with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
+		'\t\"' + outfileStr + '_pb.dat\" using 1:3 with boxes fc rgb \"#ac0a0f\" title \"PowerBlade\"\n\n')
+
+	outfile.write('# Bottom plot (power)\n\n')
 	outfile.write('unset label\n')
 	outfile.write('unset key\n')
-
-	if(logscale):
-		outfile.write('set logscale y\n')
-		outfile.write('set yrange[1:5000]\n')
-	else:
-		outfile.write('set yrange[1:1000]\n')
-
+	outfile.write('set logscale y\n')
 	outfile.write('set bmargin 5.5\n')
 	outfile.write('set xtics  rotate by 45 right font \", 10\"\n')
-	#outfile.write('set size 1,0.66\n')
-	#outfile.write('set origin 0,0\n')
-	
+	outfile.write('set size 1,0.66\n')
+	outfile.write('set origin 0,0\n')
+	outfile.write('set yrange[1:5000]\n')
 	outfile.write('set ylabel \"Average Active\\nPower (w)\" offset 1,-1 font \", 12\"\n')
 
-	outfile.write('plot ')
+	outfile.write('plot \"' + outfileStr + '_li.dat\" using 1:4:xticlabels(2) with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
+		'\t\"' + outfileStr + '_pb.dat\" using 1:4:xticlabels(2) with boxes fc rgb \"#ac0a0f\"\n')
 
-	for datfile, rgb, title in datfiles:
-		outfile.write('\"' + datfile + '\" using 1:4:xticlabels(3) with boxes fc rgb \"' + rgb + '\" title \"' + title + '\", \\\n')
-
-	# outfile.write('plot \"energy_li.dat\" using 1:7:xticlabels(3) with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
-	# 	'\t\"energy_pb.dat\" using 1:7:xticlabels(3) with boxes fc rgb \"#ac0a0f\"\n')
+	outfile.write('unset multiplot\n')
 
 	outfile.close()
 
