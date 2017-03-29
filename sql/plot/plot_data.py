@@ -551,7 +551,7 @@ elif(config['type'] == 'energy'):
 
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
-	aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.category, t1.deviceType, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, t3.avgPower from ' \
+	aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, t3.avgPower from ' \
 		'active_devices t1 ' \
 		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
@@ -580,10 +580,10 @@ elif(config['type'] == 'energy'):
 	total_measured_energy = 0
 
 	# Energy Printout
-	for idx, (mac, name, devCat, devType, dayEnergy, var, totEnergy, power) in enumerate(expData):
+	for idx, (mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power) in enumerate(expData):
 		total_measured_energy += dayEnergy
-		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(devCat) + " " + str(devType) + " " + str(dayEnergy) + " " + str(var) + " " + str(totEnergy) + " " + str(power))
-		outfile.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(devCat) + "\t" + str(devType) + "\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + "\t" + str(power) + "\n")
+		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(loc) + " " + str(devCat) + " " + str(devType) + " " + str(dayEnergy) + " " + str(var) + " " + str(totEnergy) + " " + str(power))
+		outfile.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(loc) + "\t" + str(devCat) + "\t" + str(devType) + "\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + "\t" + str(power) + "\n")
 		if(mac[6:8] == '70'):
 			outfile_pb.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + "\t" + str(power) + "\n")
 		else:
@@ -678,6 +678,16 @@ elif(config['type'] == 'energy'):
 		mv('energy_pwrCDF.dat', qu_saveDir)
 		mv('energy_pwrCDF.plt', qu_saveDir)
 		mv('energy_pwrCDF.pdf', qu_saveDir)
+
+
+	# Upload to final results table
+	if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
+		uploadStr = ''
+		for mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power in expData:
+			aws_c.execute('insert into final_results (addedDate, deviceMAC, deviceName, location, category, deviceType, avgEnergy, stdEnergy, totEnergy, avgPower) values (utc_timestamp(), \"' + \
+				str(mac) + '\", \"' + str(name) + '\", ' + str(loc) + ', \"' + str(devCat) + '\", \"' + str(devType) + '\", ' + str(dayEnergy) + ', ' + str(var) + ', ' + str(totEnergy) + ', ' + str(power) + ');')
+			aws_db.commit()
+			
 
 
 ####################################################################

@@ -18,19 +18,19 @@ for inData in sys.argv[1:]:
 	location = dirNam.split('_')[3][1]
 	runType = dirNam.split('_')[4]
 
-	if(runType == 'power'):
-		if location in epList['power']:
-			print("Error: multiple power lists for location " + str(location))
-			exit()
-		else:
-			epList['power'][location] = {}
+	# if(runType == 'power'):
+	# 	if location in epList['power']:
+	# 		print("Error: multiple power lists for location " + str(location))
+	# 		exit()
+	# 	else:
+	# 		epList['power'][location] = {}
 
-			inFile = open(inData + 'tot_power.dat', 'r')
-			for line in inFile:
-				lineList = line[:-1].split('\t')[1:]
-				lineList[-1] = float(lineList[-1]) # Last column is power, convert to float
-				epList['power'][location][lineList[0]] = [lineList[1][1:-1], lineList[2]]
-	elif(runType == 'energy'):
+	# 		inFile = open(inData + 'tot_power.dat', 'r')
+	# 		for line in inFile:
+	# 			lineList = line[:-1].split('\t')[1:]
+	# 			lineList[-1] = float(lineList[-1]) # Last column is power, convert to float
+	# 			epList['power'][location][lineList[0]] = [lineList[1][1:-1], lineList[2]]
+	if(runType == 'energy'):
 		tmpErgy = {}
 		inFile = open(inData + 'tot_energy.dat', 'r')
 		for line in inFile:
@@ -42,14 +42,15 @@ for inData in sys.argv[1:]:
 					tmpErgy['gT'] = ['', [float(lineList[1])], [0]]
 			else:
 				lineList = line[:-1].split('\t')[1:]
-				tmpErgy[lineList[0]] = [lineList[1][1:-1], [float(lineList[2])], [float(lineList[3])]]
+				tmpErgy[lineList[0]] = [lineList[1][1:-1], lineList[2], lineList[3], [float(lineList[4])], [float(lineList[5])], float(lineList[7])]
 
 		# Now combine with the existing
 		if location in epList['energy']:
 			for dev in tmpErgy:
 				if dev in epList['energy'][location]:
-					epList['energy'][location][dev][1].extend(tmpErgy[dev][1])
-					epList['energy'][location][dev][2].extend(tmpErgy[dev][2])
+					epList['energy'][location][dev][3].extend(tmpErgy[dev][3])
+					epList['energy'][location][dev][4].extend(tmpErgy[dev][4])
+					epList['energy'][location][dev][5] = tmpErgy[dev][5]
 				else:
 					epList['energy'][location][dev] = tmpErgy[dev]
 		else:
@@ -59,16 +60,14 @@ for inData in sys.argv[1:]:
 # Do the combination
 for location in epList['energy']:
 	for dev in epList['energy'][location]:
-		epList['energy'][location][dev][1] = sum(epList['energy'][location][dev][1])/float(len(epList['energy'][location][dev][1]))
-		epList['energy'][location][dev][2] = sum(epList['energy'][location][dev][2])/float(len(epList['energy'][location][dev][2]))
+		epList['energy'][location][dev][3] = sum(epList['energy'][location][dev][3])/float(len(epList['energy'][location][dev][3]))
+		epList['energy'][location][dev][4] = sum(epList['energy'][location][dev][4])/float(len(epList['energy'][location][dev][4]))
 
 
-# Create a unified list
-
-for location in 
+# Category-based energy breakdown
 
 
-# Sort by energy, low to high
+# CDF-style energy breakdown
 
 
 
