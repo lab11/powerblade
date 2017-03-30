@@ -208,7 +208,22 @@ select * from perm_maxPower_pb;
 select * from mr_maxPower_pb;
 select * from mr_avgPower_pb;
 
+describe final_results;
+describe final_gnd;
 
+CREATE VIEW mr_final_results AS
+SELECT t1.* from final_results t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM final_results t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
+CREATE VIEW mr_final_gnd AS
+SELECT t1.* from final_gnd t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM final_gnd t2 WHERE t1.location=t2.location);
+
+select * from mr_final_gnd;
+
+CREATE VIEW mr_avgPower_pb AS
+SELECT t1.* from perm_avgPower_pb t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM perm_avgPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
 
 -- SELECT * FROM active_gateways;

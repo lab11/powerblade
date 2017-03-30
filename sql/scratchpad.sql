@@ -156,6 +156,12 @@ on t1.deviceMAC=t2.deviceMAC;
 
 select * from dat_blink where gatewayMAC='c098e5c00034' and deviceMAC not in ('c098e59000d3', 'c098e59000dd', 'c098e59000d8', 'c098e59000d4') order by id desc;
 
+select * from mr_final_results;
+select * from mr_final_gnd;
+select location from mr_final_results group by location;
+ where deviceType='Fridge';
+select location concat_ws(' ', category, deviceType) as catName, sum(avgEnergy), avg(avgPower) as ;
+
 show processlist;
 
 

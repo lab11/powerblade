@@ -40,6 +40,9 @@ create table final_results (id int(11) not null auto_increment, addedDate dateti
 primary key (id), index (deviceMAC));
 select * from final_results;
 
+create table final_gnd (id int(11) not null auto_increment, addedDate datetime, location int(1), startDate date, duration int(11), missingDays int(11), totEnergy decimal(24,4), primary key (id), index (location));
+select * from final_gnd;
+
 insert into final_results (addedDate) values (utc_timestamp());
 
 # pb_lookup
