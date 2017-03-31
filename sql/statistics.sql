@@ -62,6 +62,27 @@ from inf_dep_stats;
 where duration > 7;
  and duration < 168;
  
+
+ 
+select * from dev_resets;
+select * from dev_actResets;
+
+select * from dat_powerblade force index(devTimeEnergy) where deviceMAC='c098e570005d' and date(timestamp)='2017-03-24' order by timestamp asc limit 1;
+ 
+alter view dev_resets as
+select date(timestamp) as dayst, deviceMAC,
+min(energy) as minEnergy,
+case when min(energy)<1.75 then 1 else 0 end as devReset,
+min(timestamp) as minTs
+from dat_powerblade force index(devTimeEnergy)
+where timestamp>='2017-2-25 00:00:00' and timestamp<='2017-3-28 23:59:59'
+and deviceMAC in ('c098e5700192', 'c098e570005d')
+group by dayst, deviceMAC;
+        
+select * from dev_resets where deviceMAC='c098e5700192';
+ 
+select id/1E9 from dat_powerblade where timestamp<'2016-07-22 00:00:00' order by timestamp desc limit 1;
+ 
 select max(t1.id)/1E9 as countPb, max(t2.id)/1E6 as countBl, max(t3.id)/1E3 as countLi
 from dat_powerblade t1
 join dat_blees t2
@@ -200,9 +221,13 @@ select * from dev_resets order by deviceMAC asc, dayst asc;
 select * from days_w_resets order by dayst asc;
 
 
+select * from most_recent_powerblades where deviceType='Fan' or deviceType='Air filter';
+
+select * from most_recent_powerblades where location=0;
+select * from day_energy_pb where deviceMAC='c098e570025c';
+
+select * from mr_final_results where category='Other';
 
 
-
-
-
+select * from dat_powerblade force index (devDevPower) where deviceMAC='c098e5700184' and power>1300 order by timestamp desc;
 

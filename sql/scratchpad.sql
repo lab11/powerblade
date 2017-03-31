@@ -152,16 +152,31 @@ group by deviceMAC) t1
 join most_recent_powerblades t2
 on t1.deviceMAC=t2.deviceMAC;
 
-
+select * from dat_powerblade force index (devDevPower) where deviceMAC='c098e5700193' and power>10 order by timestamp desc;
 
 select * from dat_blink where gatewayMAC='c098e5c00034' and deviceMAC not in ('c098e59000d3', 'c098e59000dd', 'c098e59000d8', 'c098e59000d4') order by id desc;
 
-select * from mr_final_results;
+select * from mr_final_results where deviceType='Fridge';
+
+
+select t1.dayst, t1.deviceMAC, t1.minEnergy, t1.devReset, t2.dayEnergy from
+(select * from dev_resets where deviceMAC='c098e5700195') t1 join
+(select * from day_energy_pb where deviceMAC='c098e5700195') t2
+on t1.dayst=t2.dayst and t1.deviceMAC=t2.deviceMAC;
+
+select * from dat_powerblade force index (devTimeEnergy) where deviceMAC='c098e5700195' and timestamp>'2017-03-10' order by timestamp asc;
+
+describe mr_final_results;
+
+select * from mr_final_results where deviceType='Small lamp/light';
 select * from mr_final_gnd;
 select location from mr_final_results group by location;
  where deviceType='Fridge';
 select location concat_ws(' ', category, deviceType) as catName, sum(avgEnergy), avg(avgPower) as ;
 
 show processlist;
+
+select * from inf_gw_lookup where gatewayMAC='c098e5c00026';
+select * from dat_powerblade where gatewayMAC='c098e5c00026' order by id desc limit 10;
 
 
