@@ -1,3 +1,4 @@
 !*.pdf
 .plotconfig
 random/*
+*savetest*
