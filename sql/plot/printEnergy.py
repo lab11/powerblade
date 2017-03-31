@@ -2,7 +2,7 @@
 
 def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 	if gndTruth == 0 or gndTruth == None:
-		return
+		gndTruth = total_measured_energy
 
 	# CDF Printout
 	pwrData = sorted(expData, key=lambda dev: dev[8])

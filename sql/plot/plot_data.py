@@ -525,7 +525,7 @@ elif(config['type'] == 'energy'):
 	aws_c.execute('alter view dev_resets as ' \
 		'select date(timestamp) as dayst, deviceMAC, ' \
 		'min(energy) as minEnergy, '
-		'case when min(energy)<1.75 then 1 else 0 end as devReset ' \
+		'case when min(energy)<1.75 then 1 else 0 end as devReset, min(timestamp) as minTs ' \
 		'from dat_powerblade force index(devTimeEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' ' \
@@ -539,7 +539,7 @@ elif(config['type'] == 'energy'):
 	aws_c.execute('alter view avgPower_pb as ' \
 		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devTimePower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-		'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
+		'and power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 
 	day_en_str = ''
@@ -573,7 +573,7 @@ elif(config['type'] == 'energy'):
 		avg_pwr_str += ' union (select deviceMAC, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
 
 	aws_c.execute('alter view day_energy as select * from day_energy_pb tta where ' \
-		'(select devReset from dev_resets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0' + day_en_str + ';')
+		'(select actReset from dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0' + day_en_str + ';')
 	aws_c.execute('alter view avg_power as select * from avgPower_pb' + avg_pwr_str + ';')
 
 	# Step 1: Unified query for energy and power
@@ -643,8 +643,8 @@ elif(config['type'] == 'energy'):
 	epstopdf('breakdown.eps')
 
 	# Show plot file
-	# img = subprocess.Popen(['open', 'datfile.pdf'])
-	# img.wait()
+	img = subprocess.Popen(['open', 'breakdown.pdf'])
+	img.wait()
 
 	# Remove temporary file
 	os.remove('breakdown.eps')
@@ -658,15 +658,14 @@ elif(config['type'] == 'energy'):
 
 	printEnergy(expData, total_measured_energy, tot_gndTruth, 'energy')
 
-	if tot_gndTruth != 0 and tot_gndTruth != None:
-		gnuplot('energy_pwrCDF.plt')
-		epstopdf('energy_pwrCDF.eps')
+	gnuplot('energy_pwrCDF.plt')
+	epstopdf('energy_pwrCDF.eps')
 
-		os.remove('energy_pwrCDF.eps')
+	os.remove('energy_pwrCDF.eps')
 
-		mv('energy_pwrCDF.dat', qu_saveDir)
-		mv('energy_pwrCDF.plt', qu_saveDir)
-		mv('energy_pwrCDF.pdf', qu_saveDir)
+	mv('energy_pwrCDF.dat', qu_saveDir)
+	mv('energy_pwrCDF.plt', qu_saveDir)
+	mv('energy_pwrCDF.pdf', qu_saveDir)
 
 
 	# Upload to final results table
@@ -704,30 +703,31 @@ elif(config['type'] == 'results'):
 	# 	'group by location, category, deviceType) t1 ' \
 	# 	'group by catName '
 	# 	'order by energy asc;')
-	aws_c.execute('select concat_ws(\' \', category, deviceType) as catName, ' \
-		'avg(avgEnergy) as energy, avg(avgPower) as power ' \
+	
+	#aws_c.execute('select concat_ws(\' \', category, deviceType) as catName, ' \
+	aws_c.execute('select category as catName, ' \
+		'sum(avgEnergy) as energy, avg(avgPower) as power ' \
 		'from mr_final_results ' \
-		'group by category, deviceType ' \
+		'where location=0 ' \
+		'group by category ' \
 		'order by energy asc;')
+	
 	expData = aws_c.fetchall()
-
-	aws_c.execute('select sum(totEnergy) from mr_final_gnd;')
-	final_gnd = aws_c.fetchall()[0][0]
 
 	outfile_pb = open('results_pb.dat', 'w')
 	outfile_li = open('results_li.dat', 'w')
 
 	labelstr = ""
-	energyCutoff = 1000
-
-	total_measured_energy = 0
+	energyCutoff = 1200
+	energyTop = 1500
+	energyCutoff_loc = 1650
 
 	# Energy Printout
 	for idx, (name, dayEnergy, power) in enumerate(expData):
 
-		print(str(idx) + " \"" + str(name) + "\" " + str(dayEnergy) + " " + str(power))
+		name = name.split('/')[0]
 
-		total_measured_energy += dayEnergy
+		print(str(idx) + " \"" + str(name) + "\" " + str(dayEnergy) + " " + str(power))
 		
 		if(name[0:8] == 'overhead'):
 			outfile_li.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
@@ -735,20 +735,22 @@ elif(config['type'] == 'results'):
 			outfile_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
 		
 		if(dayEnergy > energyCutoff):
-			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
+			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff_loc) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
+		else:
+			labelstr += 'set label at ' + str(idx) + ', ' + str(float(dayEnergy) + 100) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
 
 	outfile_pb.close()
 	outfile_li.close()
 
-	breakdown(energyCutoff, labelstr, 'results')
+	breakdown(energyTop, labelstr, 'results')
 
 	# Generate plot and convert to PDF
 	gnuplot('results.plt')
 	epstopdf('results.eps')
 
 	# Show plot file
-	# img = subprocess.Popen(['open', 'datfile.pdf'])
-	# img.wait()
+	img = subprocess.Popen(['open', 'results.pdf'])
+	img.wait()
 
 	# Remove temporary file
 	os.remove('results.eps')
@@ -759,7 +761,24 @@ elif(config['type'] == 'results'):
 	mv('results.plt', qu_saveDir)
 	mv('results.pdf', qu_saveDir)
 
-	print(final_gnd)
+
+
+
+	aws_c.execute('select deviceMAC as catName, ' \
+		'avgEnergy, avgPower ' \
+		'from mr_final_results ' \
+		'group by deviceMAC ' \
+		'order by avgEnergy asc;')
+
+	expData = aws_c.fetchall()
+
+	total_measured_energy = 0
+	# Energy Printout
+	for name, dayEnergy, power in expData:
+		total_measured_energy += dayEnergy
+
+	aws_c.execute('select sum(totEnergy) from mr_final_gnd;')
+	final_gnd = aws_c.fetchall()[0][0]
 
 	printEnergy([[0, row[0], 0, 0, 0, row[1], 0, 0, row[2]] for row in expData], total_measured_energy, final_gnd, 'total')
 

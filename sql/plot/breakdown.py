@@ -38,6 +38,9 @@ def breakdown(energyCutoff, labelstr, outfileStr):
 	outfile.write('set size 1,0.66\n')
 	outfile.write('set origin 0,0\n')
 	outfile.write('set yrange[1:5000]\n')
+
+	outfile.write('set grid y\n\n')
+
 	outfile.write('set ylabel \"Average Active\\nPower (w)\" offset 1,-1 font \", 12\"\n')
 
 	outfile.write('plot \"' + outfileStr + '_li.dat\" using 1:4:xticlabels(2) with boxes fc rgb \"#4b97c8\" title \"BLEES/Ligeiro\", \\\n'
