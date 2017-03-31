@@ -226,6 +226,22 @@ SELECT t1.* from perm_avgPower_pb t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM perm_avgPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
 
+
+
+create view dev_actResets as
+select t1.dayst, t1.deviceMAC, t1.minEnergy, t1.devReset, t1.minTs,
+case when t1.devReset=1 and (select min(energy) from dat_powerblade force index(devTimeEnergy) 
+where deviceMAC=t1.deviceMAC and timestamp=t1.minTs and energy!=2.24)>1.75 then 1 else 0 end as actReset
+from dev_resets t1;
+
+select * from dev_actResets;
+
+select * from dat_powerblade where deviceMAC='c098e570005d' and timestamp='2017-03-09 00:00:00';
+
+select * from inf_pb_lookup where location=0;
+select * from active_devices where location=0;
+
+
 -- SELECT * FROM active_gateways;
 -- SELECT * FROM active_powerblades;
 -- SELECT * FROM active_blinks;
