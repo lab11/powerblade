@@ -76,7 +76,7 @@ console.log("Looking for PowerBlade " + pb_address);
 var g_time_start = new Date();
 
 //filename = dateFormat(g_time_start, "yyyy-mm-dd_h-MM-ss") + "_" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".txt";
-filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
+filename = process.env.PB_DATA + "measurements_rig/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
 
 if(fs.existsSync(filename)) {
     var replace = readlineSync.question("File exists: overwrite, rename, or exit? (o/r/e): ");

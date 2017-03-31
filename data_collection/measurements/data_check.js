@@ -6,7 +6,7 @@ var fs = require('fs');
 //const pbList = ['c098e5700048', 'c098e570004a', 'c098e570004e', 'c098e5700053', 'c098e570013c'];//, 'c098e570004b', 'c098e570005d'];
 const pbList = ['c098e570004f', 'c098e5700080', 'c098e5700081', 'c098e5700065'];
 const configList = ['jumper', 'outlet', 'surge', 'gfci'];
-const calibList = ['jumper', 'outlet', 'surge'];
+const calibList = ['jumper', 'outlet', 'surge', 'gfci'];
 
 const INCOM = -1
 const CLEARED = -2
@@ -112,7 +112,8 @@ if(process.argv.length >= 3) {
     
 file_info = {}
 
-var filenames = fs.readdirSync(process.env.PB_DATA);
+var folderName = process.env.PB_DATA + 'measurements_rig'
+var filenames = fs.readdirSync(folderName);
 
 filenames.forEach( function(file) {
 
@@ -123,7 +124,7 @@ filenames.forEach( function(file) {
 
 		// Read data from the file
 		if(filelist.length >= 1 && filelist.length <= 3) {
-			var data = fs.readFileSync(process.env.PB_DATA + "/" + file, 'utf8');
+			var data = fs.readFileSync(folderName + "/" + file, 'utf8');
 			var avgPower = 0;
 			var avgVoltage = 0;
 			var count = 0;
@@ -232,14 +233,14 @@ if(device_save == "missing") {
 if(device_save == "clear") {
 	for(var i = 0; i < configList.length; i++) {
 		if(file_info[device_clear]['actual'] && typeof file_info[device_clear]['actual'] != "number" && !file_info[device_clear]['actual'][configList[i]]) {
-			var filename = process.env.PB_DATA + "/" + device_clear + "_" + configList[i] + ".dat";
+			var filename = folderName + "/" + device_clear + "_" + configList[i] + ".dat";
 			console.log("Creating file: " + filename);
 			fs.closeSync(fs.openSync(filename, 'w')); 
 		}
 
 		for(var j = 0; j < pbList.length; j++) {
 			if(!file_info[device_clear][pbList[j]] || !file_info[device_clear][pbList[j]][configList[i]]) {
-				var filename = process.env.PB_DATA + "/" + pbList[j] + "_" + device_clear + "_" + configList[i] + ".dat";
+				var filename = folderName + "/" + pbList[j] + "_" + device_clear + "_" + configList[i] + ".dat";
 				console.log("Creating file: " + filename);
 				fs.closeSync(fs.openSync(filename, 'w')); 
 			}
@@ -398,10 +399,11 @@ for(device in file_info) {
 		file_info[device]['outlet'][configList[config]] = file_info[device]['c098e5700080'][configList[config]]['power'];
 		file_info[device]['jumper'][configList[config]] = file_info[device]['c098e5700081'][configList[config]]['power'];
 		file_info[device]['surge'][configList[config]] = file_info[device]['c098e570004f'][configList[config]]['power'];
+		file_info[device]['gfci'][configList[config]] = file_info[device]['c098e5700065'][configList[config]]['power'];
 
 		if(device != 'vac' && device != 'hairGF' && device != 'toastGF') {
 			for(calib in calibList) {
-				avgErr[calibList[calib]][configList[config]] += Math.abs(actual - file_info[device][calibList[calib]][configList[config]]);
+				avgErr[calibList[calib]][configList[config]] += (Math.abs(actual - file_info[device][calibList[calib]][configList[config]])/actual)*100;
 				avgErrCt[calibList[calib]][configList[config]] += 1;
 			}
 		}
@@ -424,7 +426,7 @@ for(var i = 0; i < (calibList.length * configList.length); i++) {
 			}
 		}
 	}
-	//console.log(maxCalib + "\t" + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]));
+	//console.log(maxCalib + "\t" + maxConfig)// + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]));
 	writeString_config += maxCalib + "." + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]) + "\n";
 	delete avg_copy[maxCalib][maxConfig];
 }
