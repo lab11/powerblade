@@ -519,7 +519,8 @@ elif(config['type'] == 'energy'):
 	# Day energy: maximum energy minus minimum energy for each device for each day
 	print("Altering views for energy query...\n")
 	aws_c.execute('alter view day_energy_pb as ' \
-		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devTimeEnergy) ' \
+		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy ' \
+		'from dat_powerblade force index (devTimeEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
 	aws_c.execute('alter view dev_resets as ' \
@@ -611,7 +612,7 @@ elif(config['type'] == 'energy'):
 	outfile = open ('tot_energy.dat', 'w')
 
 	labelstr = ""
-	energyCutoff = 1000
+	energyCutoff = 1200
 
 	total_measured_energy = 0
 
