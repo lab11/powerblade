@@ -12,9 +12,9 @@ left join inf_dep_lig t5
 on t1.location=t5.location
 order by location;
 
-create view inf_dep_pb as
-select location, min(startTime) as startTime, least(utc_date(), max(endTime)) as endTime, 
-1+datediff(least(utc_date(), max(endTime)), min(startTime)) as duration,
+alter view inf_dep_pb as
+select location, min(startTime) as startTime, least('2017-04-11 11:00:00', max(endTime)) as endTime, 
+1+datediff(least('2017-04-11 11:00:00', max(endTime)), min(startTime)) as duration,
 count(*) as pb_count 
 from most_recent_powerblades 
 where location!=10
@@ -40,9 +40,9 @@ select * from inf_dep_pb;
 
 select * from inf_dep_lig;
 
-create view inf_dep_gw as
-select location, min(startTime) as startTime, least(utc_date(), max(endTime)) as endTime,
-1+datediff(least(utc_date(), max(endTime)), min(startTime)) as duration,
+alter view inf_dep_gw as
+select location, min(startTime) as startTime, least('2017-04-11 11:00:00', max(endTime)) as endTime,
+1+datediff(least('2017-04-11 11:00:00', max(endTime)), min(startTime)) as duration,
 count(*) as gw_count
 from most_recent_gateways
 where location!=10
@@ -51,7 +51,7 @@ group by location;
 create view inf_gnd_truth_lookup as
 select location,1 as gndTruth from dat_gnd_truth group by location;
 
-select * from inf_dep_stats where location>2;
+select * from inf_dep_stats; where location>2;
 
 select count(*) as numDeps, avg(duration) as avgDuration, stddev(duration) as stdDuration, min(duration) as minDuration, max(duration) as maxDuration, 
 sum(pb_count) as sumPb, avg(pb_count) as  avgPb, stddev(pb_count) as stdPb, min(pb_count) as minPb, max(pb_count) as maxPb,
