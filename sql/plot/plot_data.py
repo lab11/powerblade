@@ -173,7 +173,7 @@ def dev_print():
 
 	devNames = []
 	if(query_powerblade):
-		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from active_powerblades where deviceMAC in ' + dev_powerblade + ';')
+		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from valid_powerblades where deviceMAC in ' + dev_powerblade + ';')
 		devNames.extend(aws_c.fetchall())
 	if(query_blees):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_blees + ';')
@@ -296,7 +296,7 @@ while(confirm != ""):
 			devType = confirm_list[1]
 			devOffset = 2
 
-		aws_c.execute('select lower(deviceMAC) from active_devices where location=' + confirm_list[devOffset] + ';')
+		aws_c.execute('select lower(deviceMAC) from valid_devices where location=' + confirm_list[devOffset] + ';')
 		device_list = aws_c.fetchall()
 		devList = [i[0] for i in device_list]
 
@@ -414,6 +414,9 @@ dStart = datetime.strptime(config['start'], "%Y-%m-%d %H:%M:%S")
 dEnd = datetime.strptime(config['end'], "%Y-%m-%d %H:%M:%S")
 
 duration = (dEnd - dStart).total_seconds()
+duration_days = int(math.ceil(duration / 86400))
+
+
 
 ####################################################################
 #
@@ -591,12 +594,10 @@ elif(config['type'] == 'energy'):
 	#aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, 0 from ' \
 
 	# Step 2: Ground Truth
-	aws_c.execute('select location, avg(energy), count(*) from most_recent_gnd_truth where location in ' + loc_list + ' and ' \
+	aws_c.execute('select location, avg(energy), count(*), ' + str(duration_days) + '-count(*) from most_recent_gnd_truth where location in ' + loc_list + ' and ' \
 		'date(dayst)>=\'' + config['startDay'] + '\' and date(dayst)<=\'' + config['endDay'] + '\' ' \
 		'group by location;')
 	gndTruth = aws_c.fetchall()
-
-	duration_days = int(math.ceil(duration / 86400))
 
 	tot_gndTruth = 0
 	min_days = duration_days
@@ -679,12 +680,13 @@ elif(config['type'] == 'energy'):
 			aws_db.commit()
 		for loc in config['locations']:
 			try:
-				loc2, totEnergy, missing = gndTruth[[x[0] for x in gndTruth].index(int(loc))]
+				loc2, totEnergy, truthDays, missing = gndTruth[[x[0] for x in gndTruth].index(int(loc))]
 			except:
 				totEnergy = 0
+				truthDays = 0
 				missing = duration_days
-			aws_c.execute('insert into final_gnd (addedDate, location, startDate, duration, missingDays, totEnergy) values (utc_timestamp(), ' + \
-				str(loc) + ', \'' + config['startDay'] + '\', ' + str(duration_days) + ', ' + str(missing) + ', ' + str(round(totEnergy,2)) + ');')
+			aws_c.execute('insert into final_gnd (addedDate, location, startDate, endDate, duration, truthDays, missingDays, totMeas, totGnd) values (utc_timestamp(), ' + \
+				str(loc) + ', \'' + config['startDay'] + '\', \'' + config['endDay'] + '\', ' + str(duration_days) + ', ' + str(truthDays) + ', ' + str(missing) + ', ' + str(round(total_measured_energy)) + ', ' + str(round(totEnergy,2)) + ');')
 			aws_db.commit()
 			
 
