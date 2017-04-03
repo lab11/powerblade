@@ -584,7 +584,7 @@ elif(config['type'] == 'energy'):
 	print("Running data query...\n")
 	aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, t3.avgPower from ' \
 		'active_devices t1 ' \
-		'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
+		'join (select deviceMAC, sum(dayEnergy)/' + str(duration_days) + ' as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
 		'from day_energy group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC ' \
 		'join avg_power t3 ' \
