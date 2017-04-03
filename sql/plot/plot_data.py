@@ -691,9 +691,12 @@ elif(config['type'] == 'energy'):
 			
 
 
+
+
+
 ####################################################################
 #
-# This section is for the power option (temporary)
+# This section is for results (combine everything)
 #
 ####################################################################
 

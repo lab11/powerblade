@@ -12,6 +12,11 @@ SELECT t1.* from inf_gw_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_gw_lookup t2 WHERE t1.gatewayMAC=t2.gatewayMAC and t1.location=t2.location)
 and t1.room is not null;
 
+create view valid_gateways as
+SELECT * from most_recent_gateways WHERE
+startTime < utc_timestamp() AND
+(remTime is NULL OR remTime > utc_timestamp());
+
 ALTER VIEW active_gateways AS
 SELECT * from most_recent_gateways WHERE
 startTime < utc_timestamp() AND
@@ -21,6 +26,11 @@ endTime > utc_timestamp();
 ALTER VIEW most_recent_powerblades AS
 SELECT t1.* FROM inf_pb_lookup t1 WHERE 
 t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC and t1.deviceName=t2.deviceName);
+
+CREATE VIEW valid_powerblades AS
+SELECT * from most_recent_powerblades WHERE
+startTime < utc_timestamp() AND
+(remTime is NULL OR remTime > utc_timestamp());
 
 ALTER VIEW active_powerblades AS
 SELECT * from most_recent_powerblades WHERE
@@ -48,13 +58,18 @@ t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMA
 
 ALTER VIEW active_devices AS
 SELECT deviceMAC, deviceName, location, category, deviceType from active_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'overhead', 'light' from active_lights
-UNION SELECT deviceMAC, room, location, 'overhead', 'light' from active_blinks;
+UNION SELECT deviceMAC, deviceName, location, 'Lighting', 'Lighting' from active_lights
+UNION SELECT deviceMAC, room, location, 'Lighting', 'Lighting' from active_blinks;
+
+create view valid_devices as
+SELECT deviceMAC, deviceName, location, category, deviceType from valid_powerblades
+UNION SELECT deviceMAC, deviceName, location, 'Lighting', 'Lighting' from active_lights
+UNION SELECT deviceMAC, room, location, 'Lighting', 'Lighting' from active_blinks;
 
 ALTER VIEW most_recent_devices AS
 SELECT deviceMAC, deviceName, location, category, deviceType from most_recent_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'overhead', 'light' from most_recent_lights
-UNION SELECT deviceMAC, room, location, 'overhead', 'light' from most_recent_blinks;
+UNION SELECT deviceMAC, deviceName, location, 'Lighting', 'Lighting' from most_recent_lights
+UNION SELECT deviceMAC, room, location, 'Lighting', 'Lighting' from most_recent_blinks;
 
 CREATE VIEW avg_lux AS
 SELECT deviceMAC, avg(lux) as avgLux FROM dat_blees FORCE INDEX (devLux)
@@ -215,7 +230,7 @@ CREATE VIEW mr_final_results AS
 SELECT t1.* from final_results t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM final_results t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
-CREATE VIEW mr_final_gnd AS
+ALTER VIEW mr_final_gnd AS
 SELECT t1.* from final_gnd t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM final_gnd t2 WHERE t1.location=t2.location);
 
@@ -224,6 +239,18 @@ select * from mr_final_gnd;
 CREATE VIEW mr_avgPower_pb AS
 SELECT t1.* from perm_avgPower_pb t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM perm_avgPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
+
+alter view mr_final_gnd_corr as
+select t1.location, t1.startDate, t1.endDate, t1.duration, t1.truthDays, t1.missingDays, t1.totMeas, t1.totGnd, 
+(select count(*) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullTruth,
+t1.duration-(select count(*) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullMissing,
+(select avg(energy) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullGnd
+from mr_final_gnd t1;
+
+select * from mr_final_gnd_corr order by location asc;
+
+
 
 
 

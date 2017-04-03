@@ -1,6 +1,6 @@
 # Deployment stats
 alter view inf_dep_stats as
-select t1.location, case when t3.gndTruth is not null then 1 else 0 end as gndTruth, greatest(t1.startTime, t2.startTime) as startTime, least(t1.endTime, t2.endTime) as endTime, least(t1.duration, t2.duration) as duration, t1.pb_count, t2.gw_count, t4.bl_count, t5.li_count from
+select t1.location, t3.gndTruth, greatest(t1.startTime, t2.startTime) as startTime, least(t1.endTime, t2.endTime) as endTime, least(t1.duration, t2.duration) as duration, t1.pb_count, t2.gw_count, t4.bl_count, t5.li_count from
 inf_dep_pb t1
 join inf_dep_gw t2
 on t1.location=t2.location
@@ -16,7 +16,7 @@ alter view inf_dep_pb as
 select location, min(startTime) as startTime, least('2017-04-11 11:00:00', max(endTime)) as endTime, 
 1+datediff(least('2017-04-11 11:00:00', max(endTime)), min(startTime)) as duration,
 count(*) as pb_count 
-from most_recent_powerblades 
+from valid_powerblades 
 where location!=10
 group by location;
 
@@ -48,10 +48,15 @@ from most_recent_gateways
 where location!=10
 group by location;
 
-create view inf_gnd_truth_lookup as
-select location,1 as gndTruth from dat_gnd_truth group by location;
+select * from most_recent_gnd_truth;
+select * from inf_gnd_truth_lookup;
+
+alter view inf_gnd_truth_lookup as
+select location,count(*) as gndTruth from most_recent_gnd_truth group by location;
 
 select * from inf_dep_stats; where location>2;
+
+select * from valid_powerblades where location=0;
 
 select count(*) as numDeps, avg(duration) as avgDuration, stddev(duration) as stdDuration, min(duration) as minDuration, max(duration) as maxDuration, 
 sum(pb_count) as sumPb, avg(pb_count) as  avgPb, stddev(pb_count) as stdPb, min(pb_count) as minPb, max(pb_count) as maxPb,
@@ -59,10 +64,14 @@ sum(gw_count) as sumGw, avg(gw_count) as avgGw, min(gw_count) as minGw, max(gw_c
 sum(bl_count) as sumBl, avg(bl_count) as avgBl, min(bl_count) as minBl, max(bl_count) as maxBl,
 sum(li_count) as sumLi, avg(li_count) as avgLi, min(li_count) as minLi, max(li_count) as maxLi
 from inf_dep_stats
-where location>2;
+where location!=2;
 where duration > 7;
  and duration < 168;
  
+
+
+select * from mr_final_gnd;
+
 
  
 select * from dev_resets;
