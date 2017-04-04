@@ -20,9 +20,9 @@ from valid_powerblades
 where location!=10
 group by location;
 
-create view inf_dep_blees as 
+alter view inf_dep_blees as 
 select location, count(*) as bl_count
-from most_recent_lights
+from active_lights
 where location!=10
 and deviceType='BLEES'
 group by location;
@@ -50,6 +50,7 @@ group by location;
 
 select * from most_recent_gnd_truth;
 select * from inf_gnd_truth_lookup;
+select * from most_recent_lights where location=0;
 
 alter view inf_gnd_truth_lookup as
 select location,count(*) as gndTruth from most_recent_gnd_truth group by location;
@@ -69,10 +70,11 @@ where duration > 7;
  and duration < 168;
  
 
+select sum(avgEnergy) from mr_final_results;
+select avg(totMeas) as meas, avg(fullGnd), avg(totMeas)/avg(fullGnd) as pct from mr_final_gnd_corr;
+select * from mr_final_gnd_corr order by location asc;
 
-select * from mr_final_gnd;
-
-
+select * from mr_final_results where category='Kitchen';
  
 select * from dev_resets;
 select * from dev_actResets;
@@ -93,7 +95,7 @@ select * from dev_resets where deviceMAC='c098e5700192';
  
 select id/1E9 from dat_powerblade where timestamp<'2016-07-22 00:00:00' order by timestamp desc limit 1;
  
-select max(t1.id)/1E9 as countPb, max(t2.id)/1E6 as countBl, max(t3.id)/1E3 as countLi
+select max(t1.id)/1E9 as countPb, max(t2.id)/1E6 as countBl, max(t3.id)/1E6 as countLi
 from dat_powerblade t1
 join dat_blees t2
 join dat_ligeiro t3;

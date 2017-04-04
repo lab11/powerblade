@@ -168,13 +168,21 @@ select * from dat_powerblade force index (devTimeEnergy) where deviceMAC='c098e5
 
 describe mr_final_results;
 
-select * from mr_final_results where deviceType='Small lamp/light';
+select * from dat_powerblade force index (devDevPower) where deviceMAC='c098e57001f3' order by timestamp desc;
+
+select * from valid_powerblades where deviceMAC='c098e57001f3';
+
+select * from mr_final_results where category='Lighting';
 select * from mr_final_gnd;
 select location from mr_final_results group by location;
  where deviceType='Fridge';
 select location concat_ws(' ', category, deviceType) as catName, sum(avgEnergy), avg(avgPower) as ;
 
 show processlist;
+
+select * from energy_blees;
+
+select deviceMAC, count(*) as count from active_powerblades group by deviceMAC order by count desc;
 
 select * from inf_gw_lookup where gatewayMAC='c098e5c00026';
 select * from dat_powerblade where gatewayMAC='c098e5c00026' order by id desc limit 10;
