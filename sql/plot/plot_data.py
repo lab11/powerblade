@@ -591,7 +591,7 @@ elif(config['type'] == 'energy'):
 		'on t1.deviceMAC=t3.deviceMAC ' \
 		'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
-	#aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, 0 from ' \
+	#'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
 
 	# Step 2: Ground Truth
 	aws_c.execute('select location, avg(energy), count(*), ' + str(duration_days) + '-count(*) from most_recent_gnd_truth where location in ' + loc_list + ' and ' \
@@ -702,6 +702,8 @@ elif(config['type'] == 'energy'):
 
 elif(config['type'] == 'results'):
 
+	num_locations = 8
+
 	# aws_c.execute('select t1.catName, sum(t1.energy) as energy, avg(t1.power) as power from ' \
 	# 	'(select location, concat_ws(\' \', category, deviceType) as catName, ' \
 	# 	'sum(avgEnergy) as energy, avg(avgPower) as power ' \
@@ -712,9 +714,10 @@ elif(config['type'] == 'results'):
 	
 	#aws_c.execute('select concat_ws(\' \', category, deviceType) as catName, ' \
 	aws_c.execute('select category as catName, ' \
-		'sum(avgEnergy) as energy, avg(avgPower) as power ' \
+		'sum(avgEnergy)/' + str(num_locations) + ' as energy, avg(avgPower) as power ' \
 		'from mr_final_results ' \
-		'where location=0 ' \
+		'where location!=2 ' \
+		'and deviceMAC!=\'c098e57001A0\'' \
 		'group by category ' \
 		'order by energy asc;')
 	
@@ -724,18 +727,18 @@ elif(config['type'] == 'results'):
 	outfile_li = open('results_li.dat', 'w')
 
 	labelstr = ""
-	energyCutoff = 1200
-	energyTop = 1500
-	energyCutoff_loc = 1650
+	energyCutoff = 1000
+	energyTop = 1200
+	energyCutoff_loc = 1320
 
 	# Energy Printout
 	for idx, (name, dayEnergy, power) in enumerate(expData):
 
 		name = name.split('/')[0]
 
-		print(str(idx) + " \"" + str(name) + "\" " + str(dayEnergy) + " " + str(power))
+		#print(str(idx) + " \"" + str(name) + "\" " + str(dayEnergy) + " " + str(power))
 		
-		if(name[0:8] == 'overhead'):
+		if(name[0:8] == 'Overhead'):
 			outfile_li.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
 		else:
 			outfile_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
@@ -770,8 +773,8 @@ elif(config['type'] == 'results'):
 
 
 
-	aws_c.execute('select deviceMAC as catName, ' \
-		'avgEnergy, avgPower ' \
+	aws_c.execute('select deviceMAC, ' \
+		'avgEnergy/' + str(num_locations) + ' as avgEnergy, avgPower ' \
 		'from mr_final_results ' \
 		'group by deviceMAC ' \
 		'order by avgEnergy asc;')
@@ -783,13 +786,17 @@ elif(config['type'] == 'results'):
 	for name, dayEnergy, power in expData:
 		total_measured_energy += dayEnergy
 
-	aws_c.execute('select sum(totEnergy) from mr_final_gnd;')
+	aws_c.execute('select avg(fullGnd) from mr_final_gnd_corr;')
 	final_gnd = aws_c.fetchall()[0][0]
 
 	printEnergy([[0, row[0], 0, 0, 0, row[1], 0, 0, row[2]] for row in expData], total_measured_energy, final_gnd, 'total')
 
 	gnuplot('total_pwrCDF.plt')
 	epstopdf('total_pwrCDF.eps')
+
+	# Show plot file
+	img = subprocess.Popen(['open', 'total_pwrCDF.pdf'])
+	img.wait()
 
 	os.remove('total_pwrCDF.eps')
 

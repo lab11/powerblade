@@ -27,7 +27,7 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 	for mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power in pwrData:
 		# Test if this power is the same as the one before it
 		if power != curPower:
-			print(str(curPower) + " " + str(cdfEnergy) + " " + str(measPct) + " " + str(gndPct))		# Print the last device and the energy sum
+			#print(str(curPower) + " " + str(cdfEnergy) + " " + str(measPct) + " " + str(gndPct))		# Print the last device and the energy sum
 			outfile_pwr.write(str(curPower) + "\t" + str(cdfEnergy) + "\t" + str(measPct) + "\t" + str(gndPct) + "\n")
 			curPower = power
 
@@ -36,7 +36,7 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 		measPct = cdfEnergy/total_measured_energy
 		gndPct = cdfEnergy/gndTruth
 
-	print(str(curPower) + " " + str(cdfEnergy) + " " + str(measPct) + " " + str(gndPct))		# Print the last device and the energy sum
+	#print(str(curPower) + " " + str(cdfEnergy) + " " + str(measPct) + " " + str(gndPct))		# Print the last device and the energy sum
 	outfile_pwr.write(str(curPower) + "\t" + str(cdfEnergy) + "\t" + str(measPct) + "\t" + str(gndPct) + "\n")
 
 	outfile_pwr.close()
@@ -57,11 +57,13 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 
 	outfile.write('set xtics .1\n\n')
 
+	outfile.write('set yrange [0:110]\n\n')
+
 	outfile.write('set y2tics ' + str(total_measured_percent/10) + '\n')
-	outfile.write('set y2range [0:' + str(total_measured_percent) + ']\n')
+	outfile.write('set y2range [0:' + str(float(total_measured_percent)*1.1) + ']\n')
 	outfile.write('set format y2 \"\%.0f\"\n\n')
 
-	outfile.write('set xrange [:2000]\n\n')
+	outfile.write('set xrange [:' + str(curPower) + ']\n\n')
 
 	outfile.write('plot \"' + outfilePath + '\" using 1:($3*100) axes x1y1 with lines, \\\n')
 	outfile.write('\t\"' + outfilePath + '\" using 1:($4*100) axes x1y2 with lines\n')
