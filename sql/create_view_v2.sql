@@ -58,18 +58,18 @@ t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMA
 
 ALTER VIEW active_devices AS
 SELECT deviceMAC, deviceName, location, category, deviceType from active_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'Lighting', 'Lighting' from active_lights
-UNION SELECT deviceMAC, room, location, 'Lighting', 'Lighting' from active_blinks;
+UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from active_lights
+UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from active_blinks;
 
-create view valid_devices as
+alter view valid_devices as
 SELECT deviceMAC, deviceName, location, category, deviceType from valid_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'Lighting', 'Lighting' from active_lights
-UNION SELECT deviceMAC, room, location, 'Lighting', 'Lighting' from active_blinks;
+UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from active_lights
+UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from active_blinks;
 
 ALTER VIEW most_recent_devices AS
 SELECT deviceMAC, deviceName, location, category, deviceType from most_recent_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'Lighting', 'Lighting' from most_recent_lights
-UNION SELECT deviceMAC, room, location, 'Lighting', 'Lighting' from most_recent_blinks;
+UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from most_recent_lights
+UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from most_recent_blinks;
 
 CREATE VIEW avg_lux AS
 SELECT deviceMAC, avg(lux) as avgLux FROM dat_blees FORCE INDEX (devLux)
