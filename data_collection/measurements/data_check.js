@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+var stats = require("stats-lite")
+
 var chalk = require('chalk');
 var fs = require('fs');
 
@@ -368,15 +370,12 @@ for(burner in file_info) {	// Do this for the number of devices
 fs.writeFileSync("sorted_maxDiff_power.dat", writeString_power);
 
 // Get the total errors for each of the three configs for each of the three types of calibration
-var avgErr = {};
-var avgErrCt = {};
+var avgErrStat = {}
 
 for(calib in calibList) {
-	avgErr[calibList[calib]] = {};
-	avgErrCt[calibList[calib]] = {};
+	avgErrStat[calibList[calib]] = {};
 	for(config in configList) {
-		avgErr[calibList[calib]][configList[config]] = 0;
-		avgErrCt[calibList[calib]][configList[config]] = 0;
+		avgErrStat[calibList[calib]][configList[config]] = [];
 	}
 }
 
@@ -403,31 +402,30 @@ for(device in file_info) {
 
 		if(device != 'vac' && device != 'hairGF' && device != 'toastGF') {
 			for(calib in calibList) {
-				avgErr[calibList[calib]][configList[config]] += (Math.abs(actual - file_info[device][calibList[calib]][configList[config]])/actual)*100;
-				avgErrCt[calibList[calib]][configList[config]] += 1;
+				avgErrStat[calibList[calib]][configList[config]].push((Math.abs(actual - file_info[device][calibList[calib]][configList[config]])/actual)*100);
 			}
 		}
 	}
 }
 
-var avg_copy = JSON.parse(JSON.stringify(avgErr));
+var avg_copy = JSON.parse(JSON.stringify(avgErrStat));
 var writeString_config = "";
 
 for(var i = 0; i < (calibList.length * configList.length); i++) {
-	var maxVal = 0;
+	var maxVal = 1000;
 	var maxCalib;
 	var maxConfig;
 	for(calib in avg_copy) {
 		for(config in avg_copy[calib]) {
-			if(avg_copy[calib][config] > maxVal) {
-				maxVal = avg_copy[calib][config];
+			if(stats.mean(avg_copy[calib][config]) < maxVal) {
+				maxVal = stats.mean(avg_copy[calib][config]);
 				maxCalib = calib;
 				maxConfig = config;
 			}
 		}
 	}
-	//console.log(maxCalib + "\t" + maxConfig)// + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]));
-	writeString_config += maxCalib + "." + maxConfig + "\t" + (avgErr[maxCalib][maxConfig]/avgErrCt[maxCalib][maxConfig]) + "\n";
+	//console.log(maxCalib + "\t" + maxConfig + "\t" + avgErrStat[maxCalib][maxConfig]);
+	writeString_config += i + "\t" + maxCalib + "." + maxConfig + "\t" + stats.mean(avgErrStat[maxCalib][maxConfig]) + "\t" + stats.stdev(avgErrStat[maxCalib][maxConfig]) + "\n";
 	delete avg_copy[maxCalib][maxConfig];
 }
 
