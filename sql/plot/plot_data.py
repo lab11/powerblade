@@ -714,7 +714,9 @@ elif(config['type'] == 'results'):
 	
 	#aws_c.execute('select concat_ws(\' \', category, deviceType) as catName, ' \
 	aws_c.execute('select category as catName, ' \
-		'sum(avgEnergy)/' + str(num_locations) + ' as energy, avg(avgPower) as power ' \
+		'sum(avgEnergy)/' + str(num_locations) + ' as energy, '\
+		'stddev(avgEnergy) as stdEnergy, '\
+		'avg(avgPower) as power ' \
 		'from mr_final_results ' \
 		'where location!=2 ' \
 		'and deviceMAC!=\'c098e57001A0\'' \

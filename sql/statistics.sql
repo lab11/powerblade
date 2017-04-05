@@ -59,13 +59,16 @@ select * from inf_dep_stats; where location>2;
 
 select * from valid_powerblades where location=0;
 
-select count(*) as numDeps, avg(duration) as avgDuration, stddev(duration) as stdDuration, min(duration) as minDuration, max(duration) as maxDuration, 
+select count(*) as numDeps, avg(duration) as avgDuration, stddev(duration) as stdDuration, min(duration) as minDuration, max(duration) as maxDuration,
+sum(duration) as depDays,
+sum(pb_count)+sum(bl_count)+sum(li_count) as devCount, 
 sum(pb_count) as sumPb, avg(pb_count) as  avgPb, stddev(pb_count) as stdPb, min(pb_count) as minPb, max(pb_count) as maxPb,
 sum(gw_count) as sumGw, avg(gw_count) as avgGw, min(gw_count) as minGw, max(gw_count) as maxGw,
 sum(bl_count) as sumBl, avg(bl_count) as avgBl, min(bl_count) as minBl, max(bl_count) as maxBl,
 sum(li_count) as sumLi, avg(li_count) as avgLi, min(li_count) as minLi, max(li_count) as maxLi
 from inf_dep_stats
-where location!=2;
+where location!=2
+and location!=1;
 where duration > 7;
  and duration < 168;
  
@@ -75,6 +78,7 @@ select avg(totMeas) as meas, avg(fullGnd), avg(totMeas)/avg(fullGnd) as pct from
 select * from mr_final_gnd_corr order by location asc;
 
 select * from mr_final_results where category='Kitchen';
+
  
 select * from dev_resets;
 select * from dev_actResets;
