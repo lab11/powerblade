@@ -541,10 +541,14 @@ elif(config['type'] == 'energy'):
 		'and power != 120.13 ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 	aws_c.execute('alter view avgPower_pb as ' \
-		'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devTimePower) ' \
+		'select deviceMAC, min(power) as minPower, avg(power) as avgPower, max(power) as maxPower, ' \
+		'(select avg(power) from dat_powerblade force index(devDevPower) where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\'  and deviceMAC=t1.deviceMAC and power<=avg(t1.power)) as q1Pwr, ' \
+		'(select avg(power) from dat_powerblade force index(devDevPower) where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\'  and deviceMAC=t1.deviceMAC and power>=avg(t1.power)) as q3Pwr ' \
+		'from dat_powerblade t1 force index(devTimePower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+		
 
 	day_en_str = ''
 	avg_pwr_str = ''
@@ -561,7 +565,7 @@ elif(config['type'] == 'energy'):
 			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
 			'energy_blees group by deviceMAC, dayst;')
 		day_en_str += ' union select * from day_energy_blees'
-		avg_pwr_str += ' union (select deviceMAC, power from active_lights where deviceMAC in ' + dev_blees + ')'
+		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_blees + ')'
 	if(query_ligeiro):
 		aws_c.execute('alter view energy_ligeiro as ' \
 			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
@@ -574,7 +578,7 @@ elif(config['type'] == 'energy'):
 			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
 			'energy_ligeiro group by deviceMAC, dayst;')
 		day_en_str += ' union select * from day_energy_ligeiro'
-		avg_pwr_str += ' union (select deviceMAC, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
+		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
 
 	aws_c.execute('alter view day_energy as select * from day_energy_pb tta where ' \
 		'(select actReset from dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0' + day_en_str + ';')
@@ -582,15 +586,24 @@ elif(config['type'] == 'energy'):
 
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
-	aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.stdEnergy, t2.totEnergy, t3.avgPower from ' \
+	aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.avgEnergy, t2.totEnergy, t3.avgPower, ' \
+		't2.minEnergy, t2.q1DayEn, t2.q3DayEn, t2.maxEnergy, ' \
+		't3.minPower, t3.q1Pwr, t3.q3Pwr, t3.maxPower from ' \
 		'active_devices t1 ' \
-		'join (select deviceMAC, sum(dayEnergy)/' + str(duration_days) + ' as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
-		'from day_energy group by deviceMAC) t2 ' \
+		'join (select deviceMAC, min(dayEnergy) as minEnergy, ' \
+		'(select sum(dayEnergy)/' + str(duration_days) + ' from day_energy tq1 where tq1.dayEnergy<=(sum(tday.dayEnergy)/' + str(duration_days) + ')) as q1DayEn, ' \
+		'sum(dayEnergy)/' + str(duration_days) + ' as avgEnergy, ' \
+		'(select sum(dayEnergy)/' + str(duration_days) + ' from day_energy tq3 where tq3.dayEnergy>=(sum(tday.dayEnergy)/' + str(duration_days) + ')) as q3DayEn, ' \
+		'max(dayEnergy) as maxEnergy, '
+		'sum(dayEnergy) as totEnergy ' \
+		'from day_energy tday group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC ' \
 		'join avg_power t3 ' \
 		'on t1.deviceMAC=t3.deviceMAC ' \
 		'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
+	#'(select sum(dayEnergy)/' + str(duration_days) + ' from day_energy tq1 where tday.deviceMAC=tq1.deviceMAC and tq1.dayEnergy<=(select sum(tday.dayEnergy)/' + str(duration_days) + ' from day_energy tavg where tavg.deviceMAC=tday.deviceMAC)) as q1DayEn, ' \
+	#'(select (sum(dayEnergy)/' + str(duration_days) + ') from day_energy tq3 where tday.deviceMAC=tq3.deviceMAC and tq3.dayEnergy>=(select sum(tday.dayEnergy)/' + str(duration_days) + ' from day_energy tavg where tavg.deviceMAC=tday.deviceMAC)) as q3DayEn, ' \
 	#'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
 
 	# Step 2: Ground Truth
@@ -610,6 +623,8 @@ elif(config['type'] == 'energy'):
 
 	outfile_pb = open('breakdown_pb.dat', 'w')
 	outfile_li = open('breakdown_li.dat', 'w')
+	boxfile_pb = open('bdownbox_pb.dat', 'w')
+	boxfile_li = open('bdownbox_li.dat', 'w')
 	outfile = open ('tot_energy.dat', 'w')
 
 	labelstr = ""
@@ -618,15 +633,17 @@ elif(config['type'] == 'energy'):
 	total_measured_energy = 0
 
 	# Energy Printout
-	for idx, (mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power) in enumerate(expData):
+	for idx, (mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power, minEnergy, q1Energy, q3Energy, maxEnergy, minPower, q1Power, q3Power, maxPower) in enumerate(expData):
 		total_measured_energy += dayEnergy
 		print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(loc) + " " + str(devCat) + " " + str(devType) + " " + str(dayEnergy) + " " + str(var) + " " + str(totEnergy) + " " + str(power))
 		outfile.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(loc) + "\t" + str(devCat) + "\t" + str(devType) + "\t" + str(dayEnergy) + "\t" + str(var) + "\t" + str(totEnergy) + "\t" + str(power) + "\n")
 		
 		if(mac[6:8] == '70'):
 			outfile_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
+			boxfile_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(minEnergy) + "\t" + str(q1Energy) + "\t" + str(dayEnergy) + "\t" + str(q3Energy) + "\t" + str(maxEnergy) + "\t" + str(minPower) + "\t" + str(q1Power) + "\t" + str(power) + "\t" + str(q3Power) + "\t" + str(maxPower) + "\t0.5\n")
 		else:
 			outfile_li.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(dayEnergy) + "\t" + str(power) + "\n")
+			boxfile_li.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(minEnergy) + "\t" + str(q1Energy) + "\t" + str(dayEnergy) + "\t" + str(q3Energy) + "\t" + str(maxEnergy) + "\t" + str(minPower) + "\t" + str(q1Power) + "\t" + str(power) + "\t" + str(q3Power) + "\t" + str(maxPower) + "\t0.5\n")
 		
 		if(dayEnergy > energyCutoff):
 			labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff * 1.1) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
@@ -637,6 +654,8 @@ elif(config['type'] == 'energy'):
 
 	outfile_pb.close()
 	outfile_li.close()
+	boxfile_pb.close()
+	boxfile_li.close()
 
 	breakdown(energyCutoff, labelstr, 'breakdown')
 
@@ -674,7 +693,7 @@ elif(config['type'] == 'energy'):
 	#if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
 	if(save_to_final):
 		uploadStr = ''
-		for mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power in expData:
+		for mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power, minEnergy, q1Energy, q3Energy, maxEnergy, minPower, q1Power, q3Power, maxPower in expData:
 			aws_c.execute('insert into final_results (addedDate, deviceMAC, deviceName, location, category, deviceType, avgEnergy, stdEnergy, totEnergy, avgPower) values (utc_timestamp(), \"' + \
 				str(mac) + '\", \"' + str(name) + '\", ' + str(loc) + ', \"' + str(devCat) + '\", \"' + str(devType) + '\", ' + str(round(dayEnergy,2)) + ', ' + str(round(var,2)) + ', ' + str(round(totEnergy,2)) + ', ' + str(round(power,2)) + ');')
 			aws_db.commit()
@@ -715,11 +734,11 @@ elif(config['type'] == 'results'):
 	#aws_c.execute('select concat_ws(\' \', category, deviceType) as catName, ' \
 	aws_c.execute('select category as catName, ' \
 		'sum(avgEnergy)/' + str(num_locations) + ' as energy, '\
-		'stddev(avgEnergy) as stdEnergy, '\
 		'avg(avgPower) as power ' \
 		'from mr_final_results ' \
 		'where location!=2 ' \
 		'and deviceMAC!=\'c098e57001A0\'' \
+		'and deviceMAC!=\'c098e5700193\'' \
 		'group by category ' \
 		'order by energy asc;')
 	
@@ -771,6 +790,107 @@ elif(config['type'] == 'results'):
 	mv('results_li.dat', qu_saveDir)
 	mv('results.plt', qu_saveDir)
 	mv('results.pdf', qu_saveDir)
+
+
+
+
+
+
+
+
+	# aws_c.execute('select t1.category, min(t1.catSum) as minCat, ' \
+	# 	'(select avg(catSum) from mr_cat_breakdown t2 where t1.category=t2.category and t2.catSum<avg(t1.catSum)) as q1, ' \
+	# 	'avg(t1.catSum) as meanCat, ' \
+	# 	'(select avg(catSum) from mr_cat_breakdown t3 where t1.category=t3.category and t3.catSum>avg(t1.catSum)) as q3, ' \
+	# 	'max(t1.catSum) as maxCat ' \
+	# 	'from mr_cat_breakdown t1 ' \
+	# 	'group by t1.category ' \
+	# 	'order by meanCat asc;')
+	aws_c.execute('select * from mr_cat_en_pwr;')
+	expData = aws_c.fetchall();
+
+	aws_c.execute('select t1.category, min(t1.catSum) as minCat, ' \
+		'(select avg(catSum) from mr_cat_breakdown t2 where t1.category=t2.category and t2.catSum<avg(t1.catSum)) as q1, ' \
+		'avg(t1.catSum) as meanCat, ' \
+		'(select avg(catSum) from mr_cat_breakdown t3 where t1.category=t3.category and t3.catSum>avg(t1.catSum)) as q3, ' \
+		'max(t1.catSum) as maxCat ' \
+		'from mr_cat_breakdown t1 ' \
+		'where t1.category=\'Phone charger\' and t1.catSum>0 '
+		'group by t1.category;')
+	phone = aws_c.fetchall()[0];
+
+	aws_c.execute('select t1.category, min(t1.catSum) as minCat, ' \
+		'(select avg(catSum) from mr_cat_breakdown t2 where t1.category=t2.category and t2.catSum<avg(t1.catSum)) as q1, ' \
+		'avg(t1.catSum) as meanCat, ' \
+		'(select avg(catSum) from mr_cat_breakdown t3 where t1.category=t3.category and t3.catSum>avg(t1.catSum)) as q3, ' \
+		'max(t1.catSum) as maxCat ' \
+		'from mr_cat_breakdown t1 ' \
+		'where t1.category=\'Overhead\' and t1.catSum>0 '
+		'group by t1.category;')
+	overhead = aws_c.fetchall()[0];
+
+	cat_pb = open('boxplot_pb.dat', 'w')
+	cat_li = open('boxplot_li.dat', 'w')
+
+	# labelstr = ""
+	# energyCutoff = 1000
+	# energyTop = 1200
+	# energyCutoff_loc = 1320
+
+	# Energy Printout
+	for idx, (name, minEn, q1En, meanEn, q3En, maxEn, minPwr, q1Pwr, meanPwr, q3Pwr, maxPwr) in enumerate(expData):
+
+		name = name.split('/')[0]
+
+		#print(str(idx) + " \"" + str(name) + "\" " + str(dayEnergy) + " " + str(power))
+
+
+		
+		if(name[0:8] == 'Overhead'):
+			cat_li.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(overhead[1]) + "\t" + str(overhead[2]) + "\t" + str(overhead[3]) + "\t" + str(overhead[4]) + "\t" + str(overhead[5]) + "\t")
+			outputFile = cat_li
+		elif(name[0:13] == 'Phone charger'):
+			cat_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(phone[1]) + "\t" + str(phone[2]) + "\t" + str(phone[3]) + "\t" + str(phone[4]) + "\t" + str(phone[5]) + "\t")
+			outputFile = cat_pb
+		else:
+			cat_pb.write(str(idx) + "\t\"" + str(name) + "\"\t" + str(minEn) + "\t" + str(q1En) + "\t" + str(meanEn) + "\t" + str(q3En) + "\t" + str(maxEn) + "\t")
+			outputFile = cat_pb
+
+		outputFile.write(str(minPwr) + "\t" + str(q1Pwr) + "\t" + str(meanPwr) + "\t" + str(q3Pwr) + "\t" + str(maxPwr) + "\t0.5\n")
+		
+		# if(dayEnergy > energyCutoff):
+		# 	labelstr += 'set label at ' + str(idx) + ', ' + str(energyCutoff_loc) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
+		# else:
+		# 	labelstr += 'set label at ' + str(idx) + ', ' + str(float(dayEnergy) + 100) + ' \"' + str(int(dayEnergy)) + '\" center font \", 8\"\n'
+
+	cat_pb.close()
+	cat_li.close()
+
+	# Generate plot and convert to PDF
+	gnuplot('boxplot.plt')
+	epstopdf('boxplot.eps')
+
+	# Show plot file
+	img = subprocess.Popen(['open', 'boxplot.pdf'])
+	img.wait()
+
+	# Remove temporary file
+	os.remove('boxplot.eps')
+
+	# Move data to saveDir
+	mv('boxplot_pb.dat', qu_saveDir)
+	mv('boxplot_li.dat', qu_saveDir)
+	mv('boxplot.plt', qu_saveDir)
+	mv('boxplot.pdf', qu_saveDir)
+
+
+
+
+
+
+
+
+
 
 
 

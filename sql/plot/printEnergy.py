@@ -24,7 +24,7 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 	#print(str(cdfEnergy) + " " + str(total_measured_energy) + " " + str(gndTruth))
 	measPct = cdfEnergy/total_measured_energy
 	gndPct = cdfEnergy/gndTruth
-	for mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power in pwrData:
+	for mac, name, loc, devCat, devType, dayEnergy, var, totEnergy, power, minEnergy, q1Energy, q3Energy, maxEnergy, minPower, q1Power, q3Power, maxPower in pwrData:
 		# Test if this power is the same as the one before it
 		if power != curPower:
 			#print(str(curPower) + " " + str(cdfEnergy) + " " + str(measPct) + " " + str(gndPct))		# Print the last device and the energy sum
