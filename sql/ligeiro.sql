@@ -25,3 +25,5 @@ on t1.deviceMAC=t3.deviceMAC;
 select * from inf_gw_status where gatewayMAC='c098e5c00025' or gatewayMAC='c098e5c0002e' order by timestamp desc;
 
 
+select * from dat_ligeiro where deviceMAC in (select deviceMAC from dat_ligeiro where deviceMAC<='c098e5d00024' group by deviceMAC) limit 1000000;
+
