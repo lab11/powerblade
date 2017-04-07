@@ -269,6 +269,66 @@ select * from inf_pb_lookup where location=0;
 select * from active_devices where location=0;
 
 
+create view mr_final_categories as select category from mr_final_results group by category;
+create view mr_final_locations as select location from mr_final_results group by location;
+
+
+
+alter view mr_cat_breakdown as
+select t2.location, t1.category, case when t1.category in (select category from mr_final_results t3 where t2.location=t3.location) then
+(select sum(avgEnergy) from mr_final_results t4 where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' and t2.location=t4.location and t1.category=t4.category)
+else 0 end as catSum from
+mr_final_categories t1
+join
+mr_final_locations t2;
+
+select * from mr_cat_en_pwr;
+
+create view mr_cat_en_pwr as
+select tEn.category, tEn.minEn, tEn.q1En, tEn.meanEn, tEn.q3En, tEn.maxEn, tPwr.minPwr, tPwr.q1Pwr, tPwr.meanPwr, tPwr.q3Pwr, tPwr.maxPwr from
+mr_cat_en tEn
+join
+mr_cat_pwr tPwr
+on tEn.category=tPwr.category
+order by tEn.meanEn asc;
+
+create view mr_cat_en as
+(select t1.category, min(t1.catSum) as minEn,
+(select avg(catSum) from mr_cat_breakdown t2 where t1.category=t2.category and t2.catSum<=(select avg(catSum) from mr_cat_breakdown t9 where t9.category=t1.category)) as q1En,
+avg(t1.catSum) as meanEn,
+(select avg(catSum) from mr_cat_breakdown t3 where t1.category=t3.category and t3.catSum>=(select avg(catSum) from mr_cat_breakdown t10 where t10.category=t1.category)) as q3En,
+max(t1.catSum) as maxEn
+from mr_cat_breakdown t1
+group by t1.category);
+
+alter view mr_cat_pwr as
+(select t4.category, min(t4.avgPower) as minPwr,
+(select avg(avgPower) from mr_final_results t5 where t4.category=t5.category and t5.avgPower<=(select avg(avgPower) from mr_final_results t7 where t7.category=t4.category)) as q1Pwr,
+avg(t4.avgPower) as meanPwr,
+(select avg(avgPower) from mr_final_results t6 where t4.category=t6.category and t6.avgPower>=(select avg(avgPower) from mr_final_results t8 where t8.category=t4.category)) as q3Pwr,
+max(t4.avgPower) as maxPwr
+from mr_final_results t4
+where t4.avgPower>0
+group by t4.category);
+
+
+
+
+
+
+select * from day_energy_dayst join day_energy_deviceMAC;
+
+#drop view day_energy_dayst;
+#drop view day_energy_deviceMAC;
+
+select date(timestamp) from dat_powerblade force index(timestamp)
+where timestamp>'2017-03-04 00:00:00'
+group by date(timestamp);
+
+select deviceMAC from dat_powerblade group by deviceMAC;
+
+
+
 -- SELECT * FROM active_gateways;
 -- SELECT * FROM active_powerblades;
 -- SELECT * FROM active_blinks;

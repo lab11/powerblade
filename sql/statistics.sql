@@ -77,7 +77,22 @@ select sum(avgEnergy) from mr_final_results;
 select avg(totMeas) as meas, avg(fullGnd), avg(totMeas)/avg(fullGnd) as pct from mr_final_gnd_corr;
 select * from mr_final_gnd_corr order by location asc;
 
-select * from mr_final_results where category='Kitchen';
+select * from mr_final_results where category='Networking/Communication';
+
+
+
+
+select t1.category, min(t1.catSum) as minCat,
+(select avg(catSum) from mr_cat_breakdown t2 where t1.category=t2.category and t2.catSum<avg(t1.catSum)) as q1,
+avg(t1.catSum) as meanCat,
+(select avg(catSum) from mr_cat_breakdown t3 where t1.category=t3.category and t3.catSum>avg(t1.catSum)) as q3,
+max(t1.catSum) as maxCat
+from mr_cat_breakdown t1
+#where t1.catSum>0
+group by t1.category;
+
+
+select * from mr_cat_breakdown where category='Lighting';
 
  
 select * from dev_resets;
