@@ -245,7 +245,8 @@ alter view mr_final_gnd_corr as
 select t1.location, t1.startDate, t1.endDate, t1.duration, t1.truthDays, t1.missingDays, t1.totMeas, t1.totGnd, 
 (select count(*) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullTruth,
 t1.duration-(select count(*) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullMissing,
-(select avg(energy) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullGnd
+(select avg(energy) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullGnd,
+t1.totMeas/(select avg(energy) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst)*100 as pct
 from mr_final_gnd t1;
 
 select * from mr_final_gnd_corr order by location asc;
