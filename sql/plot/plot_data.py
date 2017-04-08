@@ -14,6 +14,7 @@ from sh import epstopdf, gnuplot, mkdir, cp, mv
 
 from printEnergy import printEnergy
 from breakdown import breakdown
+from boxplot import boxplot
 
 import math
 
@@ -724,6 +725,20 @@ elif(config['type'] == 'energy'):
 	mv('energy_pwrCDF.plt', qu_saveDir)
 	mv('energy_pwrCDF.pdf', qu_saveDir)
 
+	boxplot(8, 66.5, 2000, 'boxplot')
+
+	gnuplot('boxplot.plt')
+	epstopdf('boxplot.eps')
+
+	img = subprocess.Popen(['open', 'boxplot.pdf'])
+	img.wait()
+
+	os.remove('boxplot.eps')
+
+	mv('boxplot_pb.dat', qu_saveDir)
+	mv('boxplot_li.dat', qu_saveDir)
+	mv('boxplot.plt', qu_saveDir)
+	mv('boxplot.pdf', qu_saveDir)
 
 	# Upload to final results table
 	#if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
@@ -934,6 +949,7 @@ elif(config['type'] == 'results'):
 	aws_c.execute('select deviceMAC, ' \
 		'avgEnergy, avgPower ' \
 		'from mr_final_results ' \
+		'where location!=1 ' \
 		'group by deviceMAC ' \
 		'order by avgEnergy asc;')
 
@@ -944,7 +960,7 @@ elif(config['type'] == 'results'):
 	for name, dayEnergy, power in expData:
 		total_measured_energy += dayEnergy
 
-	aws_c.execute('select sum(fullGnd) from mr_final_gnd_corr;')
+	aws_c.execute('select sum(fullGnd) from mr_final_gnd_corr where location!=1;')
 	final_gnd = aws_c.fetchall()[0][0]
 
 	printEnergy([[0, row[0], 0, 0, 0, row[1], 0, 0, row[2], 0, 0, 0, 0, 0, 0, 0, 0] for row in expData], total_measured_energy, final_gnd, 'total')
