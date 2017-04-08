@@ -76,6 +76,8 @@ where duration > 7;
 select sum(avgEnergy) from mr_final_results;
 select avg(totMeas) as meas, avg(fullGnd), avg(totMeas)/avg(fullGnd) as pct from mr_final_gnd_corr;
 select * from mr_final_gnd_corr order by location asc;
+select sum(totMeas)/sum(fullGnd)*100 from mr_final_gnd_corr;
+select avg(totMeas)/avg(fullGnd)*100 from mr_final_gnd_corr;
 
 select * from mr_final_results where category='Networking/Communication';
 
