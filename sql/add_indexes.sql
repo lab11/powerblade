@@ -11,4 +11,6 @@ alter table dat_powerblade add index devTimeEnergy (deviceMAC, timestamp, energy
 
 alter table dat_blees add index devLux (deviceMAC, lux, timestamp);
 
+alter table dat_powerblade add index devTimeSeq (deviceMAC, timestamp, seq);
+
 
