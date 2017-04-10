@@ -522,46 +522,44 @@ elif(config['type'] == 'energy'):
 	# Step 0: Alter the views acccording to the specified query paremeters
 	# Day energy: maximum energy minus minimum energy for each device for each day
 	print("Altering views for energy query...\n")
-	# aws_c.execute('alter view day_energy_pb as ' \
-	# 	'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy ' \
-	# 	'from dat_powerblade force index (devTimeEnergy) ' \
-	# 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# 	'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
+	aws_c.execute('alter view day_energy_pb as ' \
+		'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy ' \
+		'from dat_powerblade force index (devTimeEnergy) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
 	# aws_c.execute('alter view day_energy_pb as ' \
 	# 	'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy ' \
 	# 	'from loc0_dat_powerblade force index (devTimeEnergy) ' \
 	# 	'where energy!=999999.99 group by deviceMAC, dayst;')
-	# # aws_c.execute('alter view dev_resets as ' \
-	# # 	'select date(timestamp) as dayst, deviceMAC, ' \
-	# # 	'min(energy) as minEnergy, '
-	# # 	'case when min(energy)<1.75 then 1 else 0 end as devReset, min(timestamp) as minTs ' \
-	# # 	'from dat_powerblade force index(devTimeEnergy) ' \
-	# # 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# # 	'and deviceMAC in ' + dev_powerblade + ' ' \
-	# # 	'group by dayst, deviceMAC;')
+	aws_c.execute('alter view dev_resets as ' \
+		'select date(timestamp) as dayst, deviceMAC, ' \
+		'min(energy) as minEnergy, '
+		'case when min(energy)<1.75 then 1 else 0 end as devReset, min(timestamp) as minTs ' \
+		'from dat_powerblade force index(devTimeEnergy) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and deviceMAC in ' + dev_powerblade + ' ' \
+		'group by dayst, deviceMAC;')
 	# aws_c.execute('alter view dev_resets as ' \
 	# 	'select date(timestamp) as dayst, deviceMAC, ' \
 	# 	'min(energy) as minEnergy, '
 	# 	'case when min(energy)<1.75 then 1 else 0 end as devReset, min(timestamp) as minTs ' \
 	# 	'from loc0_dat_powerblade force index(devTimeEnergy) ' \
 	# 	'group by dayst, deviceMAC;')
-	# # Max power - maximum power per device over the time period
-	# # aws_c.execute('alter view maxPower_pb as ' \
-	# # 	'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
-	# # 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# # 	'and power != 120.13 ' \
-	# # 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+	# Max power - maximum power per device over the time period
+	aws_c.execute('alter view maxPower_pb as ' \
+		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power != 120.13 ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 	# aws_c.execute('alter view maxPower_pb as ' \
 	# 	'select deviceMAC, max(power) as maxPower from loc0_dat_powerblade force index (devTimePower) ' \
 	# 	'where power != 120.13 group by deviceMAC;')
-	# # aws_c.execute('alter view avgPower_pb as ' \
-	# # 	'select deviceMAC, min(power) as minPower, avg(power) as avgPower, max(power) as maxPower, ' \
-	# # 	'(select avg(power) from dat_powerblade force index(devDevPower) where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\'  and deviceMAC=t1.deviceMAC and power<=avg(t1.power)) as q1Pwr, ' \
-	# # 	'(select avg(power) from dat_powerblade force index(devDevPower) where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\'  and deviceMAC=t1.deviceMAC and power>=avg(t1.power)) as q3Pwr ' \
-	# # 	'from dat_powerblade t1 force index(devTimePower) ' \
-	# # 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# # 	'and power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
-	# # 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
+	aws_c.execute('alter view avgPower_pb as ' \
+		'select deviceMAC, min(power) as minPower, avg(power) as avgPower, max(power) as maxPower ' \
+		'from dat_powerblade t1 force index(devTimePower) ' \
+		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+		'and power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
+		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
 	# aws_c.execute('alter view avgPower_pb as ' \
 	# 	'select deviceMAC, min(power) as minPower, avg(power) as avgPower, max(power) as maxPower, ' \
 	# 	'(select avg(power) from loc0_dat_powerblade force index(devDevPower) where deviceMAC=t1.deviceMAC and power<=(select avg(power) from loc0_avg_power where deviceMAC=t1.deviceMAC)) as q1Pwr, ' \
@@ -571,74 +569,72 @@ elif(config['type'] == 'energy'):
 	# 	'group by deviceMAC;')
 		
 
-	# day_en_str = ''
-	# avg_pwr_str = ''
-	# # Step 0.5: Handle light data
-	# if(query_blees):
-	# 	aws_c.execute('alter view energy_blees as ' \
-	# 		'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
-	# 		'case when lux>(select avgLux from avg_lux t2 where t1.deviceMAC=t2.deviceMAC) then ' \
-	# 		'(select power*5/60 from active_lights t3 where t1.deviceMAC=t3.deviceMAC) else 0 end as \'onoff\' ' \
-	# 		'from dat_blees t1 force index (devLux) ' \
-	# 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# 		'and deviceMAC in ' + dev_blees + ' group by deviceMAC, timekey;')
-	# 	aws_c.execute('alter view day_energy_blees as ' \
-	# 		'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
-	# 		'energy_blees group by deviceMAC, dayst;')
-	# 	day_en_str += ' union select * from day_energy_blees'
-	# 	avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_blees + ')'
-	# if(query_ligeiro):
-	# 	aws_c.execute('alter view energy_ligeiro as ' \
-	# 		'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
-	# 		'case when (1+max(count)-min(count)) >= 1 then '\
-	# 		'(select power*5/60 from active_lights t2 where t1.deviceMAC=t2.deviceMAC) else 0 end as \'onoff\' ' \
-	# 		'from dat_ligeiro t1 ' \
-	# 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# 		'and deviceMAC in ' + dev_ligeiro + ' group by deviceMAC, timekey;')
-	# 	aws_c.execute('alter view day_energy_ligeiro as ' \
-	# 		'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
-	# 		'energy_ligeiro group by deviceMAC, dayst;')
-	# 	day_en_str += ' union select * from day_energy_ligeiro'
-	# 	avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
+	day_en_str = ''
+	avg_pwr_str = ''
+	# Step 0.5: Handle light data
+	if(query_blees):
+		aws_c.execute('alter view energy_blees as ' \
+			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
+			'case when lux>(select avgLux from avg_lux t2 where t1.deviceMAC=t2.deviceMAC) then ' \
+			'(select power*5/60 from active_lights t3 where t1.deviceMAC=t3.deviceMAC) else 0 end as \'onoff\' ' \
+			'from dat_blees t1 force index (devLux) ' \
+			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+			'and deviceMAC in ' + dev_blees + ' group by deviceMAC, timekey;')
+		aws_c.execute('alter view day_energy_blees as ' \
+			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
+			'energy_blees group by deviceMAC, dayst;')
+		day_en_str += ' union select * from day_energy_blees'
+		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_blees + ')'
+	if(query_ligeiro):
+		aws_c.execute('alter view energy_ligeiro as ' \
+			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
+			'case when (1+max(count)-min(count)) >= 1 then '\
+			'(select power*5/60 from active_lights t2 where t1.deviceMAC=t2.deviceMAC) else 0 end as \'onoff\' ' \
+			'from dat_ligeiro t1 ' \
+			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
+			'and deviceMAC in ' + dev_ligeiro + ' group by deviceMAC, timekey;')
+		aws_c.execute('alter view day_energy_ligeiro as ' \
+			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
+			'energy_ligeiro group by deviceMAC, dayst;')
+		day_en_str += ' union select * from day_energy_ligeiro'
+		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
 
-	# aws_c.execute('alter view day_energy as select * from day_energy_pb tta where ' \
-	# 	'(select actReset from dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0' + day_en_str + ';')
-	# aws_c.execute('alter view avg_power as select * from avgPower_pb' + avg_pwr_str + ';')
+	aws_c.execute('alter view day_energy as select * from day_energy_pb tta where ' \
+		'(select actReset from dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0' + day_en_str + ';')
+	aws_c.execute('alter view avg_power as select * from avgPower_pb' + avg_pwr_str + ';')
 
 	# Step 1: Unified query for energy and power
 	print("Running data query...\n")
-	# aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.avgEnergy, t2.totEnergy, t3.avgPower, ' \
-	# 	't2.minEnergy, t2.q1DayEn, t2.q3DayEn, t2.maxEnergy, ' \
-	# 	't3.minPower, t3.q1Pwr, t3.q3Pwr, t3.maxPower from ' \
-	# 	'active_devices t1 ' \
-	# 	'join (select deviceMAC, min(dayEnergy) as minEnergy, ' \
-	# 	'(select sum(dayEnergy)/' + str(duration_days) + ' from day_energy tq1 where tq1.dayEnergy<=(sum(tday.dayEnergy)/' + str(duration_days) + ')) as q1DayEn, ' \
-	# 	'sum(dayEnergy)/' + str(duration_days) + ' as avgEnergy, ' \
-	# 	'(select sum(dayEnergy)/' + str(duration_days) + ' from day_energy tq3 where tq3.dayEnergy>=(sum(tday.dayEnergy)/' + str(duration_days) + ')) as q3DayEn, ' \
-	# 	'max(dayEnergy) as maxEnergy, '
-	# 	'sum(dayEnergy) as totEnergy ' \
-	# 	'from day_energy tday group by deviceMAC) t2 ' \
-	# 	'on t1.deviceMAC=t2.deviceMAC ' \
-	# 	'join avg_power t3 ' \
-	# 	'on t1.deviceMAC=t3.deviceMAC ' \
-	# 	'order by t2.avgEnergy;')
-	# expData = aws_c.fetchall()
 	aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.avgEnergy, t2.totEnergy, t3.avgPower, ' \
-		't2.minEnergy, t2.q1DayEn, t2.q3DayEn, t2.maxEnergy, ' \
-		't3.minPower, t3.q1Pwr, t3.q3Pwr, t3.maxPower from ' \
+		't2.minEnergy, 1, 1, t2.maxEnergy, ' \
+		't3.minPower, 1, 1, t3.maxPower from ' \
 		'active_devices t1 ' \
 		'join (select deviceMAC, min(dayEnergy) as minEnergy, ' \
-		'(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy<=(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC)) as q1DayEn, ' \
-		'avg(dayEnergy) as avgEnergy, ' \
-		'(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy>=(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC)) as q3DayEn, ' \
+		'sum(dayEnergy)/' + str(duration_days) + ' as avgEnergy, ' \
 		'max(dayEnergy) as maxEnergy, '
 		'sum(dayEnergy) as totEnergy ' \
-		'from day_energy_full tday group by deviceMAC) t2 ' \
+		'from day_energy tday group by deviceMAC) t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC ' \
 		'join avg_power t3 ' \
 		'on t1.deviceMAC=t3.deviceMAC ' \
 		'order by t2.avgEnergy;')
 	expData = aws_c.fetchall()
+	# aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.avgEnergy, t2.totEnergy, t3.avgPower, ' \
+	# 	't2.minEnergy, t2.q1DayEn, t2.q3DayEn, t2.maxEnergy, ' \
+	# 	't3.minPower, t3.q1Pwr, t3.q3Pwr, t3.maxPower from ' \
+	# 	'active_devices t1 ' \
+	# 	'join (select deviceMAC, min(dayEnergy) as minEnergy, ' \
+	# 	'(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy<=(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC)) as q1DayEn, ' \
+	# 	'avg(dayEnergy) as avgEnergy, ' \
+	# 	'(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy>=(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC)) as q3DayEn, ' \
+	# 	'max(dayEnergy) as maxEnergy, '
+	# 	'sum(dayEnergy) as totEnergy ' \
+	# 	'from day_energy_full tday group by deviceMAC) t2 ' \
+	# 	'on t1.deviceMAC=t2.deviceMAC ' \
+	# 	'join avg_power t3 ' \
+	# 	'on t1.deviceMAC=t3.deviceMAC ' \
+	# 	'order by t2.avgEnergy;')
+	# expData = aws_c.fetchall()
 	#'(select sum(dayEnergy)/' + str(duration_days) + ' from day_energy tq1 where tday.deviceMAC=tq1.deviceMAC and tq1.dayEnergy<=(select sum(tday.dayEnergy)/' + str(duration_days) + ' from day_energy tavg where tavg.deviceMAC=tday.deviceMAC)) as q1DayEn, ' \
 	#'(select (sum(dayEnergy)/' + str(duration_days) + ') from day_energy tq3 where tday.deviceMAC=tq3.deviceMAC and tq3.dayEnergy>=(select sum(tday.dayEnergy)/' + str(duration_days) + ' from day_energy tavg where tavg.deviceMAC=tday.deviceMAC)) as q3DayEn, ' \
 	#'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
@@ -660,8 +656,8 @@ elif(config['type'] == 'energy'):
 
 	outfile_pb = open('breakdown_pb.dat', 'w')
 	outfile_li = open('breakdown_li.dat', 'w')
-	boxfile_pb = open('bdownbox_pb.dat', 'w')
-	boxfile_li = open('bdownbox_li.dat', 'w')
+	boxfile_pb = open('boxplot_pb.dat', 'w')
+	boxfile_li = open('boxplot_li.dat', 'w')
 	outfile = open ('tot_energy.dat', 'w')
 
 	labelstr = ""
@@ -725,7 +721,7 @@ elif(config['type'] == 'energy'):
 	mv('energy_pwrCDF.plt', qu_saveDir)
 	mv('energy_pwrCDF.pdf', qu_saveDir)
 
-	boxplot(8, 66.5, 2000, 'boxplot')
+	boxplot(8, 66.5, 3000, 'boxplot')
 
 	gnuplot('boxplot.plt')
 	epstopdf('boxplot.eps')
@@ -917,6 +913,8 @@ elif(config['type'] == 'results'):
 	cat_pb.close()
 	cat_li.close()
 
+	boxplot(4, idx + 0.5, 3000, 'boxplot')
+
 	# Generate plot and convert to PDF
 	gnuplot('boxplot.plt')
 	epstopdf('boxplot.eps')
@@ -931,7 +929,7 @@ elif(config['type'] == 'results'):
 	# Move data to saveDir
 	mv('boxplot_pb.dat', qu_saveDir)
 	mv('boxplot_li.dat', qu_saveDir)
-	cp('boxplot.plt', qu_saveDir)
+	mv('boxplot.plt', qu_saveDir)
 	mv('boxplot.pdf', qu_saveDir)
 
 
@@ -950,6 +948,7 @@ elif(config['type'] == 'results'):
 		'avgEnergy, avgPower ' \
 		'from mr_final_results ' \
 		'where location!=1 ' \
+		'and category!=\'Overhead\' ' \
 		'group by deviceMAC ' \
 		'order by avgEnergy asc;')
 

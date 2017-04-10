@@ -63,8 +63,9 @@ describe day_energy;
 select * from day_energy;
 drop view day_energy;
 create table day_energy (dayst date, deviceMAC char(16), dayEnergy decimal(37,4), index (deviceMAC), index devDevEnergy (deviceMAC, dayEnergy, dayst));
+rename table day_energy to loc0_day_energy;
 
-insert into day_energy (dayst, deviceMAC, dayEnergy)
+insert into loc0_day_energy (dayst, deviceMAC, dayEnergy)
 select * from day_energy_pb tta where
 (select actReset from dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0
 union select * from day_energy_blees
@@ -89,14 +90,14 @@ select * from day_energy_full where deviceMAC='c098e5300052';
 
 
 
-create view day_energy_days as select dayst from day_energy group by dayst;
-create view day_energy_devs as select deviceMAC from day_energy group by deviceMAC;
+create view day_energy_days as select dayst from loc0_day_energy group by dayst;
+create view day_energy_devs as select deviceMAC from loc0_day_energy group by deviceMAC;
 
 
 
 create view day_energy_full as
-select t1.dayst, t2.deviceMAC, case when t1.dayst in (select dayst from day_energy t3 where t2.deviceMAC=t3.deviceMAc) then
-(select dayEnergy from day_energy t4 where t2.deviceMAC=t4.deviceMAC and t1.dayst=t4.dayst)
+select t1.dayst, t2.deviceMAC, case when t1.dayst in (select dayst from loc0_day_energy t3 where t2.deviceMAC=t3.deviceMAc) then
+(select dayEnergy from loc0_day_energy t4 where t2.deviceMAC=t4.deviceMAC and t1.dayst=t4.dayst)
 else 0 end as dayEnergy from
 day_energy_days t1
 join
