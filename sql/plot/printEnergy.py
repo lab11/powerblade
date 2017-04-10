@@ -57,10 +57,12 @@ def printEnergy(expData, total_measured_energy, gndTruth, outfileStr):
 
 	outfile.write('set xtics .1\n\n')
 
-	outfile.write('set yrange [0:110]\n\n')
+	outfile.write('set ytics 10\n\n')
+
+	outfile.write('set yrange [0:105]\n\n')
 
 	outfile.write('set y2tics ' + str(total_measured_percent/10) + '\n')
-	outfile.write('set y2range [0:' + str(float(total_measured_percent)*1.1) + ']\n')
+	outfile.write('set y2range [0:' + str(float(total_measured_percent)*1.05) + ']\n')
 	outfile.write('set format y2 \"\%.0f\"\n\n')
 
 	outfile.write('set xrange [:' + str(curPower) + ']\n\n')

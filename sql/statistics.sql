@@ -77,9 +77,9 @@ select avg(energy) from most_recent_gnd_truth where location=7;
 select sum(avgEnergy) from mr_final_results;
 select avg(totMeas) as meas, avg(fullGnd), avg(totMeas)/avg(fullGnd) as pct from mr_final_gnd_corr;
 select * from mr_final_gnd_corr order by location asc;
-select sum(totMeas)/sum(fullGnd)*100 from mr_final_gnd_corr where location!=1 and location!=1 and location!=9;
-select avg(totMeas)/avg(fullGnd)*100 from mr_final_gnd_corr where location!=1 and location!=1 and location!=9;
-select avg(pct) from mr_final_gnd_corr;
+select sum(totMeas)/sum(fullGnd)*100 from mr_final_gnd_corr where location!=1;
+select avg(totMeas)/avg(fullGnd)*100 from mr_final_gnd_corr where location!=1;
+select avg(pct) from mr_final_gnd_corr where location!=1;
 
 select * from mr_final_results where category='Networking/Communication';
 
