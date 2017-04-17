@@ -59,7 +59,7 @@ if(pb_address == 0) {
 }
 
 if(device == "") {
-    console.log("Error: Must run with a certain device");
+    console.log("Error: Must run with a certain AC device to be measured");
     console.log("Use \"-d [device]\" or \"--device [device]\" to specify");
     process.exit();
 }
@@ -76,7 +76,7 @@ console.log("Looking for PowerBlade " + pb_address);
 var g_time_start = new Date();
 
 //filename = dateFormat(g_time_start, "yyyy-mm-dd_h-MM-ss") + "_" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".txt";
-filename = process.env.PB_DATA + "measurements_rig/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
+filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
 
 if(fs.existsSync(filename)) {
     var replace = readlineSync.question("File exists: overwrite, rename, or exit? (o/r/e): ");
@@ -139,11 +139,13 @@ mqtt_client.on('connect', function () {
                 process.stdout.write("\n");
                 console.log("Average power: " + (total/count))
 
-                runScript('./data_check.js', device.substr(1), function (err) {
-				    if (err) throw err;
-				    console.log('finished running data_check.js');
-				    process.exit();
-				});
+                //runScript('./data_check.js', device.substr(1), function (err) {
+		//		    if (err) throw err;
+		//		    console.log('finished running data_check.js');
+		//		    process.exit();
+		//		});
+		process.exit();
+
             }
         }
 	});
