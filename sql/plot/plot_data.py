@@ -94,7 +94,7 @@ def check_tag():
 	# else:
 	# 	qu_saveDir = master_saveDir + config['tag'] + '/'
 
-def dev_print():
+def dev_print(print_all):
 	global loc_list
 
 	global dev_powerblade
@@ -173,13 +173,13 @@ def dev_print():
 	dev_blink = "".join(dev_blink)
 
 	devNames = []
-	if(query_powerblade):
+	if(print_all and query_powerblade):
 		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from valid_powerblades where deviceMAC in ' + dev_powerblade + ';')
 		devNames.extend(aws_c.fetchall())
-	if(query_blees):
+	if(print_all and  query_blees):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_blees + ';')
 		devNames.extend(aws_c.fetchall())
-	if(query_ligeiro):
+	if(print_all and query_ligeiro):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_ligeiro + ';')
 		devNames.extend(aws_c.fetchall())
 	if(query_blink):
@@ -202,10 +202,13 @@ def print_parameters():
 
 	if(config['type'] == 'plot'):
 		print("\nPlotting data from the following devices:")
-		dev_print()
+		dev_print(True)
 	elif(config['type'] == 'energy'):
 		print("\nQuerying " + config['type'] + " from the following devices")
-		dev_print()
+		dev_print(True)
+	elif(config['type'] == 'blink'):
+		print("\nQuerying " + config['type'] + " from the following devices")
+		dev_print(False)
 	else:
 		print("\nQuerying " + config['type'])
 
@@ -218,7 +221,7 @@ def print_parameters():
 		print("\nOver the following time period:")
 		config['startDay'] = config['start'][0:10]
 		config['endDay'] = config['end'][0:10]
-		if(config['type'] == 'plot'):
+		if(config['type'] == 'plot' or config['type'] == 'blink'):
 			print("From\t" + config['start'])
 			print("To\t" + config['end'])
 		#elif(config['type'] == 'energy'):
@@ -238,7 +241,7 @@ def print_parameters():
 print_parameters()
 
 print("\nTo confirm, push enter. To modify:")
-print("\t'type [plot, energy, results]'")
+print("\t'type [plot, energy, results, blink]'")
 print("\t'devices [comma separated 12 or 6 digit macs]' or")
 print("\t'location #'")
 print("\t'start yyyy-mm-dd HH:mm:ss' or")
@@ -258,11 +261,11 @@ while(confirm != ""):
 	if(confirm_list[0] == 'exit'):
 		sys.exit()
 	elif(confirm_list[0] == 'type'):
-		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'results'):
+		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'results' or confirm_list[1] == 'blink'):
 			config['type'] = confirm_list[1]
 			changes = True
 		else:
-			print("Usage is type [plot, energy, results]")
+			print("Usage is type [plot, energy, results, blink]")
 			error = True
 	elif(confirm_list[0] == 'dev' or confirm_list[0] == 'devices'):
 		devType = 'replace'
@@ -977,64 +980,85 @@ elif(config['type'] == 'results'):
 	mv('total_pwrCDF.plt', qu_saveDir)
 	mv('total_pwrCDF.pdf', qu_saveDir)
 
-	# print("Running power...\n")
-
-	# print("Acquiring max power...\n")
-
-	# # # Max power - maximum power per device over the time period
-	# # aws_c.execute('insert into perm_maxPower_pb (deviceMAC, maxPower) ' \
-	# # 	'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
-	# # 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# # 	'and power != 120.13 ' \
-	# # 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-
-	# # print("Acquiring avg power...\n")
-
-	# # aws_c.execute('insert into perm_avgPower_pb (deviceMAC, avgPower) ' \
-	# # 	'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devDevPower) ' \
-	# # 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# # 	'and power>(select 0.1*maxPower from mr_maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
-	# # 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-
-	# aws_c.execute('alter view maxPower_pb as ' \
-	# 	'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
-	# 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# 	'and power != 120.13 ' \
-	# 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-	# aws_c.execute('alter view avgPower_pb as ' \
-	# 	'select deviceMAC, avg(power) as avgPower from dat_powerblade t1 force index(devTimePower) ' \
-	# 	'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
-	# 	'and power>(select 0.1*maxPower from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
-	# 	'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-
-	# aws_c.execute('select t1.deviceMAC, t1.deviceName, t2.avgPower from ' \
-	# 	'active_devices t1 ' \
-	# 	'join avgPower_pb t2 ' \
-	# 	'on t1.deviceMAC=t2.deviceMAC ' \
-	# 	'order by t1.deviceMAC;')
-	# expData = aws_c.fetchall()
 
 
-	# outfile_pwr = open('tot_power.dat', 'w')
+####################################################################
+#
+# This section is for blink (occupancy)
+#
+####################################################################
 
-	# pwrData = sorted(expData, key=lambda dev: dev[2])
+elif(config['type'] == 'blink'):
 
-	# for idx, (mac, name, avgPower) in enumerate(pwrData):
-	# 	print(str(idx) + " " + str(mac) + " \"" + str(name) + "\" " + str(avgPower))
-	# 	outfile_pwr.write(str(idx) + "\t" + str(mac) + "\t\"" + str(name) + "\"\t" + str(avgPower) + "\n")
+	aws_c.execute('select t2.room, t1.ts, t1.minMot from ' \
+		'(select round(unix_timestamp(timestamp)/(60*60)) as timekey, min(timestamp) as ts, deviceMAC, sum(minMot) as minMot ' \
+		'from dat_blink force index (devMIN) ' \
+		'where deviceMAC in ' + dev_blink + ' ' \
+		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
+		'group by timekey, deviceMAC) t1 ' \
+		'join active_blinks t2 ' \
+		'on t1.deviceMAC=t2.deviceMAC ' \
+		'order by t1.deviceMAC, t1.timekey;')
+	blink_data = aws_c.fetchall()
 
-	# outfile_pwr.close()
+	blink_out = open('blink.dat', 'w')
 
-	# breakdown([['tot_power.dat', '#4b97c8', 'BLEES/Ligeiro']], True, 'tot_power')
-	
-	# gnuplot('tot_power.plt')
-	# epstopdf('tot_power.eps')
+	plot_count = 0
+	current_room = 0
+	for room, ts, minMot in blink_data:
+		if room != current_room:
+			plot_count += 1
+			current_room = room
+			blink_out.write('\n\n\"' + current_room + '\"\n')
+		blink_out.write('\"' + str(ts) + '\"\t' + str(minMot) + '\n')
 
-	# os.remove('tot_power.eps')
+	blink_out.close()
 
-	# mv('tot_power.dat', qu_saveDir)
-	# mv('tot_power.plt', qu_saveDir)
-	# mv('tot_power.pdf', qu_saveDir)
+	# Create .plt file and fill
+	plt = open('blink.plt', 'w')
+	plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 3in,2.8in\n')
+	plt.write('set output "blink.eps"\n')
+
+	plt.write('set xdata time\n')
+	plt.write('set key under\n')
+	plt.write('set timefmt \"\\\"%Y-%m-%d %H:%M:%S\\\"\"\n')
+	plt.write('set format x \"%m-%d\\n%H:%M\"\n')
+
+	plt.write('plot for [IDX=0:' + str(plot_count) + '] \'blink.dat\' i IDX u 1:2 w lines title columnheader(1)\n')
+	plt.close()
+
+	# Generate plot and convert to PDF
+	gnuplot('blink.plt')
+	epstopdf('blink.eps')
+
+	# Show plot file
+	img = subprocess.Popen(['open', 'blink.pdf'])
+	img.wait()
+
+	# Remove temporary file
+	os.remove('blink.eps')
+
+	# Move data to saveDir
+	mv('blink.dat', qu_saveDir)
+	mv('blink.plt', qu_saveDir)
+	cp('blink.pdf', qu_saveDir)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
