@@ -166,7 +166,7 @@ function gather_device_id(is_success) {
 		program_nrf();
 	}
 	else {
-		var id_query = 'SELECT CONV(CONV(MAX(deviceMAC), 16, 10) + 1, 10, 16) as newMac from pb_calib;'
+		var id_query = 'SELECT CONV(CONV(MAX(deviceMAC), 16, 10) + 1, 10, 16) as newMac from dat_pb_calib;'
 		db_connection.query(id_query, function(err, rows, fields) {
 			if (err) throw err;
 			device_id = rows[0].newMac.toLowerCase();
@@ -201,7 +201,7 @@ function program_nrf() {
 		console.log("Done programming nrf51822");
 		if(argval != '-a') {
 			console.log("Adding database entry");
-			var nrf_query = 'INSERT INTO pb_calib (deviceMAC, nrf_prog_date) values (\'' + device_id + '\', now());'
+			var nrf_query = 'INSERT INTO dat_pb_calib (deviceMAC, nrf_prog_date) values (\'' + device_id + '\', now());'
 			db_connection.query(nrf_query, function(err, rows, fields) {
 				if (err) throw err;
 				console.log("Database updated to reflect state of " + device_id_format)
@@ -238,7 +238,7 @@ function program_msp() {
 		console.log("Done programming MSP430");
 		if(argval != '-a') {
 			console.log("Adding database entry");
-			var msp_query = 'INSERT INTO pb_calib (deviceMAC, msp_prog_date) values (\'' + device_id + '\', now());'
+			var msp_query = 'INSERT INTO dat_pb_calib (deviceMAC, msp_prog_date) values (\'' + device_id + '\', now());'
 			db_connection.query(msp_query, function(err, rows, fields) {
 				if (err) throw err;
 				console.log("Database updated to reflect state of " + device_id_format)
@@ -290,10 +290,10 @@ function calibrate() {
 			console.log("Adding database entry");
 			var calib_query;
 			if(argval == '-a') {
-				calib_query = 'INSERT INTO pb_calib (deviceMAC, nrf_prog_date, msp_prog_date, msp_prog_val, msp_calib_date) values (\'' + device_id + '\', now(), now(), \'2.3.0\', now());'
+				calib_query = 'INSERT INTO dat_pb_calib (deviceMAC, nrf_prog_date, msp_prog_date, msp_prog_val, msp_calib_date) values (\'' + device_id + '\', now(), now(), \'2.3.0\', now());'
 			}
 			else {
-				calib_query = 'INSERT INTO pb_calib (deviceMAC, msp_calib_date) values (\'' + device_id + '\', now());'
+				calib_query = 'INSERT INTO dat_pb_calib (deviceMAC, msp_calib_date) values (\'' + device_id + '\', now());'
 			}
 			
 			db_connection.query(calib_query, function(err, rows, fields) {
