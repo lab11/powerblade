@@ -130,12 +130,12 @@ select * from dat_powerblade where deviceMAC='c098e57001bb' order by id desc lim
 select * from dat_powerblade where flags>66 limit 10;
 
 
-alter view day_energy_pb as
-select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devEnergy) 
-where timestamp>='2017-03-20 00:00:00' and timestamp<='2017-03-22 23:59:59' 
-and deviceMAC in ("c098e570015e","c098e57001b1")
-and energy!=999999.99 
-group by deviceMAC, dayst;
+#alter view day_energy_pb as
+#select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy from dat_powerblade force index (devEnergy) 
+#where timestamp>='2017-03-20 00:00:00' and timestamp<='2017-03-22 23:59:59' 
+#and deviceMAC in ("c098e570015e","c098e57001b1")
+#and energy!=999999.99 
+#group by deviceMAC, dayst;
 
 explain select deviceMAC, avg(power) as maxPower from dat_powerblade# force index (devDevPower) 
 where timestamp>='2017-3-20  00:00:00' and timestamp<='2017-03-22 23:59:59'
@@ -178,6 +178,8 @@ select location from mr_final_results group by location;
  where deviceType='Fridge';
 select location concat_ws(' ', category, deviceType) as catName, sum(avgEnergy), avg(avgPower) as ;
 
+RENAME TABLE pb_calib TO dat_pb_calib;
+
 show processlist;
 
 select * from energy_blees;
@@ -187,4 +189,14 @@ select deviceMAC, count(*) as count from active_powerblades group by deviceMAC o
 select * from inf_gw_lookup where gatewayMAC='c098e5c00026';
 select * from dat_powerblade where gatewayMAC='c098e5c00026' order by id desc limit 10;
 
+SHOW FULL TABLES IN powerblade WHERE TABLE_TYPE LIKE 'BASE TABLE';
 
+SELECT TABLE_NAME 
+FROM information_schema.tables 
+WHERE TABLE_TYPE LIKE 'BASE TABLE'
+and TABLE_SCHEMA='powerblade'
+order by table_name asc;
+
+select * from valid_powerblades where deviceMAC='c098e5700203';
+
+select * from dat_powerblade where deviceMAC='c098e5700203' order by id desc limit 10;
