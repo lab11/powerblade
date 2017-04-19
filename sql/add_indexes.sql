@@ -22,7 +22,7 @@ alter table dat_blees add index devLux (deviceMAC, lux, timestamp);
 alter table dat_powerblade add index devTimeSeq (deviceMAC, timestamp, seq);
 alter table dat_powerblade add index devDevSeq (deviceMAC, seq, timestamp);
 
-
+alter table dat_blink add index devMin (timestamp, deviceMAC, minMot);
 
 alter table dat_powerblade drop index devEnergy;
 
