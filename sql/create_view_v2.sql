@@ -1,8 +1,5 @@
 # Creation of the views for success
 
-SHOW FULL TABLES IN powerblade WHERE TABLE_TYPE LIKE 'VIEW';
-
-
 # Create views for active gateways, powerblades, blinks, blees, and monjolos
 # This is a list of the devices that should be active
 # The body of the query selects the highest id value for each device MAC address
@@ -225,15 +222,17 @@ WHERE t1.location=t2.location AND t1.dayst=t2.dayst);
 describe final_results;
 describe final_gnd;
 
+# Most recent entry for each location from final_results
 CREATE VIEW mr_final_results AS
 SELECT t1.* from final_results t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM final_results t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
+# Most recent entry for each location from final_gnd
 ALTER VIEW mr_final_gnd AS
 SELECT t1.* from final_gnd t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM final_gnd t2 WHERE t1.location=t2.location);
 
-
+# Values of mr_final_gnd with the addition of any extra data found in most_recent_gnd_truth
 alter view mr_final_gnd_corr as
 select t1.location, t1.startDate, t1.endDate, t1.duration, t1.truthDays, t1.missingDays, t1.totMeas, t1.totGnd, 
 (select count(*) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst) as fullTruth,
@@ -242,6 +241,7 @@ t1.duration-(select count(*) from most_recent_gnd_truth t2 where t1.location=t2.
 t1.totMeas/(select avg(energy) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst)*100 as pct
 from mr_final_gnd t1;
 
+select * from mr_final_gnd order by location asc;
 select * from mr_final_gnd_corr order by location asc;
 
 
@@ -262,12 +262,14 @@ select * from dat_powerblade where deviceMAC='c098e570005d' and timestamp='2017-
 select * from inf_pb_lookup where location=0;
 select * from active_devices where location=0;
 
-
+# Lists of all categories and locations from the final results
+# Used below to create mr_cat_breakdown
 create view mr_final_categories as select category from mr_final_results group by category;
 create view mr_final_locations as select location from mr_final_results group by location;
 
-
-
+# Total category-based energy breakdown, filled in for all locations and categories
+# The result is a list of [location, category, sum for that category]
+# This is the equivalent of loc_day_energy_full but for categories
 alter view mr_cat_breakdown as
 select t2.location, t1.category, case when t1.category in (select category from mr_final_results t3 where t2.location=t3.location) then
 (select sum(avgEnergy) from mr_final_results t4 where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' and t2.location=t4.location and t1.category=t4.category)
@@ -276,16 +278,9 @@ mr_final_categories t1
 join
 mr_final_locations t2;
 
-select * from mr_cat_en_pwr;
 
-create view mr_cat_en_pwr as
-select tEn.category, tEn.minEn, tEn.q1En, tEn.meanEn, tEn.q3En, tEn.maxEn, tPwr.minPwr, tPwr.q1Pwr, tPwr.meanPwr, tPwr.q3Pwr, tPwr.maxPwr from
-mr_cat_en tEn
-join
-mr_cat_pwr tPwr
-on tEn.category=tPwr.category
-order by tEn.meanEn asc;
-
+# Energy distribution by category for all locations
+# This uses mr_cat_breakdown and calculates min, max, mean, q1, and q3 for energy
 create view mr_cat_en as
 (select t1.category, min(t1.catSum) as minEn,
 (select avg(catSum) from mr_cat_breakdown t2 where t1.category=t2.category and t2.catSum<=(select avg(catSum) from mr_cat_breakdown t9 where t9.category=t1.category)) as q1En,
@@ -295,6 +290,8 @@ max(t1.catSum) as maxEn
 from mr_cat_breakdown t1
 group by t1.category);
 
+# Power distribution by category for all locations
+# This uses mr_cat_breakdown and calculates min, max, mean, q1, and q3 for power
 alter view mr_cat_pwr as
 (select t4.category, min(t4.avgPower) as minPwr,
 (select avg(avgPower) from mr_final_results t5 where t4.category=t5.category and t5.avgPower<=(select avg(avgPower) from mr_final_results t7 where t7.category=t4.category)) as q1Pwr,
@@ -305,7 +302,15 @@ from mr_final_results t4
 where t4.avgPower>0
 group by t4.category);
 
-
+# Total data table for category breakdown
+# For each category, min, max, mean, q1, and q3 for both energy and power
+create view mr_cat_en_pwr as
+select tEn.category, tEn.minEn, tEn.q1En, tEn.meanEn, tEn.q3En, tEn.maxEn, tPwr.minPwr, tPwr.q1Pwr, tPwr.meanPwr, tPwr.q3Pwr, tPwr.maxPwr from
+mr_cat_en tEn
+join
+mr_cat_pwr tPwr
+on tEn.category=tPwr.category
+order by tEn.meanEn asc;
 
 
 
