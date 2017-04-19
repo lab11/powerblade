@@ -8,13 +8,13 @@ alter table dat_powerblade add index (deviceMAC);
 alter table dat_powerblade add index (power);
 
 # Create ss_powerblade table
-CREATE TABLE ss_powerblade LIKE dat_powerblade;
-insert into ss_powerblade select * from dat_powerblade where gatewaymac='c098e5c00003' or gatewaymac='c098e5c00025' or gatewaymac='c098e5c00026';
+CREATE TABLE loc1_dat_powerblade LIKE dat_powerblade;
+insert into loc1_dat_powerblade select * from dat_powerblade where gatewaymac='c098e5c00003' or gatewaymac='c098e5c00025' or gatewaymac='c098e5c00026';
 
 # Describe
 describe dat_powerblade;
 describe inf_pb_lookup;
-describe ss_powerblade;
+describe loc1_dat_powerblade;
 
 # Create dat_blink table
 CREATE TABLE dat_blink 
@@ -36,6 +36,7 @@ create table final_results (id int(11) not null auto_increment, addedDate dateti
 primary key (id), index (deviceMAC));
 select * from final_results;
 
+# This is the parallel table to final_results, used to store a reference to the data in final_results
 create table final_gnd (id int(11) not null auto_increment, addedDate datetime, location int(1), startDate date, duration int(11), missingDays int(11), totEnergy decimal(24,4), primary key (id), index (location));
 select * from final_gnd;
 

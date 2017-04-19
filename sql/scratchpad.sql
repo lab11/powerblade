@@ -191,11 +191,7 @@ select * from dat_powerblade where gatewayMAC='c098e5c00026' order by id desc li
 
 SHOW FULL TABLES IN powerblade WHERE TABLE_TYPE LIKE 'BASE TABLE';
 
-SELECT TABLE_NAME 
-FROM information_schema.tables 
-WHERE TABLE_TYPE LIKE 'BASE TABLE'
-and TABLE_SCHEMA='powerblade'
-order by table_name asc;
+
 
 select * from valid_powerblades where deviceMAC='c098e5700203';
 
