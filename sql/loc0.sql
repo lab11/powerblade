@@ -31,20 +31,27 @@ select count(*) from loc0_dat_abovezero;
 
 describe loc0_dat_abovezero;
 
+create view loc0_maxPower_pb as
+select deviceMAC, max(power) as maxPower from loc0_dat_powerblade force index (devTimePower)
+where power != 120.13 group by deviceMAC;
+
 insert into loc0_dat_abovezero (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, flags, timestamp)
 select t1.gatewayMAC, t1.deviceMAC, t1.seq, t1.voltage, t1.power, t1.energy, t1.pf, t1.flags, t1.timestamp
 from loc0_dat_powerblade t1 force index (devDevPower)
-where power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC);
+where power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from loc0_maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC);
 
 drop view avgPower_pb;
-create table avgPower_pb as
+create table loc0_avgPower_pb as
 select deviceMAC, min(power) as minPower, avg(power) as avgPower, max(power) as maxPower,
 (select avg(power) from loc0_dat_abovezero force index(devDevPower) where deviceMAC=t1.deviceMAC and power<=(select avgPower from loc0_avg_power where deviceMAC=t1.deviceMAC)) as q1Pwr,
 (select avg(power) from loc0_dat_abovezero force index(devDevPower) where deviceMAC=t1.deviceMAC and power>=(select avgPower from loc0_avg_power where deviceMAC=t1.deviceMAC)) as q3Pwr
 from loc0_dat_abovezero t1 force index(devDevPower)
 group by deviceMAC;
 
+
+
 select * from avgPower_pb;
+
 
 
 select * from day_energy_pb;
