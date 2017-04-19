@@ -177,13 +177,13 @@ def dev_print(print_all):
 		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from valid_powerblades where deviceMAC in ' + dev_powerblade + ';')
 		devNames.extend(aws_c.fetchall())
 	if(print_all and  query_blees):
-		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_blees + ';')
+		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from valid_lights where deviceMAC in ' + dev_blees + ';')
 		devNames.extend(aws_c.fetchall())
 	if(print_all and query_ligeiro):
-		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from active_lights where deviceMAC in ' + dev_ligeiro + ';')
+		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from valid_lights where deviceMAC in ' + dev_ligeiro + ';')
 		devNames.extend(aws_c.fetchall())
 	if(query_blink):
-		aws_c.execute('select \'Blink\\t\', deviceMAC, location, room from active_blinks where deviceMAC in ' + dev_blink + ';')
+		aws_c.execute('select \'Blink\\t\', deviceMAC, location, room from valid_blinks where deviceMAC in ' + dev_blink + ';')
 		devNames.extend(aws_c.fetchall())
 
 	for line in devNames:
@@ -579,7 +579,7 @@ elif(config['type'] == 'energy'):
 		aws_c.execute('alter view energy_blees as ' \
 			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
 			'case when lux>(select avgLux from avg_lux t2 where t1.deviceMAC=t2.deviceMAC) then ' \
-			'(select power*5/60 from active_lights t3 where t1.deviceMAC=t3.deviceMAC) else 0 end as \'onoff\' ' \
+			'(select power*5/60 from valid_lights t3 where t1.deviceMAC=t3.deviceMAC) else 0 end as \'onoff\' ' \
 			'from dat_blees t1 force index (devLux) ' \
 			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 			'and deviceMAC in ' + dev_blees + ' group by deviceMAC, timekey;')
@@ -587,12 +587,12 @@ elif(config['type'] == 'energy'):
 			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
 			'energy_blees group by deviceMAC, dayst;')
 		day_en_str += ' union select * from day_energy_blees'
-		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_blees + ')'
+		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from valid_lights where deviceMAC in ' + dev_blees + ')'
 	if(query_ligeiro):
 		aws_c.execute('alter view energy_ligeiro as ' \
 			'select round(unix_timestamp(timestamp)/(5*60)) as timekey, deviceMAC, date(timestamp) as dayst, ' \
 			'case when (1+max(count)-min(count)) >= 1 then '\
-			'(select power*5/60 from active_lights t2 where t1.deviceMAC=t2.deviceMAC) else 0 end as \'onoff\' ' \
+			'(select power*5/60 from valid_lights t2 where t1.deviceMAC=t2.deviceMAC) else 0 end as \'onoff\' ' \
 			'from dat_ligeiro t1 ' \
 			'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 			'and deviceMAC in ' + dev_ligeiro + ' group by deviceMAC, timekey;')
@@ -600,7 +600,7 @@ elif(config['type'] == 'energy'):
 			'select dayst, deviceMAC, sum(onoff) as dayEnergy from ' \
 			'energy_ligeiro group by deviceMAC, dayst;')
 		day_en_str += ' union select * from day_energy_ligeiro'
-		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from active_lights where deviceMAC in ' + dev_ligeiro + ')'
+		avg_pwr_str += ' union (select deviceMAC, power, power, power, power, power from valid_lights where deviceMAC in ' + dev_ligeiro + ')'
 
 	aws_c.execute('alter view day_energy as select * from day_energy_pb tta where ' \
 		'(select actReset from dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0' + day_en_str + ';')
@@ -996,7 +996,7 @@ elif(config['type'] == 'blink'):
 		'where deviceMAC in ' + dev_blink + ' ' \
 		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
 		'group by timekey, deviceMAC) t1 ' \
-		'join active_blinks t2 ' \
+		'join valid_blinks t2 ' \
 		'on t1.deviceMAC=t2.deviceMAC ' \
 		'order by t1.deviceMAC, t1.timekey;')
 	blink_data = aws_c.fetchall()
