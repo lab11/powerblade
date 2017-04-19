@@ -25,6 +25,5 @@ rename table overall_power_filled to old_overall_power_filled;
 
 rename table ss_data to loc1_data;
 rename table ss_powerblade to loc1_dat_powerblade;
-
-
+rename table ss_power_states to loc1_ss_power_states;
 
