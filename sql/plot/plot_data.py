@@ -530,10 +530,6 @@ elif(config['type'] == 'energy'):
 		'from dat_powerblade force index (devTimeEnergy) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' and energy!=999999.99 group by deviceMAC, dayst;')
-	# aws_c.execute('alter view day_energy_pb as ' \
-	# 	'select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy ' \
-	# 	'from loc0_dat_powerblade force index (devTimeEnergy) ' \
-	# 	'where energy!=999999.99 group by deviceMAC, dayst;')
 	aws_c.execute('alter view dev_resets as ' \
 		'select date(timestamp) as dayst, deviceMAC, ' \
 		'min(energy) as minEnergy, '
@@ -542,34 +538,20 @@ elif(config['type'] == 'energy'):
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and deviceMAC in ' + dev_powerblade + ' ' \
 		'group by dayst, deviceMAC;')
-	# aws_c.execute('alter view dev_resets as ' \
-	# 	'select date(timestamp) as dayst, deviceMAC, ' \
-	# 	'min(energy) as minEnergy, '
-	# 	'case when min(energy)<1.75 then 1 else 0 end as devReset, min(timestamp) as minTs ' \
-	# 	'from loc0_dat_powerblade force index(devTimeEnergy) ' \
-	# 	'group by dayst, deviceMAC;')
+
 	# Max power - maximum power per device over the time period
 	aws_c.execute('alter view maxPower_pb as ' \
 		'select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power != 120.13 ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-	# aws_c.execute('alter view maxPower_pb as ' \
-	# 	'select deviceMAC, max(power) as maxPower from loc0_dat_powerblade force index (devTimePower) ' \
-	# 	'where power != 120.13 group by deviceMAC;')
-	aws_c.execute('alter view avgPower_pb as ' \
+	# This only needs to be 'create' for the first time. Then change to 'alter'
+	aws_c.execute('create view avgPower_pb as ' \
 		'select deviceMAC, min(power) as minPower, avg(power) as avgPower, max(power) as maxPower ' \
 		'from dat_powerblade t1 force index(devTimePower) ' \
 		'where timestamp>=\'' + config['startDay'] + ' 00:00:00\' and timestamp<=\'' + config['endDay'] + ' 23:59:59\' ' \
 		'and power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
 		'and deviceMAC in ' + dev_powerblade + ' group by deviceMAC;')
-	# aws_c.execute('alter view avgPower_pb as ' \
-	# 	'select deviceMAC, min(power) as minPower, avg(power) as avgPower, max(power) as maxPower, ' \
-	# 	'(select avg(power) from loc0_dat_powerblade force index(devDevPower) where deviceMAC=t1.deviceMAC and power<=(select avg(power) from loc0_avg_power where deviceMAC=t1.deviceMAC)) as q1Pwr, ' \
-	# 	'(select avg(power) from loc0_dat_powerblade force index(devDevPower) where deviceMAC=t1.deviceMAC and power>=(select avg(power) from loc0_avg_power where deviceMAC=t1.deviceMAC)) as q3Pwr ' \
-	# 	'from loc0_dat_powerblade t1 force index(devTimePower) ' \
-	# 	'where power>(select case when maxPower>10 then 0.1*maxPower else 0.5*maxPower end from maxPower_pb t2 where t1.deviceMAC=t2.deviceMAC) ' \
-	# 	'group by deviceMAC;')
 		
 
 	day_en_str = ''
@@ -621,7 +603,6 @@ elif(config['type'] == 'energy'):
 		'join avg_power t3 ' \
 		'on t1.deviceMAC=t3.deviceMAC ' \
 		'order by t2.avgEnergy;')
-	expData = aws_c.fetchall()
 	# aws_c.execute('select t1.deviceMAC, t1.deviceName, t1.location, t1.category, t1.deviceType, t2.avgEnergy, t2.avgEnergy, t2.totEnergy, t3.avgPower, ' \
 	# 	't2.minEnergy, t2.q1DayEn, t2.q3DayEn, t2.maxEnergy, ' \
 	# 	't3.minPower, t3.q1Pwr, t3.q3Pwr, t3.maxPower from ' \
@@ -637,10 +618,7 @@ elif(config['type'] == 'energy'):
 	# 	'join avg_power t3 ' \
 	# 	'on t1.deviceMAC=t3.deviceMAC ' \
 	# 	'order by t2.avgEnergy;')
-	# expData = aws_c.fetchall()
-	#'(select sum(dayEnergy)/' + str(duration_days) + ' from day_energy tq1 where tday.deviceMAC=tq1.deviceMAC and tq1.dayEnergy<=(select sum(tday.dayEnergy)/' + str(duration_days) + ' from day_energy tavg where tavg.deviceMAC=tday.deviceMAC)) as q1DayEn, ' \
-	#'(select (sum(dayEnergy)/' + str(duration_days) + ') from day_energy tq3 where tday.deviceMAC=tq3.deviceMAC and tq3.dayEnergy>=(select sum(tday.dayEnergy)/' + str(duration_days) + ' from day_energy tavg where tavg.deviceMAC=tday.deviceMAC)) as q3DayEn, ' \
-	#'join (select deviceMAC, avg(dayEnergy) as avgEnergy, stddev(dayEnergy) as stdEnergy, sum(dayEnergy) as totEnergy ' \
+	expData = aws_c.fetchall()
 
 	# Step 2: Ground Truth
 	aws_c.execute('select location, avg(energy), count(*), ' + str(duration_days) + '-count(*) from most_recent_gnd_truth where location in ' + loc_list + ' and ' \
