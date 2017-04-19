@@ -1,9 +1,14 @@
+# This is used to generate a list of sequence gaps - used for networking analysis
+
+# Create the seq table (a subset of the data found in the main powerblade table)
 create table seq_powerblade like dat_powerblade;
+
+# Drop or empty the table before refilling
 describe seq_powerblade;
 drop table seq_powerblade;
-
 delete from seq_powerblade where id>1;
 
+# Fill the table in various ways
 insert into seq_powerblade (gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, flags, timestamp)
 select gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, flags, timestamp
 #from dat_powerblade where timestamp > date_sub(utc_timestamp(), interval 10 minute);
@@ -14,13 +19,12 @@ and deviceMAC in (select deviceMAC from valid_powerblades where location=0);
 #from dat_powerblade where deviceMAC='c098e5700210' order by id desc limit 10000;
 #from dat_powerblade where deviceMAC='c098e5700115' order by id desc limit 10000;
 
+# Test the contents of the table
 select * from seq_powerblade order by seq;
 select count(*) from seq_powerblade;
 
 
-
-
-create table powerblade_seqGap as;
+# Run main query. Checks for gaps of 1 to 9, including 10+
 select tfull.gatewayMAC, tfull.deviceMAC, tfull.seqGap, count(*) from
 (select tt1.gatewayMAC, tt1.deviceMAC, tt1.seq, case when greatest(tt1.seqGap, tt2.seqGap, tt3.seqGap, tt4.seqGap, tt5.seqGap, tt6.seqGap, tt7.seqGap, tt8.seqGap, tt9.seqGap) = 0 
 then case when tt1.seq>=10 then 10 else tt1.seq end
