@@ -21,6 +21,9 @@ RENAME TABLE pb_calib TO dat_pb_calib;
 
 rename table avgPower to old_avgPower;
 
+drop view day_energy_dayst;
+drop view day_energy_deviceMAC;
+
 rename table temp_powerblade to seq_powerblade;
 
 rename table instpower to old_instpower;

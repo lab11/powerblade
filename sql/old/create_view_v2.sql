@@ -1,65 +1,18 @@
 # Creation of the views for success
 
 # Create views for active gateways, powerblades, blinks, blees, and monjolos
-
-# most_recent_[device] - for each inf_[device] table, the most recent entry for each device
-# Select the highest id value for each device MAC address
+# This is a list of the devices that should be active
+# The body of the query selects the highest id value for each device MAC address
 
 alter VIEW most_recent_gateways AS
 SELECT t1.* from inf_gw_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_gw_lookup t2 WHERE t1.gatewayMAC=t2.gatewayMAC and t1.location=t2.location)
 and t1.room is not null;
 
-ALTER VIEW most_recent_powerblades AS
-SELECT t1.* FROM inf_pb_lookup t1 WHERE 
-t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC and t1.deviceName=t2.deviceName);
-
-ALTER VIEW most_recent_lights AS 
-SELECT t1.* FROM inf_light_lookup t1 WHERE
-t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
-
-ALTER VIEW most_recent_blinks AS
-SELECT t1.* FROM inf_blink_lookup t1 WHERE
-t1.id=(SELECT MAX(t2.id) FROM inf_blink_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
-
-ALTER VIEW most_recent_devices AS
-SELECT deviceMAC, deviceName, location, category, deviceType from most_recent_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from most_recent_lights
-UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from most_recent_blinks;
-
-
-# valid_[device] - all devices in a most_recent_[device] table that have been installed and not removed
-# removed means the device was removed from the study and should not be considered
-# this is different than endTime, which is the time when that location is ended (and is no longer active)
-
 create view valid_gateways as
 SELECT * from most_recent_gateways WHERE
 startTime < utc_timestamp() AND
 (remTime is NULL OR remTime > utc_timestamp());
-
-CREATE VIEW valid_powerblades AS
-SELECT * from most_recent_powerblades WHERE
-startTime < utc_timestamp() AND
-(remTime is NULL OR remTime > utc_timestamp());
-
-CREATE VIEW valid_lights AS
-SELECT * FROM most_recent_lights WHERE
-startTime < utc_timestamp() AND 
-(remTime is NULL OR remTime > utc_timestamp());
-
-CREATE VIEW valid_blinks AS
-SELECT * FROM most_recent_blinks WHERE
-startTime < utc_timestamp() AND 
-(remTime is NULL OR remTime > utc_timestamp());
-
-alter view valid_devices as
-SELECT deviceMAC, deviceName, location, category, deviceType from valid_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from valid_lights
-UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from valid_blinks;
-
-
-# active_[device] - all devices in a most_recent_[device] that are valid (see above) and that are active 
-# active means that the endTime, the time that location is ended, has not yet happened
 
 ALTER VIEW active_gateways AS
 SELECT * from most_recent_gateways WHERE
@@ -67,20 +20,47 @@ startTime < utc_timestamp() AND
 (remTime is NULL OR remTime > utc_timestamp()) AND
 endTime > utc_timestamp();
 
+ALTER VIEW most_recent_powerblades AS
+SELECT t1.* FROM inf_pb_lookup t1 WHERE 
+t1.id=(SELECT MAX(t2.id) FROM inf_pb_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC and t1.deviceName=t2.deviceName);
+
+CREATE VIEW valid_powerblades AS
+SELECT * from most_recent_powerblades WHERE
+startTime < utc_timestamp() AND
+(remTime is NULL OR remTime > utc_timestamp());
+
 ALTER VIEW active_powerblades AS
 SELECT * from most_recent_powerblades WHERE
 startTime < utc_timestamp() AND
 (remTime is NULL OR remTime > utc_timestamp()) AND
 endTime > utc_timestamp();
 
-ALTER VIEW active_lights AS
-SELECT * FROM most_recent_lights WHERE
+ALTER VIEW most_recent_blinks AS
+SELECT t1.* FROM inf_blink_lookup t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM inf_blink_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
+CREATE VIEW valid_blinks AS
+SELECT * FROM most_recent_blinks WHERE
+startTime < utc_timestamp() AND 
+(remTime is NULL OR remTime > utc_timestamp());
+
+ALTER VIEW active_blinks AS
+SELECT * FROM most_recent_blinks WHERE
 startTime < utc_timestamp() AND 
 (remTime is NULL OR remTime > utc_timestamp()) AND
 endTime > utc_timestamp();
 
-ALTER VIEW active_blinks AS
-SELECT * FROM most_recent_blinks WHERE
+ALTER VIEW most_recent_lights AS 
+SELECT t1.* FROM inf_light_lookup t1 WHERE
+t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
+CREATE VIEW valid_lights AS
+SELECT * FROM most_recent_lights WHERE
+startTime < utc_timestamp() AND 
+(remTime is NULL OR remTime > utc_timestamp());
+
+ALTER VIEW active_lights AS
+SELECT * FROM most_recent_lights WHERE
 startTime < utc_timestamp() AND 
 (remTime is NULL OR remTime > utc_timestamp()) AND
 endTime > utc_timestamp();
@@ -90,13 +70,29 @@ SELECT deviceMAC, deviceName, location, category, deviceType from active_powerbl
 UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from active_lights
 UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from active_blinks;
 
+alter view valid_devices as
+SELECT deviceMAC, deviceName, location, category, deviceType from valid_powerblades
+UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from valid_lights
+UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from valid_blinks;
 
-# yest_data_[device] - data for each device recorded in the last 24 hours
-# 24 hours is the scope of the status script sql_status_v2.py - hitrate over the past 24 hours
-# Because this is used for hitrate, BLEES and Ligeiro data is combined
+ALTER VIEW most_recent_devices AS
+SELECT deviceMAC, deviceName, location, category, deviceType from most_recent_powerblades
+UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from most_recent_lights
+UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from most_recent_blinks;
+
+CREATE VIEW avg_lux AS
+SELECT deviceMAC, avg(lux) as avgLux FROM dat_blees FORCE INDEX (devLux)
+group by deviceMAC;
+
+
+# Create views for yesterday's data
 
 CREATE VIEW yest_data_pb AS
 SELECT * FROM dat_powerblade
+WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp();
+
+CREATE VIEW yest_data_blink AS
+SELECT * FROM dat_blink
 WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp();
 
 CREATE VIEW yest_data_light AS
@@ -106,30 +102,15 @@ UNION
 SELECT gatewayMAC, deviceMAC, timestamp FROM dat_blees
 WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp();
 
-CREATE VIEW yest_data_blink AS
-SELECT * FROM dat_blink
-WHERE timestamp>subdate(utc_timestamp(),1) AND timestamp<utc_timestamp();
+
+# Create view for yesterday's gateway data
 
 CREATE VIEW yest_data_gw AS
 SELECT gatewayMAC, deviceMAC, timestamp FROM yest_data_pb UNION
 SELECT gatewayMAC, deviceMAC, timestamp FROM yest_data_blink UNION
 SELECT gatewayMAC, deviceMAC, timestamp FROM yest_data_light;
 
-CREATE VIEW dat_gateway AS
-select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime
-from dat_powerblade t1 group by t1.gatewaymac
-UNION ALL
-select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_blink t2 where t2.id=max(t1.id)) as maxTime
-from dat_blink t1 group by t1.gatewaymac
-UNION ALL
-select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_blees t2 where t2.id=max(t1.id)) as maxTime
-from dat_blees t1 group by t1.gatewaymac
-UNION ALL
-select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_ligeiro t2 where t2.id=max(t1.id)) as maxTime
-from dat_ligeiro t1 group by t1.gatewaymac;
 
-
-# yest_hr_[device] - For each 15 minute interval in the yesterday data, total number of packets
 # Create views for yesterday's hitrate
 
 CREATE VIEW yest_hr_pb AS
@@ -147,13 +128,16 @@ SELECT ROUND(UNIX_TIMESTAMP(timestamp)/(15 * 60)) AS timekey, MIN(timestamp) AS 
 FROM yest_data_light
 GROUP BY gatewayMAC, deviceMAC, timekey;
 
+
+# Create viwe for yesterday's gateway hitrate
+
 CREATE VIEW yest_hr_gw AS
 SELECT ROUND(UNIX_TIMESTAMP(timestamp)/(15 * 60)) AS timekey, MIN(timestamp) AS ts, gatewayMAC, deviceMAC, COUNT(*) AS count
 FROM yest_data_gw
 GROUP BY gatewayMAC, deviceMAC, timekey;
 
 
-# success_[device] - average hitrate for each device
+# Create view for each device's success
 
 CREATE VIEW success_powerblade AS
 SELECT t1.deviceMAC, t1.deviceName, t1.location, t1.permanent, AVG(t2.count) AS count
@@ -176,6 +160,9 @@ ON t1.deviceMAC=t2.deviceMAC
 GROUP BY t1.deviceMAC
 ORDER BY t1.location ASC, count ASC;
 
+
+# Create view for the gateway success
+
 CREATE VIEW success_gateway AS
 SELECT t1.gatewayMAC, '' AS deviceName, t1.location, 1 AS permanent, avg(t2.count) AS count
 FROM active_gateways t1 LEFT JOIN yest_hr_gw t2
@@ -184,7 +171,7 @@ GROUP BY t1.gatewayMAC
 ORDER BY t1.location ASC, count ASC;
 
 
-# last_seen_[device] - last seen for each
+# Finally, get last seen for each
 
 CREATE VIEW last_seen_pb AS
 SELECT t1.deviceMAC AS deviceMAC, (SELECT t2.timestamp FROM dat_powerblade t2 WHERE t2.id=MAX(t1.id)) AS maxTime 
@@ -200,24 +187,29 @@ FROM dat_blees t1 GROUP BY t1.deviceMAC UNION
 SELECT t3.deviceMAC AS deviceMAC, (SELECT t4.timestamp FROM dat_ligeiro t4 WHERE t4.id=MAX(t3.id)) AS maxTime
 FROM dat_ligeiro t3 GROUP BY t3.deviceMAC;
 
+CREATE VIEW dat_gateway AS
+select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_powerblade t2 where t2.id=max(t1.id)) as maxTime
+from dat_powerblade t1 group by t1.gatewaymac
+UNION ALL
+select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_blink t2 where t2.id=max(t1.id)) as maxTime
+from dat_blink t1 group by t1.gatewaymac
+UNION ALL
+select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_blees t2 where t2.id=max(t1.id)) as maxTime
+from dat_blees t1 group by t1.gatewaymac
+UNION ALL
+select t1.gatewayMAC as deviceMAC, (select t2.timestamp from dat_ligeiro t2 where t2.id=max(t1.id)) as maxTime
+from dat_ligeiro t1 group by t1.gatewaymac;
+
 create view last_seen_gw as
 SELECT deviceMAC, MAX(maxTime) FROM dat_gateway
 GROUP BY deviceMAC;
 
+# DONT DELETE THIS - not saved elsewhere
+alter view days_w_resets as
+select dayst from dev_resets where devReset=1
+group by dayst;
 
 
-
-
-# Avg lux for BLEES
-CREATE VIEW avg_lux AS
-SELECT deviceMAC, avg(lux) as avgLux FROM dat_blees FORCE INDEX (devLux)
-group by deviceMAC;
-
-
-
-
-
-# Most recent ground truth entries for each location and each day
 CREATE VIEW most_recent_gnd_truth AS
 SELECT t1.* FROM dat_gnd_truth t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM dat_gnd_truth t2
@@ -226,6 +218,9 @@ WHERE t1.location=t2.location AND t1.dayst=t2.dayst);
 
 
 
+
+describe final_results;
+describe final_gnd;
 
 # Most recent entry for each location from final_results
 CREATE VIEW mr_final_results AS
@@ -246,25 +241,26 @@ t1.duration-(select count(*) from most_recent_gnd_truth t2 where t1.location=t2.
 t1.totMeas/(select avg(energy) from most_recent_gnd_truth t2 where t1.location=t2.location and t1.startDate<=t2.dayst and t1.endDate>=t2.dayst)*100 as pct
 from mr_final_gnd t1;
 
+select * from mr_final_gnd order by location asc;
+select * from mr_final_gnd_corr order by location asc;
 
 
 
 
-# actResets - this view goes through the dev_resets (devices and days when the minimum energy is low) and determines if it was an actual reset
-# In this case, an actual reset is: the minimum energy is low (device+day is in dev_resets) AND the earliest energy on that day is not low
-# This means that the device started the day plugged in, and was then reset 
-# This ignores non-permanent devices that were plugged in, used, and unplugged
-# This misses non-permanent devices that are plugged and unplugged several times
-# All powerblades with the new version (2.3.0) do not need this, as energy is actually stored non-volatile
+
+
 create view dev_actResets as
 select t1.dayst, t1.deviceMAC, t1.minEnergy, t1.devReset, t1.minTs,
 case when t1.devReset=1 and (select min(energy) from dat_powerblade force index(devTimeEnergy) 
 where deviceMAC=t1.deviceMAC and timestamp=t1.minTs and energy!=2.24)>1.75 then 1 else 0 end as actReset
 from dev_resets t1;
 
+select * from dev_actResets;
 
+select * from dat_powerblade where deviceMAC='c098e570005d' and timestamp='2017-03-09 00:00:00';
 
-
+select * from inf_pb_lookup where location=0;
+select * from active_devices where location=0;
 
 # Lists of all categories and locations from the final results
 # Used below to create mr_cat_breakdown
@@ -315,6 +311,81 @@ join
 mr_cat_pwr tPwr
 on tEn.category=tPwr.category
 order by tEn.meanEn asc;
+
+
+
+
+select * from day_energy_dayst join day_energy_deviceMAC;
+
+#drop view day_energy_dayst;
+#drop view day_energy_deviceMAC;
+
+select date(timestamp) from dat_powerblade force index(timestamp)
+where timestamp>'2017-03-04 00:00:00'
+group by date(timestamp);
+
+select deviceMAC from dat_powerblade group by deviceMAC;
+
+
+
+-- SELECT * FROM active_gateways;
+-- SELECT * FROM active_powerblades;
+-- SELECT * FROM active_blinks;
+-- SELECT * FROM active_lights;
+
+-- select * from yesterday_data;
+-- select * from yesterday_hitrate;
+-- select * from gateway_success;
+-- select * from powerblade_success;
+-- select * from last_seen_gw;
+-- select * from last_seen_pb;
+
+
+
+
+
+-- select deviceMAC, max(timestamp) from dat_powerblade group by deviceMAC;
+
+-- select t1.*, max(t2.timestamp) as 'last seen' from powerblade_success t1 left join dat_powerblade t2 on t1.deviceMAC=t2.deviceMAC;
+
+-- explain select t1.* from dat_powerblade t1 where t1.id = (select max(t2.id) from dat_powerblade t2 where t1.deviceMAC=t2.deviceMAC);
+
+
+
+
+
+-- select t1.*, t2.maxTime as last_seen from gateway_success t1 left join last_seen_gw t2 on t1.gatewayMAC=t1.gatewayMAC;
+
+-- select t1.*, t2.maxTime as last_seen from powerblade_success t1 left join last_seen_pb t2 on t1.deviceMAC=t2.deviceMAC;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
