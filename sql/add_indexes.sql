@@ -15,3 +15,9 @@ alter table dat_powerblade add index devTimeSeq (deviceMAC, timestamp, seq);
 alter table dat_powerblade add index devDevSeq (deviceMAC, seq, timestamp);
 
 
+
+alter table dat_powerblade drop index devEnergy;
+
+
+
+
