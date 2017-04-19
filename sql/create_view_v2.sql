@@ -75,7 +75,7 @@ UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from active_blink
 
 alter view valid_devices as
 SELECT deviceMAC, deviceName, location, category, deviceType from valid_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from active_lights
+UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from valid_lights
 UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from valid_blinks;
 
 ALTER VIEW most_recent_devices AS

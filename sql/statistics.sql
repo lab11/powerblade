@@ -22,14 +22,14 @@ group by location;
 
 alter view inf_dep_blees as 
 select location, count(*) as bl_count
-from active_lights
+from valid_lights
 where location!=10
 and deviceType='BLEES'
 group by location;
 
-create view inf_dep_lig as 
+alter view inf_dep_lig as 
 select location, count(*) as li_count
-from most_recent_lights
+from valid_lights
 where location!=10
 and deviceType='Ligeiro'
 group by location;
