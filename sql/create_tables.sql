@@ -52,9 +52,9 @@ insert into final_results (addedDate) values (utc_timestamp());
 
 
 # pb_lookup
-create table inf_ss_pb_lookup (deviceMAC char(16), deviceName varchar(50));
-alter table inf_ss_pb_lookup add column devType varchar(20);
-alter table inf_ss_pb_lookup add index (deviceMAC, devType);
+create table loc1_pb_lookup (deviceMAC char(16), deviceName varchar(50));
+alter table loc1_pb_lookup add column devType varchar(20);
+alter table loc1_pb_lookup add index (deviceMAC, devType);
 
 # Other useful stuff:
 #	substring(timestamp,12,2)

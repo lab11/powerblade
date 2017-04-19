@@ -9,7 +9,7 @@ SET @dat_end='2016-12-31 22:59:59';
 DROP TABLE IF EXISTS ebreakdown;
 CREATE TABLE ebreakdown AS
 SELECT t1.deviceMAC AS deviceMAC, 
-(SELECT t3.deviceName FROM inf_ss_pb_lookup t3 WHERE t1.deviceMAC=t3.deviceMAC) AS devName, 
+(SELECT t3.deviceName FROM loc1_pb_lookup t3 WHERE t1.deviceMAC=t3.deviceMAC) AS devName, 
 (SELECT t2.energy FROM loc1_dat_powerblade t2 WHERE t1.deviceMAC=t2.deviceMAC AND t2.timestamp between @dat_start and @dat_end order by t2.timestamp desc LIMIT 1) AS finEnergy 
 FROM loc1_dat_powerblade t1 
 GROUP BY t1.deviceMAC 
@@ -45,7 +45,7 @@ select t1.*, (@csum := @csum + t1.finenergy) as cdf from loc1_data t1 order by t
 
 # Create combination graph based on category
 select t1.devType as devType, sum(t2.finenergy) as finenergy, AVG(t2.toppower) as toppower 
-from inf_ss_pb_lookup t1 
+from loc1_pb_lookup t1 
 join loc1_data t2 
 on t1.devicemac=t2.devicemac 
 group by t1.devtype order by finenergy desc;
