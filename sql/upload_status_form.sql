@@ -10,7 +10,7 @@ load data local infile '/Users/sdebruin/Downloads/BLEES.csv' into table inf_ligh
 load data local infile '/Users/sdebruin/Downloads/GndTruth.csv' into table dat_gnd_truth fields terminated by ',' (location, dayst, energy);
 load data local infile 'C:/Users/Sam/Downloads/GndTruth.csv' into table dat_gnd_truth fields terminated by ',' (location, dayst, energy);
 
-select * from inf_pb_lookup;
+
 
 
 
