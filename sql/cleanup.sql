@@ -17,6 +17,8 @@ drop table inf_blees_light_lookup;
 
 drop view days_w_resets;
 
+RENAME TABLE pb_calib TO dat_pb_calib;
+
 rename table avgPower to old_avgPower;
 
 rename table temp_powerblade to seq_powerblade;
