@@ -207,7 +207,10 @@ create view last_seen_gw as
 SELECT deviceMAC, MAX(maxTime) FROM dat_gateway
 GROUP BY deviceMAC;
 
-
+# DONT DELETE THIS - not saved elsewhere
+alter view days_w_resets as
+select dayst from dev_resets where devReset=1
+group by dayst;
 
 
 CREATE VIEW most_recent_gnd_truth AS
@@ -218,22 +221,6 @@ WHERE t1.location=t2.location AND t1.dayst=t2.dayst);
 
 
 
-ALTER VIEW mr_maxPower_pb AS
-SELECT t1.* from perm_maxPower_pb t1 WHERE
-t1.id=(SELECT MAX(t2.id) FROM perm_maxPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
-
-CREATE VIEW mr_avgPower_pb AS
-SELECT t1.* from perm_avgPower_pb t1 WHERE
-t1.id=(SELECT MAX(t2.id) FROM perm_avgPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
-
-drop view mr_maxPower_pb;
-drop view mr_avgPower_pb;
-
-
-show processlist;
-select * from perm_maxPower_pb;
-select * from mr_maxPower_pb;
-select * from mr_avgPower_pb;
 
 describe final_results;
 describe final_gnd;
@@ -245,12 +232,6 @@ t1.id=(SELECT MAX(t2.id) FROM final_results t2 WHERE t1.deviceMAC=t2.deviceMAC);
 ALTER VIEW mr_final_gnd AS
 SELECT t1.* from final_gnd t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM final_gnd t2 WHERE t1.location=t2.location);
-
-select * from mr_final_gnd;
-
-CREATE VIEW mr_avgPower_pb AS
-SELECT t1.* from perm_avgPower_pb t1 WHERE
-t1.id=(SELECT MAX(t2.id) FROM perm_avgPower_pb t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
 
 alter view mr_final_gnd_corr as

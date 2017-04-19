@@ -191,17 +191,6 @@ and power != 120.13
 and deviceMAC in ("c098e57000f6","c098e57000d9","c098e57000e8","c098e57000d5","c098e57000fb","c098e57000bf","c098e57000e3","c098e570006b","c098e57000ea","c098e57000f9","c098e57000e1","c098e57000e9","c098e57000d1","c098e57000eb","c098e57000cd","c098e57000d8","c098e5700115","c098e57000ee","c098e57000ed","c098e57000d6","c098e57000ce","c098e57000ec","c098e57000cf","c098e57000f4","c098e57000c0","c098e5700100","c098e57000f3") 
 group by deviceMAC;
 
-select * from perm_maxPower_pb;
-select * from mr_maxPower_pb;
-select * from perm_avgPower_pb;
-select * from mr_avgPower_pb;
-
-insert into perm_maxPower_pb (deviceMAC, maxPower)
-(select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) 
-where timestamp>='2017-1-13  00:00:00' and timestamp<='2017-3-27  23:59:59' 
-and power != 120.13 
-and deviceMAC in ("c098e57000f6","c098e57000d9","c098e57000e8","c098e57000d5","c098e57000fb","c098e57000bf","c098e57000e3","c098e570006b","c098e57000ea","c098e57000f9","c098e57000e1","c098e57000e9","c098e57000d1","c098e57000eb","c098e57000cd","c098e57000d8","c098e5700115","c098e57000ee","c098e57000ed","c098e57000d6","c098e57000ce","c098e57000ec","c098e57000cf","c098e57000f4","c098e57000c0","c098e5700100","c098e57000f3") 
-group by deviceMAC);
 
 select deviceMAC, max(power) as maxPower from dat_powerblade force index (devTimePower) 
 where timestamp>='2017-1-13  00:00:00' and timestamp<='2017-3-27  23:59:59' 
@@ -247,10 +236,7 @@ where timestamp>'2017-02-27 00:00:00'
 and deviceMAC in ('c098e5700193', 'c098e5700195')
 group by dayst, deviceMAC;
 
-# DONT DELETE THIS - not saved elsewhere
-alter view days_w_resets as
-select dayst from dev_resets where devReset=1
-group by dayst;
+
 
 select * from dev_resets order by deviceMAC asc, dayst asc;
 select * from days_w_resets order by dayst asc;

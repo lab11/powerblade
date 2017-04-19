@@ -30,10 +30,6 @@ alter table inf_gw_lookup add column remTime datetime after startTime;
 alter table inf_light_lookup add column remTime datetime after startTime;
 alter table inf_blink_lookup add column remTime datetime after startTime;
 
-create table perm_maxPower_pb (id int(11) not null auto_increment, deviceMAC char(12), maxPower decimal(8,2), primary key (id), index (deviceMAC), index devPower (deviceMAC, maxPower));
-create table perm_avgPower_pb (id int(11) not null auto_increment, deviceMAC char(12), avgPower decimal(8,2), primary key (id), index (deviceMAC), index devPower (deviceMAC, avgPower));
-drop table perm_maxPower_pb;
-drop table perm_avgPower_pb;
 
 describe avg_power;
 create table final_results (id int(11) not null auto_increment, addedDate datetime, deviceMAC char(12), deviceName varchar(50), location int(1), category varchar(30), deviceType varchar(30), avgEnergy decimal(24,4), stdEnergy decimal(24,4), totEnergy decimal(24,4), avgPower decimal(24,4),
