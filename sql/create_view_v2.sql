@@ -38,23 +38,35 @@ startTime < utc_timestamp() AND
 (remTime is NULL OR remTime > utc_timestamp()) AND
 endTime > utc_timestamp();
 
-CREATE VIEW most_recent_blinks AS
+ALTER VIEW most_recent_blinks AS
 SELECT t1.* FROM inf_blink_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_blink_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
 
+CREATE VIEW valid_blinks AS
+SELECT * FROM most_recent_blinks WHERE
+startTime < utc_timestamp() AND 
+(remTime is NULL OR remTime > utc_timestamp());
+
 ALTER VIEW active_blinks AS
-SELECT t1.* FROM inf_blink_lookup t1 WHERE
-t1.id=(SELECT MAX(t2.id) FROM inf_blink_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < utc_timestamp()) AND ((remTime is NULL) OR (remTime > utc_timestamp())));
+SELECT * FROM most_recent_blinks WHERE
+startTime < utc_timestamp() AND 
+(remTime is NULL OR remTime > utc_timestamp()) AND
+endTime > utc_timestamp();
 
-ALTER VIEW active_lights AS
-SELECT t1.* FROM inf_light_lookup t1 WHERE
-t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC) AND
-((startTime < utc_timestamp()) AND ((remTime is NULL) OR (remTime > utc_timestamp())));
-
-CREATE VIEW most_recent_lights AS 
+ALTER VIEW most_recent_lights AS 
 SELECT t1.* FROM inf_light_lookup t1 WHERE
 t1.id=(SELECT MAX(t2.id) FROM inf_light_lookup t2 WHERE t1.deviceMAC=t2.deviceMAC);
+
+CREATE VIEW valid_lights AS
+SELECT * FROM most_recent_lights WHERE
+startTime < utc_timestamp() AND 
+(remTime is NULL OR remTime > utc_timestamp());
+
+ALTER VIEW active_lights AS
+SELECT * FROM most_recent_lights WHERE
+startTime < utc_timestamp() AND 
+(remTime is NULL OR remTime > utc_timestamp()) AND
+endTime > utc_timestamp();
 
 ALTER VIEW active_devices AS
 SELECT deviceMAC, deviceName, location, category, deviceType from active_powerblades
@@ -64,7 +76,7 @@ UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from active_blink
 alter view valid_devices as
 SELECT deviceMAC, deviceName, location, category, deviceType from valid_powerblades
 UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from active_lights
-UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from active_blinks;
+UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from valid_blinks;
 
 ALTER VIEW most_recent_devices AS
 SELECT deviceMAC, deviceName, location, category, deviceType from most_recent_powerblades
