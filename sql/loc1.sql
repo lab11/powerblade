@@ -15,6 +15,8 @@ FROM ss_powerblade t1
 GROUP BY t1.deviceMAC 
 ORDER BY finEnergy DESC;
 
+RENAME TABLE ebreakdown TO loc1_ebreakdown;
+
 # Old instpower method
 
 # Generate instpower table (long running)
@@ -32,7 +34,7 @@ from ss_powerblade as t1 group by t1.deviceMAC;
 # select t1.*, t2.toppower from ebreakdown t1 join instpower_new t2 on t1.devicemac=t2.devicemac where t1.devname is not null order by t1.finenergy desc;
 create table ss_data as 
 select t1.devicemac, t1.devname, t1.finenergy, t2.toppower 
-from ebreakdown t1 
+from loc1_ebreakdown t1 
 join instpower_new t2 
 on t1.devicemac=t2.devicemac 
 where t1.devname is not null 
