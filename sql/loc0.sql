@@ -65,9 +65,27 @@ drop view day_energy;
 create table day_energy (dayst date, deviceMAC char(16), dayEnergy decimal(37,4), index (deviceMAC), index devDevEnergy (deviceMAC, dayEnergy, dayst));
 rename table day_energy to loc0_day_energy;
 
+create view loc0_day_energy_pb as
+select date(timestamp) as dayst, deviceMAC, (max(energy) - min(energy)) as dayEnergy
+from loc0_dat_powerblade force index (devTimeEnergy)
+where energy!=999999.99 group by deviceMAC, dayst;
+
+create view loc0_dev_resets as
+select date(timestamp) as dayst, deviceMAC,
+min(energy) as minEnergy,
+case when min(energy)<1.75 then 1 else 0 end as devReset, min(timestamp) as minTs
+from loc0_dat_powerblade force index(devTimeEnergy)
+group by dayst, deviceMAC;
+
+create view loc0_dev_actResets as
+select t1.dayst, t1.deviceMAC, t1.minEnergy, t1.devReset, t1.minTs,
+case when t1.devReset=1 and (select min(energy) from dat_powerblade force index(devTimeEnergy) 
+where deviceMAC=t1.deviceMAC and timestamp=t1.minTs and energy!=2.24)>1.75 then 1 else 0 end as actReset
+from loc0_dev_resets t1;
+
 insert into loc0_day_energy (dayst, deviceMAC, dayEnergy)
-select * from day_energy_pb tta where
-(select actReset from dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0
+select * from loc0_day_energy_pb tta where
+(select actReset from loc0_dev_actResets ttb where tta.deviceMAC=ttb.deviceMAC and tta.dayst=ttb.dayst)=0
 union select * from day_energy_blees
 union select * from day_energy_ligeiro;
 
@@ -77,30 +95,28 @@ union select * from day_energy_ligeiro;
 
 
 select deviceMAC, min(dayEnergy) as minEnergy,
-(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy<=(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC)) as q1DayEn,
+(select avg(dayEnergy) from loc0_day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy<=(select avg(dayEnergy) from loc0_day_energy_full where deviceMAC=tday.deviceMAC)) as q1DayEn,
 avg(dayEnergy) as avgEnergy,
-(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy>=(select avg(dayEnergy) from day_energy_full where deviceMAC=tday.deviceMAC)) as q3DayEn,
+(select avg(dayEnergy) from loc0_day_energy_full where deviceMAC=tday.deviceMAC and dayEnergy>=(select avg(dayEnergy) from loc0_day_energy_full where deviceMAC=tday.deviceMAC)) as q3DayEn,
 max(dayEnergy) as maxEnergy,
 sum(dayEnergy) as totEnergy
-from day_energy_full tday group by deviceMAC;
+from loc0_day_energy_full tday group by deviceMAC;
 
 
-select * from day_energy_full where deviceMAC='c098e5300052';
+select * from loc0_day_energy_full where deviceMAC='c098e5300052';
 
 
-
-
-create view day_energy_days as select dayst from loc0_day_energy group by dayst;
-create view day_energy_devs as select deviceMAC from loc0_day_energy group by deviceMAC;
+create view loc0_day_energy_days as select dayst from loc0_day_energy group by dayst;
+create view loc0_day_energy_devs as select deviceMAC from loc0_day_energy group by deviceMAC;
 
 
 
-create view day_energy_full as
+create view loc0_day_energy_full as
 select t1.dayst, t2.deviceMAC, case when t1.dayst in (select dayst from loc0_day_energy t3 where t2.deviceMAC=t3.deviceMAc) then
 (select dayEnergy from loc0_day_energy t4 where t2.deviceMAC=t4.deviceMAC and t1.dayst=t4.dayst)
 else 0 end as dayEnergy from
-day_energy_days t1
+loc0_day_energy_days t1
 join
-day_energy_devs t2;
+loc0_day_energy_devs t2;
 
 
