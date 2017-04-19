@@ -1,5 +1,14 @@
 # SQL script used for generating an energy breakdown, instantaneous power
 
+# Create ss_powerblade table
+CREATE TABLE loc1_dat_powerblade LIKE dat_powerblade;
+insert into loc1_dat_powerblade select * from dat_powerblade where gatewaymac='c098e5c00003' or gatewaymac='c098e5c00025' or gatewaymac='c098e5c00026';
+
+# pb_lookup
+create table loc1_pb_lookup (deviceMAC char(16), deviceName varchar(50));
+alter table loc1_pb_lookup add column devType varchar(20);
+alter table loc1_pb_lookup add index (deviceMAC, devType);
+
 # dat_start is the starting datetime
 # dat_end is the ending datetime
 SET @dat_start='2016-01-01 00:00:00';

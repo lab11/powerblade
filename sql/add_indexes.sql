@@ -1,3 +1,11 @@
+# Index creation for data tables
+
+alter table dat_powerblade add index (timestamp);
+alter table dat_powerblade add index (gatewayMAC);
+alter table dat_powerblade add index (deviceMAC);
+alter table dat_powerblade add index (power);
+
+
 alter table dat_powerblade add index devEnergy (timestamp, deviceMAC, energy);
 alter table dat_powerblade add index devPower (timestamp, deviceMAC, power);
 
