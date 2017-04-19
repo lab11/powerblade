@@ -273,7 +273,7 @@ create view mr_final_locations as select location from mr_final_results group by
 
 # Total category-based energy breakdown, filled in for all locations and categories
 # The result is a list of [location, category, sum for that category]
-# This is the equivalent of loc_day_energy_full but for categories
+# This is the equivalent of loc0_day_energy_full but for categories
 alter view mr_cat_breakdown as
 select t2.location, t1.category, case when t1.category in (select category from mr_final_results t3 where t2.location=t3.location) then
 (select sum(avgEnergy) from mr_final_results t4 where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' and t2.location=t4.location and t1.category=t4.category)
