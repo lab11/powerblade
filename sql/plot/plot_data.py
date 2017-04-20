@@ -94,7 +94,7 @@ def check_tag():
 	# else:
 	# 	qu_saveDir = master_saveDir + config['tag'] + '/'
 
-def dev_print(print_all):
+def dev_print():
 	global loc_list
 
 	global dev_powerblade
@@ -173,13 +173,13 @@ def dev_print(print_all):
 	dev_blink = "".join(dev_blink)
 
 	devNames = []
-	if(print_all and query_powerblade):
+	if(query_powerblade):
 		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from valid_powerblades where deviceMAC in ' + dev_powerblade + ';')
 		devNames.extend(aws_c.fetchall())
-	if(print_all and  query_blees):
+	if(query_blees):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from valid_lights where deviceMAC in ' + dev_blees + ';')
 		devNames.extend(aws_c.fetchall())
-	if(print_all and query_ligeiro):
+	if(query_ligeiro):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from valid_lights where deviceMAC in ' + dev_ligeiro + ';')
 		devNames.extend(aws_c.fetchall())
 	if(query_blink):
@@ -202,13 +202,13 @@ def print_parameters():
 
 	if(config['type'] == 'plot'):
 		print("\nPlotting data from the following devices:")
-		dev_print(True)
+		dev_print()
 	elif(config['type'] == 'energy'):
 		print("\nQuerying " + config['type'] + " from the following devices")
-		dev_print(True)
+		dev_print()
 	elif(config['type'] == 'blink'):
 		print("\nQuerying " + config['type'] + " from the following devices")
-		dev_print(False)
+		dev_print()
 	else:
 		print("\nQuerying " + config['type'])
 
@@ -321,17 +321,16 @@ while(confirm != ""):
 				confirm_list[1] = '2017-' + confirm_list[1]
 			if(len(confirm_list) == 2):
 				try:
-					datetime.strptime(confirm_list[1], '%Y-%m-%d')
-					config[confirm_list[0]] = confirm_list[1] + " " + config[confirm_list[0]].split(" ")[1]
+					strTime = datetime.strptime(confirm_list[1], '%Y-%m-%d').strftime('%Y-%m-%d')
+					config[confirm_list[0]] = strTime + " " + config[confirm_list[0]].split(" ")[1]
 					changes = True
 				except:
-					datetime.strptime(confirm_list[1], '%H:%M:%S')
-					config[confirm_list[0]] = config[confirm_list[0]].split(" ")[0] + " " + confirm_list[1]
+					strTime = datetime.strptime(confirm_list[1], '%H:%M:%S').strftime('%H:%M:%S')
+					config[confirm_list[0]] = config[confirm_list[0]].split(" ")[0] + " " + strTime
 					changes = True
 			else:
 				date_text = confirm_list[1] + " " + confirm_list[2]
-				datetime.strptime(date_text, '%Y-%m-%d %H:%M:%S')
-				config[confirm_list[0]] = date_text
+				config[confirm_list[0]] = datetime.strptime(date_text, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
 				changes = True
 		except:
 			error = True
