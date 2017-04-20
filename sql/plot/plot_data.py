@@ -315,6 +315,22 @@ while(confirm != ""):
 			config['devices'] = [x for x in config['devices'] if x not in devList]
 			config['locations'] = [x for x in config['locations'] if x != confirm_list[devOffset]]
 		changes = True
+	elif(confirm_list[0] == 'room'):
+		room = ' '.join(confirm_list[1:])
+		
+		locStr = ['(']
+		for loc in config['locations']:
+			locStr.append(str(loc))
+			locStr.append(',')
+		locStr[-1] = ')'
+		locStr = ''.join(locStr)
+
+		aws_c.execute('select lower(deviceMAC) from valid_devices_2 where location in ' + locStr + ' and room=\'' + room + '\';')
+		device_list = aws_c.fetchall()
+		devList = [i[0] for i in device_list]
+
+		config['devices'] = devList
+		changes = True
 	elif(confirm_list[0] == 'start' or confirm_list[0] == 'end'):
 		try:
 			if(len(confirm_list[1].split('-')) == 2):
