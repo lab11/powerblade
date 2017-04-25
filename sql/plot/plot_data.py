@@ -17,6 +17,7 @@ from breakdown import breakdown
 from boxplot import boxplot
 
 import math
+import numpy
 
 query_startDay = datetime.utcnow().strftime('%Y_%m_%d_')
 
@@ -325,7 +326,7 @@ while(confirm != ""):
 		locStr[-1] = ')'
 		locStr = ''.join(locStr)
 
-		aws_c.execute('select lower(deviceMAC) from valid_devices_2 where location in ' + locStr + ' and room=\'' + room + '\';')
+		aws_c.execute('select lower(deviceMAC) from valid_devices where location in ' + locStr + ' and room=\'' + room + '\';')
 		device_list = aws_c.fetchall()
 		devList = [i[0] for i in device_list]
 
@@ -983,8 +984,10 @@ elif(config['type'] == 'results'):
 
 elif(config['type'] == 'blink'):
 
-	aws_c.execute('select t2.room, t1.ts, t1.minMot from ' \
-		'(select round(unix_timestamp(timestamp)/(60*60)) as timekey, max(timestamp) as ts, deviceMAC, sum(minMot) as minMot ' \
+	downsample = int(duration/100)
+
+	aws_c.execute('select t2.room, t1.ts, t1.ts2, t1.minMot from ' \
+		'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, left(max(timestamp), 16) as ts2, deviceMAC, sum(minMot) as minMot ' \
 		'from dat_blink force index (devMIN) ' \
 		'where deviceMAC in ' + dev_blink + ' ' \
 		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
@@ -1000,27 +1003,28 @@ elif(config['type'] == 'blink'):
 	current_room = 0
 	# Find max values (used for normalization)
 	maxVals = {}
-	for room, ts, minMot in blink_data:
+	for room, ts, ts2, minMot in blink_data:
 		if room != current_room:
 			plot_count += 1
 			current_room = room
 			maxVals[current_room] = minMot
 		if minMot > maxVals[current_room]:
 			maxVals[current_room] = minMot
+		#print(ts2)
 
 	current_room = 0
-	for room, ts, minMot in blink_data:
+	xcorr_data = {}
+	for room, ts, ts2, minMot in blink_data:
 		if room != current_room:
 			current_room = room
 			blink_out.write('\n\n\"Blink: ' + current_room + '\"\n')
 		blink_out.write('\"' + str(ts) + '\"\t' + str(minMot/maxVals[current_room]) + '\n')
+		xcorr_data[ts2] = float(minMot/maxVals[current_room])
 
 	blink_out.close()
 
-	downsample = int(duration/100)
-
-	aws_c.execute('select t2.deviceName, t1.ts, t1.avgPower from ' \
-		'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, deviceMAC, avg(power) as avgPower ' \
+	aws_c.execute('select t2.deviceName, t1.ts, t1.ts2, t1.avgPower from ' \
+		'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, left(max(timestamp), 16) as ts2, deviceMAC, avg(power) as avgPower ' \
 		'from dat_powerblade force index (devPower) ' \
 		'where deviceMAC in ' + dev_powerblade + ' ' \
 		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
@@ -1034,7 +1038,7 @@ elif(config['type'] == 'blink'):
 
 	pb_count = 0
 	current_dev = 0
-	for dev, ts, pwr in pb_data:
+	for dev, ts, ts2, pwr in pb_data:
 		if dev != current_dev:
 			pb_count += 1
 			current_dev = dev
@@ -1043,10 +1047,37 @@ elif(config['type'] == 'blink'):
 			maxVals[current_dev] = pwr
 
 	current_dev = 0
-	for dev, ts, pwr in pb_data:
+	xcorr_pb = {}
+	xcorr_pb_act = {}	# Active (on) measurements (above 10%)
+	for dev, ts, ts2, pwr in pb_data:
 		if dev != current_dev:
 			current_dev = dev
-			pb_out.write('\n\n\"' + current_dev + '\"\n')
+			xcorr_pb[current_dev] = {}
+			xcorr_pb_act[current_dev] = {}
+			xcorr_pb[current_dev]['pb'] = []
+			xcorr_pb_act[current_dev]['pb'] = []
+			xcorr_pb[current_dev]['blink'] = []
+			xcorr_pb_act[current_dev]['blink'] = []
+		#print(ts2)
+		try:
+			xcorr_pb[current_dev]['blink'].append(xcorr_data[ts2])
+			xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev]))
+
+			if(float(pwr/maxVals[current_dev]) >= .1):
+				xcorr_pb_act[current_dev]['blink'].append(xcorr_data[ts2])
+				xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev]))
+
+		except:
+			print('Couldnt find ' + str(ts2))
+
+	current_dev = 0
+	for dev, ts, ts2, pwr in pb_data:
+		if dev != current_dev:
+			current_dev = dev
+			#if(len(xcorr_data) == len(xcorr_pb[current_dev])):
+			pb_out.write('\n\n\"' + str(current_dev) + ' ' + str(round(numpy.corrcoef(xcorr_pb[current_dev]['blink'], xcorr_pb[current_dev]['pb'])[0][1],2)) + '\"\n')
+			#else:
+			#	pb_out.write('\n\n\"' + current_dev + '\"\n')
 		pb_out.write('\"' + str(ts) + '\"\t' + str(pwr/maxVals[current_dev]) + '\n')
 
 	pb_out.close()
@@ -1059,16 +1090,27 @@ elif(config['type'] == 'blink'):
 
 	# Create .plt file and fill
 	plt = open('blink.plt', 'w')
-	plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 3in,2.8in\n')
+	plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,11in\n')
 	plt.write('set output "blink.eps"\n')
 
 	plt.write('set xdata time\n')
-	plt.write('set key under\n')
+	plt.write('set key top left\n')
 	plt.write('set timefmt \"\\\"%Y-%m-%d %H:%M:%S\\\"\"\n')
-	plt.write('set format x \"%m-%d\\n%H:%M\"\n')
+	plt.write('set format x \"%m-%d\\n%H:%M\"\n\n')
 
-	plt.write('plot for [IDX=0:' + str(plot_count) + '] \'blink.dat\' i IDX u 1:2 w lines axes x1y2 title columnheader(1), \\\n')
-	plt.write('\tfor[IDX=0:' + str(pb_count) + '] \'pb.dat\' i IDX u 1:2 w lines axes x1y1 title columnheader(1)\n')
+	plt.write('set ytics .2\n\n')
+
+	#plt.write('plot for [IDX=0:' + str(plot_count) + '] \'blink.dat\' i IDX u 1:2 w lines axes x1y2 title columnheader(1), \\\n')
+	#plt.write('\tfor[IDX=0:' + str(pb_count) + '] \'pb.dat\' i IDX u 1:2 w lines axes x1y1 title columnheader(1)\n')
+
+	plt.write('set multiplot layout ' + str(pb_count) + ', 1\n\n')
+
+	for i in range(0, pb_count):
+		plt.write('plot \'pb.dat\' i ' + str(i) + ' u 1:2 w lines title columnheader(1), \\\n')
+		plt.write('\t\'blink.dat\' u 1:2 w lines title \'Blink\'\n\n')
+
+	plt.write('unset multiplot\n')
+
 	plt.close()
 
 	# Generate plot and convert to PDF
