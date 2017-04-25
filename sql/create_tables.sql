@@ -46,5 +46,15 @@ primary key (id), index (location));
 
 
 
+# Deltas table
+create table dat_delta (id int(11) not null auto_increment, dayst datetime, deviceMAC char(12), 
+ct5 int(11), spk5 int(11), ct10 int(11), spk10 int(11), ct15 int(11), spk15 int(11),
+ct25 int(11), spk25 int(11), ct50 int(11), spk50 int(11), ct75 int(11), spk75 int(11), 
+ct100 int(11), spk100 int(11), ct150 int(11), spk150 int(11), ct250 int(11), spk250 int(11), 
+ct500 int(11), spk500 int(11), primary key (id), index (dayst), index (deviceMAC), index devDay (deviceMAC, dayst));
+
+describe dat_delta;
+
+
 # Other useful stuff:
 # 	to "delete from": SET SQL_SAFE_UPDATES = 0;
