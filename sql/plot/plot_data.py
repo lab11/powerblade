@@ -453,7 +453,7 @@ if(config['type'] == 'plot'):
 			"deviceMAC, max(timestamp) as timest, avg(power) as avgPower from dat_powerblade force index (devPower) where deviceMAC in " + \
 			dev_powerblade + " and timestamp between \"" + str(config['start']) + "\" and \"" + str(config['end']) + "\"" + \
 			"group by deviceMAC, timekey) t1 " \
-			"join active_powerblades t2 on t1.deviceMAC=t2.deviceMAC " \
+			"join valid_powerblades t2 on t1.deviceMAC=t2.deviceMAC " \
 			"order by t2.deviceName, t1.timest;")
 		data_pb = aws_c.fetchall()
 		
@@ -984,7 +984,7 @@ elif(config['type'] == 'results'):
 elif(config['type'] == 'blink'):
 
 	aws_c.execute('select t2.room, t1.ts, t1.minMot from ' \
-		'(select round(unix_timestamp(timestamp)/(60*60)) as timekey, min(timestamp) as ts, deviceMAC, sum(minMot) as minMot ' \
+		'(select round(unix_timestamp(timestamp)/(60*60)) as timekey, max(timestamp) as ts, deviceMAC, sum(minMot) as minMot ' \
 		'from dat_blink force index (devMIN) ' \
 		'where deviceMAC in ' + dev_blink + ' ' \
 		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
@@ -998,14 +998,64 @@ elif(config['type'] == 'blink'):
 
 	plot_count = 0
 	current_room = 0
+	# Find max values (used for normalization)
+	maxVals = {}
 	for room, ts, minMot in blink_data:
 		if room != current_room:
 			plot_count += 1
 			current_room = room
-			blink_out.write('\n\n\"' + current_room + '\"\n')
-		blink_out.write('\"' + str(ts) + '\"\t' + str(minMot) + '\n')
+			maxVals[current_room] = minMot
+		if minMot > maxVals[current_room]:
+			maxVals[current_room] = minMot
+
+	current_room = 0
+	for room, ts, minMot in blink_data:
+		if room != current_room:
+			current_room = room
+			blink_out.write('\n\n\"Blink: ' + current_room + '\"\n')
+		blink_out.write('\"' + str(ts) + '\"\t' + str(minMot/maxVals[current_room]) + '\n')
 
 	blink_out.close()
+
+	downsample = int(duration/100)
+
+	aws_c.execute('select t2.deviceName, t1.ts, t1.avgPower from ' \
+		'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, deviceMAC, avg(power) as avgPower ' \
+		'from dat_powerblade force index (devPower) ' \
+		'where deviceMAC in ' + dev_powerblade + ' ' \
+		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
+		'group by deviceMAC, timekey) t1 ' \
+		'join valid_powerblades t2 ' \
+		'on t1.deviceMAC=t2.deviceMAC ' \
+		"order by t2.deviceName, t1.timekey;")
+	pb_data = aws_c.fetchall()
+
+	pb_out = open('pb.dat', 'w')
+
+	pb_count = 0
+	current_dev = 0
+	for dev, ts, pwr in pb_data:
+		if dev != current_dev:
+			pb_count += 1
+			current_dev = dev
+			maxVals[current_dev] = pwr
+		if pwr > maxVals[current_dev]:
+			maxVals[current_dev] = pwr
+
+	current_dev = 0
+	for dev, ts, pwr in pb_data:
+		if dev != current_dev:
+			current_dev = dev
+			pb_out.write('\n\n\"' + current_dev + '\"\n')
+		pb_out.write('\"' + str(ts) + '\"\t' + str(pwr/maxVals[current_dev]) + '\n')
+
+	pb_out.close()
+		
+		# if(config['sum']):
+		# 	aws_c.execute("select timestamp, sum(power) from dat_powerblade where deviceMAC in " + \
+		# 		dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\" " + \
+		# 		"group by timestamp order by timestamp;")
+		# 	sum_pb = aws_c.fetchall();
 
 	# Create .plt file and fill
 	plt = open('blink.plt', 'w')
@@ -1017,7 +1067,8 @@ elif(config['type'] == 'blink'):
 	plt.write('set timefmt \"\\\"%Y-%m-%d %H:%M:%S\\\"\"\n')
 	plt.write('set format x \"%m-%d\\n%H:%M\"\n')
 
-	plt.write('plot for [IDX=0:' + str(plot_count) + '] \'blink.dat\' i IDX u 1:2 w lines title columnheader(1)\n')
+	plt.write('plot for [IDX=0:' + str(plot_count) + '] \'blink.dat\' i IDX u 1:2 w lines axes x1y2 title columnheader(1), \\\n')
+	plt.write('\tfor[IDX=0:' + str(pb_count) + '] \'pb.dat\' i IDX u 1:2 w lines axes x1y1 title columnheader(1)\n')
 	plt.close()
 
 	# Generate plot and convert to PDF
@@ -1032,6 +1083,7 @@ elif(config['type'] == 'blink'):
 	os.remove('blink.eps')
 
 	# Move data to saveDir
+	mv('pb.dat', qu_saveDir)
 	mv('blink.dat', qu_saveDir)
 	mv('blink.plt', qu_saveDir)
 	cp('blink.pdf', qu_saveDir)
