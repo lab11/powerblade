@@ -26,6 +26,6 @@ alter table dat_blink add index devMin (timestamp, deviceMAC, minMot);
 
 alter table dat_powerblade drop index devEnergy;
 
-
+alter table dat_powerblade add index devPowTimeSeq (deviceMAC, power, timestamp, seq);
 
 
