@@ -53,9 +53,10 @@ startTime < utc_timestamp() AND
 (remTime is NULL OR remTime > utc_timestamp());
 
 alter view valid_devices as
-SELECT deviceMAC, deviceName, location, category, deviceType from valid_powerblades
-UNION SELECT deviceMAC, deviceName, location, 'Overhead', 'Overhead' from valid_lights
-UNION SELECT deviceMAC, room, location, 'Overhead', 'Overhead' from valid_blinks;
+SELECT deviceMAC, deviceName, location, room, category, deviceType from valid_powerblades
+UNION SELECT deviceMAC, deviceName, location, room, 'Overhead', 'Overhead' from valid_lights
+UNION SELECT deviceMAC, room, location, room, 'Overhead', 'Overhead' from valid_blinks;
+
 
 
 # active_[device] - all devices in a most_recent_[device] that are valid (see above) and that are active 
@@ -317,5 +318,12 @@ on tEn.category=tPwr.category
 order by tEn.meanEn asc;
 
 
+
+
+
+# This is used for the device ID
+create view mr_dat_delta as
+select t1.* from dat_delta t1 where
+t1.id=(select max(t2.id) from dat_delta t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
 
 
