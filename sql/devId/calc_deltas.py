@@ -7,6 +7,9 @@ from datetime import datetime, timedelta
 import sys
 from os.path import expanduser
 
+sys.path.append('../plot/')
+import pytch
+
 def chop_microseconds(delta):
     return delta - timedelta(microseconds=delta.microseconds)
 
@@ -21,7 +24,7 @@ aws_c = aws_db.cursor()
 # Query for the device list
 item_start = datetime.utcnow()
 sys.stdout.write('Querying device list ... ')
-aws_c.execute('select deviceMAC from valid_powerblades where location=9 ' \
+aws_c.execute('select deviceMAC from valid_powerblades where location in (5,6) ' \
 	'and deviceType in (select * from id_categories);')
 device_list = aws_c.fetchall()
 devList = [i[0] for i in device_list]
@@ -34,13 +37,22 @@ devI += devI
 
 
 # Set up start and end times
-start_date = datetime.strptime('2017-03-27', '%Y-%m-%d')
-end_date = datetime.strptime('2017-04-18', '%Y-%m-%d')
+start_date = datetime.strptime('2017-02-23', '%Y-%m-%d')
+end_date = datetime.strptime('2017-04-24', '%Y-%m-%d')
 
 print('\nTotal devices: ' + str(len(devList)))
 print('Query scope: ' + str((end_date - start_date).days+1) + ' days')
-print('Expected runtime: ' + str(timedelta(seconds=(len(devList) * ((end_date - start_date).days+1) * 25))) + '\n')
+print('Expected runtime: ' + str(timedelta(seconds=(len(devList) * ((end_date - start_date).days+1) * 20))) + '\n')
 
+confirm = pytch.input_loop('Press enter, or \'exit\' to cancel: ')
+
+print('')
+
+if(confirm == 'exit'):
+	exit()
+
+dev_scope = len(devList)
+dev_complete = -1
 total_scope = len(devList) * ((end_date - start_date).days+1);
 total_complete = 0
 
@@ -53,6 +65,8 @@ new_data = {}
 for query_dev in devList:
 
 	query_date = start_date
+
+	dev_complete += 1
 
 	new_data[query_dev] = {}
 
@@ -67,7 +81,7 @@ for query_dev in devList:
 			'where deviceMAC=\'' + query_dev + '\' and date(timestamp)=\'' + query_date_str + '\' ' \
 			'order by deviceMAC, timestamp, seq;')
 		cur_data = aws_c.fetchall()
-		print(str((datetime.utcnow() - item_start).total_seconds()) + ' seconds')
+		print(str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
 
 		item_start = datetime.utcnow()
 		sys.stdout.write('Processing deltas ... ')
@@ -130,14 +144,14 @@ for query_dev in devList:
 					else:
 						prev_delta = 0
 
-		print(str(totalCt) + ' found in ' + str((datetime.utcnow() - item_start).total_seconds()) + ' seconds')
+		print(str(totalCt) + ' found in ' + str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
 
 		print(str(dat))
 
 		total_complete += 1
 		print('\nTotal elapsed time: ' + str(chop_microseconds(datetime.utcnow() - script_start)))
-		print(str(round(100*float(total_complete)/total_scope,2)) + ' pct complete')
-		print('Remaining time: ' + str(chop_microseconds((datetime.utcnow() - script_start)*total_scope/total_complete)) + '\n')
+		print(str(round(100*float(total_complete)/total_scope,2)) + ' pct complete (' + str(dev_complete) + '/' + str(dev_scope) + ' devices)')
+		print('Remaining time: ' + str(chop_microseconds(((datetime.utcnow() - script_start)*total_scope/total_complete)-(datetime.utcnow() - script_start))) + '\n')
 
 		if(totalCt > 0): 
 			aws_c.execute('insert into dat_delta (dayst, deviceMAC, ' \
@@ -154,19 +168,5 @@ for query_dev in devList:
 
 		query_date = query_date + timedelta(days=1)
 
-# for dev in new_data:
-# 	for date in new_data[dev]:
-# 		dat = new_data[dev][date]
-# 		print(dev + ' ' + str(date) + ' ' + str(dat))
-# 		aws_c.execute('insert into dat_delta (dayst, deviceMAC, ' \
-# 			'ct5, spk5, ct10, spk10, ct15, spk15, ' \
-# 			'ct25, spk25, ct50, spk50, ct75, spk75, ' \
-# 			'ct100, spk100, ct150, spk150, ct250, spk250, ' \
-# 			'ct500, spk500) ' \
-# 			'values (\'' + str(date) + '\', \'' + dev + '\', ' + \
-# 			str(dat['5'][0]) + ', ' + str(dat['5'][1]) + ', ' + str(dat['10'][0]) + ', ' + str(dat['10'][1]) + ', ' + str(dat['15'][0]) + ', ' + str(dat['15'][1]) + ', ' + \
-# 			str(dat['25'][0]) + ', ' + str(dat['25'][1]) + ', ' + str(dat['50'][0]) + ', ' + str(dat['50'][1]) + ', ' + str(dat['75'][0]) + ', ' + str(dat['75'][1]) + ', ' + \
-# 			str(dat['100'][0]) + ', ' + str(dat['100'][1]) + ', ' + str(dat['150'][0]) + ', ' + str(dat['150'][1]) + ', ' + str(dat['250'][0]) + ', ' + str(dat['250'][1]) + ', ' + \
-# 			str(dat['500'][0]) + ', ' + str(dat['500'][1]) + ');')
-# 		aws_db.commit()
+
 			
