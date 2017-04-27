@@ -345,7 +345,10 @@ select t1.id, t1.dayst, t1.deviceMAC, t1.avgPwr, t1.varPwr, t1.maxPwr, t1.minPwr
 t1.ct5, t1.spk5, t1.ct10, t1.spk10, t1.ct15, t1.spk15, t1.ct25, t1.spk25, t1.ct50, t1.spk50,
 t1.ct75, t1.spk75, t1.ct100, t1.spk100, t1.ct150, t1.spk150, t1.ct250, t1.spk250, t1.ct500, t1.spk500,
 case when t1.deviceType='Desk lamp' or t1.deviceType='Small lamp/light' or t1.deviceType='Standing lamp'
-then 'Lamp' else t1.deviceType end as deviceType
+then 'Lamp' else 
+case when t1.deviceType='Router' or t1.deviceType='Modem'
+then 'Router/Modem' else
+t1.deviceType end end as deviceType
 from dat_vector t1 where
 t1.id=(select max(t2.id) from dat_vector t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
 
