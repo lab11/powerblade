@@ -1,4 +1,5 @@
 # This selects data starting in the beginning of march from several categories
+# This isnt really used anymore
 
 # Select data from televisions (12 devices, 32M rows)
 select gatewayMAC, deviceMAC, seq, voltage, power, energy, pf, flags, timestamp 
@@ -24,70 +25,10 @@ select deviceMAC from valid_powerblades where deviceType='Laptop computer';
 # Select data from lighting (48 devices)
 select deviceMAC from valid_powerblades where category='Lighting';
 
-select * from valid_powerblades where deviceType='Television';
-
-select * from dat_powerblade where gatewayMAC='c098e5c00031' order by id desc limit 10;
-
-select * from valid_powerblades where deviceMAC='c098e57000e6';
-
-show processlist;
-
-select category, deviceType, count(*) as count from valid_powerblades group by deviceType order by count desc;
 
 
-# Creating the vector for device identification - right now every day
-select ROUND(unix_timestamp(timestamp)/(24*60*60)) as timekey, max(timestamp), 
-deviceMAC, 
-avg(power), var_pop(power), max(power), min(power),
-# duty cycle
-(select count(*) from dat_powerblade t2 where t1.deviceMAC=t2.deviceMAC and timestamp>'2017-03-01 00:00:00' and power>5) as onCount, count(*) as totCount
-# waveform
-from dat_powerblade t1
-where deviceMAC='c098e570005d'
-and timestamp>'2017-03-01 00:00:00'
-group by deviceMAC, timekey;
-
-
-select deviceMAC, seq, power from dat_powerblade 
-where deviceMAC='c098e570005d'
-and timestamp>'2017-03-01 00:00:00'
-order by timestamp asc;
-
-select * from dat_powerblade force index (devTimePower)
-where timestamp>'2017-04-10 00:00:00'# and id not in (select id from dat_delta group by id)
-order by deviceMAC, timestamp;
-
-select * from dat_powerblade force index (devTimeSeq)
-#where timestamp>'2017-03-01 00:00:00' and timestamp<'2017-03-01 01:00:00'
-#where id not in (select id from dat_delta group by id)
-where deviceMAC='c098e570005d' and date(timestamp)='2017-03-20'
-order by deviceMAC, timestamp, seq;
-
-drop table temp_powerblade;
-create table temp_powerblade like dat_powerblade;
-alter table temp_powerblade add index timeDevSeq (timestamp, deviceMAC, seq);
-insert into temp_powerblade select * from dat_powerblade where timestamp>'2017-03-15 00:00:00' limit 1000000;
-
-alter view id_categories as
-select deviceType from valid_powerblades
-where deviceType in 
-('Television', 'Fridge', 'Microwave', 'Laptop computer', 'Phone charger', 
-'Blowdryer', 'Coffee maker', 'Fan', 'Cable Box', 'Curling iron', 
-'Computer Monitor', 'Toaster', 'Modem', 'Router', 'Blender')
-or category='Lighting'
-group by deviceType;
-
-create view id_fewcats as
-select deviceType from valid_powerblades
-where deviceType in
-('Television', 'Fridge', 'Microwave', 'Laptop computer', 
-'Cable Box', 'Phone charger', 'Toaster', 'Coffee maker')
-or category='Lighting';
-
-select * from id_categories order by deviceType asc;
-
-select * from mr_dat_delta;
-
+# Create full vector - this is replicated in calc_vectors
+# This isnt really used anymore since the script
 select t1.dayst, t1.deviceMAC,
 coalesce(t2.avgPwr, 0) as avgPwr, coalesce(t2.varPwr, 0) as varPwr, coalesce(t2.maxPwr, 0) as maxPwr, coalesce(t2.minPwr, 0) as minPwr,
 t1.count as count,
@@ -128,25 +69,10 @@ on t1.deviceMAC=t3.deviceMAC
 left join
 mr_dat_delta t4
 on t1.deviceMAC=t4.deviceMAC and t1.dayst=t4.dayst;
-where t1.count>100;
-
-
-select ROUND(unix_timestamp(timestamp)/(24*60*60)) as timekey, max(timestamp) as maxTime, 
-deviceMAC, 
-count(distinct seq) as count
-from dat_powerblade force index (devTimeSeq) where deviceMAC='c098e570005d' and timestamp>'2017-03-01 00:00:00' 
-group by deviceMAC, timekey;
-
-explain select ROUND(unix_timestamp(timestamp)/(24*60*60)) as timekey, max(timestamp) as maxTime, 
-deviceMAC, 
-avg(power) as avgPwr, var_pop(power) as varPwr, max(power) as maxPwr, min(power) as minPwr,
-count(*) as count
-from dat_powerblade where deviceMAC='c098e570005d'and power>17 and timestamp>'2017-03-01 00:00:00'
-group by deviceMAC, timekey;
 
 
 
-#
+# Various queries against mr_inf_delta
 select * from valid_powerblades where deviceMAC='c098e57001a0';
 select deviceType, count(*) as count from mr_inf_delta group by deviceType order by count desc;
 select * from mr_inf_delta where deviceType='Laptop computer';
@@ -157,9 +83,99 @@ select * from mr_inf_delta where deviceType='Modem';
 select * from mr_inf_delta where deviceType='Phone charger';
 select * from mr_inf_delta where deviceType='Television';
 
-select t2.deviceType, avg(ct5), var_pop(ct5), avg(ct10), var_pop(ct10), avg(ct50), var_pop(ct50), avg(ct100), var_pop(ct100) from
-(mr_dat_delta t1
-join valid_powerblades t2
-on t1.deviceMAC=t2.deviceMAC)
-group by t2.deviceType;
+
+# These set up the categories for the device identification
+# Also the smaller category list
+
+alter view id_categories as
+select deviceType from valid_powerblades
+where deviceType in 
+('Television', 'Fridge', 'Microwave', 'Laptop computer', 'Phone charger', 
+'Blowdryer', 'Coffee maker', 'Fan', 'Cable Box', 'Curling iron', 
+'Computer Monitor', 'Toaster', 'Modem', 'Router', 'Blender')
+or category='Lighting'
+group by deviceType;
+
+alter view id_fewcats as
+select deviceType from valid_powerblades
+where deviceType in
+('Television', 'Fridge', 'Microwave', 'Laptop computer', 
+'Cable Box', 'Phone charger', 'Toaster', 'Coffee maker')
+or category='Lighting';
+
+
+
+# The following queries are used to observe the data for identification
+
+select * from mr_dat_vector where deviceMAC='c098e5700220';
+select * from valid_powerblades where deviceMAC='c098e570026a';
+
+select deviceMAC, deviceType, avg(avgPwr) as avgAvgPwr, avg(varPwr) as avgVarPwr, min(maxPwr) as minMaxPwr, avg(maxPwr) as avgMaxPwr, max(maxPwr) as maxMaxPwr
+from mr_dat_vector
+where duty!=0
+and (deviceType = 'Blender')
+group by deviceMAC;
+
+select deviceType, avg(avgPwr) as avgAvgPwr, avg(varPwr) as avgVarPwr, min(maxPwr) as minMaxPwr, avg(maxPwr) as avgMaxPwr, max(maxPwr) as maxMaxPwr
+from mr_dat_vector
+where duty!=0
+group by deviceType
+order by avgMaxPwr asc;
+
+
+
+
+
+
+
+# The following views and queries work with mr_dat_vector, the output of calc_vectors
+
+# Devices for the test set (the second most quantity of each category)
+create view vector_test as 
+select deviceMAC from valid_powerblades
+where deviceMAC in ('c098e570005d', 'c098e5700211', 
+'c098e5700183', 'c098e570016a', 'c098e570026e', 'c098e57000eb', 
+'c098e5700164', 'c098e57001b2', 'c098e57001b4', 'c098e570016e', 
+'c098e5700282', 'c098e57001ad', 'c098e5700195', 'c098e5700262', 
+'c098e57000ed', 'c098e570023a', 'c098e5700285', 'c098e5700170')
+group by deviceMAC;
+
+# Devices for the reject set (errors, bad calibration, etc)
+create view vector_reject as
+select deviceMAC from valid_powerblades
+where deviceMAC in ('c098e57001b5', 'c098e57001c5', 
+'c098e57001c8', 'c098e5700163', 'c098e5700233', 'c098e57001ed', 
+'c098e570026a', 'c098e57001a0', 'c098e570027d', 'c098e5700238')
+group by deviceMAC;
+
+
+# WKB All - Full Set
+select * from mr_dat_vector
+where duty!=0
+and deviceMAC not in (select * from vector_reject);
+
+# WKB Train - Full Set
+select * from mr_dat_vector
+where duty!=0
+and deviceMAC not in (select * from vector_test)
+and deviceMAC not in (select * from vector_reject);
+
+# WKB Test - Full Set
+select * from mr_dat_vector
+where duty!=0
+and deviceMAC in (select * from vector_test);
+
+# WKB Train - Smaller Set
+select * from mr_dat_vector
+where duty!=0
+and deviceMAC not in (select * from vector_test)
+and deviceMAC not in (select * from vector_reject)
+and deviceType in (select * from id_fewcats);
+
+# WKB Test - Smaller Set
+select * from mr_dat_vector
+where duty!=0
+and deviceMAC in (select * from vector_test)
+and deviceType in (select * from id_fewcats);
+
 
