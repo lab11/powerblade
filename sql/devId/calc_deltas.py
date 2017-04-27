@@ -24,7 +24,7 @@ aws_c = aws_db.cursor()
 # Query for the device list
 item_start = datetime.utcnow()
 sys.stdout.write('Querying device list ... ')
-aws_c.execute('select deviceMAC from valid_powerblades where location in (3) ' \
+aws_c.execute('select deviceMAC from valid_powerblades where location in (0) ' \
 	'and deviceType in (select * from id_categories);')
 device_list = aws_c.fetchall()
 devList = [i[0] for i in device_list]
@@ -37,8 +37,8 @@ devI += devI
 
 
 # Set up start and end times
-start_date = datetime.strptime('2017-01-13', '%Y-%m-%d')
-end_date = datetime.strptime('2017-04-24', '%Y-%m-%d')
+start_date = datetime.strptime('2017-03-10', '%Y-%m-%d')
+end_date = datetime.strptime('2017-04-17', '%Y-%m-%d')
 
 print('\nTotal devices: ' + str(len(devList)))
 print('Query scope: ' + str((end_date - start_date).days+1) + ' days')
