@@ -66,6 +66,18 @@ deviceType varchar(30),
 primary key (id), index (dayst), index (deviceMAC), index devDay (deviceMAC, dayst));
 
 
+describe dat_blink;
+# Occupancy tables
+create table dat_occ_blink (id int(11) not null auto_increment, 
+deviceMAC char(12), room varchar(50), tsMin datetime, minMot int(11),
+primary key (id), index (deviceMAC));
+
+create table dat_occ_pb (id int(11) not null auto_increment, 
+deviceMAC char(12), room varchar(50), tsMin datetime, avgPower decimal(12,6),
+primary key (id), index (deviceMAC));
+
+
+
 
 
 # Other useful stuff:

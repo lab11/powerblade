@@ -354,9 +354,14 @@ t1.id=(select max(t2.id) from dat_vector t2 where t1.deviceMAC=t2.deviceMAC and 
 
 
 
+# Occupancy
+create view mr_dat_occ_blink as
+select t1.* from dat_occ_blink t1 where
+t1.id=(select max(t2.id) from dat_occ_blink t2 where t1.deviceMAC=t2.deviceMAC and t1.tsMin=t2.tsMin);
 
-
-
+create view mr_dat_occ_pb as
+select t1.* from dat_occ_pb t1 where
+t1.id=(select max(t2.id) from dat_occ_pb t2 where t1.deviceMAC=t2.deviceMAC and t1.tsMin=t2.tsMin);
 
 
 
