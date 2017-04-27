@@ -6,3 +6,4 @@ bridge.plt
 *.csv
 !blees_light_lookup.csv
 temp.plt
+scratchpad.sql
