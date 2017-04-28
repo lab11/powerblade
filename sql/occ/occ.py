@@ -43,11 +43,11 @@ aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd
 aws_c = aws_db.cursor()
 
 
-downsample = 5184
+downsample = 3600
 
 
 # Location
-locations = [8, 9]
+locations = [8]#, 9]
 
 # Start and end times
 start_date = datetime.strptime('2017-03-27', '%Y-%m-%d')
