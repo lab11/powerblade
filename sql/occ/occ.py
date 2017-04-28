@@ -47,10 +47,10 @@ downsample = 5184
 
 
 # Location
-locations = [0]#, 3, 5, 8, 9]
+locations = [3]#, 3, 5, 8, 9]
 
 # Start and end times
-start_date = datetime.strptime('2017-03-11', '%Y-%m-%d')
+start_date = datetime.strptime('2017-01-13', '%Y-%m-%d')
 end_date = datetime.strptime('2017-04-17', '%Y-%m-%d')
 
 
@@ -110,7 +110,8 @@ for loc in locLists:
 					'order by t1.deviceMAC, t1.timekey;')
 				blink_data = aws_c.fetchall()
 				print(str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
-				'and date(timestamp)=\'' + query_date_str + '\' ' \
+				#'and date(timestamp)=\'' + query_date_str + '\' ' \
+				print(str(len(blink_data)) + ' devices')
 
 				print_time()
 
@@ -118,10 +119,9 @@ for loc in locLists:
 				sys.stdout.write('Uploading to AWS ... ')
 				sys.stdout.flush()
 				for devMAC, room, tsMin, minMot in blink_data:
-					#aws_c.execute
-					print('insert into dat_occ_blink (deviceMAC, room, tsMin, minMot) values (' \
+					aws_c.execute('insert into dat_occ_blink (deviceMAC, room, tsMin, minMot) values (' \
 						'\'' + str(devMAC) + '\', \'' + str(room) + '\', \'' + str(tsMin) + '\', ' + str(minMot) + ');')
-					#aws_db.commit()
+					aws_db.commit()
 				print(str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
 
 				print_time()
@@ -140,6 +140,7 @@ for loc in locLists:
 					"order by t1.deviceMAC, t1.timekey;")
 				pb_data = aws_c.fetchall()
 				print(str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
+				print(str(len(pb_data)) + ' devices')
 
 				print_time()
 
@@ -147,10 +148,9 @@ for loc in locLists:
 				sys.stdout.write('Uploading to AWS ... ')
 				sys.stdout.flush()
 				for devMAC, room, tsMin, avgPwr in pb_data:
-					#aws_c.execute
-					print('insert into dat_occ_pb (deviceMAC, room, tsMin, avgPower) values (' \
+					aws_c.execute('insert into dat_occ_pb (deviceMAC, room, tsMin, avgPower) values (' \
 						'\'' + str(devMAC) + '\', \'' + str(room) + '\', \'' + str(tsMin) + '\', ' + str(round(avgPwr,6)) + ');')
-					#aws_db.commit()
+					aws_db.commit()
 				print(str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
 
 				print_time()
