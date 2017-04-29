@@ -47,10 +47,10 @@ downsample = 3600
 
 
 # Location
-locations = [5]
+locations = [0, 3]
 
 # Start and end times
-start_date = datetime.strptime('2017-02-23', '%Y-%m-%d')
+start_date = datetime.strptime('2017-03-10', '%Y-%m-%d')
 end_date = datetime.strptime('2017-04-17', '%Y-%m-%d')
 
 
