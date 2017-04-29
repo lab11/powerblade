@@ -4,7 +4,7 @@ import mylogin
 import MySQLdb
 import json
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytch
 
 import os
@@ -59,6 +59,22 @@ aws_login = mylogin.get_login_info('aws')
 aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd'], 'powerblade')
 aws_c = aws_db.cursor()
 connected = True
+
+def chop_microseconds(delta):
+    return delta - timedelta(microseconds=delta.microseconds)
+
+total_complete = 0
+def print_time():
+	global total_complete
+	total_complete += 1
+	print('\nTotal elapsed time: ' + str(chop_microseconds(datetime.utcnow() - script_start)))
+	print(str(round(100*float(total_complete)/total_scope,2)) + ' pct complete')
+
+	if(total_complete == total_scope):
+		remaining = 0
+	else:
+		remaining = chop_microseconds(((datetime.utcnow() - query_start)*total_scope/total_complete)-(datetime.utcnow() - query_start))
+	print('Remaining time: ' + str(remaining) + '\n')
 
 qu_saveDir = ''
 def check_tag():
@@ -175,7 +191,7 @@ def dev_print():
 
 	devNames = []
 	if(query_powerblade):
-		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from valid_powerblades where deviceMAC in ' + dev_powerblade + ';')
+		aws_c.execute('select \'PowerBlade\', deviceMAC, location, deviceName from valid_powerblades_no1 where deviceMAC in ' + dev_powerblade + ';')
 		devNames.extend(aws_c.fetchall())
 	if(query_blees):
 		aws_c.execute('select concat(deviceType, \'\\t\'), deviceMAC, location, deviceName from valid_lights where deviceMAC in ' + dev_blees + ';')
@@ -438,6 +454,11 @@ duration_days = int(math.ceil(duration / 86400))
 
 
 
+# Script body
+script_start = datetime.utcnow()
+
+
+
 ####################################################################
 #
 # This section is for the plot option
@@ -512,8 +533,8 @@ if(config['type'] == 'plot'):
 	epstopdf('datfile.eps')
 
 	# Show plot file
-	# img = subprocess.Popen(['open', 'datfile.pdf'])
-	# img.wait()
+	img = subprocess.Popen(['open', 'datfile.pdf'])
+	img.wait()
 
 	# Remove temporary file
 	os.remove('datfile.eps')
@@ -521,7 +542,7 @@ if(config['type'] == 'plot'):
 	# Move data to saveDir
 	mv('datfile.dat', qu_saveDir)
 	mv('datfile.plt', qu_saveDir)
-	mv('datfile.pdf', qu_saveDir)
+	cp('datfile.pdf', qu_saveDir)
 
 
 
@@ -984,153 +1005,348 @@ elif(config['type'] == 'results'):
 
 elif(config['type'] == 'blink'):
 
-	downsample = int(duration/100)
+	# downsample = int(duration/100)
 
-	aws_c.execute('select t2.room, t1.ts, t1.ts2, t1.minMot from ' \
-		'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, left(max(timestamp), 16) as ts2, deviceMAC, sum(minMot) as minMot ' \
-		'from dat_blink force index (devMIN) ' \
-		'where deviceMAC in ' + dev_blink + ' ' \
-		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
-		'group by timekey, deviceMAC) t1 ' \
-		'join valid_blinks t2 ' \
-		'on t1.deviceMAC=t2.deviceMAC ' \
-		'order by t1.deviceMAC, t1.timekey;')
-	blink_data = aws_c.fetchall()
+	# aws_c.execute('select t2.room, t1.ts, t1.ts2, t1.minMot from ' \
+	# 	'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, left(max(timestamp), 16) as ts2, deviceMAC, sum(minMot) as minMot ' \
+	# 	'from dat_blink force index (devMIN) ' \
+	# 	'where deviceMAC in ' + dev_blink + ' ' \
+	# 	'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
+	# 	'group by timekey, deviceMAC) t1 ' \
+	# 	'join valid_blinks t2 ' \
+	# 	'on t1.deviceMAC=t2.deviceMAC ' \
+	# 	'order by t1.deviceMAC, t1.timekey;')
+	# blink_data = aws_c.fetchall()
 
-	blink_out = open('blink.dat', 'w')
+	# blink_out = open('blink.dat', 'w')
 
-	plot_count = 0
-	current_room = 0
-	# Find max values (used for normalization)
-	maxVals = {}
-	for room, ts, ts2, minMot in blink_data:
-		if room != current_room:
-			plot_count += 1
-			current_room = room
-			maxVals[current_room] = minMot
-		if minMot > maxVals[current_room]:
-			maxVals[current_room] = minMot
-		#print(ts2)
+	# plot_count = 0
+	# current_room = 0
+	# # Find max values (used for normalization)
+	# maxVals = {}
+	# for room, ts, ts2, minMot in blink_data:
+	# 	if room != current_room:
+	# 		plot_count += 1
+	# 		current_room = room
+	# 		maxVals[current_room] = minMot
+	# 	if minMot > maxVals[current_room]:
+	# 		maxVals[current_room] = minMot
+	# 	#print(ts2)
 
-	current_room = 0
-	xcorr_data = {}
-	for room, ts, ts2, minMot in blink_data:
-		if room != current_room:
-			current_room = room
-			blink_out.write('\n\n\"Blink: ' + current_room + '\"\n')
-		blink_out.write('\"' + str(ts) + '\"\t' + str(minMot/maxVals[current_room]) + '\n')
-		xcorr_data[ts2] = float(minMot/maxVals[current_room])
+	# current_room = 0
+	# xcorr_data = {}
+	# for room, ts, ts2, minMot in blink_data:
+	# 	if room != current_room:
+	# 		current_room = room
+	# 		blink_out.write('\n\n\"Blink: ' + current_room + '\"\n')
+	# 	blink_out.write('\"' + str(ts) + '\"\t' + str(minMot/maxVals[current_room]) + '\n')
+	# 	xcorr_data[ts2] = float(minMot/maxVals[current_room])
 
-	blink_out.close()
+	# blink_out.close()
 
-	aws_c.execute('select t2.deviceName, t1.ts, t1.ts2, t1.avgPower from ' \
-		'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, left(max(timestamp), 16) as ts2, deviceMAC, avg(power) as avgPower ' \
-		'from dat_powerblade force index (devPower) ' \
-		'where deviceMAC in ' + dev_powerblade + ' ' \
-		'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
-		'group by deviceMAC, timekey) t1 ' \
-		'join valid_powerblades t2 ' \
-		'on t1.deviceMAC=t2.deviceMAC ' \
-		"order by t2.deviceName, t1.timekey;")
-	pb_data = aws_c.fetchall()
+	# aws_c.execute('select t2.deviceName, t1.ts, t1.ts2, t1.avgPower from ' \
+	# 	'(select round(unix_timestamp(timestamp)/(' + str(downsample) + ')) as timekey, max(timestamp) as ts, left(max(timestamp), 16) as ts2, deviceMAC, avg(power) as avgPower ' \
+	# 	'from dat_powerblade force index (devPower) ' \
+	# 	'where deviceMAC in ' + dev_powerblade + ' ' \
+	# 	'and timestamp between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
+	# 	'group by deviceMAC, timekey) t1 ' \
+	# 	'join valid_powerblades t2 ' \
+	# 	'on t1.deviceMAC=t2.deviceMAC ' \
+	# 	"order by t2.deviceName, t1.timekey;")
+	# pb_data = aws_c.fetchall()
 
-	pb_out = open('pb.dat', 'w')
+	# pb_out = open('pb.dat', 'w')
 
-	pb_count = 0
-	current_dev = 0
-	for dev, ts, ts2, pwr in pb_data:
-		if dev != current_dev:
-			pb_count += 1
-			current_dev = dev
-			maxVals[current_dev] = pwr
-		if pwr > maxVals[current_dev]:
-			maxVals[current_dev] = pwr
+	# pb_count = 0
+	# current_dev = 0
+	# for dev, ts, ts2, pwr in pb_data:
+	# 	if dev != current_dev:
+	# 		pb_count += 1
+	# 		current_dev = dev
+	# 		maxVals[current_dev] = pwr
+	# 	if pwr > maxVals[current_dev]:
+	# 		maxVals[current_dev] = pwr
 
-	current_dev = 0
-	xcorr_pb = {}
-	xcorr_pb_act = {}	# Active (on) measurements (above 10%)
-	for dev, ts, ts2, pwr in pb_data:
-		if dev != current_dev:
-			current_dev = dev
-			xcorr_pb[current_dev] = {}
-			xcorr_pb_act[current_dev] = {}
-			xcorr_pb[current_dev]['pb'] = []
-			xcorr_pb_act[current_dev]['pb'] = []
-			xcorr_pb[current_dev]['blink'] = []
-			xcorr_pb_act[current_dev]['blink'] = []
-		#print(ts2)
-		try:
-			xcorr_pb[current_dev]['blink'].append(xcorr_data[ts2])
-			xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev]))
+	# current_dev = 0
+	# xcorr_pb = {}
+	# xcorr_pb_act = {}	# Active (on) measurements (above 10%)
+	# for dev, ts, ts2, pwr in pb_data:
+	# 	if dev != current_dev:
+	# 		current_dev = dev
+	# 		xcorr_pb[current_dev] = {}
+	# 		xcorr_pb_act[current_dev] = {}
+	# 		xcorr_pb[current_dev]['pb'] = []
+	# 		xcorr_pb_act[current_dev]['pb'] = []
+	# 		xcorr_pb[current_dev]['blink'] = []
+	# 		xcorr_pb_act[current_dev]['blink'] = []
+	# 	#print(ts2)
+	# 	try:
+	# 		xcorr_pb[current_dev]['blink'].append(xcorr_data[ts2])
+	# 		xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev]))
 
-			if(float(pwr/maxVals[current_dev]) >= .1):
-				xcorr_pb_act[current_dev]['blink'].append(xcorr_data[ts2])
-				xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev]))
+	# 		if(float(pwr/maxVals[current_dev]) >= .1):
+	# 			xcorr_pb_act[current_dev]['blink'].append(xcorr_data[ts2])
+	# 			xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev]))
 
-		except:
-			print('Couldnt find ' + str(ts2))
+	# 	except:
+	# 		print('Couldnt find ' + str(ts2))
 
-	current_dev = 0
-	for dev, ts, ts2, pwr in pb_data:
-		if dev != current_dev:
-			current_dev = dev
-			#if(len(xcorr_data) == len(xcorr_pb[current_dev])):
-			pb_out.write('\n\n\"' + str(current_dev) + ' ' + str(round(numpy.corrcoef(xcorr_pb[current_dev]['blink'], xcorr_pb[current_dev]['pb'])[0][1],2)) + '\"\n')
-			#else:
-			#	pb_out.write('\n\n\"' + current_dev + '\"\n')
-		pb_out.write('\"' + str(ts) + '\"\t' + str(pwr/maxVals[current_dev]) + '\n')
+	files_to_open = []
 
-	pb_out.close()
-		
-		# if(config['sum']):
-		# 	aws_c.execute("select timestamp, sum(power) from dat_powerblade where deviceMAC in " + \
-		# 		dev_powerblade + " and timestamp between \"" + config['start'] + "\" and \"" + config['end'] + "\" " + \
-		# 		"group by timestamp order by timestamp;")
-		# 	sum_pb = aws_c.fetchall();
+	locRooms = []
 
-	# Create .plt file and fill
-	plt = open('blink.plt', 'w')
-	plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,11in\n')
-	plt.write('set output "blink.eps"\n')
+	total_data = []
 
-	plt.write('set xdata time\n')
-	plt.write('set key top left\n')
-	plt.write('set timefmt \"\\\"%Y-%m-%d %H:%M:%S\\\"\"\n')
-	plt.write('set format x \"%m-%d\\n%H:%M\"\n\n')
+	query_start = datetime.utcnow()
 
-	plt.write('set ytics .2\n\n')
+	total_scope = 0
 
-	#plt.write('plot for [IDX=0:' + str(plot_count) + '] \'blink.dat\' i IDX u 1:2 w lines axes x1y2 title columnheader(1), \\\n')
-	#plt.write('\tfor[IDX=0:' + str(pb_count) + '] \'pb.dat\' i IDX u 1:2 w lines axes x1y1 title columnheader(1)\n')
+	for loc in config['locations']:
+		aws_c.execute('select t1.room from ' \
+			'(select room from valid_blinks where location=' + str(loc) + ' group by room) t1 ' \
+			'join ' \
+			'(select room from valid_powerblades_no1 where location=' + str(loc) + ' ' \
+			'and deviceMAC in ' + dev_powerblade + ' '
+			'group by room) t2 ' \
+			'on t1.room=t2.room;')
+		rooms = aws_c.fetchall()
 
-	plt.write('set multiplot layout ' + str(pb_count) + ', 1\n\n')
-
-	for i in range(0, pb_count):
-		plt.write('plot \'pb.dat\' i ' + str(i) + ' u 1:2 w lines title columnheader(1), \\\n')
-		plt.write('\t\'blink.dat\' u 1:2 w lines title \'Blink\'\n\n')
-
-	plt.write('unset multiplot\n')
-
-	plt.close()
-
-	# Generate plot and convert to PDF
-	gnuplot('blink.plt')
-	epstopdf('blink.eps')
-
-	# Show plot file
-	img = subprocess.Popen(['open', 'blink.pdf'])
-	img.wait()
-
-	# Remove temporary file
-	os.remove('blink.eps')
-
-	# Move data to saveDir
-	mv('pb.dat', qu_saveDir)
-	mv('blink.dat', qu_saveDir)
-	mv('blink.plt', qu_saveDir)
-	cp('blink.pdf', qu_saveDir)
+		for room in rooms:
+			total_scope += 1
+			locRooms.append([loc, room[0]])
 
 
+	for loc, room in locRooms:
+		dev_powerblade_room = '(select deviceMAC from valid_powerblades where location=' + str(loc) + ' and room=\'' + str(room) + '\' ' \
+			'and deviceMAC in ' + dev_powerblade + ')'
+
+		item_start = datetime.utcnow()
+		sys.stdout.write('Getting correlation for location ' + str(loc) + ' ' + room + ' ... ')
+		sys.stdout.flush()
+		aws_c.execute('select deviceMAC, deviceName, tsMin, avgPower, minMot ' \
+			'from mr_dat_occ ' \
+			'where deviceMAC in ' + dev_powerblade_room + ' ' \
+			'and tsMin between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
+			'order by deviceMAC, tsMin;')
+		pb_data = aws_c.fetchall()
+
+		print(str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
+
+		runString = 'L' + str(loc) + '_' + room.replace(' ', '_')
+
+		pb_out = open('pb_' + runString + '.dat', 'w')
+
+		pb_count = 0
+		current_dev = 0
+		maxVals = {}
+		for dev, name, ts, pwr, mot in pb_data:
+			if dev != current_dev:
+				pb_count += 1
+				current_dev = dev
+				maxVals[current_dev] = [pwr, mot]
+			if pwr > maxVals[current_dev][0]:
+				maxVals[current_dev][0] = pwr
+			if mot > maxVals[current_dev][1]:
+				maxVals[current_dev][1] = mot
+
+		current_dev = 0
+		xcorr_pb = {}
+		xcorr_pb_act = {}
+		dep_pb = {}
+		pwr_last = 0
+		mot_last = 0
+		for dev, name, ts, pwr, mot in pb_data:
+			if dev != current_dev:
+				current_dev = dev
+				xcorr_pb[current_dev] = {}
+				xcorr_pb_act[current_dev] = {}
+				xcorr_pb[current_dev]['pb'] = []
+				xcorr_pb_act[current_dev]['pb'] = []
+				xcorr_pb[current_dev]['blink'] = []
+				xcorr_pb_act[current_dev]['blink'] = []
+				dep_pb[current_dev] = {}
+				dep_pb[current_dev]['po'] = 0
+				dep_pb[current_dev]['pp'] = 0
+				dep_pb[current_dev]['pop'] = 0
+				dep_pb[current_dev]['tot'] = 0
+			if(maxVals[current_dev][0] > 0):
+				xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
+			else:
+				xcorr_pb[current_dev]['pb'].append(0)
+				#print('Zero maximum for ' + current_dev)
+			xcorr_pb[current_dev]['blink'].append(float(float(mot)/maxVals[current_dev][1]))
+
+			dep_pb[current_dev]['tot'] += 1
+
+			if(float(float(mot)/maxVals[current_dev][1]) > .2):
+				dep_pb[current_dev]['po'] += 1
+
+			if(maxVals[current_dev][0] > 0 and float(pwr/maxVals[current_dev][0]) > .2):
+				xcorr_pb_act[current_dev]['pb'].append(float(pwr_last/maxVals[current_dev][0]))
+				#xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))	
+				xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))
+
+				dep_pb[current_dev]['pp'] += 1
+				if(float(float(mot)/maxVals[current_dev][1]) > .2):
+					dep_pb[current_dev]['pop'] += 1
+
+			elif(maxVals[current_dev][0] > 0 and float(pwr_last/maxVals[current_dev][0]) > .2):
+				xcorr_pb_act[current_dev]['pb'].append(float(pwr_last/maxVals[current_dev][0]))
+				xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))
+				xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
+				xcorr_pb_act[current_dev]['blink'].append(float(float(mot)/maxVals[current_dev][1]))
+
+			pwr_last = pwr
+			mot_last = mot
+			# else:
+			# 	#xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
+			# 	xcorr_pb_act[current_dev]['pb'].append(0)
+			# 	xcorr_pb_act[current_dev]['blink'].append(0)
+
+
+		current_dev = 0
+		ts_last = 0
+		pwr_last = 0
+		mot_last = 0
+		for dev, name, ts, pwr, mot in pb_data:
+			if dev != current_dev:
+				# Flush old data
+				if(current_dev != 0):
+					if(maxVals[current_dev][0] > 0):
+						pwr_print = pwr_last/maxVals[current_dev][0]
+					else:
+						pwr_print = 0
+					if(maxVals[current_dev][1] > 0):
+						mot_print = float(mot_last)/maxVals[current_dev][1]
+					else:
+						mot_print = 0
+					pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_print) + '\t' + str(mot_print) + '\n')
+
+
+				current_dev = dev
+				ts_last = 0
+				pwr_last = 0
+				mot_last = 0
+
+				# Conditional prob calc - normalizing for occupancy
+				try:
+					pOcc = float(dep_pb[current_dev]['po'])/dep_pb[current_dev]['tot']
+					pOccGivenPowRaw = float(dep_pb[current_dev]['pop'])/dep_pb[current_dev]['pp']
+				except:
+					pOcc = 0
+					pOccGivenPowRaw = 0
+
+				if(pOccGivenPowRaw == 0):
+					slope = 0
+					yint = 0
+				elif(pOccGivenPowRaw > pOcc):
+					slope = 1/(1 - pOcc)
+					yint = pOcc/(pOcc-1)
+				else:
+					slope = 1/pOcc
+					yint = -1
+
+				# print(name)
+				# if(name == 'Disposal'):
+				# 	print(xcorr_pb[current_dev]['pb'])
+				# 	exit()
+				if(len(xcorr_pb_act[current_dev]['pb']) > 1 and max(xcorr_pb[current_dev]['blink']) > 0 and max(xcorr_pb[current_dev]['pb']) > 0):
+					crossCorr = round(numpy.corrcoef(xcorr_pb[current_dev]['blink'], xcorr_pb[current_dev]['pb'])[0][1],2)
+				else:
+					crossCorr = 0
+				if(len(xcorr_pb_act[current_dev]['pb']) > 1 and max(xcorr_pb_act[current_dev]['blink']) > 0 and max(xcorr_pb_act[current_dev]['pb']) > 0):
+					actCrossCorr = round(numpy.corrcoef(xcorr_pb_act[current_dev]['blink'], xcorr_pb_act[current_dev]['pb'])[0][1],2)
+				else:
+					actCrossCorr = 0
+				pOccGivenPow = round(slope * pOccGivenPowRaw + yint, 2)
+
+				pb_out.write('\n\n\"' + str(name) + ' ' + str(crossCorr) + ' ' + str(pOccGivenPow) + '\"\n')
+				total_data.append([dev, name, loc, room, crossCorr, pOccGivenPow])
+				aws_c.execute('insert into dat_occ_corr (deviceMAC, deviceName, location, room, crossCorr, pOcc) values (' \
+						'\'' + str(dev) + '\', \'' + str(name.replace('\'', '')) + '\', ' + str(loc) + ', \'' + str(room) + '\', ' + \
+						str(crossCorr) + ', ' + str(pOccGivenPow) + ');')
+				aws_db.commit()
+			# if(float(pwr/maxVals[current_dev][0]) > .1):
+			if(maxVals[current_dev][0] > 0):
+				pwr_print = pwr_last/maxVals[current_dev][0]
+			else:
+				pwr_print = 0
+			if(maxVals[current_dev][1] > 0):
+				mot_print = float(mot_last)/maxVals[current_dev][1]
+			else:
+				mot_print = 0
+			pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_print) + '\t' + str(mot_print) + '\n')
+			# elif(float(pwr_last/maxVals[current_dev][0]) > .1):
+			# 	pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_last/maxVals[current_dev][0]) + '\t' + str(float(mot_last)/maxVals[current_dev][1]) + '\n')
+			# 	pb_out.write('\"' + str(ts) + '\"\t' + str(pwr/maxVals[current_dev][0]) + '\t' + str(float(mot)/maxVals[current_dev][1]) + '\n')
+			
+			ts_last = ts
+			pwr_last = pwr
+			mot_last = mot
+
+		if(maxVals[current_dev][0] > 0):
+			pwr_print = pwr_last/maxVals[current_dev][0]
+		else:
+			pwr_print = 0
+		if(maxVals[current_dev][1] > 0):
+			mot_print = float(mot_last)/maxVals[current_dev][1]
+		else:
+			mot_print = 0
+		pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_print) + '\t' + str(mot_print) + '\n')
+
+		pb_out.close()
+
+		# Create .plt file and fill
+		plt = open(runString + '.plt', 'w')
+		plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,11in\n')
+		plt.write('set output \"' + runString + '.eps\"\n')
+
+		plt.write('set xdata time\n')
+		plt.write('set key outside above\n')
+		plt.write('set timefmt \"\\\"%Y-%m-%d %H:%M:%S\\\"\"\n')
+		plt.write('set format x \"%m-%d\\n%H:%M\"\n\n')
+
+		plt.write('set ytics .2\n\n')
+
+		#plt.write('plot for [IDX=0:' + str(plot_count) + '] \'blink.dat\' i IDX u 1:2 w lines axes x1y2 title columnheader(1), \\\n')
+		#plt.write('\tfor[IDX=0:' + str(pb_count) + '] \'pb.dat\' i IDX u 1:2 w lines axes x1y1 title columnheader(1)\n')
+
+		plt.write('set multiplot layout ' + str(pb_count) + ', 1\n\n')
+
+		for i in range(0, pb_count):
+			plt.write('plot \'pb_' + runString + '.dat\' i ' + str(i) + ' u 1:2 w lines title columnheader(1), \\\n')
+			plt.write('\t\'\' i ' + str(i) + ' u 1:3 w lines title \'Blink\'\n\n')
+
+		plt.write('unset multiplot\n')
+
+		plt.close()
+
+		# Generate plot and convert to PDF
+		gnuplot(runString + '.plt')
+		epstopdf(runString + '.eps')
+
+		# Remove temporary file
+		os.remove(runString + '.eps')
+
+		# Move data to saveDir
+		mv('pb_' + runString + '.dat', qu_saveDir)
+		#mv('blink.dat', qu_saveDir)
+		mv(runString + '.plt', qu_saveDir)
+		mv(runString + '.pdf', qu_saveDir)
+
+		# Show plot file
+		# img = subprocess.Popen(['open', qu_saveDir + '/' + runString + '.pdf'])
+		# img.wait()
+		files_to_open.append(qu_saveDir + '/' + runString + '.pdf')
+
+		print_time()
+
+	for file in files_to_open:
+		img = subprocess.Popen(['open', file])
+		img.wait()
+
+	for dev, name, loc, room, crossCorr, pOccGivenPow in total_data:
+		print(dev + '\t' + str(crossCorr) + '\t' + str(pOccGivenPow) + '\t' + str(loc) + '\t' + room + '\t' + name)
 
 
 
