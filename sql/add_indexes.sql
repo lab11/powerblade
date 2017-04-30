@@ -29,3 +29,9 @@ alter table dat_powerblade drop index devEnergy;
 alter table dat_powerblade add index devPowTimeSeq (deviceMAC, power, timestamp, seq);
 
 
+describe dat_occ_pb;
+alter table dat_occ_pb add index devTime (deviceMAC, tsMin);
+alter table dat_occ_blink add index devTime (deviceMAC, tsMin);
+
+describe inf_pb_lookup;
+alter table inf_pb_lookup add index devLoc (deviceMAC, location);
