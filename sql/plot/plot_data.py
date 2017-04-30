@@ -1305,7 +1305,8 @@ elif(config['type'] == 'blink'):
 
 		# Create .plt file and fill
 		plt = open(runString + '.plt', 'w')
-		plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,11in\n')
+		#plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,11in\n')
+		plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,3.4in\n')
 		plt.write('set output \"' + runString + '.eps\"\n')
 
 		plt.write('set xdata time\n')
@@ -1410,7 +1411,9 @@ elif(config['type'] == 'occ'):
 
 	xCorr_plt.write('unset key\n\n')
 
-	xCorr_plt.write('unset xtics\n\n')
+	xCorr_plt.write('unset xtics\n')
+	xCorr_plt.write('set yrange [:1.05]\n')
+	xCorr_plt.write('set rmargin 3\n\n')
 
 	xCorr_plt.write('set xrange [0:' + str(numTypes+1) + ']\n\n')
 
