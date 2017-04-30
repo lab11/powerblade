@@ -72,6 +72,8 @@ select * from most_recent_powerblades where location=9;
 
 # View stats for each location
 select * from inf_dep_stats order by location asc;
+select location from mr_dat_occ group by location;
+select location, count(distinct(tsMin)) from mr_dat_occ group by location;
 select * from mr_final_gnd_corr order by location asc;
 
 select min(startTime), max(endTime) from inf_dep_stats where location!=1 and location!=2 and location!=3;
