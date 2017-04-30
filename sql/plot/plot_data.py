@@ -19,6 +19,13 @@ from boxplot import boxplot
 import math
 import numpy
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except:
+        return False
+
 query_startDay = datetime.utcnow().strftime('%Y_%m_%d_')
 
 master_saveDir = os.environ['PB_DATA'] + "/savetest/" + str(query_startDay)
@@ -229,12 +236,12 @@ def print_parameters():
 	else:
 		print("\nQuerying " + config['type'])
 
-	if(config['type'] != 'results'):
+	if(config['type'] != 'results' and config['type'] != 'occ'):
 		print("\nFrom the following locations")
 		for loc in sorted(config['locations']):
 			print("\tLocation " + loc)
 
-	if(config['type'] != 'results'):
+	if(config['type'] != 'results' and config['type'] != 'occ'):
 		print("\nOver the following time period:")
 		config['startDay'] = config['start'][0:10]
 		config['endDay'] = config['end'][0:10]
@@ -258,7 +265,7 @@ def print_parameters():
 print_parameters()
 
 print("\nTo confirm, push enter. To modify:")
-print("\t'type [plot, energy, results, blink]'")
+print("\t'type [plot, energy, results, blink, occ]'")
 print("\t'devices [comma separated 12 or 6 digit macs]' or")
 print("\t'location #'")
 print("\t'start yyyy-mm-dd HH:mm:ss' or")
@@ -278,11 +285,11 @@ while(confirm != ""):
 	if(confirm_list[0] == 'exit'):
 		sys.exit()
 	elif(confirm_list[0] == 'type'):
-		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'results' or confirm_list[1] == 'blink'):
+		if(confirm_list[1] == 'plot' or confirm_list[1] == 'energy' or confirm_list[1] == 'results' or confirm_list[1] == 'blink' or confirm_list[1] == 'occ'):
 			config['type'] = confirm_list[1]
 			changes = True
 		else:
-			print("Usage is type [plot, energy, results, blink]")
+			print("Usage is type [plot, energy, results, blink, occ]")
 			error = True
 	elif(confirm_list[0] == 'dev' or confirm_list[0] == 'devices'):
 		devType = 'replace'
@@ -1353,15 +1360,98 @@ elif(config['type'] == 'blink'):
 
 
 
+####################################################################
+#
+# This section is for occ (the digested results of occupancy)
+#
+####################################################################
 
+elif(config['type'] == 'occ'):
 
+	aws_c.execute('select deviceType, min(crossCorr) as minCrossCorr, ' \
+		'(select avg(crossCorr) from mr_dat_occ_corr where deviceType=ttop.deviceType and crossCorr<=' \
+			'(select avg(crossCorr) from mr_dat_occ_corr where deviceType=ttop.deviceType)) as t1CrossCorr, ' \
+		'avg(crossCorr) as meanCrossCorr, ' \
+		'(select avg(crossCorr) from mr_dat_occ_corr where deviceType=ttop.deviceType and crossCorr>=' \
+			'(select avg(crossCorr) from mr_dat_occ_corr where deviceType=ttop.deviceType)) as t3CrossCorr, ' \
+		'max(crossCorr) as maxCrossCorr, ' \
+		'min(pOcc) as minPOcc, ' \
+		'(select avg(pOcc) from mr_dat_occ_corr where deviceType=ttop.deviceType and pOcc<=' \
+			'(select avg(pOcc) from mr_dat_occ_corr where deviceType=ttop.deviceType)) as t1POcc, ' \
+		'avg(pOcc) as meanPOcc, ' \
+		'(select avg(pOcc) from mr_dat_occ_corr where deviceType=ttop.deviceType and pOcc>=' \
+			'(select avg(pOcc) from mr_dat_occ_corr where deviceType=ttop.deviceType)) as t3POcc, ' \
+		'max(pOcc) as maxPOcc ' \
+		'from mr_dat_occ_corr ttop ' \
+		'group by deviceType ' \
+		'order by avg(pOcc) asc;')
+	xCorr_data = aws_c.fetchall()
 
+	xCorr_out = open('xcorr.dat', 'w')
 
+	numTypes = 0
+	for idx, data in enumerate(xCorr_data):
+		printStr = str(idx+1) + '\t'
+		for datum in data:
+			if is_number(datum):
+				printStr += str(datum) + '\t'
+			else:
+				printStr += '\"' + str(datum) + '\"\t'
+		printStr += '0.5'
+		xCorr_out.write(printStr + '\n')
+		numTypes = idx+1
 
+	xCorr_out.close()
 
+	xCorr_plt = open('xcorr.plt', 'w')
 
+	xCorr_plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 7in,2.7in\n')
+	xCorr_plt.write('set output \"xcorr.eps\"\n\n')
 
+	xCorr_plt.write('unset key\n\n')
 
+	xCorr_plt.write('unset xtics\n\n')
+
+	xCorr_plt.write('set xrange [0:' + str(numTypes+1) + ']\n\n')
+
+	xCorr_plt.write('set multiplot layout 2,1\n\n')
+
+	xCorr_plt.write('set size 1,0.43\n')
+	xCorr_plt.write('set origin 0,0.55\n\n')
+
+	xCorr_plt.write('set ylabel \"P(occupancy | power)\"\n\n')
+
+	xCorr_plt.write('plot \"xcorr.dat\" using 1:9:8:12:11:13:xticlabels(2) with candlesticks lw 1.5 fc rgb "#ac0a0f" whiskerbars, \\\n' \
+		'\t\"\" using 1:10:10:10:10:13 with candlesticks lt -1 lw 1.5\n\n')
+
+	xCorr_plt.write('set bmargin 6\n')
+	xCorr_plt.write('set ylabel \"\" offset 1,-1 font \", 12\"\n')
+	xCorr_plt.write('set xtics rotate by 45 right font \", 10\"\n\n')
+
+	xCorr_plt.write('set size 1,0.58\n')
+	xCorr_plt.write('set origin 0,0\n\n')
+
+	xCorr_plt.write('set xrange [0:' + str(numTypes+1) + ']\n\n')
+
+	xCorr_plt.write('set ylabel \"Cross-correlation\\nOccupancy with Power\"\n\n')
+
+	xCorr_plt.write('plot \"xcorr.dat\" using 1:4:3:7:6:13:xticlabels(2) with candlesticks lw 1.5 fc rgb "#ac0a0f" whiskerbars, \\\n' \
+		'\t\"\" using 1:5:5:5:5:13 with candlesticks lt -1 lw 1.5\n\n')
+
+	xCorr_plt.write('unset multiplot\n\n')
+
+	xCorr_plt.close()
+
+	gnuplot('xcorr.plt')
+	epstopdf('xcorr.eps')
+	os.remove('xcorr.eps')
+
+	mv('xcorr.dat', qu_saveDir)
+	mv('xcorr.plt', qu_saveDir)
+	mv('xcorr.pdf', qu_saveDir)
+
+	img = subprocess.Popen(['open', qu_saveDir + '/xcorr.pdf'])
+	img.wait()
 
 
 
