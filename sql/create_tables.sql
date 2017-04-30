@@ -77,7 +77,13 @@ deviceMAC char(12), room varchar(50), tsMin datetime, avgPower decimal(12,6),
 primary key (id), index (deviceMAC));
 
 
+rename table dat_occ_blink to dat_occ_blink_bak;
+rename table dat_occ_pb to dat_occ_pb_bak;
 
+create table dat_occ_corr (id int(11) not null auto_increment,
+deviceMAC char(12), deviceName varchar(50), location int(1), room varchar(50),
+crossCorr decimal(12,2), pOcc decimal(12,2),
+primary key (id), index (deviceMAC));
 
 
 # Other useful stuff:
