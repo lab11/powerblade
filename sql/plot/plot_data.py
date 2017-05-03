@@ -67,6 +67,21 @@ aws_db = MySQLdb.connect(aws_login['host'], aws_login['user'], aws_login['passwd
 aws_c = aws_db.cursor()
 connected = True
 
+def print_blink(ts_last, pwr_last, mot_last, time_last):
+	if(maxVals[current_dev][0] > 0):
+		pwr_print = pwr_last/maxVals[current_dev][0]
+	else:
+		pwr_print = 0
+	if(maxVals[current_dev][1] > 0):
+		mot_print = float(mot_last)/maxVals[current_dev][1]
+	else:
+		mot_print = 0
+	if(maxVals[current_dev][2] > 0):
+		time_print = float(time_last)/maxVals[current_dev][2]
+	else:
+		time_print = 0
+	pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_print) + '\t' + str(mot_print) + '\t' + str(time_print) + '\n')
+
 def chop_microseconds(delta):
     return delta - timedelta(microseconds=delta.microseconds)
 
@@ -1134,8 +1149,8 @@ elif(config['type'] == 'blink'):
 		sys.stdout.flush()
 		aws_c.execute('select deviceMAC, deviceName, ' \
 			'convert_tz(tsMin, \'UTC\', \'America/Detroit\') as tsMin, ' \
-			'avgPower, minMot ' \
-			'' \
+			'avgPower, minMot, ' \
+			'timediff(extract(hour_second from \'2000-01-01 00:00:00\'), extract(hour_second from convert_tz(tsMin, \'UTC\', \'America/Detroit\'))) as timeDiff ' \
 			'from mr_dat_occ ' \
 			'where deviceMAC in ' + dev_powerblade_room + ' ' \
 			'and tsMin between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
@@ -1151,15 +1166,26 @@ elif(config['type'] == 'blink'):
 		pb_count = 0
 		current_dev = 0
 		maxVals = {}
-		for dev, name, ts, pwr, mot in pb_data:
+		new_pb_data = []
+		for idx, (dev, name, ts, pwr, mot, timeDiff) in enumerate(pb_data):
+
+			if(abs(timeDiff) >= timedelta(hours=12)):
+				timeDiff = (timedelta(hours=24)-abs(timeDiff)).seconds
+			else:
+				timeDiff = abs(timeDiff).seconds
+			# Save back into the data structure
+			new_pb_data.append([dev, name, ts, pwr, mot, timeDiff])
+
 			if dev != current_dev:
 				pb_count += 1
 				current_dev = dev
-				maxVals[current_dev] = [pwr, mot]
+				maxVals[current_dev] = [pwr, mot, timeDiff]
 			if pwr > maxVals[current_dev][0]:
 				maxVals[current_dev][0] = pwr
 			if mot > maxVals[current_dev][1]:
 				maxVals[current_dev][1] = mot
+			if timeDiff > maxVals[current_dev][2]:
+				maxVals[current_dev][2] = timeDiff;
 
 		current_dev = 0
 		xcorr_pb = {}
@@ -1167,7 +1193,7 @@ elif(config['type'] == 'blink'):
 		dep_pb = {}
 		pwr_last = 0
 		mot_last = 0
-		for dev, name, ts, pwr, mot in pb_data:
+		for dev, name, ts, pwr, mot, timeDiff in new_pb_data:
 			if dev != current_dev:
 				current_dev = dev
 				xcorr_pb[current_dev] = {}
@@ -1220,25 +1246,18 @@ elif(config['type'] == 'blink'):
 		ts_last = 0
 		pwr_last = 0
 		mot_last = 0
-		for dev, name, ts, pwr, mot in pb_data:
+		for dev, name, ts, pwr, mot, timeDiff in new_pb_data:
 			if dev != current_dev:
 				# Flush old data
 				if(current_dev != 0):
-					if(maxVals[current_dev][0] > 0):
-						pwr_print = pwr_last/maxVals[current_dev][0]
-					else:
-						pwr_print = 0
-					if(maxVals[current_dev][1] > 0):
-						mot_print = float(mot_last)/maxVals[current_dev][1]
-					else:
-						mot_print = 0
-					pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_print) + '\t' + str(mot_print) + '\n')
+					print_blink(ts_last, pwr_last, mot_last, time_last)
 
 
 				current_dev = dev
 				ts_last = 0
 				pwr_last = 0
 				mot_last = 0
+				time_last = 0
 
 				# Conditional prob calc - normalizing for occupancy
 				try:
@@ -1258,10 +1277,6 @@ elif(config['type'] == 'blink'):
 					slope = 1/pOcc
 					yint = -1
 
-				# print(name)
-				# if(name == 'Disposal'):
-				# 	print(xcorr_pb[current_dev]['pb'])
-				# 	exit()
 				if(len(xcorr_pb_act[current_dev]['pb']) > 1 and max(xcorr_pb[current_dev]['blink']) > 0 and max(xcorr_pb[current_dev]['pb']) > 0):
 					crossCorr = round(numpy.corrcoef(xcorr_pb[current_dev]['blink'], xcorr_pb[current_dev]['pb'])[0][1],2)
 				else:
@@ -1279,33 +1294,16 @@ elif(config['type'] == 'blink'):
 							'\'' + str(dev) + '\', \'' + str(name.replace('\'', '')) + '\', ' + str(loc) + ', \'' + str(room) + '\', ' + \
 							str(crossCorr) + ', ' + str(pOccGivenPow) + ');')
 					aws_db.commit()
-			# if(float(pwr/maxVals[current_dev][0]) > .1):
-			if(maxVals[current_dev][0] > 0):
-				pwr_print = pwr_last/maxVals[current_dev][0]
-			else:
-				pwr_print = 0
-			if(maxVals[current_dev][1] > 0):
-				mot_print = float(mot_last)/maxVals[current_dev][1]
-			else:
-				mot_print = 0
-			pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_print) + '\t' + str(mot_print) + '\n')
-			# elif(float(pwr_last/maxVals[current_dev][0]) > .1):
-			# 	pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_last/maxVals[current_dev][0]) + '\t' + str(float(mot_last)/maxVals[current_dev][1]) + '\n')
-			# 	pb_out.write('\"' + str(ts) + '\"\t' + str(pwr/maxVals[current_dev][0]) + '\t' + str(float(mot)/maxVals[current_dev][1]) + '\n')
+
+			print_blink(ts_last, pwr_last, mot_last, time_last)
 			
 			ts_last = ts
 			pwr_last = pwr
 			mot_last = mot
+			time_last = timeDiff
 
-		if(maxVals[current_dev][0] > 0):
-			pwr_print = pwr_last/maxVals[current_dev][0]
-		else:
-			pwr_print = 0
-		if(maxVals[current_dev][1] > 0):
-			mot_print = float(mot_last)/maxVals[current_dev][1]
-		else:
-			mot_print = 0
-		pb_out.write('\"' + str(ts_last) + '\"\t' + str(pwr_print) + '\t' + str(mot_print) + '\n')
+		# Last data
+		print_blink(ts_last, pwr_last, mot_last, time_last)
 
 		pb_out.close()
 
@@ -1329,7 +1327,8 @@ elif(config['type'] == 'blink'):
 
 		for i in range(0, pb_count):
 			plt.write('plot \'pb_' + runString + '.dat\' i ' + str(i) + ' u 1:2 w lines title columnheader(1), \\\n')
-			plt.write('\t\'\' i ' + str(i) + ' u 1:3 w lines title \'Blink\'\n\n')
+			plt.write('\t\'\' i ' + str(i) + ' u 1:3 w lines title \'Blink\', \\\n')
+			plt.write('\t\'\' i ' + str(i) + ' u 1:4 w lines title \'Time\'\n\n')
 
 		plt.write('unset multiplot\n')
 
