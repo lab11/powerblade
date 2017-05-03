@@ -422,7 +422,7 @@ if(changes):
 		with open('.plotconfig', 'w') as outfile:
 		    json.dump(config, outfile)
 
-if(config['type'] == 'energy'):
+if(config['type'] == 'energy' or config['type'] == 'blink'):
 	if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
 		save_to_final = True
 	else:
@@ -1269,10 +1269,11 @@ elif(config['type'] == 'blink'):
 
 				pb_out.write('\n\n\"' + str(name) + ' ' + str(crossCorr) + ' ' + str(pOccGivenPow) + '\"\n')
 				total_data.append([dev, name, loc, room, crossCorr, pOccGivenPow])
-				aws_c.execute('insert into dat_occ_corr (deviceMAC, deviceName, location, room, crossCorr, pOcc) values (' \
-						'\'' + str(dev) + '\', \'' + str(name.replace('\'', '')) + '\', ' + str(loc) + ', \'' + str(room) + '\', ' + \
-						str(crossCorr) + ', ' + str(pOccGivenPow) + ');')
-				aws_db.commit()
+				if(save_to_final):
+					aws_c.execute('insert into dat_occ_corr (deviceMAC, deviceName, location, room, crossCorr, pOcc) values (' \
+							'\'' + str(dev) + '\', \'' + str(name.replace('\'', '')) + '\', ' + str(loc) + ', \'' + str(room) + '\', ' + \
+							str(crossCorr) + ', ' + str(pOccGivenPow) + ');')
+					aws_db.commit()
 			# if(float(pwr/maxVals[current_dev][0]) > .1):
 			if(maxVals[current_dev][0] > 0):
 				pwr_print = pwr_last/maxVals[current_dev][0]
@@ -1305,8 +1306,8 @@ elif(config['type'] == 'blink'):
 
 		# Create .plt file and fill
 		plt = open(runString + '.plt', 'w')
-		#plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,11in\n')
-		plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,3.4in\n')
+		plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,11in\n')
+		#plt.write('set terminal postscript enhanced eps solid color font "Helvetica,14" size 8.5in,3.4in\n')
 		plt.write('set output \"' + runString + '.eps\"\n')
 
 		plt.write('set xdata time\n')
