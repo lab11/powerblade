@@ -424,8 +424,10 @@ if(changes):
 
 if(config['type'] == 'energy' or config['type'] == 'blink'):
 	if(raw_input("\nSave data to final data table? [y/n]: ") == "y"):
+		print("Saving to final data table")
 		save_to_final = True
 	else:
+		print("Not saving to final data table")
 		save_to_final = False
 
 
@@ -1130,7 +1132,10 @@ elif(config['type'] == 'blink'):
 		item_start = datetime.utcnow()
 		sys.stdout.write('Getting correlation for location ' + str(loc) + ' ' + room + ' ... ')
 		sys.stdout.flush()
-		aws_c.execute('select deviceMAC, deviceName, tsMin, avgPower, minMot ' \
+		aws_c.execute('select deviceMAC, deviceName, ' \
+			'convert_tz(tsMin, \'UTC\', \'America/Detroit\') as tsMin, ' \
+			'avgPower, minMot ' \
+			'' \
 			'from mr_dat_occ ' \
 			'where deviceMAC in ' + dev_powerblade_room + ' ' \
 			'and tsMin between \"' + str(config['start']) + '\" and \"' + str(config['end']) + '\" ' \
