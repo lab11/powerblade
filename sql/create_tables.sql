@@ -66,6 +66,17 @@ deviceType varchar(30),
 primary key (id), index (dayst), index (deviceMAC), index devDay (deviceMAC, dayst));
 
 
+# Fault vector table
+create table dat_fault_vector (id int(11) not null auto_increment, minTs datetime, deviceMAC char(12), deviceName varchar(50), tag varchar(50),
+avgPwr decimal(12,6), varPwr decimal(12,6), maxPwr decimal(8,2), minPwr decimal(8,2),
+ct5 int(11), spk5 int(11), ct10 int(11), spk10 int(11), ct15 int(11), spk15 int(11),
+ct25 int(11), spk25 int(11), ct50 int(11), spk50 int(11), ct75 int(11), spk75 int(11), 
+ct100 int(11), spk100 int(11), ct150 int(11), spk150 int(11), ct250 int(11), spk250 int(11), 
+ct500 int(11), spk500 int(11), 
+broken int(11),
+primary key (id), index (minTs), index (deviceMAC), index devMin (deviceMAC, minTs));
+
+
 describe dat_blink;
 # Occupancy tables
 create table dat_occ_blink (id int(11) not null auto_increment, 

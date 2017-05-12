@@ -354,6 +354,12 @@ t1.id=(select max(t2.id) from dat_vector t2 where t1.deviceMAC=t2.deviceMAC and 
 
 
 
+create view mr_dat_fault_vector as
+select t1.* from dat_fault_vector t1 where
+t1.id=(select max(t2.id) from dat_fault_vector t2 where t1.deviceMAC=t2.deviceMAc and t1.minTs=t2.minTs and t1.deviceName=t2.deviceName and t1.tag=t2.tag);
+
+
+
 # Occupancy
 alter view mr_dat_occ_blink as
 select t1.*, t2.location from 
