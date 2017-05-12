@@ -34,10 +34,12 @@ if not os.path.isdir(os.environ['PB_DATA'] + "/savetest/"):
 	mkdir(os.environ['PB_DATA'] + "/savetest/")
 
 
+pltconfig_str = '/'.join(sys.argv[0].split('/')[0:-1]) + '/.plotconfig'
+
 # Read config file for start time, end time, and devices
 config = {}
 try:
-	config_file = open('.plotconfig', 'r')
+	config_file = open(pltconfig_str, 'r')
 	json_txt = ""
 	for line in config_file:
 		json_txt += line
@@ -434,7 +436,7 @@ while(confirm != ""):
 
 if(changes):
 	if(raw_input("\nSave changes to config file? [y/n]: ") == "y"):
-		with open('.plotconfig', 'w') as outfile:
+		with open(pltconfig_str, 'w') as outfile:
 		    json.dump(config, outfile)
 
 if(config['type'] == 'energy' or config['type'] == 'blink'):
@@ -452,7 +454,7 @@ check_tag()
 
 mkdir(qu_saveDir)
 
-cp('.plotconfig', qu_saveDir)
+cp(pltconfig_str, qu_saveDir)
 
 # Create human readable tag for the test
 configTxt = open(qu_saveDir + 'plotConfig.txt', 'w')
@@ -1191,6 +1193,8 @@ elif(config['type'] == 'blink'):
 		xcorr_pb = {}
 		xcorr_pb_act = {}
 		dep_pb = {}
+		interdev_pb = {}
+		names = {}
 		pwr_last = 0
 		mot_last = 0
 		for dev, name, ts, pwr, mot, timeDiff in new_pb_data:
@@ -1198,6 +1202,7 @@ elif(config['type'] == 'blink'):
 				current_dev = dev
 				xcorr_pb[current_dev] = {}
 				xcorr_pb_act[current_dev] = {}
+				interdev_pb[current_dev] = {}
 				xcorr_pb[current_dev]['pb'] = []
 				xcorr_pb_act[current_dev]['pb'] = []
 				xcorr_pb[current_dev]['blink'] = []
@@ -1207,10 +1212,13 @@ elif(config['type'] == 'blink'):
 				dep_pb[current_dev]['pp'] = 0
 				dep_pb[current_dev]['pop'] = 0
 				dep_pb[current_dev]['tot'] = 0
+				names[current_dev] = name
 			if(maxVals[current_dev][0] > 0):
 				xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
+				interdev_pb[current_dev][ts] = float(pwr/maxVals[current_dev][0])
 			else:
 				xcorr_pb[current_dev]['pb'].append(0)
+				interdev_pb[current_dev][ts] = 0
 				#print('Zero maximum for ' + current_dev)
 			xcorr_pb[current_dev]['blink'].append(float(float(mot)/maxVals[current_dev][1]))
 
@@ -1240,6 +1248,54 @@ elif(config['type'] == 'blink'):
 			# 	#xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
 			# 	xcorr_pb_act[current_dev]['pb'].append(0)
 			# 	xcorr_pb_act[current_dev]['blink'].append(0)
+
+		# Inter-device correlation
+		for device in interdev_pb:
+			sys.stdout.write(names[device] + '\t')
+			for new_device in interdev_pb:
+				if device != new_device:
+					common_times = 0
+					dev_items = []
+					new_items = []
+					p_tot = 0
+					p_dev = 0
+					p_new = 0
+					p_both = 0
+					onThold = .25
+					for timestamp in sorted(interdev_pb[device]):
+						p_tot += 1
+						if interdev_pb[device][timestamp] > onThold:
+							p_dev += 1
+						if timestamp in interdev_pb[new_device]:
+							common_times += 1
+							if interdev_pb[new_device][timestamp] > onThold:
+								p_new += 1
+							if interdev_pb[device][timestamp] > onThold and interdev_pb[new_device][timestamp] > onThold:
+								p_both += 1
+							dev_items.append(interdev_pb[device][timestamp])
+							new_items.append(interdev_pb[new_device][timestamp])
+						if names[new_device] == 'Television' and names[device] == 'Xbox One':
+							print(str(timestamp) + ' ' + str(interdev_pb[device][timestamp] > onThold) + ' ' + str(interdev_pb[new_device][timestamp] > onThold))
+					xcorr = round(numpy.corrcoef(dev_items, new_items)[0][1],2)
+
+					pNew = float(p_new)/p_tot
+					pNewGivenDevRaw = float(p_both)/p_dev
+
+					if(pNewGivenDevRaw == 0):
+						slope = 0
+						yint = 0
+					elif(pNewGivenDevRaw > pNew):
+						slope = 1/(1 - pNew)
+						yint = pNew/(pNew-1)
+					else:
+						slope = 1/pNew
+						yint = -1
+
+					pNewGivenDev = round(float(slope * pNewGivenDevRaw + yint), 2)
+
+					sys.stdout.write(names[new_device] + '\t' + str(len(interdev_pb[device])) + '\t' + str(xcorr) + '\t' + str(p_dev) + '\t' + str(p_new) + '\t' + str(p_both) + '\t' + str(pNewGivenDev) + '\n\t\t')
+			print('')
+
 
 
 		current_dev = 0
