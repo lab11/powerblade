@@ -352,7 +352,12 @@ t1.deviceType end end as deviceType
 from dat_vector t1 where
 t1.id=(select max(t2.id) from dat_vector t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
 
+create view mr_dat_occ_vector as 
+select t1.* from dat_occ_vector t1 where
+t1.id=(select max(t2.id) from dat_occ_vector t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
 
+create view mr_dat_occ_vector_2 as 
+select t1.* 
 
 create view mr_dat_fault_vector as
 select t1.* from dat_fault_vector t1 where
