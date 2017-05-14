@@ -25,7 +25,7 @@ aws_c = aws_db.cursor()
 # Query for the device list
 item_start = datetime.utcnow()
 sys.stdout.write('Querying device list ... ')
-aws_c.execute('select deviceMAC from valid_powerblades where location in (0) ' \
+aws_c.execute('select deviceMAC from valid_powerblades where location in (9) ' \
 	'and deviceType in (select * from id_categories);')
 device_list = aws_c.fetchall()
 devList = [i[0] for i in device_list]
@@ -38,8 +38,8 @@ devI += devI
 
 
 # Set up start and end times
-start_date = datetime.strptime('2017-03-10', '%Y-%m-%d')
-end_date = datetime.strptime('2017-04-17', '%Y-%m-%d')
+start_date = datetime.strptime('2017-03-30', '%Y-%m-%d')
+end_date = datetime.strptime('2017-04-18', '%Y-%m-%d')
 
 print('\nTotal devices: ' + str(len(devList)))
 print('Query scope: ' + str((end_date - start_date).days+1) + ' days')
@@ -125,7 +125,7 @@ for query_dev in devList:
 			'where deviceMAC=\'' + query_dev + '\') t3;')
 		avgPower, varPower, maxPower, minPower, devCount, dutyCycle, deviceType = aws_c.fetchall()[0]
 		print(str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
-		print(str(deviceType) + ': Average power = ' + str(avgPower) + ', maxPower = ' + str(maxPower) + ', minPower = ' + str(minPower) + ', dutyCycle = ' + str(dutyCycle))
+		#print(str(deviceType) + ': Average power = ' + str(avgPower) + ', maxPower = ' + str(maxPower) + ', minPower = ' + str(minPower) + ', dutyCycle = ' + str(dutyCycle))
 
 		item_start = datetime.utcnow()
 		sys.stdout.write('Processing deltas ... ')
@@ -190,7 +190,7 @@ for query_dev in devList:
 
 		print(str(totalCt) + ' found in ' + str(round((datetime.utcnow() - item_start).total_seconds(),2)) + ' seconds')
 
-		print(str(dat))
+		#print(str(dat))
 
 		item_start = datetime.utcnow()
 		sys.stdout.write('Processing occupancy ... ')
@@ -198,18 +198,16 @@ for query_dev in devList:
 
 		onThold = 0.2
 
-		print(occ_data)
-
 		if(len(occ_data) > 0):
 			# 0 = MAC, 1 = Name, 2 = tsMin, 3 = avgPower, 4 = minMot
 			maxPwr = max([x[3] for x in occ_data])
 			maxMot = max([x[4] for x in occ_data])
-			xcorr_pb = [float(x[3])/maxPwr for x in occ_data]
-			xcorr_blink = [float(x[4])/maxMot for x in occ_data]
+			xcorr_pb = [float(x[3])/float(maxPwr) for x in occ_data]
+			xcorr_blink = [float(x[4])/float(maxMot) for x in occ_data]
 			p_tot = len(occ_data)
-			p_a = len([x for x in occ_data if float(x[3])/maxPwr > onThold])
-			p_o = len([x for x in occ_data if float(x[4])/maxMot > onThold])
-			p_oa = len([x for x in occ_data if float(x[3])/maxPwr > onThold and float(x[4])/maxMot > onThold])
+			p_a = len([x for x in occ_data if float(x[3])/float(maxPwr) > onThold])
+			p_o = len([x for x in occ_data if float(x[4])/float(maxMot) > onThold])
+			p_oa = len([x for x in occ_data if float(x[3])/float(maxPwr) > onThold and float(x[4])/float(maxMot) > onThold])
 
 			if(len(xcorr_pb) > 1 and max(xcorr_pb) > 0 and max(xcorr_blink) > 0):
 				crossCorr = round(numpy.corrcoef(xcorr_blink, xcorr_pb)[0][1], 2)
@@ -266,8 +264,6 @@ for query_dev in devList:
 			aws_db.commit()
 
 		query_date = query_date + timedelta(days=1)
-
-		exit()
 
 
 			

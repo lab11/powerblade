@@ -32,35 +32,35 @@ aws_c = aws_db.cursor()
 # Processes:
 processes = [
 
-	['wkb', 
-		'select * from mr_dat_vector ' \
+	['wkb_occ', 
+		'select * from mr_dat_occ_vector ' \
 			'where duty!=0 and ' \
 			'deviceMAC not in (select * from vector_reject);'
 	],
 
-	['wkb_train', 
-		'select * from mr_dat_vector ' \
+	['wkb_occ_train', 
+		'select * from mr_dat_occ_vector ' \
 			'where duty!=0 ' \
 			'and deviceMAC not in (select * from vector_test) ' \
 			'and deviceMAC not in (select * from vector_reject);'
 	],
 
-	['wkb_test',
-		'select * from mr_dat_vector ' \
+	['wkb_occ_test',
+		'select * from mr_dat_occ_vector ' \
 			'where duty!=0 ' \
 			'and deviceMAC in (select * from vector_test);'
 	],
 
-	['wkb_train_small',
-		'select * from mr_dat_vector ' \
+	['wkb_occ_train_small',
+		'select * from mr_dat_occ_vector ' \
 			'where duty!=0 ' \
 			'and deviceMAC not in (select * from vector_test) ' \
 			'and deviceMAC not in (select * from vector_reject) ' \
 			'and deviceType in (select * from id_fewcats);'
 	],
 
-	['wkb_test_small',
-		'select * from mr_dat_vector ' \
+	['wkb_occ_test_small',
+		'select * from mr_dat_occ_vector ' \
 			'where duty!=0 ' \
 			'and deviceMAC in (select * from vector_test) ' \
 			'and deviceType in (select * from id_fewcats);'
@@ -100,6 +100,8 @@ for process in processes:
 	arff.write('@attribute minPwr numeric\n')
 	arff.write('@attribute count numeric\n')
 	arff.write('@attribute dutyCycle numeric\n')
+	arff.write('@attribute crossCorr numeric\n')
+	arff.write('@attribute pOcc numeric\n')
 	arff.write('@attribute ct5 numeric\n')
 	arff.write('@attribute spk5 numeric\n')
 	arff.write('@attribute ct10 numeric\n')
@@ -128,12 +130,14 @@ for process in processes:
 		dataStr = []
 		for idx, datItem in enumerate(data):
 			if(idx > 2):
+				if datItem == None:
+					datItem = 0
 				dataStr.append(str(datItem))
 				dataStr.append(',')
 		dataStr[-2] = '"' + dataStr[-2] + '"'
 		dataStr[-1] = '\n'
-		dataStr = ''.join(dataStr)
 
+		dataStr = ''.join(dataStr)
 		arff.write(dataStr)
 
 	arff.write('\n')
