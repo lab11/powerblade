@@ -67,7 +67,7 @@ total_conf = open('conf_matrix.txt', 'w')
 totalDevs = 0
 devCount = 0
 
-def process_classifier(runType, cls, occ, devList, label):
+def process_classifier(runType, cls, occ, devList, fewCats, label):
 	global devCount
 	conf_matrix = {}
 
@@ -86,9 +86,15 @@ def process_classifier(runType, cls, occ, devList, label):
 				str(round(100*float(devCount)/totalDevs,2)) + ' pct complete (' + str(remaining) + ' remaining)                 \r')
 			sys.stdout.flush()
 
-			aws_c.execute('select * from mr_dat_occ_vector ' \
-				'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
-				'and deviceMAC!=\'' + dev + '\';')
+			if fewCats:
+				aws_c.execute('select * from mr_dat_occ_vector ' \
+					'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
+					'and deviceType in (select * from id_fewcats) '
+					'and deviceMAC!=\'' + dev + '\';')
+			else:
+				aws_c.execute('select * from mr_dat_occ_vector ' \
+					'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
+					'and deviceMAC!=\'' + dev + '\';')
 			results = aws_c.fetchall()
 
 			# Generate type list
@@ -107,9 +113,15 @@ def process_classifier(runType, cls, occ, devList, label):
 
 			gen_arff(arff_train, typeStr, results, occ)
 
-			aws_c.execute('select * from mr_dat_occ_vector ' \
-				'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
-				'and deviceMAC=\'' + dev + '\';')
+			if fewCats:
+				aws_c.execute('select * from mr_dat_occ_vector ' \
+					'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
+					'and deviceType in (select * from id_fewcats) '
+					'and deviceMAC=\'' + dev + '\';')
+			else:
+				aws_c.execute('select * from mr_dat_occ_vector ' \
+					'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
+					'and deviceMAC=\'' + dev + '\';')
 			gen_arff(arff_test, typeStr, aws_c.fetchall(), occ)
 
 			train = loader.load_file(arff_train + '.arff')
@@ -208,8 +220,13 @@ def process_classifier(runType, cls, occ, devList, label):
 		total_conf.write(writeStr + '\n')
 
 	else:
-		aws_c.execute('select * from mr_dat_occ_vector ' \
-			'where duty!=0 and deviceMAC not in (select * from vector_reject);')
+		if fewCats:
+			aws_c.execute('select * from mr_dat_occ_vector ' \
+				'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
+				'and deviceType in (select * from id_fewcats);')
+		else:
+			aws_c.execute('select * from mr_dat_occ_vector ' \
+				'where duty!=0 and deviceMAC not in (select * from vector_reject);')
 		results = aws_c.fetchall()
 
 		devCount += 1
@@ -257,13 +274,13 @@ def process_classifier(runType, cls, occ, devList, label):
 	total_results[label] = final_reslut
 
 process_list = []
-def preprocess_classifier(runType, cls, occ, thisDevList, label):
+def preprocess_classifier(runType, cls, occ, thisDevList, fewcats, label):
 	global totalDevs
 	if runType == 'seen':
 		totalDevs += 1
 	else:
 		totalDevs += len(thisDevList)
-	process_list.append([runType, cls, occ, thisDevList, label])
+	process_list.append([runType, cls, occ, thisDevList, fewcats, label])
 
 
 clsTree = Classifier(classname="weka.classifiers.trees.J48", options=["-C", "0.25", "-M", "2"])
@@ -271,31 +288,58 @@ clsBayes = Classifier(classname="weka.classifiers.bayes.NaiveBayes")
 
 
 # US Seen Bayes
-preprocess_classifier('seen', clsBayes, False, devList, 'full_seen_bayes')
+preprocess_classifier('seen', clsBayes, False, devList, False, 'full_seen_bayes')
 
 # US Seen J48
-preprocess_classifier('seen', clsTree, False, devList, 'full_seen_j48')
+preprocess_classifier('seen', clsTree, False, devList, False, 'full_seen_j48')
 
 # US Unseen Bayes
-preprocess_classifier('unseen', clsBayes, False, devList, 'full_unseen_bayes')
+preprocess_classifier('unseen', clsBayes, False, devList, False, 'full_unseen_bayes')
 
 # US Unseen J48
-preprocess_classifier('unseen', clsTree, False, devList, 'full_unseen_j48')
+preprocess_classifier('unseen', clsTree, False, devList, False, 'full_unseen_j48')
 
 # Small Seen Bayes
-# process_classifier('seen', clsBayes, False, smallList, 'small_seen_bayes')
+preprocess_classifier('seen', clsBayes, False, smallList, True, 'small_seen_bayes')
 
 # # Small Seen J48
-# process_classifier('seen', clsTree, False, smallList, 'small_seen_j48')
+preprocess_classifier('seen', clsTree, False, smallList, True, 'small_seen_j48')
 
-# # Small Unseen Bayes
-# process_classifier('unsee')
+# Small Unseen Bayes
+preprocess_classifier('unseen', clsBayes, False, smallList, True, 'small_unseen_bayes')
 
-# process_classifier('seen', clsBayes, True, devList, 'occ_seen_bayes')
+# Small Unseen J48
+preprocess_classifier('unseen', clsTree, False, smallList, True, 'small_unseen_j48')
+
+# Occ Seen Bayes
+preprocess_classifier('seen', clsBayes, True, devList, False, 'occ_seen_bayes')
+
+# Occ Seen J48
+preprocess_classifier('seen', clsTree, True, devList, False, 'occ_seen_j48')
+
+# Occ Unseen Bayes
+preprocess_classifier('unseen', clsBayes, True, devList, False, 'occ_unseen_bayes')
+
+# Occ Unseen J48
+preprocess_classifier('unseen', clsTree, True, devList, False, 'occ_unseen_j48')
+
+# Occ Small Seen Bayes
+preprocess_classifier('seen', clsBayes, True, smallList, True, 'occ_small_seen_bayes')
+
+# Occ Small Seen J48
+preprocess_classifier('seen', clsTree, True, smallList, True, 'occ_small_seen_j48')
+
+# Occ Small Unseen Bayes
+preprocess_classifier('unseen', clsBayes, True, smallList, True, 'occ_small_unseen_bayes')
+
+# Occ Small Unseen J48
+preprocess_classifier('unseen', clsTree, True, smallList, True, 'occ_small_unseen_j48')
+
+
 
 item_start = datetime.utcnow()
-for rT, cL, oC, dL, lA in process_list:
-	process_classifier(rT, cL, oC, dL, lA)
+for rT, cL, oC, dL, fc, lA in process_list:
+	process_classifier(rT, cL, oC, dL, fc, lA)
 
 
 jvm.stop()
@@ -303,7 +347,7 @@ jvm.stop()
 total_conf.close()
 mv('conf_matrix.txt', master_saveDir)
 
-for label in total_results:
+for label in sorted(total_results):
 	print(label + ': ' + str(total_results[label]) + ' pct correct')
 
 def print_data(outfile, labels, bayesValues, treeValues):
@@ -340,7 +384,7 @@ mv('classify_full.dat', master_saveDir)
 # Craete small occ output
 print_data(open('classify_occ_small.dat', 'w'),
 	['Small, Seen', 'Occ Sm, Seen', 'Small, Unseen', 'Occ Sm, Unseen'],
-	[rep_none('small_seen_bayes'), rep_none('occ_small_seen_bayes'), rep_none('small_unseen_bayes'), rep_none('occ_small unseen_bayes')],
+	[rep_none('small_seen_bayes'), rep_none('occ_small_seen_bayes'), rep_none('small_unseen_bayes'), rep_none('occ_small_unseen_bayes')],
 	[rep_none('small_seen_j48'), rep_none('occ_small_seen_j48'), rep_none('small_unseen_j48'), rep_none('occ_small_unseen_j48')])
 mv('classify_occ_small.dat', master_saveDir)
 
