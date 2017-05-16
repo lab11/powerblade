@@ -10,6 +10,8 @@ import subprocess
 from sh import epstopdf, gnuplot, mkdir, cp, mv
 from os.path import expanduser
 
+import copy
+
 sys.path.append('../plot/')
 import pytch
 
@@ -31,6 +33,109 @@ def is_number(s):
         return True
     except:
         return False
+
+def print_conf_matrix(conf_matrix, stream, latex, plusSign, textCol):
+	# print header:
+	correct = 0
+	total = 0
+	if latex:
+		colStr = '| '
+		for col in range(0, len(conf_matrix)):
+			colStr += 'c | '
+		if textCol:
+			colStr += '| c |'
+		stream.write('\\begin{' + 'tabular}{' + colStr + '} \\hline \n')
+		for idx, name in enumerate(conf_matrix):
+			stream.write('$\\hskip 0.7em$' + chr(ord('a') + idx) + '$\\hskip 0.7em$\t')
+			if not textCol and (idx+1) == len(conf_matrix):
+				stream.write('\\\\ \\hline % & ')
+			else:
+				stream.write('& ')
+		stream.write('$<$- Classified as\t\\\\ \\hline \n')
+	else:
+		stream.write('\n=== Confusion Matrix ===\n\n')
+		for idx, name in enumerate(conf_matrix):
+			value = chr(ord('a') + idx)
+			stream.write('   ' + str(value))
+		stream.write('   <-- classified as\n')
+	stream.flush()
+
+	for idx, testName in enumerate(conf_matrix):
+		if latex:
+			stream.write('\t')
+		for idy, predName in enumerate(conf_matrix):
+			if predName in conf_matrix[testName]:
+				value = conf_matrix[testName][predName]
+			else:
+				value = 0
+
+			if latex:
+				if plusSign:
+					if value > 0:
+						writeVal = '+' + str(value)
+					else:
+						writeVal = value
+				else:
+					writeVal = value
+				if predName == testName:
+					stream.write('\cellcolor{' + 'goodgreen} ' + str(writeVal) + '\t')
+				else:
+					stream.write(str(writeVal) + '\t')
+
+				if not textCol and (idy+1) == len(conf_matrix):
+					stream.write('\\\\ \\hline % & ')
+				else:
+					stream.write('& ')
+			else:
+				if value < 10:
+					stream.write('  ')
+				elif value < 100:
+					stream.write(' ')
+				stream.write(' ' + str(value))
+
+			if predName == testName:
+				correct += value
+			total += value
+
+		writeStr = str(chr(ord('a') + idx)) + ' = ' + str(testName)
+		if latex:
+			stream.write(writeStr + '\t\\\\ \\hline \n\t')
+		else:
+			stream.write(' |   ' + writeStr + '\n')
+	
+	if latex:
+		stream.write('\\end{' + 'tabular}\n')
+	stream.flush()
+
+	return correct, total
+
+def sub_conf_matrix(orig, subtract):
+
+	output = {}
+
+	for testName in orig:
+		orig_test = orig[testName]
+		if testName in subtract:
+			sub_test = subtract[testName]
+		else:
+			sub_test = {}
+
+		output[testName] = {}
+
+		for predName in orig:
+			if predName in orig_test:
+				orig_val = orig_test[predName]
+			else:
+				orig_val = 0
+			if predName in sub_test:
+				sub_val = sub_test[predName]
+			else:
+				sub_val = 0
+
+			output[testName][predName] = orig_val - sub_val
+
+	return output
+
 
 item_start = datetime.utcnow()
 
@@ -67,8 +172,13 @@ total_conf = open('conf_matrix.txt', 'w')
 totalDevs = 0
 devCount = 0
 
-def process_classifier(runType, cls, occ, devList, fewCats, label):
+save_orig = ''
+save_subtract = ''
+
+def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 	global devCount
+	global save_orig
+	global save_subtract
 	conf_matrix = {}
 
 	writeStr = '=========================================================================================\n' + \
@@ -162,54 +272,14 @@ def process_classifier(runType, cls, occ, devList, fewCats, label):
 			# if i == 10:
 			# 	break
 
-		# print header:
-		writeStr = '\n=== Confusion Matrix ===\n'
-		print('\n' + writeStr)
-		total_conf.write(writeStr + '\n')
-		for idx, name in enumerate(conf_matrix):
-			value = idx + 1
 
-			if value < 10:
-				sys.stdout.write('  ')
-				total_conf.write('  ')
-			elif value < 100:
-				sys.stdout.write(' ')
-				total_conf.write(' ')
-			sys.stdout.write(' ' + str(value))
-			total_conf.write(' ' + str(value))
-			sys.stdout.flush()
+		correct, total = print_conf_matrix(conf_matrix, sys.stdout, False, False, False)
+		correct, total = print_conf_matrix(conf_matrix, total_conf, False, False, False)
 
-		writeStr = '   <-- classified as'
-		print(writeStr)
-		total_conf.write(writeStr + '\n')
-
-		correct = 0
-		total = 0
-
-		for idx, testName in enumerate(conf_matrix):
-			for predName in conf_matrix:
-				if predName in conf_matrix[testName]:
-					value = conf_matrix[testName][predName]
-				else:
-					value = 0
-
-				if value < 10:
-					sys.stdout.write('  ')
-					total_conf.write('  ')
-				elif value < 100:
-					sys.stdout.write(' ')
-					total_conf.write(' ')
-				sys.stdout.write(' ' + str(value))
-				total_conf.write(' ' + str(value))
-				sys.stdout.flush()
-
-				if predName == testName:
-					correct += value
-				total += value
-
-			writeStr = ' |   ' + str(idx + 1) + ' = ' + str(testName)
-			print(writeStr)
-			total_conf.write(writeStr + '\n')
+		if subtract == 'orig':
+			save_orig = copy.deepcopy(conf_matrix)
+		elif subtract == 'subtract':
+			save_subtract = copy.deepcopy(conf_matrix)
 
 		final_reslut = round(100*float(correct)/total,2)
 
@@ -274,75 +344,79 @@ def process_classifier(runType, cls, occ, devList, fewCats, label):
 	total_results[label] = final_reslut
 
 process_list = []
-def preprocess_classifier(runType, cls, occ, thisDevList, fewcats, label):
+def preprocess_classifier(runType, cls, occ, thisDevList, fewcats, label, subtract):
 	global totalDevs
 	if runType == 'seen':
 		totalDevs += 1
 	else:
 		totalDevs += len(thisDevList)
-	process_list.append([runType, cls, occ, thisDevList, fewcats, label])
+	process_list.append([runType, cls, occ, thisDevList, fewcats, label, subtract])
 
 
 clsTree = Classifier(classname="weka.classifiers.trees.J48", options=["-C", "0.25", "-M", "2"])
 clsBayes = Classifier(classname="weka.classifiers.bayes.NaiveBayes")
 
 
-# US Seen Bayes
-preprocess_classifier('seen', clsBayes, False, devList, False, 'full_seen_bayes')
+# # US Seen Bayes
+# preprocess_classifier('seen', clsBayes, False, devList, False, 'full_seen_bayes')
 
-# US Seen J48
-preprocess_classifier('seen', clsTree, False, devList, False, 'full_seen_j48')
+# # US Seen J48
+# preprocess_classifier('seen', clsTree, False, devList, False, 'full_seen_j48')
 
-# US Unseen Bayes
-preprocess_classifier('unseen', clsBayes, False, devList, False, 'full_unseen_bayes')
+# # US Unseen Bayes
+# preprocess_classifier('unseen', clsBayes, False, devList, False, 'full_unseen_bayes')
 
 # US Unseen J48
-preprocess_classifier('unseen', clsTree, False, devList, False, 'full_unseen_j48')
+preprocess_classifier('unseen', clsTree, False, devList, False, 'full_unseen_j48', 'subtract')
 
-# Small Seen Bayes
-preprocess_classifier('seen', clsBayes, False, smallList, True, 'small_seen_bayes')
+# # Small Seen Bayes
+# preprocess_classifier('seen', clsBayes, False, smallList, True, 'small_seen_bayes')
 
-# # Small Seen J48
-preprocess_classifier('seen', clsTree, False, smallList, True, 'small_seen_j48')
+# # # Small Seen J48
+# preprocess_classifier('seen', clsTree, False, smallList, True, 'small_seen_j48')
 
-# Small Unseen Bayes
-preprocess_classifier('unseen', clsBayes, False, smallList, True, 'small_unseen_bayes')
+# # Small Unseen Bayes
+# preprocess_classifier('unseen', clsBayes, False, smallList, True, 'small_unseen_bayes')
 
-# Small Unseen J48
-preprocess_classifier('unseen', clsTree, False, smallList, True, 'small_unseen_j48')
+# # Small Unseen J48
+# preprocess_classifier('unseen', clsTree, False, smallList, True, 'small_unseen_j48')
 
-# Occ Seen Bayes
-preprocess_classifier('seen', clsBayes, True, devList, False, 'occ_seen_bayes')
+# # Occ Seen Bayes
+# preprocess_classifier('seen', clsBayes, True, devList, False, 'occ_seen_bayes')
 
-# Occ Seen J48
-preprocess_classifier('seen', clsTree, True, devList, False, 'occ_seen_j48')
+# # Occ Seen J48
+# preprocess_classifier('seen', clsTree, True, devList, False, 'occ_seen_j48')
 
-# Occ Unseen Bayes
-preprocess_classifier('unseen', clsBayes, True, devList, False, 'occ_unseen_bayes')
+# # Occ Unseen Bayes
+# preprocess_classifier('unseen', clsBayes, True, devList, False, 'occ_unseen_bayes')
 
 # Occ Unseen J48
-preprocess_classifier('unseen', clsTree, True, devList, False, 'occ_unseen_j48')
+preprocess_classifier('unseen', clsTree, True, devList, False, 'occ_unseen_j48', 'orig')
 
-# Occ Small Seen Bayes
-preprocess_classifier('seen', clsBayes, True, smallList, True, 'occ_small_seen_bayes')
+# # Occ Small Seen Bayes
+# preprocess_classifier('seen', clsBayes, True, smallList, True, 'occ_small_seen_bayes')
 
-# Occ Small Seen J48
-preprocess_classifier('seen', clsTree, True, smallList, True, 'occ_small_seen_j48')
+# # Occ Small Seen J48
+# preprocess_classifier('seen', clsTree, True, smallList, True, 'occ_small_seen_j48')
 
-# Occ Small Unseen Bayes
-preprocess_classifier('unseen', clsBayes, True, smallList, True, 'occ_small_unseen_bayes')
+# # Occ Small Unseen Bayes
+# preprocess_classifier('unseen', clsBayes, True, smallList, True, 'occ_small_unseen_bayes')
 
-# Occ Small Unseen J48
-preprocess_classifier('unseen', clsTree, True, smallList, True, 'occ_small_unseen_j48')
-
-
+# # Occ Small Unseen J48
+# preprocess_classifier('unseen', clsTree, True, smallList, True, 'occ_small_unseen_j48')
 
 item_start = datetime.utcnow()
-for rT, cL, oC, dL, fc, lA in process_list:
-	process_classifier(rT, cL, oC, dL, fc, lA)
+for rT, cL, oC, dL, fc, lA, sT in process_list:
+	process_classifier(rT, cL, oC, dL, fc, lA, sT)
 
 
 jvm.stop()
+
+conf_new = sub_conf_matrix(save_orig, save_subtract)
+print('\nFull Unseen J48\n')
+print_conf_matrix(save_orig, sys.stdout, True, False, True)
+print('\nOcc Unseen J48\n')
+print_conf_matrix(conf_new, sys.stdout, True, True, True)
 
 total_conf.close()
 mv('conf_matrix.txt', master_saveDir)
