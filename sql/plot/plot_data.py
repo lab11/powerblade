@@ -1127,6 +1127,10 @@ elif(config['type'] == 'blink'):
 
 	total_scope = 0
 
+	idle_savings_potential = {}
+	idle_savings_potential['.5'] = 0
+	idle_savings_potential['.75'] = 0
+
 	for loc in config['locations']:
 		aws_c.execute('select t1.room from ' \
 			'(select room from valid_blinks where location=' + str(loc) + ' group by room) t1 ' \
@@ -1193,15 +1197,24 @@ elif(config['type'] == 'blink'):
 			if pwr < minVals[current_dev]:
 				minVals[current_dev] = pwr
 
+
+		for devMAC in maxVals:
+			if maxVals[devMAC][0] == minVals[devMAC]:
+				minVals[devMAC] = 0
+			
+
 		current_dev = 0
+		current_day = 0
 		xcorr_pb = {}
 		xcorr_pb_act = {}
 		dep_pb = {}
 		interdev_pb = {}
 		names = {}
+		idleP = {}
 		pwr_last = 0
 		mot_last = 0
 		for dev, name, ts, pwr, mot, timeDiff in new_pb_data:
+			dayst = str(ts.strftime('%Y-%m-%d 00:00:00'))
 			if dev != current_dev:
 				current_dev = dev
 				xcorr_pb[current_dev] = {}
@@ -1217,6 +1230,11 @@ elif(config['type'] == 'blink'):
 				dep_pb[current_dev]['pop'] = 0
 				dep_pb[current_dev]['tot'] = 0
 				names[current_dev] = name
+				idleP[current_dev] = []
+
+				if current_day != dayst:
+					current_day = dayst
+
 			if(maxVals[current_dev][0] > 0):
 				xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
 				interdev_pb[current_dev][ts] = float((pwr-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev]))
@@ -1239,12 +1257,14 @@ elif(config['type'] == 'blink'):
 				dep_pb[current_dev]['pp'] += 1
 				if(float(float(mot)/maxVals[current_dev][1]) > .2):
 					dep_pb[current_dev]['pop'] += 1
+			else:
+				idleP[current_dev].append(pwr)
 
-			elif(maxVals[current_dev][0] > 0 and float((pwr_last-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev])) > .2):
-				xcorr_pb_act[current_dev]['pb'].append(float(pwr_last/maxVals[current_dev][0]))
-				xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))
-				xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
-				xcorr_pb_act[current_dev]['blink'].append(float(float(mot)/maxVals[current_dev][1]))
+				if(maxVals[current_dev][0] > 0 and float((pwr_last-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev])) > .2):
+					xcorr_pb_act[current_dev]['pb'].append(float(pwr_last/maxVals[current_dev][0]))
+					xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))
+					xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
+					xcorr_pb_act[current_dev]['blink'].append(float(float(mot)/maxVals[current_dev][1]))
 
 			pwr_last = pwr
 			mot_last = mot
@@ -1280,24 +1300,26 @@ elif(config['type'] == 'blink'):
 							new_items.append(interdev_pb[new_device][timestamp])
 						# if names[new_device] == 'Television' and names[device] == 'Xbox One':
 						# 	print(str(timestamp) + ' ' + str(interdev_pb[device][timestamp] > onThold) + ' ' + str(interdev_pb[new_device][timestamp] > onThold))
-					xcorr = round(numpy.corrcoef(dev_items, new_items)[0][1],2)
-
-					pNew = float(p_new)/p_tot
-					pNewGivenDevRaw = float(p_both)/p_dev
-
-					if(pNewGivenDevRaw == 0):
-						slope = 0
-						yint = 0
-					elif(pNewGivenDevRaw > pNew):
-						slope = 1/(1 - pNew)
-						yint = pNew/(pNew-1)
+					if len(dev_items) > 1 and len(new_items) > 1 and max(dev_items) > 0 and max(new_items) > 0:
+						xcorr = round(numpy.corrcoef(dev_items, new_items)[0][1],2)
 					else:
-						slope = 1/pNew
-						yint = -1
+						xcorr = 0
 
-					pNewGivenDev = round(float(slope * pNewGivenDevRaw + yint), 2)
+					if p_tot > 0:
+						pNew = float(p_new)/p_tot
+					else:
+						pNew = 0
+					if p_dev > 0:
+						pNewGivenDevRaw = round(float(p_both)/p_dev,2)
+					else:
+						pNewGivenDevRaw = 0
 
 					sys.stdout.write(names[new_device] + '\t' + str(len(interdev_pb[device])) + '\t' + str(xcorr) + '\t' + str(p_dev) + '\t' + str(p_new) + '\t' + str(p_both) + '\t' + str(pNewGivenDevRaw) + '\n\t\t')
+					if(save_to_final):
+						aws_c.execute('insert into dat_dev_corr (testMAC, activeMAC, location, room, crossCorr, pOcc) values (' \
+							'\'' + str(new_device) + '\', \'' + str(device) + '\', ' + str(loc) + ', \'' + str(room) + '\', ' + \
+							str(xcorr) + ', ' + str(pNewGivenDevRaw) + ');')
+						aws_db.commit()
 			print('')
 
 
@@ -1306,6 +1328,7 @@ elif(config['type'] == 'blink'):
 		ts_last = 0
 		pwr_last = 0
 		mot_last = 0
+		pOccGivenPow = {}
 		for dev, name, ts, pwr, mot, timeDiff in new_pb_data:
 			if dev != current_dev:
 				# Flush old data
@@ -1345,14 +1368,14 @@ elif(config['type'] == 'blink'):
 					actCrossCorr = round(numpy.corrcoef(xcorr_pb_act[current_dev]['blink'], xcorr_pb_act[current_dev]['pb'])[0][1],2)
 				else:
 					actCrossCorr = 0
-				pOccGivenPow = round(slope * pOccGivenPowRaw + yint, 2)
+				pOccGivenPow[current_dev] = round(slope * pOccGivenPowRaw + yint, 2)
 
-				pb_out.write('\n\n\"' + str(name) + ' ' + str(crossCorr) + ' ' + str(pOccGivenPow) + '\"\n')
-				total_data.append([dev, name, loc, room, crossCorr, pOccGivenPow])
+				pb_out.write('\n\n\"' + str(name) + ' ' + str(crossCorr) + ' ' + str(pOccGivenPow[current_dev]) + '\"\n')
+				total_data.append([dev, name, loc, room, crossCorr, pOccGivenPow[current_dev]])
 				if(save_to_final):
 					aws_c.execute('insert into dat_occ_corr (deviceMAC, deviceName, location, room, crossCorr, pOcc) values (' \
 							'\'' + str(dev) + '\', \'' + str(name.replace('\'', '')) + '\', ' + str(loc) + ', \'' + str(room) + '\', ' + \
-							str(crossCorr) + ', ' + str(pOccGivenPow) + ');')
+							str(crossCorr) + ', ' + str(pOccGivenPow[current_dev]) + ');')
 					aws_db.commit()
 
 			print_blink(ts_last, pwr_last, mot_last, time_last)
@@ -1361,6 +1384,17 @@ elif(config['type'] == 'blink'):
 			pwr_last = pwr
 			mot_last = mot
 			time_last = timeDiff
+
+		for devMAC in dep_pb:
+			if len(idleP[devMAC]) == 0:
+				idleP[devMAC].append(0)
+			print(names[devMAC] + ' idleP: ' + str(round(sum(idleP[devMAC])/len(idleP[devMAC]),2)))
+			print(names[devMAC] + ' P(active): ' + str(round(float(dep_pb[devMAC]['pp'])/dep_pb[devMAC]['tot'],2)))
+			print(names[devMAC] + ' P(o|p): ' + str(pOccGivenPow[devMAC]))
+			if pOccGivenPow[devMAC] > 0.5:
+				idle_savings_potential['.5'] += round(365 * 24 * float(sum(idleP[devMAC]))/len(idleP[devMAC]) * (1 - float(dep_pb[devMAC]['pp'])/dep_pb[devMAC]['tot']) / 1000, 2)
+			if pOccGivenPow[devMAC] > 0.75:
+				idle_savings_potential['.75'] += round(365 * 24 * float(sum(idleP[devMAC]))/len(idleP[devMAC]) * (1 - float(dep_pb[devMAC]['pp'])/dep_pb[devMAC]['tot']) / 1000, 2)
 
 		# Last data
 		print_blink(ts_last, pwr_last, mot_last, time_last)
@@ -1413,6 +1447,9 @@ elif(config['type'] == 'blink'):
 		files_to_open.append(qu_saveDir + '/' + runString + '.pdf')
 
 		print_time()
+
+	print('\nSavings potential, thold = 0.5: ' + str(idle_savings_potential['.5']) + ' kWh ($' + str(round(idle_savings_potential['.5'] * .12,2)) + ') per year')
+	print('Savings potential: ' + str(idle_savings_potential['.75']) + ' kWh ($' + str(round(idle_savings_potential['.75'] * .12,2)) + ') per year\n')
 
 	for file in files_to_open:
 		img = subprocess.Popen(['open', file])
