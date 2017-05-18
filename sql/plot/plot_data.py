@@ -1168,6 +1168,7 @@ elif(config['type'] == 'blink'):
 		pb_count = 0
 		current_dev = 0
 		maxVals = {}
+		minVals = {}
 		new_pb_data = []
 		for idx, (dev, name, ts, pwr, mot, timeDiff) in enumerate(pb_data):
 
@@ -1182,12 +1183,15 @@ elif(config['type'] == 'blink'):
 				pb_count += 1
 				current_dev = dev
 				maxVals[current_dev] = [pwr, mot, timeDiff]
+				minVals[current_dev] = pwr
 			if pwr > maxVals[current_dev][0]:
 				maxVals[current_dev][0] = pwr
 			if mot > maxVals[current_dev][1]:
 				maxVals[current_dev][1] = mot
 			if timeDiff > maxVals[current_dev][2]:
 				maxVals[current_dev][2] = timeDiff;
+			if pwr < minVals[current_dev]:
+				minVals[current_dev] = pwr
 
 		current_dev = 0
 		xcorr_pb = {}
@@ -1215,10 +1219,10 @@ elif(config['type'] == 'blink'):
 				names[current_dev] = name
 			if(maxVals[current_dev][0] > 0):
 				xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
-				interdev_pb[current_dev][ts] = float(pwr/maxVals[current_dev][0])
+				interdev_pb[current_dev][ts] = float((pwr-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev]))
 			else:
 				xcorr_pb[current_dev]['pb'].append(0)
-				interdev_pb[current_dev][ts] = 0
+				interdev_pb[current_dev][ts] = minVals[current_dev]
 				#print('Zero maximum for ' + current_dev)
 			xcorr_pb[current_dev]['blink'].append(float(float(mot)/maxVals[current_dev][1]))
 
@@ -1227,7 +1231,7 @@ elif(config['type'] == 'blink'):
 			if(float(float(mot)/maxVals[current_dev][1]) > .2):
 				dep_pb[current_dev]['po'] += 1
 
-			if(maxVals[current_dev][0] > 0 and float(pwr/maxVals[current_dev][0]) > .2):
+			if(maxVals[current_dev][0] > 0 and float((pwr-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev])) > .2):
 				xcorr_pb_act[current_dev]['pb'].append(float(pwr_last/maxVals[current_dev][0]))
 				#xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))	
 				xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))
@@ -1236,7 +1240,7 @@ elif(config['type'] == 'blink'):
 				if(float(float(mot)/maxVals[current_dev][1]) > .2):
 					dep_pb[current_dev]['pop'] += 1
 
-			elif(maxVals[current_dev][0] > 0 and float(pwr_last/maxVals[current_dev][0]) > .2):
+			elif(maxVals[current_dev][0] > 0 and float((pwr_last-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev])) > .2):
 				xcorr_pb_act[current_dev]['pb'].append(float(pwr_last/maxVals[current_dev][0]))
 				xcorr_pb_act[current_dev]['blink'].append(float(float(mot_last)/maxVals[current_dev][1]))
 				xcorr_pb_act[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
@@ -1274,8 +1278,8 @@ elif(config['type'] == 'blink'):
 								p_both += 1
 							dev_items.append(interdev_pb[device][timestamp])
 							new_items.append(interdev_pb[new_device][timestamp])
-						if names[new_device] == 'Television' and names[device] == 'Xbox One':
-							print(str(timestamp) + ' ' + str(interdev_pb[device][timestamp] > onThold) + ' ' + str(interdev_pb[new_device][timestamp] > onThold))
+						# if names[new_device] == 'Television' and names[device] == 'Xbox One':
+						# 	print(str(timestamp) + ' ' + str(interdev_pb[device][timestamp] > onThold) + ' ' + str(interdev_pb[new_device][timestamp] > onThold))
 					xcorr = round(numpy.corrcoef(dev_items, new_items)[0][1],2)
 
 					pNew = float(p_new)/p_tot
@@ -1293,7 +1297,7 @@ elif(config['type'] == 'blink'):
 
 					pNewGivenDev = round(float(slope * pNewGivenDevRaw + yint), 2)
 
-					sys.stdout.write(names[new_device] + '\t' + str(len(interdev_pb[device])) + '\t' + str(xcorr) + '\t' + str(p_dev) + '\t' + str(p_new) + '\t' + str(p_both) + '\t' + str(pNewGivenDev) + '\n\t\t')
+					sys.stdout.write(names[new_device] + '\t' + str(len(interdev_pb[device])) + '\t' + str(xcorr) + '\t' + str(p_dev) + '\t' + str(p_new) + '\t' + str(p_both) + '\t' + str(pNewGivenDevRaw) + '\n\t\t')
 			print('')
 
 
