@@ -97,6 +97,13 @@ valid_powerblades_no1 t2
 on t1.deviceMAC=t2.deviceMAC)
 group by t2.location;
 
+select min(t1.tsMin), max(t1.tsMin), t2.location from 
+(mr_dat_occ t1 
+join 
+valid_powerblades_no1 t2
+on t1.deviceMAC=t2.deviceMAC)
+group by t2.location;
+
 
 # Total measured and total ground truth (as daily averages so each location is treated equally)
 select avg(totMeas) as meas, avg(fullGnd) as gnd, avg(totMeas)/avg(fullGnd)*100 as pct from mr_final_gnd_corr where location!=1;
