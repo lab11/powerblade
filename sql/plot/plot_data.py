@@ -1209,6 +1209,7 @@ elif(config['type'] == 'blink'):
 		xcorr_pb_act = {}
 		dep_pb = {}
 		interdev_pb = {}
+		interdev_day = {}
 		names = {}
 		idleP = {}
 		pwr_last = 0
@@ -1220,6 +1221,7 @@ elif(config['type'] == 'blink'):
 				xcorr_pb[current_dev] = {}
 				xcorr_pb_act[current_dev] = {}
 				interdev_pb[current_dev] = {}
+				interdev_day[current_dev] = {}
 				xcorr_pb[current_dev]['pb'] = []
 				xcorr_pb_act[current_dev]['pb'] = []
 				xcorr_pb[current_dev]['blink'] = []
@@ -1232,15 +1234,18 @@ elif(config['type'] == 'blink'):
 				names[current_dev] = name
 				idleP[current_dev] = []
 
-				if current_day != dayst:
-					current_day = dayst
+			if current_day != dayst:
+				current_day = dayst
+				interdev_day[current_dev][current_day] = {}
 
 			if(maxVals[current_dev][0] > 0):
 				xcorr_pb[current_dev]['pb'].append(float(pwr/maxVals[current_dev][0]))
 				interdev_pb[current_dev][ts] = float((pwr-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev]))
+				interdev_day[current_dev][current_day][ts] = float((pwr-minVals[current_dev])/(maxVals[current_dev][0]-minVals[current_dev]))
 			else:
 				xcorr_pb[current_dev]['pb'].append(0)
 				interdev_pb[current_dev][ts] = minVals[current_dev]
+				interdev_day[current_dev][current_day][ts] = minVals[current_dev]
 				#print('Zero maximum for ' + current_dev)
 			xcorr_pb[current_dev]['blink'].append(float(float(mot)/maxVals[current_dev][1]))
 
@@ -1323,9 +1328,8 @@ elif(config['type'] == 'blink'):
 			print('')
 
 
-
 		current_dev = 0
-		ts_last = 0
+		ts_last = new_pb_data[0][2] - timedelta(seconds=1)
 		pwr_last = 0
 		mot_last = 0
 		pOccGivenPow = {}
@@ -1337,7 +1341,7 @@ elif(config['type'] == 'blink'):
 
 
 				current_dev = dev
-				ts_last = 0
+				ts_last = new_pb_data[0][2] - timedelta(seconds=1)
 				pwr_last = 0
 				mot_last = 0
 				time_last = 0
@@ -1370,7 +1374,7 @@ elif(config['type'] == 'blink'):
 					actCrossCorr = 0
 				pOccGivenPow[current_dev] = round(slope * pOccGivenPowRaw + yint, 2)
 
-				pb_out.write('\n\n\"' + str(name) + ' ' + str(crossCorr) + ' ' + str(pOccGivenPow[current_dev]) + '\"\n')
+				pb_out.write('\n\n\"' + str(name) + ': Cross Correlation = ' + str(crossCorr) + ', P(o|a) = ' + str(pOccGivenPow[current_dev]) + '\"\n')
 				total_data.append([dev, name, loc, room, crossCorr, pOccGivenPow[current_dev]])
 				if(save_to_final):
 					aws_c.execute('insert into dat_occ_corr (deviceMAC, deviceName, location, room, crossCorr, pOcc) values (' \
@@ -1379,11 +1383,17 @@ elif(config['type'] == 'blink'):
 					aws_db.commit()
 
 			print_blink(ts_last, pwr_last, mot_last, time_last)
+			if (((ts-ts_last).days * 86400) + (ts - ts_last).seconds) > 3600:
+				print_blink(ts_last + timedelta(seconds=1), 0, mot_last, time_last)
+				print_blink(ts - timedelta(seconds=1), 0, mot, timeDiff)
 			
 			ts_last = ts
 			pwr_last = pwr
 			mot_last = mot
 			time_last = timeDiff
+
+		# Last data
+		print_blink(ts_last, pwr_last, mot_last, time_last)
 
 		for devMAC in dep_pb:
 			if len(idleP[devMAC]) == 0:
@@ -1395,9 +1405,6 @@ elif(config['type'] == 'blink'):
 				idle_savings_potential['.5'] += round(365 * 24 * float(sum(idleP[devMAC]))/len(idleP[devMAC]) * (1 - float(dep_pb[devMAC]['pp'])/dep_pb[devMAC]['tot']) / 1000, 2)
 			if pOccGivenPow[devMAC] > 0.75:
 				idle_savings_potential['.75'] += round(365 * 24 * float(sum(idleP[devMAC]))/len(idleP[devMAC]) * (1 - float(dep_pb[devMAC]['pp'])/dep_pb[devMAC]['tot']) / 1000, 2)
-
-		# Last data
-		print_blink(ts_last, pwr_last, mot_last, time_last)
 
 		pb_out.close()
 
@@ -1421,8 +1428,8 @@ elif(config['type'] == 'blink'):
 
 		for i in range(0, pb_count):
 			plt.write('plot \'pb_' + runString + '.dat\' i ' + str(i) + ' u 1:2 w lines title columnheader(1), \\\n')
-			plt.write('\t\'\' i ' + str(i) + ' u 1:3 w lines title \'Blink\', \\\n')
-			plt.write('\t\'\' i ' + str(i) + ' u 1:4 w lines title \'Time\'\n\n')
+			plt.write('\t\'\' i ' + str(0) + ' u 1:3 w lines title \'Blink\'\n')
+			#plt.write('\t\'\' i ' + str(i) + ' u 1:4 w lines title \'Time\'\n\n')
 
 		plt.write('unset multiplot\n')
 
