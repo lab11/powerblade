@@ -2,7 +2,6 @@
 
 import mylogin
 import MySQLdb
-import yagmail
 from datetime import datetime, timedelta
 import sys
 from os.path import expanduser

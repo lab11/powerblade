@@ -391,7 +391,7 @@ preprocess_classifier('unseen', clsTree, False, devList, False, 'full_unseen_j48
 # preprocess_classifier('unseen', clsBayes, True, devList, False, 'occ_unseen_bayes')
 
 # Occ Unseen J48
-preprocess_classifier('unseen', clsTree, True, devList, False, 'occ_unseen_j48', 'orig')
+# preprocess_classifier('unseen', clsTree, True, devList, False, 'occ_unseen_j48', 'orig')
 
 # # Occ Small Seen Bayes
 # preprocess_classifier('seen', clsBayes, True, smallList, True, 'occ_small_seen_bayes')
@@ -412,11 +412,11 @@ for rT, cL, oC, dL, fc, lA, sT in process_list:
 
 jvm.stop()
 
-conf_new = sub_conf_matrix(save_orig, save_subtract)
-print('\nFull Unseen J48\n')
-print_conf_matrix(save_orig, sys.stdout, True, False, True)
-print('\nOcc Unseen J48\n')
-print_conf_matrix(conf_new, sys.stdout, True, True, True)
+# conf_new = sub_conf_matrix(save_orig, save_subtract)
+# print('\nFull Unseen J48\n')
+# print_conf_matrix(save_orig, sys.stdout, True, False, True)
+# print('\nOcc Unseen J48\n')
+# print_conf_matrix(conf_new, sys.stdout, True, True, True)
 
 total_conf.close()
 mv('conf_matrix.txt', master_saveDir)

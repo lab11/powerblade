@@ -36,6 +36,23 @@ def gen_arff(label, typeStr, results, printOcc):
 	arff.write('@attribute spk250 numeric\n')
 	arff.write('@attribute ct500 numeric\n')
 	arff.write('@attribute spk500 numeric\n')
+
+	arff.write('@attribute coffee_maker numeric\n')
+	arff.write('@attribute television numeric\n')
+	arff.write('@attribute blowdryer numeric\n')
+	arff.write('@attribute toaster numeric\n')
+	arff.write('@attribute fridge numeric\n')
+	arff.write('@attribute microwave numeric\n')
+	arff.write('@attribute phone_charger numeric\n')
+	arff.write('@attribute curling_iron numeric\n')
+	arff.write('@attribute lamp numeric\n')
+	arff.write('@attribute fan numeric\n')
+	arff.write('@attribute laptop_computer numeric\n')
+	arff.write('@attribute exterior_lighting numeric\n')
+	arff.write('@attribute router_modem numeric\n')
+	arff.write('@attribute cable_box numeric\n')
+	arff.write('@attribute blender numeric\n')
+
 	arff.write('@attribute deviceType ' + typeStr + '\n\n')
 
 	arff.write('@data\n')
@@ -43,7 +60,7 @@ def gen_arff(label, typeStr, results, printOcc):
 	for data in results:
 		dataStr = []
 		for idx, datItem in enumerate(data):
-			if(idx > 2):
+			if(idx > 1):
 				if datItem == None:
 					datItem = 0
 				if printOcc == False:
