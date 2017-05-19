@@ -352,9 +352,25 @@ t1.deviceType end end as deviceType
 from dat_vector t1 where
 t1.id=(select max(t2.id) from dat_vector t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
 
-create view mr_dat_occ_vector as 
-select t1.* from dat_occ_vector t1 where
-t1.id=(select max(t2.id) from dat_occ_vector t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
+describe mr_dat_inter_vector;
+
+alter view mr_dat_occ_vector as select t1.dayst, t1.deviceMAC,
+t1.avgPwr, t1.varPwr, t1.maxPwr, t1.minPwr, t1.count, t1.duty, t1.crossCorr, t1.pOcc, t1.ct5, t1.spk5, 
+t1.ct10, t1.spk10, t1.ct15, t1.spk15, t1.ct25, t1.spk25, t1.ct50, t1.spk50, t1.ct75, t1.spk75, t1.ct100, 
+t1.spk100, t1.ct150, t1.spk150, t1.ct250, t1.spk250, t1.ct500, t1.spk500, 
+t2.coffee_maker, t2.television, t2.blowdryer, t2.toaster, t2.fridge,
+t2.microwave, t2.phone_charger, t2.curling_iron, t2.lamp, t2.fan,
+t2.laptop_computer, t2.exterior_lighting, t2.router_modem, t2.cable_box, t2.blender,
+case when t1.deviceType='Desk lamp' or t1.deviceType='Small lamp/light' or t1.deviceType='Standing lamp'
+then 'Lamp' else 
+case when t1.deviceType='Router' or t1.deviceType='Modem'
+then 'Router/Modem' else
+t1.deviceType end end as deviceType 
+from
+(dat_occ_vector t1 join
+mr_dat_inter_vector t2
+on t1.deviceMAC=t2.deviceMAC)
+where t1.id=(select max(t2.id) from dat_occ_vector t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
 
 create view mr_dat_occ_vector_2 as 
 select t1.* 
@@ -391,4 +407,44 @@ on t1.deviceMAC=t2.deviceMAC)
 where t1.id=(select max(t3.id) from dat_occ_corr t3 where t1.deviceMAC=t3.deviceMAC);
 
 select * from mr_dat_occ_corr;
+
+alter view mr_dat_dev_corr as
+select t1.*, t2.deviceType as testType, t3.deviceType as activeType from 
+(dat_dev_corr t1
+join valid_powerblades_no1 t2
+on t1.testMAC=t2.deviceMAC
+join valid_powerblades_no1 t3
+on t1.activeMAC=t3.deviceMAC)
+where t1.id=(select max(t4.id) from dat_dev_corr t4 where t1.testMAC=t4.testMAC and t1.activeMAC=t4.activeMAC);
+
+select * from dat_dev_corr;
+select * from mr_dat_dev_corr;
+
+alter view avgDevCorr as
+select testMAC, activeType, avg(crossCorr) as avgCorr, avg(pOcc) as avgOcc, count(*) as ct, count(distinct(location)) as locCt
+from mr_dat_dev_corr
+group by testMAC, activeType;
+
+alter view id_dev_corr as
+select * from
+avgDevCorr t1
+where testMAC in (select deviceMAC from valid_powerblades_no1 where deviceType in (select * from id_categories)) and activeType in (select * from id_categories);
+
+select * from id_categories;
+
+select * from id_dev_corr;
+
+describe mr_dat_occ_vector;
+select * from mr_dat_occ_vector join id_dev_corr on ;
+
+select * from inf_gw_status order by id desc;
+
+select * from mr_dat_occ_vector;
+
+create view mr_dat_inter_vector as
+select t1.* from 
+dat_inter_vector t1 where
+t1.id=(select max(t2.id) from dat_inter_vector t2 where t1.deviceMAC=t2.deviceMAC);
+
+select * from mr_dat_inter_vector;
 

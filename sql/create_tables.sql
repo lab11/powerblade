@@ -107,6 +107,18 @@ deviceMAC char(12), deviceName varchar(50), location int(1), room varchar(50),
 crossCorr decimal(12,2), pOcc decimal(12,2),
 primary key (id), index (deviceMAC));
 
+create table dat_dev_corr (id int(11) not null auto_increment,
+testMAC char(12), activeMAC char(12), location int(1), room varchar(50),
+crossCorr decimal(12,2), pOcc decimal(12,2),
+primary key (id), index (testMAC));
+
+create table dat_inter_vector (id int(11) not null auto_increment, deviceMAC char(12), 
+computer_monitor decimal(5,2), coffee_maker decimal(5,2), television decimal(5,2), blowdryer decimal(5,2), 
+toaster decimal(5,2), fridge decimal(5,2), microwave decimal(5,2), phone_charger decimal(5,2), 
+curling_iron decimal(5,2), lamp decimal(5,2), fan decimal(5,2), laptop_computer decimal(5,2), 
+exterior_lighting decimal(5,2), router_modem decimal(5,2), cable_box decimal(5,2), blender decimal(5,2),
+primary key (id), index(deviceMAC));
+
 
 # Other useful stuff:
 # 	to "delete from": SET SQL_SAFE_UPDATES = 0;
