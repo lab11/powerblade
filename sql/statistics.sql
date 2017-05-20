@@ -97,8 +97,9 @@ valid_powerblades_no1 t2
 on t1.deviceMAC=t2.deviceMAC)
 group by t2.location;
 
-select min(t1.tsMin), max(t1.tsMin), t2.location from 
-(mr_dat_occ t1 
+
+select min(t1.dayst), max(t1.dayst), t2.location from 
+(mr_dat_occ_vector t1 
 join 
 valid_powerblades_no1 t2
 on t1.deviceMAC=t2.deviceMAC)

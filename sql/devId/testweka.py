@@ -157,7 +157,7 @@ devList = [x[0] for x in aws_c.fetchall()]
 # Get small list of devices:
 aws_c.execute('select deviceMAC, count(*) as count from mr_dat_occ_vector ' \
 	'where count>0 and duty!=0 and deviceMAC not in (select * from vector_reject) ' \
-	'and deviceType in (select * from id_fewcats) '
+	'and deviceMAC in (select * from id_fewcats_mac) '
 	'group by deviceMAC;')
 smallList = [x[0] for x in aws_c.fetchall()]
 
@@ -199,7 +199,7 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 			if fewCats:
 				aws_c.execute('select * from mr_dat_occ_vector ' \
 					'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
-					'and deviceType in (select * from id_fewcats) '
+					'and deviceMAC in (select * from id_fewcats_mac) '
 					'and deviceMAC!=\'' + dev + '\';')
 			else:
 				aws_c.execute('select * from mr_dat_occ_vector ' \
@@ -226,7 +226,7 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 			if fewCats:
 				aws_c.execute('select * from mr_dat_occ_vector ' \
 					'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
-					'and deviceType in (select * from id_fewcats) '
+					'and deviceMAC in (select * from id_fewcats_mac) '
 					'and deviceMAC=\'' + dev + '\';')
 			else:
 				aws_c.execute('select * from mr_dat_occ_vector ' \
@@ -293,7 +293,7 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 		if fewCats:
 			aws_c.execute('select * from mr_dat_occ_vector ' \
 				'where duty!=0 and deviceMAC not in (select * from vector_reject) ' \
-				'and deviceType in (select * from id_fewcats);')
+				'and deviceMAC in (select * from id_fewcats_mac);')
 		else:
 			aws_c.execute('select * from mr_dat_occ_vector ' \
 				'where duty!=0 and deviceMAC not in (select * from vector_reject);')
@@ -357,53 +357,53 @@ clsTree = Classifier(classname="weka.classifiers.trees.J48", options=["-C", "0.2
 clsBayes = Classifier(classname="weka.classifiers.bayes.NaiveBayes")
 
 
-# # US Seen Bayes
-# preprocess_classifier('seen', clsBayes, False, devList, False, 'full_seen_bayes')
+# US Seen Bayes
+preprocess_classifier('seen', clsBayes, False, devList, False, 'full_seen_bayes', '')
 
-# # US Seen J48
-# preprocess_classifier('seen', clsTree, False, devList, False, 'full_seen_j48')
+# US Seen J48
+preprocess_classifier('seen', clsTree, False, devList, False, 'full_seen_j48', '')
 
-# # US Unseen Bayes
-# preprocess_classifier('unseen', clsBayes, False, devList, False, 'full_unseen_bayes')
+# US Unseen Bayes
+preprocess_classifier('unseen', clsBayes, False, devList, False, 'full_unseen_bayes', '')
 
 # US Unseen J48
 preprocess_classifier('unseen', clsTree, False, devList, False, 'full_unseen_j48', 'subtract')
 
-# # Small Seen Bayes
-# preprocess_classifier('seen', clsBayes, False, smallList, True, 'small_seen_bayes')
+# Small Seen Bayes
+preprocess_classifier('seen', clsBayes, False, smallList, True, 'small_seen_bayes', '')
 
-# # # Small Seen J48
-# preprocess_classifier('seen', clsTree, False, smallList, True, 'small_seen_j48')
+# # Small Seen J48
+preprocess_classifier('seen', clsTree, False, smallList, True, 'small_seen_j48', '')
 
-# # Small Unseen Bayes
-# preprocess_classifier('unseen', clsBayes, False, smallList, True, 'small_unseen_bayes')
+# Small Unseen Bayes
+preprocess_classifier('unseen', clsBayes, False, smallList, True, 'small_unseen_bayes', '')
 
-# # Small Unseen J48
-# preprocess_classifier('unseen', clsTree, False, smallList, True, 'small_unseen_j48')
+# Small Unseen J48
+preprocess_classifier('unseen', clsTree, False, smallList, True, 'small_unseen_j48', '')
 
-# # Occ Seen Bayes
-# preprocess_classifier('seen', clsBayes, True, devList, False, 'occ_seen_bayes')
+# Occ Seen Bayes
+preprocess_classifier('seen', clsBayes, True, devList, False, 'occ_seen_bayes', '')
 
-# # Occ Seen J48
-# preprocess_classifier('seen', clsTree, True, devList, False, 'occ_seen_j48')
+# Occ Seen J48
+preprocess_classifier('seen', clsTree, True, devList, False, 'occ_seen_j48', '')
 
-# # Occ Unseen Bayes
-# preprocess_classifier('unseen', clsBayes, True, devList, False, 'occ_unseen_bayes')
+# Occ Unseen Bayes
+preprocess_classifier('unseen', clsBayes, True, devList, False, 'occ_unseen_bayes', '')
 
 # Occ Unseen J48
-# preprocess_classifier('unseen', clsTree, True, devList, False, 'occ_unseen_j48', 'orig')
+preprocess_classifier('unseen', clsTree, True, devList, False, 'occ_unseen_j48', 'orig')
 
-# # Occ Small Seen Bayes
-# preprocess_classifier('seen', clsBayes, True, smallList, True, 'occ_small_seen_bayes')
+# Occ Small Seen Bayes
+preprocess_classifier('seen', clsBayes, True, smallList, True, 'occ_small_seen_bayes', '')
 
-# # Occ Small Seen J48
-# preprocess_classifier('seen', clsTree, True, smallList, True, 'occ_small_seen_j48')
+# Occ Small Seen J48
+preprocess_classifier('seen', clsTree, True, smallList, True, 'occ_small_seen_j48', '')
 
-# # Occ Small Unseen Bayes
-# preprocess_classifier('unseen', clsBayes, True, smallList, True, 'occ_small_unseen_bayes')
+# Occ Small Unseen Bayes
+preprocess_classifier('unseen', clsBayes, True, smallList, True, 'occ_small_unseen_bayes', '')
 
-# # Occ Small Unseen J48
-# preprocess_classifier('unseen', clsTree, True, smallList, True, 'occ_small_unseen_j48')
+# Occ Small Unseen J48
+preprocess_classifier('unseen', clsTree, True, smallList, True, 'occ_small_unseen_j48', '')
 
 item_start = datetime.utcnow()
 for rT, cL, oC, dL, fc, lA, sT in process_list:

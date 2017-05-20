@@ -86,6 +86,11 @@ select * from mr_inf_delta where deviceType='Television';
 
 # These set up the categories for the device identification
 # Also the smaller category list
+select deviceType, count(*) as count from valid_powerblades_no1 group by deviceType order by count desc;
+select deviceType, count(*) as count from valid_powerblades_no1 where deviceMAC not in (select * from id_fewcats_mac) group by deviceType order by count desc;
+select deviceType from valid_powerblades where deviceType not in (select * from id_categories) group by deviceType;
+select count(*) from valid_powerblades_no1 where deviceType in (select * from id_categories);
+select count(*) from valid_powerblades_no1;
 
 alter view id_categories as
 select deviceType from valid_powerblades
@@ -100,10 +105,13 @@ alter view id_fewcats as
 select deviceType from valid_powerblades
 where deviceType in
 ('Television', 'Fridge', 'Microwave', 'Laptop computer', 
-'Cable Box', 'Phone charger', 'Toaster', 'Coffee maker')
-or category='Lighting';
+'Cable Box', 'Phone charger', 'Toaster', 'Coffee maker', 'Modem', 'Router', 'Desk lamp', 'Small lamp/light', 'Standing lamp');
 
+select * from valid_powerblades_no1 where deviceType='Other';
+select * from valid_powerblades_no1 where deviceMAC='c098e5700235';
 
+select deviceMAC, avg(varPwr), deviceType from mr_dat_occ_vector where deviceType='Lamp'# and varPwr>4
+group by deviceMAC order by avg(varPwr) desc;
 
 # The following queries are used to observe the data for identification
 
@@ -143,8 +151,8 @@ group by deviceMAC;
 # Devices for the reject set (errors, bad calibration, etc)
 create view vector_reject as
 select deviceMAC from valid_powerblades
-where deviceMAC in ('c098e57001b5', 'c098e57001c5', 
-'c098e57001c8', 'c098e5700163', 'c098e5700233', 'c098e57001ed', 
+where deviceMAC in ('c098e57001b5', 'c098e57001c5', 'c098e57001b1', 'c098e5700175'
+'c098e57001c8', 'c098e5700163', 'c098e5700233', 'c098e57001ed', 'c098e57000ce'
 'c098e570026a', 'c098e57001a0', 'c098e570027d', 'c098e5700238')
 group by deviceMAC;
 
