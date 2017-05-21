@@ -367,10 +367,15 @@ case when t1.deviceType='Router' or t1.deviceType='Modem'
 then 'Router/Modem' else
 t1.deviceType end end as deviceType 
 from
-(dat_occ_vector t1 join
-mr_dat_inter_vector t2
-on t1.deviceMAC=t2.deviceMAC)
+#(
+dat_occ_vector t1# join
+#mr_dat_inter_vector t2
+#on t1.deviceMAC=t2.deviceMAC)
 where t1.id=(select max(t2.id) from dat_occ_vector t2 where t1.deviceMAC=t2.deviceMAC and t1.dayst=t2.dayst);
+
+create table temp_dat_occ_vector like dat_occ_vector;
+create table temp_dat_occ_vector_2 like dat_occ_vector;
+create table temp_dat_occ_vector_occ like dat_occ_vector;
 
 create view id_fewcats_mac as
 select deviceMAC from valid_powerblades_no1 where

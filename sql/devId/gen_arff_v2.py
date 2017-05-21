@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def gen_arff(label, typeStr, results, printOcc):
+def gen_arff(label, typeStr, results, printOcc, datCols):
 	
 	# Create arff file for Weka for all devices
 	arff = open(label + '.arff', 'w')
@@ -60,11 +60,11 @@ def gen_arff(label, typeStr, results, printOcc):
 	for data in results:
 		dataStr = []
 		for idx, datItem in enumerate(data):
-			if(idx > 1):
+			if(idx > datCols):
 				if datItem == None:
 					datItem = 0
 				if printOcc == False:
-					if idx == 9 or idx == 10:
+					if idx == (datCols + 7) or idx == (datCols + 8):
 						continue
 				dataStr.append(str(datItem))
 				dataStr.append(',')
