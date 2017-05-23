@@ -111,7 +111,10 @@ def print_conf_matrix(conf_matrix, stream, latex, plusSign, textCol):
 			total += value
 			typeTotal += value
 
-		writeStr = str(chr(ord('a') + idx)) + ' = ' + str(testName) + ' - ' + str(round(float(typeCorrect)/typeTotal,2)) + ' correct'
+		if typeTotal > 0:
+			writeStr = str(chr(ord('a') + idx)) + ' = ' + str(testName) + ' - ' + str(round(float(typeCorrect)/typeTotal,2)) + ' correct'
+		else:
+			writeStr = str(chr(ord('a') + idx)) + ' = ' + str(testName) + ' - ' + str(0) + ' correct'
 		if latex:
 			stream.write(writeStr + '\t\\\\ \\hline \n\t')
 		else:
@@ -192,15 +195,33 @@ devCount = 0
 save_orig = ''
 save_subtract = ''
 
-total_devices = 0
-total_correct = 0
+final_confidence_correct = {}
+final_confidence_incorrect = {}
+final_accuracy = {}
+
+final_confidence_correct['total'] = []
+final_confidence_incorrect['total'] = []
+final_accuracy['total'] = []
+
+initial_confidence = []
+initial_accuracy = []
+
+new_conf_matrix = {}
+actual_confidence_matrix = {}
 
 def print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, successItem, outStream):
-	global total_devices
-	global total_correct
+	global final_accuracy
+	global initial_confidence
+	global initial_accuracy
+	global final_confidence_correct
+	global final_confidence_incorrect
+	global new_conf_matrix
+	global actual_confidence_matrix
 	finalValue = 0
+	demoninator = 0
 	outStream.write('\n\n' + str(successItem[0]) + '\n')
-	for classEvents in range(1, (len(successItem[1])+1)):
+	#for classEvents in range(1, (len(successItem[1])+1)):
+	for classEvents in range(1, (30+1)):
 		numerator = p_d[successItem[0]]
 		for idx, classInst in enumerate(successItem[1]):
 			if idx < classEvents:
@@ -216,9 +237,68 @@ def print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, successI
 		outStream.write(str(classEvents) + '\t' + str(numerator/demoninator) + '\t\"' + str(successItem[0]) + '\"\t\"' + successItem[1][classEvents-1] + '\"\n')
 		#print(str(classEvents) + '\t' + str(numerator/demoninator) + '\t\"' + str(successItem[0]) + '\"\t\"' + successItem[1][classEvents-1] + '\"')
 	#print('')
-	if finalValue > 0.4:
-		total_correct += 1
-	total_devices += 1
+	# if finalValue > 0.4:
+	# 	total_correct += 1
+	# total_devices += 1
+
+	# final_confidence.append(finalValue)
+
+	if successItem[0] not in final_confidence_correct:
+		final_accuracy[successItem[0]] = []
+		final_confidence_correct[successItem[0]] = []
+		final_confidence_incorrect[successItem[0]] = []
+
+	if successItem[0] not in actual_confidence_matrix:
+		actual_confidence_matrix[successItem[0]] = {}
+
+	# Get the final accuracy (i.e. find the confidence for each label)
+	maxConf = ['', 0]
+	for typeLabel in conf_matrix:
+		numerator = p_d[typeLabel]
+		for classInst in successItem[1]:
+			numerator *= p_e_given_d[typeLabel][classInst]
+		newConf = numerator / demoninator # denom left over from earlier (also I know its spelled wrong, damnit)
+		if newConf > maxConf[1]:
+			maxConf[0] = typeLabel
+			maxConf[1] = newConf
+		if typeLabel not in actual_confidence_matrix[successItem[0]]:
+			actual_confidence_matrix[successItem[0]][typeLabel] = []
+		actual_confidence_matrix[successItem[0]][typeLabel].append(newConf)
+	if maxConf[0] == successItem[0]:
+		final_accuracy['total'].append(1)
+		final_accuracy[successItem[0]].append(1)
+		final_confidence_correct['total'].append(maxConf[1])
+		final_confidence_correct[successItem[0]].append(maxConf[1])
+	else:
+		final_accuracy['total'].append(0)
+		final_accuracy[successItem[0]].append(0)
+		final_confidence_incorrect['total'].append(maxConf[1])
+		final_confidence_incorrect[successItem[0]].append(maxConf[1])
+
+	if successItem[0] not in new_conf_matrix:
+		new_conf_matrix[successItem[0]] = {}
+	if maxConf[0] not in new_conf_matrix[successItem[0]]:
+		new_conf_matrix[successItem[0]][maxConf[0]] = 0
+	new_conf_matrix[successItem[0]][maxConf[0]] += 1
+
+	# Get the average confidence and accuracy for each individual classification
+	for classInst in successItem[1]:
+		maxConf = ['', 0]
+		for typeLabel in conf_matrix:
+			numerator = p_e_given_d[typeLabel][classInst] * p_d[typeLabel]
+			demoninator = 0
+			for otherName in conf_matrix:
+				demoninator += p_e_given_d[otherName][classInst] * p_d[otherName]
+			newConf = numerator/demoninator
+			if newConf > maxConf[1]:
+				maxConf[0] = typeLabel
+				maxConf[1] = newConf
+		initial_confidence.append(maxConf[1])
+		if successItem[0] == maxConf[0]:
+			initial_accuracy.append(1)
+		else:
+			initial_accuracy.append(0)
+
 
 def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 	global devCount
@@ -326,6 +406,11 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 				predictions += pyrandom.sample(predictions, 100 - len(predictions))
 
 			indiv_results[dev] = [testName, pyrandom.sample(predictions, 100)]
+
+			# while len(predictions) < 100:
+			# 	predictions += pyrandom.sample(predictions, 1)
+
+			# indiv_results[dev] = [testName, predictions]
 
 			# indiv_results[dev] = [testName, predictions]
 
@@ -441,9 +526,37 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 			print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, indiv_results[devItem], eachDev)
 		print('')
 		print('total devices: ' + str(len(indiv_results)))
-		print('total devices: ' + str(total_devices))
-		print('total correct: ' + str(total_correct))
+		# print('total devices: ' + str(total_devices))
+		# print('total correct: ' + str(total_correct))
+		# print('  pct correct: ' + str(round(100*float(total_correct)/total_devices,2)) + '\n')
 
+		print('initial confidence: ' + str(round(100*float(sum(initial_confidence))/len(initial_confidence),2)))
+		print('initial accuracy: ' + str(round(100*float(sum(initial_accuracy))/len(initial_accuracy),2)) + '\n')
+
+		# print('final confidence (correct): ' + str(round(100*float(sum(final_confidence_correct))/len(final_confidence_correct),2)))
+		# print('final confidence (correct): ' + str(round(100*float(sum(final_confidence_incorrect))/len(final_confidence_incorrect),2)))
+		# print('final accuracy: ' + str(round(100*float(total_correct)/total_devices,2)))
+
+		for devType in final_accuracy:
+			print('final accuracy ' + devType + ' : ' + str(round(float(sum(final_accuracy[devType]))/len(final_accuracy[devType]),6)))
+			print('final confidence (correct) ' + devType + ' : ' + str(round(float(sum(final_confidence_correct[devType]))/len(final_confidence_correct[devType]),6)))
+			if len(final_confidence_incorrect[devType]) > 0:
+				print('final confidence (incorrect) ' + devType + ' : ' + str(round(float(sum(final_confidence_incorrect[devType]))/len(final_confidence_incorrect[devType]),6)))
+			else:
+				print('final confidence (incorrect) ' + devType + ' : ' + str(0))
+			print('final confidence ' + devType + ' : ' + str(round(float(sum(final_confidence_correct[devType])+sum(final_confidence_incorrect[devType]))/(len(final_confidence_correct[devType])+len(final_confidence_incorrect[devType])),2)))
+
+		print_conf_matrix(new_conf_matrix, sys.stdout, False, False, False)
+
+		for topType in actual_confidence_matrix:
+			for botType in actual_confidence_matrix[topType]:
+				storeArray = actual_confidence_matrix[topType][botType]
+				if len(storeArray) > 0:
+					actual_confidence_matrix[topType][botType] = round(sum(storeArray)/len(storeArray),2)
+				else:
+					actual_confidence_matrix[topType][botType] = 0
+
+		print_conf_matrix(actual_confidence_matrix, sys.stdout, False, False, False)
 
 	elif runType == 'seen':
 		if fewCats:
