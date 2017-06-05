@@ -5,7 +5,7 @@
 # Grouped by location, the start, end, duration, and number of PowerBlades 
 alter view inf_dep_pb as
 select location, min(startTime) as startTime, least(utc_timestamp(), max(endTime)) as endTime, 
-1+datediff(least('2017-04-11 11:00:00', max(endTime)), min(startTime)) as duration,
+1+datediff(max(endTime), min(startTime)) as duration,
 count(*) as pb_count 
 from valid_powerblades 
 where location!=10
@@ -16,7 +16,7 @@ group by location;
 # Grouped by location, start, end, duration, and number of gateways
 alter view inf_dep_gw as
 select location, min(startTime) as startTime, least(utc_timestamp(), max(endTime)) as endTime,
-1+datediff(least('2017-04-11 11:00:00', max(endTime)), min(startTime)) as duration,
+1+datediff(max(endTime), min(startTime)) as duration,
 count(*) as gw_count
 from most_recent_gateways
 where location!=10
@@ -87,8 +87,9 @@ sum(gw_count) as sumGw, avg(gw_count) as avgGw, min(gw_count) as minGw, max(gw_c
 sum(bl_count) as sumBl, avg(bl_count) as avgBl, min(bl_count) as minBl, max(bl_count) as maxBl,
 sum(li_count) as sumLi, avg(li_count) as avgLi, min(li_count) as minLi, max(li_count) as maxLi
 from inf_dep_stats
-where location!=2
-and location!=1;
+where location!=11
+and location!=1
+and location!=2;
 
 select min(t1.dayst), max(t1.dayst), t2.location from 
 (mr_dat_vector t1 

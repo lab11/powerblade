@@ -187,3 +187,119 @@ and deviceMAC in (select * from vector_test)
 and deviceType in (select * from id_fewcats);
 
 
+
+
+
+# Re-doing the device breakdown based on the classification results
+select * from mr_final_results;
+
+create table class_results (deviceMAC char(12), actType varchar(50), classType varchar(50));
+
+load data local infile '/Users/sdebruin/repo/powerblade/sql/devId/csv_ids.dat' into table class_results fields terminated by ',' (deviceMAC, actType, classType);
+
+select * from class_results where actType!=classType;
+
+select * from class_results where deviceMAC not in (select deviceMAC from class_results_category);
+delete from class_results;
+
+create view deviceTypeList as
+select deviceType, category from valid_powerblades_no1 group by deviceType;
+select * from deviceTypeList;
+
+alter view class_results_category as
+select deviceMAC, actType, classType, category as classCat from
+class_results t1 join 
+deviceTypeList t2 on t1.classType=t2.deviceType;
+
+select * from class_results_category;
+
+select * from mr_final_results;
+
+create view mr_class_final_results as
+select t1.*, t2.classCat from 
+mr_final_results t1
+left join class_results_category t2 on 
+t1.deviceMAC=t2.deviceMAC;
+
+select * from mr_class_final_results;
+
+alter view mr_class_cat_breakdown as
+select t2.location, t1.category, case when t1.category in (select category from mr_class_final_results t3 where t2.location=t3.location) then
+(select sum(avgEnergy) from mr_class_final_results t4 where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' and t2.location=t4.location and t1.category=t4.classCat)
+else 0 end as catSum from
+mr_final_categories t1
+join
+mr_final_locations t2;
+
+select * from mr_class_final_results;
+
+select * from mr_final_results where category='Entertainment' and deviceMAC!='c098e57000E6' and deviceMAC!='c098e570018D';
+select location, sum(avgEnergy) from mr_final_results where category='Overhead' group by location;
+select * from mr_final_results where category='Screen/Display' group by location;
+select * from mr_final_results where category='Lighting';
+
+alter view newClassEnergy as
+select ta.deviceMAC, ta.location, ta.category as actCat, ta.avgEnergy as actEnergy, tb.classCat as classCat
+from mr_final_results ta
+join mr_class_final_results tb
+on ta.deviceMAC=tb.deviceMAC;
+
+alter view class_breakdown as
+select location, actCat, sum(actEnergy) as totEnergy from newClassEnergy where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' group by location, actCat;
+
+create view class_breakdown_new as
+select location, classCat, sum(actEnergy) as totEnergy from newClassEnergy where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' group by location, actCat;
+
+select actCat, avg(totEnergy) from class_breakdown group by actCat;
+
+# Energy distribution by category for all locations
+# This uses mr_cat_breakdown and calculates min, max, mean, q1, and q3 for energy
+create view mr_class_cat_en as
+(select t1.category, min(t1.catSum) as minEn,
+(select avg(catSum) from mr_class_cat_breakdown t2 where t1.category=t2.category and t2.catSum<=(select avg(catSum) from mr_class_cat_breakdown t9 where t9.category=t1.category)) as q1En,
+avg(t1.catSum) as meanEn,
+(select avg(catSum) from mr_class_cat_breakdown t3 where t1.category=t3.category and t3.catSum>=(select avg(catSum) from mr_class_cat_breakdown t10 where t10.category=t1.category)) as q3En,
+max(t1.catSum) as maxEn
+from mr_class_cat_breakdown t1
+group by t1.category);
+
+# Power distribution by category for all locations
+# This uses mr_cat_breakdown and calculates min, max, mean, q1, and q3 for power
+create view mr_class_cat_pwr as
+(select t4.classCat, min(t4.avgPower) as minPwr,
+(select avg(avgPower) from mr_class_final_results t5 where t4.classCat=t5.classCat and t5.avgPower<=(select avg(avgPower) from mr_class_final_results t7 where t7.classCat=t4.classCat)) as q1Pwr,
+avg(t4.avgPower) as meanPwr,
+(select avg(avgPower) from mr_class_final_results t6 where t4.classCat=t6.classCat and t6.avgPower>=(select avg(avgPower) from mr_class_final_results t8 where t8.classCat=t4.classCat)) as q3Pwr,
+max(t4.avgPower) as maxPwr
+from mr_class_final_results t4
+where t4.avgPower>0
+group by t4.classCat);
+
+# Total data table for category breakdown
+# For each category, min, max, mean, q1, and q3 for both energy and power
+create view mr_class_cat_en_pwr as
+select tEn.category, tEn.minEn, tEn.q1En, tEn.meanEn, tEn.q3En, tEn.maxEn, tPwr.minPwr, tPwr.q1Pwr, tPwr.meanPwr, tPwr.q3Pwr, tPwr.maxPwr from
+mr_class_cat_en tEn
+join
+mr_class_cat_pwr tPwr
+on tEn.category=tPwr.classCat
+order by tEn.meanEn asc;
+
+select * from mr_class_cat_en_pwr;
+select t1.*, t2.meanEn from 
+mr_class_cat_en t1 
+join 
+mr_cat_en t2 
+on t1.category=t2.category
+order by t1.meanEn desc;
+
+show processlist;
+kill 24915;
+
+
+
+
+
+
+
+
