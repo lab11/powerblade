@@ -992,7 +992,7 @@ elif(config['type'] == 'results'):
 		'avgEnergy, avgPower ' \
 		'from mr_final_results ' \
 		'where location!=1 ' \
-		'and category!=\'Overhead\' ' \
+		#'and category!=\'Overhead\' ' \
 		'group by deviceMAC ' \
 		'order by avgEnergy asc;')
 

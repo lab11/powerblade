@@ -284,6 +284,7 @@ join
 mr_final_locations t2;
 
 select * from mr_cat_breakdown;
+select category, avg(catSum) from mr_cat_breakdown group by category;
 
 
 # Energy distribution by category for all locations

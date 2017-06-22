@@ -202,8 +202,11 @@ select * from class_results where actType!=classType;
 select * from class_results where deviceMAC not in (select deviceMAC from class_results_category);
 delete from class_results;
 
-create view deviceTypeList as
-select deviceType, category from valid_powerblades_no1 group by deviceType;
+select * from deviceTypeList;
+select * from valid_powerblades_no1 where category='Kitchen';
+
+alter view deviceTypeList as
+select deviceType, category from valid_powerblades_no1 where category!='Kitchen' group by deviceType;
 select * from deviceTypeList;
 
 alter view class_results_category as
@@ -242,15 +245,32 @@ alter view newClassEnergy as
 select ta.deviceMAC, ta.location, ta.category as actCat, ta.avgEnergy as actEnergy, tb.classCat as classCat
 from mr_final_results ta
 join mr_class_final_results tb
-on ta.deviceMAC=tb.deviceMAC;
+on ta.deviceMAC=tb.deviceMAC
+where ta.deviceMAC!='c098e5700195' and ta.deviceMAC!='c098e5700193' and ta.deviceMAC!='c098e57001A0' and ta.deviceMAC!='c098e5700193' and ta.deviceMAC!='c098e57000E6' and ta.deviceMAC!='c098e570018D' and ta.deviceMAC!='c098e57000CE' and ta.deviceMAC!='c098e5700169';
+
+create view newNewClassEnergy as
+select * from newClassEnergy union
+select deviceMAC, location, category, avgEnergy, category from mr_final_results where category='Entertainment' and deviceType!='Cable Box' union
+select deviceMAC, location, category, avgEnergy, category from mr_final_results where category='Computer' and deviceType!='Laptop Computer';
+select * from mr_final_results where category='Entertainment' and deviceType!='Cable Box';
 
 alter view class_breakdown as
-select location, actCat, sum(actEnergy) as totEnergy from newClassEnergy where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' group by location, actCat;
+select location, actCat, sum(actEnergy) as totEnergy from newNewClassEnergy where deviceMAC!='c098e5700195' and deviceMAC!='c098e5700193' and deviceMAC!='c098e57001A0' and deviceMAC!='c098e5700193' and deviceMAC!='c098e57000E6' and deviceMAC!='c098e570018D' and deviceMAC!='c098e57000CE' and deviceMAC!='c098e5700169' group by location, actCat;
 
-create view class_breakdown_new as
-select location, classCat, sum(actEnergy) as totEnergy from newClassEnergy where deviceMAC!='c098e57001A0' and deviceMAC !='c098e5700193' group by location, actCat;
+alter view class_breakdown_new as
+select location, classCat, sum(actEnergy) as totEnergy from newNewClassEnergy where deviceMAC!='c098e5700195' and deviceMAC!='c098e5700193' and deviceMAC!='c098e57001A0' and deviceMAC!='c098e5700193' and deviceMAC!='c098e57000E6' and deviceMAC!='c098e570018D' and deviceMAC!='c098e57000CE' and deviceMAC!='c098e5700169' group by location, classCat;
 
-select actCat, avg(totEnergy) from class_breakdown group by actCat;
+select * from newNewClassEnergy;
+select * from newNewClassEnergy where actCat='Fridge' or classCat='Fridge' or actCat='Screen/Display' or classCat='Screen/Display';
+
+select actCat, sum(totEnergy)/7 from class_breakdown group by actCat;
+select sum(totEnergy) from class_breakdown_new;
+
+select ta.*, tb.avgEnergy from 
+(select actCat, sum(totEnergy)/7 as avgEnergy from class_breakdown group by actCat) ta
+join
+(select classCat, sum(totEnergy)/7 as avgEnergy from class_breakdown_new group by classCat) tb
+on ta.actCat=tb.classCat;
 
 # Energy distribution by category for all locations
 # This uses mr_cat_breakdown and calculates min, max, mean, q1, and q3 for energy

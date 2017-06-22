@@ -1,5 +1,5 @@
 libSVM
 *.arff
 savetest
-confidence.dat
-indiv_results.dat
+*.dat*
+conf_matrix.txt

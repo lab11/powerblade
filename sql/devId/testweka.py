@@ -29,6 +29,8 @@ from weka.classifiers import Classifier, Evaluation
 from weka.core.converters import Loader, Saver
 from weka.core.classes import Random
 
+import statistics as st
+
 import random as pyrandom
 
 arff_idcol = 2
@@ -209,7 +211,40 @@ initial_accuracy = []
 new_conf_matrix = {}
 actual_confidence_matrix = {}
 
-def print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, successItem, outStream):
+acc_over_time = {}
+conf_over_time = {}
+
+acc_over_time_dev = {}
+conf_over_time_dev = {}
+
+numberedDevList = []
+
+def findMaxConf(p_e_given_d, p_d, classList):
+	maxConf = ['', 0]
+	for typeLabel in p_e_given_d:
+		numerator = p_d[typeLabel]
+		for classInst in classList:
+			numerator *= p_e_given_d[typeLabel][classInst]
+		demoninator = 0
+		for otherName in p_e_given_d:
+			obsValue = p_d[otherName]
+			for classInst in classList:
+				obsValue *= p_e_given_d[otherName][classInst]
+			demoninator += obsValue
+		newConf = numerator / demoninator
+		if newConf > maxConf[1]:
+			maxConf[0] = typeLabel
+			maxConf[1] = newConf
+	return maxConf
+
+def numberDevList(successList):
+	global numberedDevList
+	for devItem in successList:
+		if successList[devItem][0] not in numberedDevList:
+			numberedDevList.append(successList[devItem][0])
+	print(numberedDevList)
+
+def print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, successItem, outStream, devItem, newIDStream):
 	global final_accuracy
 	global initial_confidence
 	global initial_accuracy
@@ -217,11 +252,13 @@ def print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, successI
 	global final_confidence_incorrect
 	global new_conf_matrix
 	global actual_confidence_matrix
+	global conf_over_time
+	global acc_over_time
 	finalValue = 0
 	demoninator = 0
 	outStream.write('\n\n' + str(successItem[0]) + '\n')
-	#for classEvents in range(1, (len(successItem[1])+1)):
-	for classEvents in range(1, (30+1)):
+	for classEvents in range(1, (len(successItem[1])+1)):
+	#for classEvents in range(1, (30+1)):
 		numerator = p_d[successItem[0]]
 		for idx, classInst in enumerate(successItem[1]):
 			if idx < classEvents:
@@ -233,8 +270,31 @@ def print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, successI
 				if idx < classEvents:
 					obsValue *= p_e_given_d[otherName][classInst]
 			demoninator += obsValue
-		finalValue = numerator/demoninator
-		outStream.write(str(classEvents) + '\t' + str(numerator/demoninator) + '\t\"' + str(successItem[0]) + '\"\t\"' + successItem[1][classEvents-1] + '\"\n')
+		if demoninator > 0:
+			finalValue = numerator/demoninator
+		else:
+			finalValue = -1
+		outStream.write(str(classEvents) + '\t' + str(numerator/demoninator) + '\t' + str(numberedDevList.index(successItem[0])) + '\t\"' + str(successItem[0]) + '\"\t\"' + successItem[1][classEvents-1] + '\"\n')
+		if successItem[0] not in conf_over_time_dev:
+			acc_over_time_dev[successItem[0]] = {}
+			conf_over_time_dev[successItem[0]] = {}
+		if classEvents not in conf_over_time:
+			acc_over_time[classEvents] = []
+			conf_over_time[classEvents] = []
+		if classEvents not in conf_over_time_dev[successItem[0]]:
+			acc_over_time_dev[successItem[0]][classEvents] = []
+			conf_over_time_dev[successItem[0]][classEvents] = []
+
+		maxConf = findMaxConf(p_e_given_d, p_d, successItem[1][0:classEvents])
+		conf_over_time[classEvents].append(maxConf[1])
+		conf_over_time_dev[successItem[0]][classEvents].append(finalValue)
+		newIDStream.write(str(devItem) + '\t' + str(successItem[0]) + '\t' + str(maxConf[0]) + '\n')
+		if maxConf[0] == successItem[0]:
+			acc_over_time[classEvents].append(1)
+			acc_over_time_dev[successItem[0]][classEvents].append(1)
+		else:
+			acc_over_time[classEvents].append(0)
+			acc_over_time_dev[successItem[0]][classEvents].append(0)
 		#print(str(classEvents) + '\t' + str(numerator/demoninator) + '\t\"' + str(successItem[0]) + '\"\t\"' + successItem[1][classEvents-1] + '\"')
 	#print('')
 	# if finalValue > 0.4:
@@ -298,6 +358,17 @@ def print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, successI
 			initial_accuracy.append(1)
 		else:
 			initial_accuracy.append(0)
+
+def printOverTime(label, this_acc_over_time, this_conf_over_time):
+	print('\n\n' + str(label))
+	for numEvents in this_acc_over_time:
+		accMean = st.mean(this_acc_over_time[numEvents])
+		accStd = st.pstdev(this_acc_over_time[numEvents])
+
+		confMean = st.mean(this_conf_over_time[numEvents])
+		confStd = st.pstdev(this_conf_over_time[numEvents])
+
+		print(str(numEvents) + '\t' + str(accMean) + '\t' + str(accStd) + '\t' + str(confMean) + '\t' + str(confStd))
 
 
 def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
@@ -378,7 +449,15 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 			testName = ''
 			predictions = []
 			for index, inst in enumerate(test):
-				testName = inst.get_string_value(inst.class_index)
+				if testName != '':
+					if testName != inst.get_string_value(inst.class_index):
+						print(str(testName) + ' ' + str(inst.get_string_value(inst.class_index)))
+						exit()
+					else:
+						testName = inst.get_string_value(inst.class_index)	
+				else:
+					testName = inst.get_string_value(inst.class_index)
+
 				if testName not in conf_matrix:
 					conf_matrix[testName] = {}
 
@@ -400,12 +479,19 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 					else:
 						total += conf_matrix[testName][predName]
 
-			while (len(predictions) * 2) <= 100:
-				predictions += pyrandom.sample(predictions, len(predictions))
-			if len(predictions) < 100:
-				predictions += pyrandom.sample(predictions, 100 - len(predictions))
 
-			indiv_results[dev] = [testName, pyrandom.sample(predictions, 100)]
+			# while (len(predictions) * 2) <= 100:
+			# 	predictions += pyrandom.sample(predictions, len(predictions))
+			# if len(predictions) < 100:
+			# 	predictions += pyrandom.sample(predictions, 100 - len(predictions))
+
+			lots_predictions = []
+			while len(lots_predictions) < 10000:
+				lots_predictions += pyrandom.sample(predictions, 1)
+
+			#indiv_results[dev] = [testName, pyrandom.sample(predictions, 100)]
+
+			indiv_results[dev] = [testName, lots_predictions]
 
 			# while len(predictions) < 100:
 			# 	predictions += pyrandom.sample(predictions, 1)
@@ -520,10 +606,12 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 				print(str(classEvents) + '\t' + str(numerator_router/demoninator) + '\t' + str(numerator_lamp/demoninator) + '\t' + str(numerator_cable/demoninator) + '\t\"' + classList[classEvents-1]) + '\"'
 			print('')
 
+		numberDevList(indiv_results)
 
 		eachDev = open('indiv_results.dat', 'w')
+		newIDStream = open('new_id.dat', 'w')
 		for devItem in indiv_results:
-			print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, indiv_results[devItem], eachDev)
+			print_obsResults(conf_matrix, conf_interval, p_d, p_e, p_e_given_d, indiv_results[devItem], eachDev, devItem, newIDStream)
 		print('')
 		print('total devices: ' + str(len(indiv_results)))
 		# print('total devices: ' + str(total_devices))
@@ -556,7 +644,13 @@ def process_classifier(runType, cls, occ, devList, fewCats, label, subtract):
 				else:
 					actual_confidence_matrix[topType][botType] = 0
 
+		print_conf_matrix(conf_matrix, sys.stdout, False, False, False)
 		print_conf_matrix(actual_confidence_matrix, sys.stdout, False, False, False)
+		print_conf_matrix(actual_confidence_matrix, sys.stdout, True, False, True)
+
+		for devType in acc_over_time_dev:
+			printOverTime(devType, acc_over_time_dev[devType], conf_over_time_dev[devType])
+		printOverTime('total', acc_over_time, conf_over_time)
 
 	elif runType == 'seen':
 		if fewCats:
@@ -757,7 +851,7 @@ jvm.stop()
 
 # conf_new = sub_conf_matrix(save_orig, save_subtract)
 # print('\nFull Unseen J48\n')
-# print_conf_matrix(save_orig, sys.stdout, True, False, True)
+print_conf_matrix(save_subtract, sys.stdout, True, False, True)
 # print('\nOcc Unseen J48\n')
 # print_conf_matrix(conf_new, sys.stdout, True, True, True)
 
