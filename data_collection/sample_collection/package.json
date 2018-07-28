@@ -1,0 +1,10 @@
+{
+  "name": "powerblade_sample_collection",
+  "version": "1.0.0",
+  "description": "Download sample data from PowerBlades",
+  "main": "collect_samples.js",
+  "author": "Branden Ghena",
+  "dependencies": {
+    "noble": "^1.9.1"
+  }
+}
