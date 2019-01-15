@@ -2,3 +2,4 @@
 *.dat
 *.pdf
 *.eps
+package-lock.json

@@ -3,23 +3,16 @@
 // imports
 var noble = require('noble');
 var fs = require('fs');
-var calib = require('./lib/calibrate_samples');
 
 // input from user
 var target_device = 'c0:98:e5:70:45:36';
 if (process.argv.length >= 3) {
     target_device = process.argv[2];
-}
-var wattage = 200;
-if (process.argv.length >= 4) {
-    wattage = process.argv[3];
-}
-var voltage = 120;
-if (process.argv.length >= 5) {
-    voltage = process.argv[4];
+} else {
+    console.log("Need to specify a device address. For example:\n\tsudo ./collect_samples.js c0:98:e5:70:02:6a");
+    process.exit(1);
 }
 console.log("Looking for " + target_device);
-console.log("Calibrating at " + wattage + " W and " + voltage + " V");
 
 // reference to discovered peripheral
 var powerblade_periph;
@@ -70,23 +63,30 @@ noble.on('disconnect', function () {
 
 // find correct device and connect to it
 noble.on('discover', function (peripheral) {
-    //console.log(peripheral.address);
+    // print the address of each BLE peripheral
+    //console.log('ADV: ' + peripheral.address);
+
+    // found it!
     if (peripheral.address == target_device) {
-        noble.stopScanning();
+        noble.stopScanning( function() {
+	        console.log('Found PowerBlade (' + peripheral.address +')');
+	        process.stdout.write('Connecting... ');
+	        powerblade_periph = peripheral;
+	        
+	        peripheral.connect(function (error) {
+	            console.log('done\n');
 
-        console.log('Found PowerBlade (' + peripheral.address +')\n');
-        console.log('Connecting...');
-        powerblade_periph = peripheral;
-        
-        peripheral.connect(function (error) {
-            console.log('\tConnected\n');
-
-            // delay before discovering services so that connection
-            //  parameters can be established
-            //XXX: check on a power trace that this is fine
-            setTimeout(discover_rawSample, 1000);
-        });
+	            // delay before discovering services so that connection
+	            //  parameters can be established
+                setTimeout(discover_rawSample, 100);
+	        });
+    	});
     }
+});
+
+// print when warnings occur
+noble.on('warning', function () {
+	console.log("Noble Warning Captured");
 });
 
 // print errors if they occur during service/characteristic discovery
@@ -101,7 +101,9 @@ function log_discovery_error(desired_char, discovered_list) {
 // wrapper for discovering a characteristic
 function discover_char(service, char_uuid, callback) {
     service.discoverCharacteristics([char_uuid], function(error, chars) {
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
         if (chars.length != 1) {
             log_discovery_error(char_uuid, chars);
             return;
@@ -111,9 +113,12 @@ function discover_char(service, char_uuid, callback) {
 }
 
 function discover_rawSample() {
-    console.log("Discovering raw sample service");
+    console.log("Discovering services. This takes about 10 seconds.");
+    process.stdout.write("  Discovering raw sample service... ");
     powerblade_periph.discoverServices([rawSample_service_uuid], function(error, services) {
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
         if (services.length != 1) {
             log_discovery_error(rawSample_service_uuid, services);
             return;
@@ -131,7 +136,7 @@ function discover_rawSample() {
                     rawSample_status_char = characteristic;
                     rawSample_status_char.on('data', RawSample_status_receive);
                     rawSample_status_char.notify(true);
-                    console.log("\tComplete\n");
+                    console.log("done");
 
                     discover_config();
                 });
@@ -141,9 +146,11 @@ function discover_rawSample() {
 }
 
 function discover_config() {
-    console.log("Discovering configuration service");
+    process.stdout.write('  Discovering configuration service... ');
     powerblade_periph.discoverServices([config_service_uuid], function(error, services) {
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
         if (services.length != 1) {
             log_discovery_error(config_service_uuid, services);
             return;
@@ -172,10 +179,9 @@ function discover_config() {
 
                                 discover_char(config_service, config_whscale_uuid, function(characteristic) {
                                     config_whscale_char = characteristic;
-                                    console.log("\tComplete\n");
+                                    console.log("done\n");
 
-                                    // delay before starting to let power catch up
-                                    start_collection();
+                                    read_calibration();
                                 });
                             });
                         });
@@ -194,9 +200,51 @@ function Config_status_receive(data, isNotify) {
     console.log("\t\t" + data[0]);
 }
 
+function read_calibration() {
+    console.log("Reading calibration values from PowerBlade...");
+    config_voff_char.read(function(error, data) {
+        if (error) throw error;
+        calibration_values['voff'] = data.readInt8();
+        console.log("  Voff= " + data.readInt8() + ' (' + data.toString('hex') + ')');
+
+        config_ioff_char.read(function(error, data) {
+            if (error) throw error;
+            calibration_values['ioff'] = data.readInt8();
+            console.log("  Ioff= " + data.readInt8() + ' (' + data.toString('hex') + ')');
+
+            config_curoff_char.read(function(error, data) {
+                if (error) throw error;
+                calibration_values['curoff'] = data.readInt8();
+                console.log("  Curoff= " + data.readInt8() + ' (' + data.toString('hex') + ')');
+
+                config_pscale_char.read(function(error, data) {
+                    if (error) throw error;
+                    calibration_values['pscale'] = data.readUInt16LE();
+                    console.log("  PScale= " + data.readUInt16LE() + ' (' + data.toString('hex') + ')');
+
+                    config_vscale_char.read(function(error, data) {
+                        if (error) throw error;
+                        calibration_values['vscale'] = data.readUInt8();
+                        console.log("  VScale= " + data.readUInt8() + ' (' + data.toString('hex') + ')');
+
+                        config_whscale_char.read(function(error, data) {
+                            if (error) throw error;
+                            calibration_values['whscale'] = data.readUInt8();
+                            console.log("  WHScale= " + data.readUInt8() + ' (' + data.toString('hex') + ')');
+
+                            console.log("Complete\n");
+                            start_collection();
+                        });
+                    });
+                });
+            });
+        });
+    });
+}
+
 function start_collection() {
     // everything is ready, start raw sample collection
-    console.log("Starting raw sample collection");
+    console.log("Starting raw sample collection. This takes about 30 seconds and reads 10 times.");
     rawSample_start_char.write(new Buffer([0x01]));
 }
 
@@ -205,22 +253,20 @@ function RawSample_status_receive(data, isNotify) {
 
     // check value for next state
     if (data[0] == 1) {
-        console.log("New data available (" + data_chunk_number + ")");
+        console.log("  New data available (" + data_chunk_number + ")");
         data_chunk_number++;
-        //XXX: check on a power trace that this is fine
         read_data();
     } else if (data[0] == 2) {
-        console.log("All data has been read\n");
+        console.log("  All data has been read\nComplete\n");
 
-        // calculate calibration numbers
-        console.log("Calculating calibration numbers...")
-        calibration_values = calib.calculate_constants(wattage, voltage, sampleData);
+        // apply calibration values to data and save results
+        console.log("Applying calibration and saving results in 'data/'");
+        adjust_and_save(calibration_values, sampleData);
 
-        // write the calculated calibration values back to the powerblade
-        console.log("Not writing calibration\n");
+        // finished
+        console.log("Complete");
         powerblade_periph.disconnect();
         process.exit(0);
-        //write_calibration();
     }
 }
 
@@ -233,9 +279,7 @@ function read_data() {
 var output_file_no = 0;
 function RawSample_data_receive(data) {
     // do something with the data
-    console.log("\tComplete\n");
-
-    //XXX: adjust this to grab sequence number as first byte
+    console.log("\tComplete");
 
     // save data to files in case we want to manually review it
     fs.writeFileSync('data/rawSamples_num' + output_file_no + '.bin', data);
@@ -245,45 +289,58 @@ function RawSample_data_receive(data) {
     sampleData = Buffer.concat([sampleData, data]);
 
     // write status to request next data
-    console.log("Requesting next data");
+    console.log("  Requesting next data");
     rawSample_status_char.write(new Buffer([0x01]), false, function(error) {
         if (error) throw error;
-        console.log("\tWrite Complete\n");
+        console.log("\tWrite Complete");
     });
 }
 
-function write_calibration() {
-    console.log("Writing calibration values to PowerBlade...");
-    config_voff_char.write(calibration_values['voff'], false, function(error) {
-        if (error) throw error;
+function adjust_and_save(calibration_values, dataArr) {
 
-        config_ioff_char.write(calibration_values['ioff'], false, function(error) {
-            if (error) throw error;
+    // split data array into current and voltage samples
+    var dataLen = dataArr.length / 4;
+    var dataBuf = new Buffer(dataArr);
+    var voltageArr = [];
+    var currentArr = [];
+    var voltageIndex = 0;
+    var currentIndex = 2;
+    for(var i = 0; i < dataLen; i++) {
+        voltageArr.push(dataBuf.readInt16BE(4*i + voltageIndex));
+        currentArr.push(dataBuf.readInt16BE(4*i + currentIndex));
+    }
 
-            config_curoff_char.write(calibration_values['curoff'], false, function(error) {
-                if (error) throw error;
+    // calibration values for the powerblade
+    var voff = calibration_values['voff'];
+    var ioff = calibration_values['ioff'];
+    var curoff = calibration_values['curoff'];
+    var pscale = calibration_values['pscale'];
+    var vscale = calibration_values['vscale'];
 
-                config_pscale_char.write(calibration_values['pscale'], false, function(error) {
-                    if (error) throw error;
+    // set calibration values per powerblade specification
+    pscale = (pscale & 0xFFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
+    vscale = vscale / 200;
 
-                    config_vscale_char.write(calibration_values['vscale'], false, function(error) {
-                        if (error) throw error;
+    // integrate current values, also write raw samples to file while iterating them
+    var integrate = [];
+    var aggCurrent = 0;
+    fs.writeFileSync('data/rawSamples.dat', '# Count\tVoltage\tCurrent\tInt\n');
+    for(var i = 0; i < dataLen; i++) {
+        var newCurrent = currentArr[i] - ioff;
+        aggCurrent += (newCurrent + (newCurrent >> 1));
+        aggCurrent -= aggCurrent >> 5;
+        integrate[i] = (aggCurrent >> 3);
 
-                        config_whscale_char.write(calibration_values['whscale'], false, function(error) {
-                            if (error) throw error;
+        fs.appendFileSync('data/rawSamples.dat', i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i] + '\n');
+    }
 
-                            // writing complete
-                            console.log("\tComplete\n");
+    // write adjusted results to file
+    fs.writeFileSync('data/realSamples.dat', '# Count\tVoltage\tCurrent\n');
+    for (var i=0; i < dataLen; i++) {
+        var real_voltage = vscale*(voltageArr[i] - voff);
+        var real_integrate = (pscale/vscale)*(integrate[i] - curoff);
 
-                            // calibration is complete
-                            console.log("Calibration Finished!");
-                            calibration_values = powerblade_periph.disconnect();
-                            process.exit(0);
-                        });
-                    });
-                });
-            });
-        });
-    });
+        fs.appendFileSync('data/realSamples.dat', i + '\t' + real_voltage + '\t' + real_integrate + '\n');
+    }
 }
 
