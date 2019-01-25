@@ -3,6 +3,7 @@
 // imports
 var noble = require('noble');
 var fs = require('fs');
+var keypress = require('keypress');
 
 // input from user
 var target_device = 'c0:98:e5:70:45:36';
@@ -233,7 +234,17 @@ function read_calibration() {
                             console.log("  WHScale= " + data.readUInt8() + ' (' + data.toString('hex') + ')');
 
                             console.log("Complete\n");
-                            start_collection();
+
+                            // wait for user keypress
+                            console.log("Press any key to start sample collection...\n");
+                            keypress(process.stdin)
+                            process.stdin.on('keypress', function (ch, key) {
+                                if (key) {
+                                    start_collection();
+                                }
+                            });
+                            process.stdin.setRawMode(true);
+                            process.stdin.resume();
                         });
                     });
                 });

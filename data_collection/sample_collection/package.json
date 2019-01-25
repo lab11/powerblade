@@ -5,6 +5,7 @@
   "main": "collect_samples.js",
   "author": "Branden Ghena",
   "dependencies": {
+    "keypress": "^0.2.1",
     "noble": "^1.9.1"
   }
 }
