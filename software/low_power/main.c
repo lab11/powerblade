@@ -51,6 +51,8 @@ int16_t voltage[BACKLOG_LEN];
 int16_t savedCurrent;
 int16_t savedVoltage;
 #endif
+int32_t waveform_i[SAMCOUNT];
+int16_t waveform_v[SAMCOUNT];
 uint8_t currentWriteCount;
 uint8_t currentReadCount;
 uint8_t voltageWriteCount;
@@ -324,6 +326,7 @@ void transmit(void) {
 }
 
 void transmitTry(void) {
+    uint8_t i;
 
 	P1OUT |= BIT3;
 
@@ -354,14 +357,22 @@ void transmitTry(void) {
 		}
 	}
 
-	// Perform calculations for I^2, V^2, and P
-	acc_i_rms += (uint64_t)(new_current * new_current);
-	acc_p_ave += ((int64_t)savedVoltage * new_current);
-	acc_v_rms += (uint64_t)((int32_t)savedVoltage * (int32_t)savedVoltage);
+	waveform_i[sampleCount] = (int32_t)new_current;
+	waveform_v[sampleCount] = (int16_t)savedVoltage;
 
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
-		// Reset sampleCount once per wave
+
+	    // Perform calculations for I^2, V^2, and P
+	    for(i = 0; i < SAMCOUNT; i++) {
+	        int32_t _current = waveform_i[i];
+	        int16_t _voltage = waveform_v[i];
+	        acc_i_rms += (uint64_t)(_current * _current);
+	        acc_p_ave += ((int64_t)_voltage * _current);
+	        acc_v_rms += (uint64_t)((int32_t)_voltage * (int32_t)_voltage);
+	    }
+
+	    // Reset sampleCount once per wave
 		sampleCount = 0;
 
 		// Increment energy calc
@@ -747,6 +758,7 @@ __interrupt void ADC10_ISR(void) {
 				ready = 0;
 #endif
 			} else if (ready == 0) {
+			    ADC_Result = ADC_VCHG + 1;
 				if (ADC_Result > ADC_VCHG) {
 					SEN_EN_OUT |= SEN_EN_PIN;
 					senseEnabled = 1;
