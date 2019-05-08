@@ -7,6 +7,7 @@
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<triggers>clean,full,incremental,</triggers>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -26,9 +27,19 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>checksum.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/common/source/checksum.c</locationURI>
+		</link>
+		<link>
 			<name>source</name>
 			<type>2</type>
 			<location>C:/Users/Sam/repo/powerblade/software/common/source</location>
+		</link>
+		<link>
+			<name>uart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/common/source/uart.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
