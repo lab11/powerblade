@@ -23,6 +23,12 @@
 #include "uart_types.h"
 #include "checksum.h"
 #include "uart.h"
+#include "DSPLib.h"
+#include "highpass.h"
+
+#define FILTER_LENGTH SAMCOUNT
+#define FILTER_STAGES (sizeof(highpass)/sizeof(msp_biquad_df1_q15_coeffs))
+
 
 //#define NORDICDEBUG
 
@@ -51,8 +57,18 @@ int16_t voltage[BACKLOG_LEN];
 int16_t savedCurrent;
 int16_t savedVoltage;
 #endif
-int32_t waveform_i[SAMCOUNT];
+int16_t waveform_i[SAMCOUNT];
 int16_t waveform_v[SAMCOUNT];
+msp_fill_q15_params fillParams;
+msp_biquad_cascade_df1_q15_params df1Params;
+DSPLIB_DATA(filterCoeffs,4)
+msp_biquad_df1_q15_coeffs filterCoeffs[FILTER_STAGES];
+DSPLIB_DATA(states,4)
+msp_biquad_df1_q15_states states[FILTER_STAGES];
+DSPLIB_DATA(filter_input,4)
+_q15 filter_input[SAMCOUNT] = {0};
+DSPLIB_DATA(filter_result,4)
+_q15 filter_result[SAMCOUNT] = {0};
 uint8_t currentWriteCount;
 uint8_t currentReadCount;
 uint8_t voltageWriteCount;
@@ -250,6 +266,8 @@ int main(void) {
 	// Wait timer for transmissions
   	TA1CTL = TASSEL_1 + MC_2 + TACLR;			// ACLK, up mode
 
+  	// Initialize filter coefficients.
+  	memcpy(filterCoeffs, highpass, sizeof(filterCoeffs));
 
 	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
@@ -325,8 +343,17 @@ void transmit(void) {
 	P1OUT &= ~BIT3;
 }
 
-void transmitTry(void) {
+void in_place_reverse(_q15* a) {
     uint8_t i;
+    for(i=0; i<SAMCOUNT/2; i++) {
+        uint8_t j = SAMCOUNT - 1 - i;
+        _q15 tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    }
+}
+
+void transmitTry(void) {
 
 	P1OUT |= BIT3;
 
@@ -359,13 +386,42 @@ void transmitTry(void) {
 
 	waveform_i[sampleCount] = (int32_t)new_current;
 	waveform_v[sampleCount] = (int16_t)savedVoltage;
+	// Store in reverse order
+	filter_input[SAMCOUNT - 1 - sampleCount] = (_q15)new_current;
 
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 
+	    volatile msp_status status;
+	    // Zero initialize filter states.
+	    fillParams.length = sizeof(states)/sizeof(_q15);
+	    fillParams.value = 0;
+	    status = msp_fill_q15(&fillParams, (void *)states);
+	    msp_checkStatus(status);
+
+	    // Initialize the parameter structure.
+	    df1Params.length = FILTER_LENGTH;
+	    df1Params.stages = FILTER_STAGES;
+	    df1Params.coeffs = filterCoeffs;
+	    df1Params.states = states;
+
+	    // Filter on current, 40Hz cut off high-pass
+	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_input, filter_result);
+	    msp_checkStatus(status);
+	    // Reverse and rerun filter, results placed in input filter array
+	    in_place_reverse(filter_result);
+	    // Zero initialize filter states.
+	    fillParams.length = sizeof(states)/sizeof(_q15);
+	    fillParams.value = 0;
+	    status = msp_fill_q15(&fillParams, (void *)states);
+	    msp_checkStatus(status);
+	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_result, filter_input);
+	    msp_checkStatus(status);
+
+	    uint8_t i;
 	    // Perform calculations for I^2, V^2, and P
 	    for(i = 0; i < SAMCOUNT; i++) {
-	        int32_t _current = waveform_i[i];
+	        int32_t _current = filter_input[i];
 	        int16_t _voltage = waveform_v[i];
 	        acc_i_rms += (uint64_t)(_current * _current);
 	        acc_p_ave += ((int64_t)_voltage * _current);
@@ -758,7 +814,7 @@ __interrupt void ADC10_ISR(void) {
 				ready = 0;
 #endif
 			} else if (ready == 0) {
-			    ADC_Result = ADC_VCHG + 1;
+			    //ADC_Result = ADC_VCHG + 1;
 				if (ADC_Result > ADC_VCHG) {
 					SEN_EN_OUT |= SEN_EN_PIN;
 					senseEnabled = 1;
