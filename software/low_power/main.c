@@ -45,7 +45,7 @@ uint8_t sampleCount;
 uint8_t measCount;
 
 // Global variables used interrupt-to-interrupt
-#define BACKLOG_LEN		16
+#define BACKLOG_LEN		42
 #if defined (ADC8)
 int8_t current[BACKLOG_LEN];
 int8_t voltage[BACKLOG_LEN];
