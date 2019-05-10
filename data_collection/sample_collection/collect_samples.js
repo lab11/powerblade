@@ -240,7 +240,11 @@ function read_calibration() {
                             keypress(process.stdin)
                             process.stdin.on('keypress', function (ch, key) {
                                 if (key) {
-                                    start_collection();
+                                    if (key.ctrl && key.name =='c') {
+                                        process.exit(0);
+                                    } else {
+                                        start_collection();
+                                    }
                                 }
                             });
                             process.stdin.setRawMode(true);

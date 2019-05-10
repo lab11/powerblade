@@ -76,6 +76,11 @@ uint16_t apparentPower;
 #pragma PERSISTENT(wattHours)
 uint64_t wattHours = 0;
 
+// Waveform storage
+#define WAVEFORM_TRANSMIT_PERIOD 1
+int32_t waveform_i[SAMCOUNT];
+int16_t waveform_v[SAMCOUNT];
+
 // Local calibration values
 int32_t voff_local;
 int32_t voff_count;
@@ -268,7 +273,7 @@ int main(void) {
 __interrupt void TIMERA0_ISR(void) {
 	TA0CCTL0 &= ~CCIFG;
 	TA0CCR0 += 13;
-	P1OUT |= BIT2;
+//	P1OUT |= BIT2;
 
 	// Start with VCC_SENSE
 	ADC10CTL0 &= ~ADC10ENC;
@@ -276,20 +281,20 @@ __interrupt void TIMERA0_ISR(void) {
 	ADC10CTL0 |= ADC10ENC;
 	ADC10CTL0 += ADC10SC;
 
-	P1OUT &= ~BIT2;
+//	P1OUT &= ~BIT2;
 }
 
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void TIMERA1_ISR(void) {
-	P1OUT |= (BIT2 + BIT3);
+//	P1OUT |= BIT2;
 	TA1CCTL0 = 0;
 	sendCount++;
 	__bic_SR_register_on_exit(LPM3_bits);
-	P1OUT &= ~(BIT2 + BIT3);
+//	P1OUT &= ~BIT2;
 }
 
 void transmit(void) {
-	P1OUT |= BIT3;
+//	P1OUT |= BIT2;
 
 	// Stuff data into txBuf
 	int blockOffset = txIndex * UARTBLOCK;
@@ -320,10 +325,12 @@ void transmit(void) {
 
 	uart_send(blockOffset, uart_len);
 
-	P1OUT &= ~BIT3;
+//	P1OUT &= ~BIT2;
 }
 
 void transmitTry(void) {
+    // keep a counter for when to send waveform data
+    static uint8_t waveform_counter = 0;
 
 	P1OUT |= BIT3;
 
@@ -359,6 +366,13 @@ void transmitTry(void) {
 	acc_p_ave += ((int64_t)savedVoltage * new_current);
 	acc_v_rms += (uint64_t)((int32_t)savedVoltage * (int32_t)savedVoltage);
 
+	// Save waveform of last cycle of the second
+	if (measCount == 59) {
+	    //XXX: Does current actually need to be an int32_t?
+	    waveform_i[sampleCount] = (int32_t)new_current;
+	    waveform_v[sampleCount] = (int16_t)savedVoltage;
+	}
+
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 		// Reset sampleCount once per wave
@@ -378,6 +392,7 @@ void transmitTry(void) {
 		measCount++;
 		if (measCount >= 60) { 					// Another second has passed
 			measCount = 0;
+            waveform_counter++;
 
 			uart_len = ADLEN + UARTOVHD;
 
@@ -555,6 +570,17 @@ void transmitTry(void) {
 				if(savedCount > 0) {	// Had partial message for multiple bookends
 					rxCt = 0;
 				}
+
+				// append a waveform every several cycles
+				if (pb_state == pb_normal && waveform_counter >= WAVEFORM_TRANSMIT_PERIOD) {
+				    waveform_counter = 0;
+				    uart_len += 1 + sizeof(int32_t)*SAMCOUNT + sizeof(int16_t)*SAMCOUNT;
+				    char data_type = WAVEFORM;
+				    int blockOffset = txIndex * UARTBLOCK;
+                    uart_stuff(blockOffset + OFFSET_DATATYPE, &data_type, sizeof(data_type));
+                    uart_stuff(blockOffset + OFFSET_WAVEFORM_I, (char*)waveform_i, sizeof(int32_t)*SAMCOUNT);
+                    uart_stuff(blockOffset + OFFSET_WAVEFORM_V, (char*)waveform_v, sizeof(int16_t)*SAMCOUNT);
+				}
 			}
 			savedCount = rxCt;
 
@@ -580,6 +606,7 @@ void transmitTry(void) {
 #if defined (NORDICDEBUG)
 			ready = 1;
 #endif
+
 			if (ready == 1) {
 				// Boot the nordic and enable its UART
 				SYS_EN_OUT &= ~SYS_EN_PIN;
@@ -613,7 +640,7 @@ __interrupt void ADC10_ISR(void) {
 		switch (ADC_Channel) {
 		case ICASE:								// I_SENSE
 		{
-			P1OUT |= BIT2;
+//			P1OUT |= BIT2;
 			// Store current value for future calculations
 #if defined (ADC8)
 			int8_t tempCurrent = (int8_t) (ADC_Result - I_VCC2);
@@ -678,7 +705,7 @@ __interrupt void ADC10_ISR(void) {
 		}
 		case VCASE:								// V_SENSE
 		{
-			P1OUT |= BIT2;
+//			P1OUT |= BIT2;
 			// Store voltage value
 #if defined (ADC8)
 			int8_t tempVoltage = (int8_t) (ADC_Result - V_VCC2) * -1;
@@ -738,7 +765,10 @@ __interrupt void ADC10_ISR(void) {
 			break;
 		}
 		case VCCCASE:	// VCC_SENSE
-			P1OUT |= BIT2;
+//			P1OUT |= BIT2;
+		    //XXX: Fake VCap on the nRF dev board
+		    //ADC_Result = ADC_VCHG+1;
+
 			// Perform Vcap measurements
 			if (ADC_Result < ADC_VMIN) {
 #if !defined (NORDICDEBUG)
@@ -782,7 +812,7 @@ __interrupt void ADC10_ISR(void) {
 	default:
 		break;
 	}
-	P1OUT &= ~(BIT2);
+//	P1OUT &= ~(BIT2);
 }
 
 

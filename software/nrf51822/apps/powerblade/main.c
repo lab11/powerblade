@@ -37,7 +37,7 @@ void start_manufdata_adv(void);
 
 void UART0_IRQHandler(void);
 void uart_rx_handler(void);
-void process_rx_packet(uint16_t packet_len);
+void process_rx_packet(uint16_t packet_len, bool overrun);
 void process_additional_data(uint8_t* buf, uint16_t len);
 void uart_tx_handler(void);
 void uart_send(uint8_t* data, uint16_t len);
@@ -80,7 +80,7 @@ APP_TIMER_DEF(restart_advs_timer);
 #define EDDYSTONE_ADV_DURATION      APP_TIMER_TICKS(200, APP_TIMER_PRESCALER)
 #define MANUFDATA_ADV_DURATION      APP_TIMER_TICKS(800, APP_TIMER_PRESCALER)
 // end of uart message to start of next with guard time
-#define UART_SLEEP_DURATION         APP_TIMER_TICKS(925, APP_TIMER_PRESCALER)
+#define UART_SLEEP_DURATION         APP_TIMER_TICKS(960, APP_TIMER_PRESCALER)
 // start of uart guard time to start of next guard time, determined empirically
 #define UART_SKIP_DURATION          APP_TIMER_TICKS(999, APP_TIMER_PRESCALER)
 // skip two cycles during a connection start since those take longer
@@ -158,6 +158,11 @@ static simple_ble_service_t rawSample_service = {
     static simple_ble_char_t rawSample_char_status = {.uuid16 = 0x01B2};
     static uint8_t rawSample_status;
 
+// receiving data items
+static bool receiving_bytes = false;
+static uint16_t received_len = 0;
+static uint16_t rx_index = 0;
+
 // uart buffers
 // max length is: total length + adv length + adv data + add type + add data + checksum
 #define RX_DATA_MAX_LEN 2+1+ADV_DATA_MAX_LEN+1+SAMDATA_MAX_LEN+1
@@ -166,8 +171,8 @@ static uint8_t* tx_data;
 static uint16_t tx_data_len = 0;
 static uint8_t tx_buffer[4+sizeof(powerblade_config)];
 // when receiving long packets, briefly pause advertisements. I've decided that
-//  100 bytes is "long" essentially arbitarily
-#define LONG_PACKET_THRESHOLD 100
+//  400 bytes is "long" essentially arbitarily
+#define LONG_PACKET_THRESHOLD 400
 
 // states for handling transmissions to the MSP
 static bool already_transmitted = false;
@@ -263,33 +268,31 @@ void UART0_IRQHandler (void) {
 }
 
 void uart_rx_handler (void) {
-    static uint16_t packet_len = 0;
-    static uint16_t rx_index = 0;
-
-    // if this is the first byte of data, restart the sleep timer
-    if (rx_index == 0) {
-        app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
-    }
-
+    led_toggle(ERROR_LED);
     // move uart data to buffer
-    //NOTE: we aren't doing any kind of check here to ensure that we aren't
-    //  waiting forever for an eronously large packet. That's okay though,
-    //  since the current draw when UART is on is unsustainable, the nRF will
-    //  just reboot if this occurs and get back to a good state
+    //Note: be very careful in this function. It's got a higher priority than
+    // most of the softdevice and can really screw things up if it takes too
+    // long to complete
     nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
     rx_data[rx_index] = nrf_uart_rxd_get(NRF_UART0);
     rx_index++;
+    led_toggle(ERROR_LED);
+}
 
+void receive_bytes(void) {
     // check if we have received the entire packet
     //  This can't occur until we have length, adv length, and checksum
     if (rx_index >= 4) {
 
         // parse out expected packet length
-        if (packet_len == 0) {
-            packet_len = (rx_data[0] << 8 | rx_data[1]);
+        if (received_len == 0) {
+            received_len = (rx_data[0] << 8 | rx_data[1]);
+
+            // we are receiving a packet, restart the sleep timer
+            app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
 
             // if we are receiving a long packet, pause advertisements until it's done
-            if (packet_len > LONG_PACKET_THRESHOLD) {
+            if (received_len > LONG_PACKET_THRESHOLD) {
                 advertising_stop();
                 app_timer_stop(start_eddystone_timer);
                 app_timer_stop(start_manufdata_timer);
@@ -299,16 +302,38 @@ void uart_rx_handler (void) {
             }
         }
 
-        // process packet if we have all of it
-        if (rx_index >= packet_len || rx_index >= RX_DATA_MAX_LEN) {
-            process_rx_packet(packet_len);
-            packet_len = 0;
+        if (nrf_uart_errorsrc_get_and_clear(NRF_UART0) == NRF_UART_ERROR_OVERRUN_MASK) {
+            // overrun. This data is invalid
+
+            if (received_len == 0) {
+                // if the timer wasn't already restarted, do so now
+                app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
+            }
+
+            // if there was an overrun, we'll fail the packet immediately
+            receiving_bytes = false;
+            process_rx_packet(rx_index, true);
+            received_len = 0;
+            rx_index = 0;
+        } else if (rx_index >= received_len || rx_index >= RX_DATA_MAX_LEN) {
+            // process packet if we have all of it
+            //NOTE: we aren't doing any kind of check here to ensure that we
+            //  aren't waiting forever for an eronously large packet. That'
+            //  okay though, because it will reset from zero at next timer
+            //  start if it goes longer than the bytes that were actually sent
+            //  in the packet. Also, since the current draw when UART is on is
+            //  unsustainable, the nRF will just reboot if this occurs and get
+            //  back to a good state in any case.
+            receiving_bytes = false;
+            process_rx_packet(received_len, false);
+            received_len = 0;
             rx_index = 0;
         }
     }
 }
 
-void process_rx_packet(uint16_t packet_len) {
+void process_rx_packet(uint16_t packet_len, bool overrun) {
+    static uint8_t rx_count = 0;
 
     // turn off UART until next window
     uart_rx_disable();
@@ -317,7 +342,7 @@ void process_rx_packet(uint16_t packet_len) {
     already_transmitted = false;
 
     // check CRC
-    if (additive_checksum(rx_data, packet_len-1) == rx_data[packet_len-1]) {
+    if (!overrun && additive_checksum(rx_data, packet_len-1) == rx_data[packet_len-1]) {
 
         // check validity of advertisement length
         uint8_t adv_len = rx_data[2];
@@ -337,6 +362,13 @@ void process_rx_packet(uint16_t packet_len) {
             //  itself within one cycle
             powerblade_adv_data_len = 1+adv_len;
             memcpy(&(powerblade_adv_data[1]), &(rx_data[3]), adv_len);
+
+            //XXX: Hack to test waveform transmission
+            if (packet_len > 4+adv_len) {
+                // I think this might add 100 to flags...?
+                powerblade_adv_data[1+adv_len-1] += 100;
+            }
+
             start_manufdata_adv();
 
             // handle additional UART data, if any
@@ -382,8 +414,18 @@ void uart_send (uint8_t* data, uint16_t len) {
 }
 
 void uart_start_receive (void) {
+    led_toggle(ERROR_LED);
     if (!skip_uart_cycle) {
+        // don't allow transmissions while waiting for a packet
+        already_transmitted = true;
+
+        // reset state. If we were still looking for an old packet, it's time
+        //  to give up and start over
+        received_len = 0;
+        rx_index = 0;
+
         // we are ready to receive, go for it
+        receiving_bytes = true;
         uart_rx_enable();
     } else {
         // skip this reception cycle to conserve power while doing heavy
@@ -601,12 +643,21 @@ int main(void) {
     uart_init();
     init_adv_data();
 
+    led_init(ERROR_LED);
+    led_on(ERROR_LED);
+
     // Initialization complete
     start_manufdata_adv();
+    receiving_bytes = true;
     uart_rx_enable();
 
     while (1) {
         power_manage();
+
+        // handle input bytes
+        if (receiving_bytes) {
+            receive_bytes();
+        }
 
         // state machine. Only send one message per second
         if (!already_transmitted) {
@@ -843,30 +894,43 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
                 break;
         }
     } else {
-        //XXX: Request retransmission if several windows have passed without a response
         // expected a message but didn't receive one. Signal error status over
-        //  status characteristic
+        //  status characteristic and try to stop whatever state we're in
         if (calibration_state == CALIB_WAIT_START) {
             status_code = STATUS_NO_CALIB_START;
             simple_ble_notify_char(&config_status_char);
+            // return to default state
+            calibration_state = CALIB_STOP;
         } else if (calibration_state == CALIB_WAIT_CONTINUE) {
             status_code = STATUS_NO_CALIB_CONTINUE;
             simple_ble_notify_char(&config_status_char);
+            // return to default state
+            calibration_state = CALIB_STOP;
         } else if (calibration_state == CALIB_WAIT_GET_CONFIG) {
             status_code = STATUS_NO_CALIB_GET_CONFIG;
             simple_ble_notify_char(&config_status_char);
+            // return to default state
+            calibration_state = CALIB_STOP;
         } else if (calibration_state == CALIB_WAIT_STOP) {
             status_code = STATUS_NO_CALIB_STOP;
             simple_ble_notify_char(&config_status_char);
+            // return to default state
+            calibration_state = CALIB_NONE;
         } else if (rawSample_state == RS_WAIT_START) {
             status_code = STATUS_NO_RS_START;
             simple_ble_notify_char(&config_status_char);
+            // return to default state
+            rawSample_state = RS_QUIT;
         } else if (rawSample_state == RS_WAIT_DATA) {
             status_code = STATUS_NO_RS_DATA;
             simple_ble_notify_char(&config_status_char);
+            // return to default state
+            rawSample_state = RS_QUIT;
         } else if (rawSample_state == RS_WAIT_QUIT) {
             status_code = STATUS_NO_RS_QUIT;
             simple_ble_notify_char(&config_status_char);
+            // return to default state
+            rawSample_state = RS_NONE;
         }
     }
 }

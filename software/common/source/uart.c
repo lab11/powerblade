@@ -12,20 +12,45 @@ int txCt;
 
 int capCt;
 
+static void uart_setBaud_9600(void) {
+    // put UART into reset
+    UCA0CTL1 |= UCSWRST;
+
+    // baud configuration for 9600 baud off of 32 kHz clock
+    UCA0CTL1 &= ~UCSSEL_3; // Clear clock bits
+    UCA0CTL1 |= UCSSEL_1; // ACLK source (32 kHz)
+    UCA0BR0 = 3;
+    UCA0BR1 = 0;
+    UCA0MCTLW = 0x9200;
+
+    // take UART out of reset, clear pending interrupts, and enable RX interrupts
+    UCA0CTL1 &= ~UCSWRST;
+    UCA0IV = 0;
+    UCA0IE |= UCRXIE;
+}
+
+static void uart_setBaud_232400(void) {
+
+    // put UART into reset
+    UCA0CTL1 |= UCSWRST;
+
+    // baud configuration for 232400 baud off of 4 MHz clock
+    UCA0CTL1 &= ~UCSSEL_3; // Clear clock bits
+    UCA0CTL1 |= UCSSEL_3; // SMCLK source (4 MHz)
+    UCA0BR0 = 17;
+    UCA0BR1 = 0;
+    UCA0MCTLW = 0x4A00;
+
+    // take UART out of reset, clear pending interrupts, and enable TX interrupts
+    UCA0CTL1 &= ~UCSWRST;
+    UCA0IV = 0;
+    UCA0IE |= UCTXIE;
+}
+
 void uart_init(void) {
-	UCA0CTL1 |= UCSWRST;						// Put UART into reset
-	UCA0CTL1 |= UCSSEL_1;						// Set to SMCLK
-	UCA0BR0 = 3;								// Baud configuration for 9600
-	UCA0BR1 = 0;
-	UCA0MCTLW = 0x9200;
-//    UCA0BR0 = 104;								// Baud configuration for 38400
-//    UCA0BR1 = 0;
-//    UCA0MCTLW = 0x1100;
-//	UCA0BR0 = 34;								// Baud configuration for 115200
-//	UCA0BR1 = 0;
-//	UCA0MCTLW = 0xBB00;
-	UCA0CTL1 &= ~UCSWRST;						// Take UART out of reset
-	UCA0IE |= UCRXIE;// + UCTXCPTIE;				// Enable RX, TX Complete interrupts
+
+    // We can only receive in sleep mode while running at 9600 baud
+    uart_setBaud_9600();
 
 	// Initialize UART receive count
 	rxCt = 0;
@@ -49,15 +74,22 @@ void uart_stuff(unsigned int offset, char* srcbuf, unsigned int len) {
 }
 
 void uart_send(int offset, uint16_t uart_len) {
-	txBufSave = txBuf + offset;
+
+    // Reconfigure TX parameters
+    txCt = 0;
+    // Add a bonus garbage byte so change baudrates doesn't mess up the checksum
+    txLen = uart_len+1;
 
 	// Calculate checksum and append to buffer
-	txLen = uart_len;
-	txBufSave[txLen-1] = additive_checksum((uint8_t*)txBufSave, txLen-1);
+	txBufSave = txBuf + offset;
+	txBufSave[uart_len-1] = additive_checksum((uint8_t*)txBufSave, uart_len-1);
 
-	// Enable interrupt and transmit
-	UCA0IE |= UCTXIE;
-	txCt = 0;
+    P1OUT &= ~BIT2;
+
+    // switch to high-speed UART (232400 baud)
+    uart_setBaud_232400();
+
+	// begin transmitting
 	UCA0TXBUF = txBufSave[txCt++];
 }
 
@@ -98,9 +130,9 @@ __interrupt void USCI_A0_ISR(void) {
 	case 0:
 		break;								// No interrupt
 	case 2: 								// RX interrupt
-		P1OUT |= (BIT2 + BIT3);
+		P1OUT ^= BIT2;
 		rxBuf[rxCt++] = UCA0RXBUF;
-		P1OUT &= ~(BIT2 + BIT3);
+		P1OUT ^= BIT2;
 		break;
 	case 4:									// TX interrupt
 		if (txCt < txLen) {
@@ -114,6 +146,12 @@ __interrupt void USCI_A0_ISR(void) {
 		break;								// Start bit received
 	case 8: 								// Transmit complete
 		UCA0IE &= ~UCTXCPTIE;
+
+	    // switch to low-speed UART (9600 baud)
+		// note that doing this here will screw up the last couple bits of the
+		// transmission, which is why we send a bonus garbage byte
+		uart_setBaud_9600();
+	    P1OUT |= BIT2;
 		break;
 	default:
 		break;

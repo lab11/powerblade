@@ -85,6 +85,8 @@
 #define OFFSET_WH		17
 #define OFFSET_FLAGS	21
 #define OFFSET_DATATYPE	22
+#define OFFSET_WAVEFORM_I 23
+#define OFFSET_WAVEFORM_V 191
 
 /**************************************************************************
    ANALOG SECTION

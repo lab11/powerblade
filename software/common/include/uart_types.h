@@ -19,6 +19,7 @@
 #define START_LOCALC	0x23
 #define CONT_LOCALC		0x24
 #define DONE_LOCALC		0x25
+#define WAVEFORM        0x26
 #define UART_NAK        0xFF
 
 
