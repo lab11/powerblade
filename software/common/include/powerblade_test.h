@@ -134,7 +134,6 @@
 #endif
 
 #define PHASEOFF	0	// zero for in-phase
-#define SAMCOUNT	42
 
 /**************************************************************************
    SCALING CONSTANTS SECTION

@@ -158,6 +158,19 @@ static simple_ble_service_t rawSample_service = {
     static simple_ble_char_t rawSample_char_status = {.uuid16 = 0x01B2};
     static uint8_t rawSample_status;
 
+// service for waveform collection
+static simple_ble_service_t waveform_service = {
+    .uuid128 = {{0x33, 0x3b, 0x60, 0x34, 0x32, 0xa8, 0x1c, 0x93,
+                 0x9b, 0x40, 0xda, 0x6c, 0xe3, 0xf1, 0x71, 0x61}}};
+
+    // characteristic to signal waveform data status
+    static simple_ble_char_t waveform_char_status = {.uuid16 = 0xE3F2};
+    static uint8_t waveform_status;
+
+    // characteristic to hold a waveform to be read
+    static simple_ble_char_t waveform_char_data = {.uuid16 = 0xE3F3};
+    static uint8_t waveform_data[WAVEFORM_MAX_LEN];
+
 // receiving data items
 static bool receiving_bytes = false;
 static uint16_t received_len = 0;
@@ -364,10 +377,12 @@ void process_rx_packet(uint16_t packet_len, bool overrun) {
             memcpy(&(powerblade_adv_data[1]), &(rx_data[3]), adv_len);
 
             //XXX: Hack to test waveform transmission
-            if (packet_len > 4+adv_len) {
-                // I think this might add 100 to flags...?
-                powerblade_adv_data[1+adv_len-1] += 100;
-            }
+            //if (packet_len > 4+adv_len) {
+            //    // I think this might add 100 to flags...?
+            //    powerblade_adv_data[1+adv_len-1] += 100;
+            //}
+            rx_count++;
+            powerblade_adv_data[1+adv_len-1] = rx_count;
 
             start_manufdata_adv();
 
@@ -533,6 +548,23 @@ void services_init (void) {
         simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
                 1, (uint8_t*)&rawSample_status,
                 &rawSample_service, &rawSample_char_status);
+
+
+    // Add waveform collection service
+    simple_ble_add_service(&waveform_service);
+
+        // Add the characteristic to signify if data is valid
+        waveform_status = false;
+        simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
+                1, (uint8_t*)&waveform_status,
+                &waveform_service, &waveform_char_status);
+
+        // Add the characteristic to provide waveforms
+        memset(waveform_data, 0x00, WAVEFORM_MAX_LEN);
+        simple_ble_add_auth_characteristic(1, 0, 0, 0, // read, write, notify, vlen
+                true, false, // read auth, write auth
+                WAVEFORM_MAX_LEN, (uint8_t*)waveform_data,
+                &waveform_service, &waveform_char_data);
 }
 
 void ble_evt_connected (ble_evt_t* p_ble_evt) {
@@ -586,6 +618,12 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
             rawSample_state = RS_NEXT;
         }
 
+    } else if (simple_ble_is_char_event(p_ble_evt, &waveform_char_status)) {
+        // clear value on write
+        waveform_status = 0;
+
+        //XXX: waveform has been downloaded. Do we need to do anything?
+
     } else if (simple_ble_is_char_event(p_ble_evt, &config_voff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_ioff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_curoff_char) ||
@@ -598,8 +636,8 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 }
 
 void ble_evt_rw_auth (ble_evt_t* p_ble_evt) {
-    if (simple_ble_is_read_auth_event(p_ble_evt, &rawSample_char_data)) {
-        // read request for data characteristic, disable uart for a cycle and
+    if (simple_ble_is_read_auth_event(p_ble_evt, &rawSample_char_data) || simple_ble_is_read_auth_event(p_ble_evt, &waveform_char_data)) {
+        // read request for a data characteristic, disable uart for a cycle and
         //  authorize the read
         skip_uart_cycle = true;
         uint32_t err_code = simple_ble_grant_auth(p_ble_evt);
@@ -802,6 +840,19 @@ void on_receive_message(uint8_t* buf, uint16_t len) {
         // switch on add data type
         uint8_t data_type = buf[0];
         switch (data_type) {
+            case WAVEFORM:
+                // save waveform if space is available
+                if (waveform_status == 0) {
+                    if ((len-1) == WAVEFORM_MAX_LEN) {
+                        memcpy(waveform_data, &(buf[1]), len-1);
+                    }
+
+                    // notify that data is available
+                    waveform_status = 1;
+                    simple_ble_notify_char(&waveform_char_status);
+                }
+                break;
+
             case UART_NAK:
                 status_code = STATUS_GOT_NAK;
                 simple_ble_notify_char(&config_status_char);
