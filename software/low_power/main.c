@@ -63,12 +63,18 @@ msp_fill_q15_params fillParams;
 msp_biquad_cascade_df1_q15_params df1Params;
 DSPLIB_DATA(filterCoeffs,4)
 msp_biquad_df1_q15_coeffs filterCoeffs[FILTER_STAGES];
-DSPLIB_DATA(states,4)
-msp_biquad_df1_q15_states states[FILTER_STAGES];
-DSPLIB_DATA(filter_input,4)
-_q15 filter_input[SAMCOUNT] = {0};
-DSPLIB_DATA(filter_result,4)
-_q15 filter_result[SAMCOUNT] = {0};
+DSPLIB_DATA(current_states,4)
+msp_biquad_df1_q15_states current_states[FILTER_STAGES];
+DSPLIB_DATA(voltage_states,4)
+msp_biquad_df1_q15_states voltage_states[FILTER_STAGES];
+DSPLIB_DATA(filter_in_current,4)
+_q15 filter_in_current[SAMCOUNT] = {0};
+DSPLIB_DATA(filter_res_current,4)
+_q15 filter_res_current[SAMCOUNT] = {0};
+DSPLIB_DATA(filter_in_voltage,4)
+_q15 filter_in_voltage[SAMCOUNT] = {0};
+DSPLIB_DATA(filter_res_voltage,4)
+_q15 filter_res_voltage[SAMCOUNT] = {0};
 uint8_t currentWriteCount;
 uint8_t currentReadCount;
 uint8_t voltageWriteCount;
@@ -268,6 +274,19 @@ int main(void) {
 
   	// Initialize filter coefficients.
   	memcpy(filterCoeffs, highpass, sizeof(filterCoeffs));
+    // Initialize the parameter structure.
+    df1Params.length = FILTER_LENGTH;
+    df1Params.stages = FILTER_STAGES;
+    df1Params.coeffs = filterCoeffs;
+
+  	msp_status status;
+  	// Zero initialize filter states.
+  	fillParams.length = sizeof(current_states)/sizeof(_q15);
+  	fillParams.value = 0;
+  	status = msp_fill_q15(&fillParams, (void *)current_states);
+  	msp_checkStatus(status);
+  	status = msp_fill_q15(&fillParams, (void *)voltage_states);
+  	msp_checkStatus(status);
 
 	__bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
@@ -385,46 +404,28 @@ void transmitTry(void) {
 	//}
 
 	//waveform_i[sampleCount] = (int32_t)new_current;
-	waveform_v[sampleCount] = (int16_t)savedVoltage;
-	// Store in reverse order
-	filter_input[SAMCOUNT - 1 - sampleCount] = (_q15)agg_current;
+	filter_in_voltage[sampleCount] = (_q15)savedVoltage;
+	filter_in_current[sampleCount] = (_q15)agg_current;
     P1OUT &= ~BIT3;
 
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 
-	    msp_status status;
-	    // Zero initialize filter states.
-	    fillParams.length = sizeof(states)/sizeof(_q15);
-	    fillParams.value = 0;
-	    status = msp_fill_q15(&fillParams, (void *)states);
-	    msp_checkStatus(status);
-
-	    // Initialize the parameter structure.
-	    df1Params.length = FILTER_LENGTH;
-	    df1Params.stages = FILTER_STAGES;
-	    df1Params.coeffs = filterCoeffs;
-	    df1Params.states = states;
-
 	    // Filter on current, 40Hz cut off high-pass
-	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_input, filter_result);
+	    msp_status status;
+        df1Params.states = current_states;
+	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_in_current, filter_res_current);
 	    msp_checkStatus(status);
-	    // Reverse and rerun filter, results placed in input filter array
-	    in_place_reverse(filter_result);
-	    // Zero initialize filter states.
-	    fillParams.length = sizeof(states)/sizeof(_q15);
-	    fillParams.value = 0;
-	    status = msp_fill_q15(&fillParams, (void *)states);
-	    msp_checkStatus(status);
-	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_result, filter_input);
+	    df1Params.states = voltage_states;
+	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_in_voltage, filter_res_voltage);
 	    msp_checkStatus(status);
 
 	    uint8_t i;
-
-
 	    // Perform calculations for I^2, V^2, and P
 	    for(i = 0; i < SAMCOUNT; i++) {
-	        int32_t _current = filter_input[i];
+	        int32_t _current = filter_res_current[i];
+	        int16_t _voltage = filter_res_voltage[i];
+
 	        // subtract offset
 	        if(pb_state == pb_local3) {
 	            _current = (_current >> 3) - curoff_local;
@@ -436,7 +437,7 @@ void transmitTry(void) {
 	            }
 	        }
 	        waveform_i[i] = _current;
-	        int16_t _voltage = waveform_v[i];
+	        waveform_v[i] = _voltage;
 	        acc_i_rms += (uint64_t)(_current * _current);
 	        acc_p_ave += ((int64_t)_voltage * _current);
 	        acc_v_rms += (uint64_t)((int32_t)_voltage * (int32_t)_voltage);
