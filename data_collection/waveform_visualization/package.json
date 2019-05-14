@@ -1,0 +1,12 @@
+{
+  "name": "powerblade_waveform_visualization",
+  "version": "1.0.0",
+  "description": "Visualize waveform data from PowerBlades",
+  "main": "visualize_waveforms.js",
+  "author": "Branden Ghena",
+  "dependencies": {
+    "keypress": "^0.2.1",
+    "matplotnode": "^0.3.2",
+    "noble": "^1.9.1"
+  }
+}
