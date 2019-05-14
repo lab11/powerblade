@@ -372,27 +372,28 @@ void transmitTry(void) {
 	agg_current -= agg_current >> 5;
 
 	// Subtract offset
-	int32_t new_current;
-	if(pb_state == pb_local3) {
-		new_current = (agg_current >> 3) - curoff_local;
-	}
-	else {
-		new_current = (agg_current >> 3) - pb_config.curoff;
-		if(pb_state == pb_local2) {
-			curoff_local += agg_current >> 3;
+	//int32_t new_current;
+	//if(pb_state == pb_local3) {
+	//	new_current = (agg_current >> 3) - curoff_local;
+	//}
+	//else {
+	//	new_current = (agg_current >> 3) - pb_config.curoff;
+	//	if(pb_state == pb_local2) {
+	//		curoff_local += agg_current >> 3;
 			curoff_count++;
-		}
-	}
+	//	}
+	//}
 
-	waveform_i[sampleCount] = (int32_t)new_current;
+	//waveform_i[sampleCount] = (int32_t)new_current;
 	waveform_v[sampleCount] = (int16_t)savedVoltage;
 	// Store in reverse order
-	filter_input[SAMCOUNT - 1 - sampleCount] = (_q15)new_current;
+	filter_input[SAMCOUNT - 1 - sampleCount] = (_q15)agg_current;
+    P1OUT &= ~BIT3;
 
 	sampleCount++;
 	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 
-	    volatile msp_status status;
+	    msp_status status;
 	    // Zero initialize filter states.
 	    fillParams.length = sizeof(states)/sizeof(_q15);
 	    fillParams.value = 0;
@@ -419,9 +420,22 @@ void transmitTry(void) {
 	    msp_checkStatus(status);
 
 	    uint8_t i;
+
+
 	    // Perform calculations for I^2, V^2, and P
 	    for(i = 0; i < SAMCOUNT; i++) {
 	        int32_t _current = filter_input[i];
+	        // subtract offset
+	        if(pb_state == pb_local3) {
+	            _current = (_current >> 3) - curoff_local;
+	        } else {
+	            _current = (_current >> 3) - pb_config.curoff;
+	            if(pb_state == pb_local2) {
+	                curoff_local += agg_current >> 3;
+	                curoff_count++;
+	            }
+	        }
+	        waveform_i[i] = _current;
 	        int16_t _voltage = waveform_v[i];
 	        acc_i_rms += (uint64_t)(_current * _current);
 	        acc_p_ave += ((int64_t)_voltage * _current);
