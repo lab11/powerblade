@@ -73,7 +73,7 @@ noble.on('discover', function (peripheral) {
 	        console.log('Found PowerBlade (' + peripheral.address +')');
 	        process.stdout.write('Connecting... ');
 	        powerblade_periph = peripheral;
-	        
+
 	        peripheral.connect(function (error) {
 	            console.log('done\n');
 
@@ -215,13 +215,13 @@ function read_calibration() {
 
             config_curoff_char.read(function(error, data) {
                 if (error) throw error;
-                calibration_values['curoff'] = data.readInt8();
-                console.log("  Curoff= " + data.readInt8() + ' (' + data.toString('hex') + ')');
+                calibration_values['curoff'] = data.readInt16LE();
+                console.log("  Curoff= " + data.readInt16LE() + ' (' + data.toString('hex').match(/.{2}/g).reverse().join("") + ')');
 
                 config_pscale_char.read(function(error, data) {
                     if (error) throw error;
                     calibration_values['pscale'] = data.readUInt16LE();
-                    console.log("  PScale= " + data.readUInt16LE() + ' (' + data.toString('hex') + ')');
+                    console.log("  PScale= " + data.readUInt16LE() + ' (' + data.toString('hex').match(/.{2}/g).reverse().join("") + ')');
 
                     config_vscale_char.read(function(error, data) {
                         if (error) throw error;
