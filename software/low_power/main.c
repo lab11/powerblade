@@ -23,6 +23,12 @@
 #include "uart_types.h"
 #include "checksum.h"
 #include "uart.h"
+#include "DSPLib.h"
+#include "highpass.h"
+
+#define FILTER_LENGTH SAMCOUNT
+#define FILTER_STAGES (sizeof(highpass)/sizeof(msp_biquad_df1_q15_coeffs))
+
 
 //#define NORDICDEBUG
 
@@ -39,7 +45,7 @@ uint8_t sampleCount;
 uint8_t measCount;
 
 // Global variables used interrupt-to-interrupt
-#define BACKLOG_LEN		16
+#define BACKLOG_LEN		42
 #if defined (ADC8)
 int8_t current[BACKLOG_LEN];
 int8_t voltage[BACKLOG_LEN];
@@ -51,6 +57,22 @@ int16_t voltage[BACKLOG_LEN];
 int16_t savedCurrent;
 int16_t savedVoltage;
 #endif
+msp_fill_q15_params fillParams;
+msp_biquad_cascade_df1_q15_params df1Params;
+DSPLIB_DATA(filterCoeffs,4)
+msp_biquad_df1_q15_coeffs filterCoeffs[FILTER_STAGES];
+DSPLIB_DATA(current_states,4)
+msp_biquad_df1_q15_states current_states[FILTER_STAGES];
+DSPLIB_DATA(voltage_states,4)
+msp_biquad_df1_q15_states voltage_states[FILTER_STAGES];
+DSPLIB_DATA(filter_in_current,4)
+_q15 filter_in_current[SAMCOUNT] = {0};
+DSPLIB_DATA(filter_res_current,4)
+_q15 filter_res_current[SAMCOUNT] = {0};
+DSPLIB_DATA(filter_in_voltage,4)
+_q15 filter_in_voltage[SAMCOUNT] = {0};
+DSPLIB_DATA(filter_res_voltage,4)
+_q15 filter_res_voltage[SAMCOUNT] = {0};
 uint8_t currentWriteCount;
 uint8_t currentReadCount;
 uint8_t voltageWriteCount;
@@ -253,6 +275,22 @@ int main(void) {
     // Wait timer for transmissions
     TA1CTL = TASSEL_1 + MC_2 + TACLR;			// ACLK, up mode
 
+    // Initialize filter coefficients.
+    memcpy(filterCoeffs, highpass, sizeof(filterCoeffs));
+
+    // Initialize the parameter structure.
+    df1Params.length = FILTER_LENGTH;
+    df1Params.stages = FILTER_STAGES;
+    df1Params.coeffs = filterCoeffs;
+
+    // Zero initialize filter states.
+    msp_status status;
+    fillParams.length = sizeof(current_states)/sizeof(_q15);
+    fillParams.value = 0;
+    status = msp_fill_q15(&fillParams, (void *)current_states);
+    msp_checkStatus(status);
+    status = msp_fill_q15(&fillParams, (void *)voltage_states);
+    msp_checkStatus(status);
 
     __bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
@@ -348,32 +386,47 @@ void transmitTry(void) {
     agg_current += (int16_t) (savedCurrent + (savedCurrent >> 1));
     agg_current -= agg_current >> 5;
 
-    // Subtract offset
-    int32_t new_current;
-    if (pb_state == pb_local3) {
-        new_current = (agg_current >> 3) - curoff_local;
-    } else {
-        new_current = (agg_current >> 3) - pb_config.curoff;
-        if (pb_state == pb_local2) {
-            curoff_local += agg_current >> 3;
-            curoff_count++;
-        }
-    }
+	filter_in_voltage[sampleCount] = (_q15)savedVoltage;
+	filter_in_current[sampleCount] = (_q15)agg_current;
+    P1OUT &= ~BIT3;
 
-    // Perform calculations for I^2, V^2, and P
-    acc_i_rms += (uint64_t)(new_current * new_current);
-    acc_p_ave += ((int64_t)savedVoltage * new_current);
-    acc_v_rms += (uint64_t)((int32_t)savedVoltage * (int32_t)savedVoltage);
+	sampleCount++;
+	if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 
-    // Save waveform of last cycle of the second
-    if (measCount == 59) {
-        //XXX: Does current actually need to be an int32_t?
-        waveform_i[sampleCount] = (int32_t)new_current;
-        waveform_v[sampleCount] = (int16_t)savedVoltage;
-    }
+	    // Filter on current, 40Hz cut off high-pass
+	    msp_status status;
+        df1Params.states = current_states;
+	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_in_current, filter_res_current);
+	    msp_checkStatus(status);
+	    df1Params.states = voltage_states;
+	    status = msp_biquad_cascade_df1_q15(&df1Params, filter_in_voltage, filter_res_voltage);
+	    msp_checkStatus(status);
 
-    sampleCount++;
-    if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
+	    uint8_t i;
+	    // Perform calculations for I^2, V^2, and P
+	    for(i = 0; i < SAMCOUNT; i++) {
+	        int32_t _current = filter_res_current[i];
+	        int16_t _voltage = filter_res_voltage[i];
+
+	        // subtract offset
+	        if(pb_state == pb_local3) {
+	            _current = (_current >> 3) - curoff_local;
+	        } else {
+	            _current = (_current >> 3) - pb_config.curoff;
+	            if(pb_state == pb_local2) {
+	                curoff_local += agg_current >> 3;
+	                curoff_count++;
+	            }
+	        }
+		if (measCount == 59) {
+     	        waveform_i[i] = (int32_t)_current;
+	            waveform_v[i] = _voltage;
+                }
+	        acc_i_rms += (uint64_t)(_current * _current);
+	        acc_p_ave += ((int64_t)_voltage * _current);
+	        acc_v_rms += (uint64_t)((int32_t)_voltage * (int32_t)_voltage);
+	    }
+
         // Reset sampleCount once per wave
         sampleCount = 0;
 
