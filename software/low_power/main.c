@@ -413,7 +413,7 @@ void transmitTry(void) {
       } else {
         _current = (_current >> 3) - pb_config.curoff;
         if(pb_state == pb_local2) {
-          curoff_local += agg_current >> 3;
+          curoff_local += _current >> 3;
           curoff_count++;
         }
       }
