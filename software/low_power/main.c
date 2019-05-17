@@ -14,7 +14,7 @@
  * 	           flags:	1 byte
  */
 
-#include <msp430.h> 
+#include <msp430.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -78,7 +78,7 @@ uint64_t wattHours = 0;
 
 // Waveform storage
 #define WAVEFORM_TRANSMIT_PERIOD 1
-int32_t waveform_i[SAMCOUNT];
+int16_t waveform_i[SAMCOUNT];
 int16_t waveform_v[SAMCOUNT];
 
 // Local calibration values
@@ -368,7 +368,7 @@ void transmitTry(void) {
     // Save waveform of last cycle of the second
     if (measCount == 59) {
         //XXX: Does current actually need to be an int32_t?
-        waveform_i[sampleCount] = (int32_t)new_current;
+        waveform_i[sampleCount] = (int16_t)new_current;
         waveform_v[sampleCount] = (int16_t)savedVoltage;
     }
 
@@ -567,11 +567,11 @@ void transmitTry(void) {
                 // append a waveform every several cycles
                 if (pb_state == pb_normal && waveform_counter >= WAVEFORM_TRANSMIT_PERIOD) {
                     waveform_counter = 0;
-                    uart_len += 1 + sizeof(int32_t)*SAMCOUNT + sizeof(int16_t)*SAMCOUNT;
+                    uart_len += 1 + sizeof(int16_t)*SAMCOUNT + sizeof(int16_t)*SAMCOUNT;
                     char data_type = WAVEFORM;
                     int blockOffset = txIndex * UARTBLOCK;
                     uart_stuff(blockOffset + OFFSET_DATATYPE, &data_type, sizeof(data_type));
-                    uart_stuff(blockOffset + OFFSET_WAVEFORM_I, (char*)waveform_i, sizeof(int32_t)*SAMCOUNT);
+                    uart_stuff(blockOffset + OFFSET_WAVEFORM_I, (char*)waveform_i, sizeof(int16_t)*SAMCOUNT);
                     uart_stuff(blockOffset + OFFSET_WAVEFORM_V, (char*)waveform_v, sizeof(int16_t)*SAMCOUNT);
                 }
             }
@@ -582,12 +582,12 @@ void transmitTry(void) {
 
             // True power cannot be less than zero
             if (wattHoursToAverage > 0) {
-                truePower = (uint16_t) ((wattHoursToAverage / 60));
+              truePower = (uint16_t) ((wattHoursToAverage / 60));
             } else {
-                truePower = 0;
-                // The following change makes it so applying PowerBlade backwards does not result in 0 for true power
-                // TODO: this isnt a great fix, the original code was in place for a reason
-                // truePower = (uint16_t) ((wattHoursToAverage / -60));
+              truePower = 0;
+              // The following change makes it so applying PowerBlade backwards does not result in 0 for true power
+              // TODO: this isnt a great fix, the original code was in place for a reason
+              // truePower = (uint16_t) ((wattHoursToAverage / -60));
             }
             wattHours += (uint64_t) truePower;
             apparentPower = (uint16_t) ((voltAmpsToAverage / 60));
@@ -600,14 +600,14 @@ void transmitTry(void) {
 #endif
 
             if (ready == 1) {
-                // Boot the nordic and enable its UART
-                SYS_EN_OUT &= ~SYS_EN_PIN;
-                uart_enable(1);
+              // Boot the nordic and enable its UART
+              SYS_EN_OUT &= ~SYS_EN_PIN;
+              uart_enable(1);
 
-                // Delay for a bit to allow nordic to boot
-                // TODO this is only required the first time
-                TA1CCR0 = TA1R + 500;
-                TA1CCTL0 = CCIE;
+              // Delay for a bit to allow nordic to boot
+              // TODO this is only required the first time
+              TA1CCR0 = TA1R + 500;
+              TA1CCTL0 = CCIE;
             }
         }
     }
