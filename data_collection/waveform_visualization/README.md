@@ -40,9 +40,6 @@ likely work eventually after several attempts.
 
 ## Data collection
 
-**Not Implemented Yet**
-
 Data is not typically saved by this script, but can be saved with the `--save`
 flag. Results are stored in the `data/` directory and are named sequentially.
-
 
