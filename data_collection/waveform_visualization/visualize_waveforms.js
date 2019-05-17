@@ -4,6 +4,7 @@
 var noble = require('noble');
 var fs = require('fs');
 var keypress = require('keypress');
+var rimraf = require('rimraf');
 const child_process = require('child_process');
 
 // input from user
@@ -16,11 +17,12 @@ if (process.argv.length >= 3) {
 }
 console.log("Looking for " + target_device);
 
-// XXX: not implemented yet
 var store_data = false;
 if (process.argv.length >= 4) {
     if (process.argv[3] == '--save') {
         store_data = true;
+        console.log("Waveform data will be saved in `data\\`");
+        rimraf.sync('./data/waveform_*.bin');
     } else {
         console.log("Unknown flag provided\n");
     }
@@ -302,20 +304,20 @@ function read_data() {
 
 var output_file_no = 0;
 function waveform_data_receive(data) {
-    // do something with the data
     console.log("\tComplete");
+    //console.log(data);
 
+    // send data to python
     plotter.stdin.write(data.toString('hex') + '\n');
 
-    //console.log(data);
-    /*
-    // save data to files in case we want to manually review it
-    fs.writeFileSync('data/rawSamples_num' + output_file_no + '.bin', data);
-    output_file_no += 1;
+    // save data if desired
+    if (store_data) {
+        console.log("\tSaving data file waveform_" + output_file_no + ".bin");
 
-    // also save data to a buffer so we can run through it programmatically
-    sampleData = Buffer.concat([sampleData, data]);
-    */
+        // save data to files in case we want to manually review it
+        fs.writeFileSync('data/waveform_' + output_file_no + '.bin', data);
+        output_file_no += 1;
+    }
 
     // write status to request next data
     console.log("  Requesting next data");
@@ -330,54 +332,4 @@ function visualize_data(data) {
     var voltageArr = [];
     var currentArr = [];
 }
-
-/*
-function adjust_and_save(calibration_values, dataArr) {
-
-    // split data array into current and voltage samples
-    var dataLen = dataArr.length / 4;
-    var dataBuf = new Buffer(dataArr);
-    var voltageArr = [];
-    var currentArr = [];
-    var voltageIndex = 0;
-    var currentIndex = 2;
-    for(var i = 0; i < dataLen; i++) {
-        voltageArr.push(dataBuf.readInt16BE(4*i + voltageIndex));
-        currentArr.push(dataBuf.readInt16BE(4*i + currentIndex));
-    }
-
-    // calibration values for the powerblade
-    var voff = calibration_values['voff'];
-    var ioff = calibration_values['ioff'];
-    var curoff = calibration_values['curoff'];
-    var pscale = calibration_values['pscale'];
-    var vscale = calibration_values['vscale'];
-
-    // set calibration values per powerblade specification
-    pscale = (pscale & 0xFFF) * Math.pow(10,-1*((pscale & 0xF000) >> 12));
-    vscale = vscale / 200;
-
-    // integrate current values, also write raw samples to file while iterating them
-    var integrate = [];
-    var aggCurrent = 0;
-    fs.writeFileSync('data/rawSamples.dat', '# Count\tVoltage\tCurrent\tInt\n');
-    for(var i = 0; i < dataLen; i++) {
-        var newCurrent = currentArr[i] - ioff;
-        aggCurrent += (newCurrent + (newCurrent >> 1));
-        aggCurrent -= aggCurrent >> 5;
-        integrate[i] = (aggCurrent >> 3);
-
-        fs.appendFileSync('data/rawSamples.dat', i + '\t' + voltageArr[i] + '\t' + currentArr[i] + '\t' + integrate[i] + '\n');
-    }
-
-    // write adjusted results to file
-    fs.writeFileSync('data/realSamples.dat', '# Count\tVoltage\tCurrent\n');
-    for (var i=0; i < dataLen; i++) {
-        var real_voltage = vscale*(voltageArr[i] - voff);
-        var real_integrate = (pscale/vscale)*(integrate[i] - curoff);
-
-        fs.appendFileSync('data/realSamples.dat', i + '\t' + real_voltage + '\t' + real_integrate + '\n');
-    }
-}
-*/
 
