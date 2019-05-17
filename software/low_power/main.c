@@ -100,7 +100,7 @@ uint64_t wattHours = 0;
 
 // Waveform storage
 #define WAVEFORM_TRANSMIT_PERIOD 1
-int32_t waveform_i[SAMCOUNT];
+int16_t waveform_i[SAMCOUNT];
 int16_t waveform_v[SAMCOUNT];
 
 // Local calibration values
@@ -404,7 +404,7 @@ void transmitTry(void) {
     uint8_t i;
     // Perform calculations for I^2, V^2, and P
     for(i = 0; i < SAMCOUNT; i++) {
-      int32_t _current = (int32_t)filter_res_current[i];
+      int16_t _current = (int16_t)filter_res_current[i];
       int16_t _voltage = (int16_t)filter_res_voltage[i];
 
       // subtract offset
@@ -417,10 +417,13 @@ void transmitTry(void) {
           curoff_count++;
         }
       }
+
       if (measCount == 59) {
-        waveform_i[i] = (int32_t)_current;
+        waveform_i[i] = _current;
         waveform_v[i] = _voltage;
       }
+
+      //XXX: these casts make no sense
       acc_i_rms += (uint64_t)(_current * _current);
       acc_p_ave += ((int64_t)_voltage * _current);
       acc_v_rms += (uint64_t)((int32_t)_voltage * (int32_t)_voltage);
@@ -619,11 +622,11 @@ void transmitTry(void) {
         // append a waveform every several cycles
         if (pb_state == pb_normal && waveform_counter >= WAVEFORM_TRANSMIT_PERIOD) {
           waveform_counter = 0;
-          uart_len += 1 + sizeof(int32_t)*SAMCOUNT + sizeof(int16_t)*SAMCOUNT;
+          uart_len += 1 + sizeof(int16_t)*SAMCOUNT + sizeof(int16_t)*SAMCOUNT;
           char data_type = WAVEFORM;
           int blockOffset = txIndex * UARTBLOCK;
           uart_stuff(blockOffset + OFFSET_DATATYPE, &data_type, sizeof(data_type));
-          uart_stuff(blockOffset + OFFSET_WAVEFORM_I, (char*)waveform_i, sizeof(int32_t)*SAMCOUNT);
+          uart_stuff(blockOffset + OFFSET_WAVEFORM_I, (char*)waveform_i, sizeof(int16_t)*SAMCOUNT);
           uart_stuff(blockOffset + OFFSET_WAVEFORM_V, (char*)waveform_v, sizeof(int16_t)*SAMCOUNT);
         }
       }

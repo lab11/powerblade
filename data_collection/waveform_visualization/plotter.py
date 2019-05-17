@@ -28,13 +28,13 @@ try:
     for line in sys.stdin:
         data = bytearray.fromhex(line[:-1])
 
-        if len(data) != 252:
+        if len(data) != 2*42+2*42:
             print("Got bad data")
             continue
 
         # pull out current data
         current_data = []
-        for byte_values in chunks(data[:4*42], 4):
+        for byte_values in chunks(data[:2*42], 2):
             current_data.append(int.from_bytes(byte_values, byteorder='big', signed=True))
 
         # normalize current data
@@ -43,7 +43,7 @@ try:
 
         # pull out voltage data
         voltage_data = []
-        for byte_values in chunks(data[4*42:], 2):
+        for byte_values in chunks(data[2*42:], 2):
             voltage_data.append(int.from_bytes(byte_values, byteorder='big', signed=True))
 
         # normalize voltage data

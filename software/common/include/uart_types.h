@@ -28,7 +28,7 @@
  **************************************************************************/
 #define SAMCOUNT    42
 #define SAMDATA_MAX_LEN 504
-#define WAVEFORM_MAX_LEN 2*SAMCOUNT+4*SAMCOUNT
+#define WAVEFORM_MAX_LEN sizeof(int16_t)*SAMCOUNT+sizeof(int16_t)*SAMCOUNT
 
 
 /**************************************************************************
