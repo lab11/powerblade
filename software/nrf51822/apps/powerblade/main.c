@@ -19,6 +19,7 @@
 // Platform, Peripherals, Devices, & Services
 #include "powerblade_states.h"
 #include "uart.h"
+#include "waveforms.h"
 #include "uart_types.h"
 #include "powerblade.h"
 #include "led.h"
@@ -47,7 +48,9 @@ void services_init(void);
 void ble_evt_write (ble_evt_t* p_ble_evt);
 
 void transmit_message(void);
-void on_receive_message(uint8_t* buf, uint16_t len);
+void receive_bytes(void);
+void process_rx_packet(uint16_t packet_len, bool overrun);
+void on_receive_message(uint8_t* buf, uint16_t len, uint8_t* adv_data, uint8_t adv_len);
 
 void timers_init(void);
 int main(void);
@@ -91,14 +94,13 @@ APP_TIMER_DEF(restart_advs_timer);
 #define PHYSWEB_URL "j2x.us/6EKY8W"
 #define UMICH_COMPANY_IDENTIFIER    0x02E0
 #define POWERBLADE_SERVICE_IDENTIFIER 0x11
-#define ADV_DATA_MAX_LEN 24 // maximum manufacturer specific advertisement data size
 static uint8_t powerblade_adv_data[ADV_DATA_MAX_LEN];
 static uint8_t powerblade_adv_data_len = 0;
 
 // service for device configuration
 static simple_ble_service_t config_service = {
-    .uuid128 = {{0x99, 0xf9, 0xac, 0xe5, 0x57, 0xb9, 0x43, 0xec,
-                 0x88, 0xf8, 0x88, 0xb9, 0x4d, 0xa1, 0x80, 0x50}}};
+    .uuid128 = {{0x99, 0xF9, 0xAC, 0xE5, 0x57, 0xB9, 0x43, 0xEC,
+                 0x88, 0xF8, 0x88, 0xB9, 0x4D, 0xA1, 0x80, 0x50}}};
 
     // holds various configuration values which are broken out in characteristics
     static PowerBladeConfig_t powerblade_config = {0};
@@ -126,8 +128,8 @@ static simple_ble_service_t config_service = {
 
 // service for internal calibration
 static simple_ble_service_t calibration_service = {
-    .uuid128 = {{0x49, 0x4b, 0x30, 0x70, 0xaa, 0xd5, 0x4e, 0x84,
-                 0x9e, 0xd9, 0x61, 0x94, 0xed, 0x0b, 0xc4, 0x57}}};
+    .uuid128 = {{0x49, 0x4B, 0x30, 0x70, 0xAA, 0xD5, 0x4E, 0x84,
+                 0x9E, 0xD9, 0x61, 0x94, 0xED, 0x0B, 0xC4, 0x57}}};
 
     // characteristic to hold wattage setpoint
     static simple_ble_char_t calibration_wattage_char = {.uuid16 = 0xED0C};
@@ -143,8 +145,8 @@ static simple_ble_service_t calibration_service = {
 
 // service for sample data collection
 static simple_ble_service_t rawSample_service = {
-    .uuid128 = {{0x31, 0x15, 0xd4, 0x39, 0x2a, 0x88, 0x4e, 0x1c,
-                 0x8c, 0xcc, 0xf8, 0x7c, 0x01, 0xaf, 0xad, 0xce}}};
+    .uuid128 = {{0x31, 0x15, 0xD4, 0x39, 0x2A, 0x88, 0x4E, 0x1C,
+                 0x8C, 0xCC, 0xF8, 0x7C, 0x01, 0xAF, 0xAD, 0xCE}}};
 
     // characteristic to start raw sample collection
     static simple_ble_char_t rawSample_char_begin = {.uuid16 = 0x01B0};
@@ -158,18 +160,33 @@ static simple_ble_service_t rawSample_service = {
     static simple_ble_char_t rawSample_char_status = {.uuid16 = 0x01B2};
     static uint8_t rawSample_status;
 
-// service for waveform collection
-static simple_ble_service_t waveform_service = {
-    .uuid128 = {{0x33, 0x3b, 0x60, 0x34, 0x32, 0xa8, 0x1c, 0x93,
-                 0x9b, 0x40, 0xda, 0x6c, 0xe3, 0xf1, 0x71, 0x61}}};
+// service for continuous waveform collection
+static simple_ble_service_t continuous_waveform_service = {
+    .uuid128 = {{0x33, 0x3B, 0x60, 0x34, 0x32, 0xA8, 0x1C, 0x93,
+                 0x9B, 0x40, 0xDA, 0x6C, 0xE3, 0xF1, 0x71, 0x61}}};
 
     // characteristic to signal waveform data status
-    static simple_ble_char_t waveform_char_status = {.uuid16 = 0xE3F2};
-    static uint8_t waveform_status;
+    static simple_ble_char_t continuous_waveform_char_status = {.uuid16 = 0xE3F2};
+    static uint8_t continuous_waveform_status;
 
     // characteristic to hold a waveform to be read
-    static simple_ble_char_t waveform_char_data = {.uuid16 = 0xE3F3};
-    static uint8_t waveform_data[WAVEFORM_MAX_LEN];
+    static simple_ble_char_t continuous_waveform_char_data = {.uuid16 = 0xE3F3};
+    static uint8_t continuous_waveform_data[WAVEFORM_MAX_LEN];
+
+// service for unique waveform collection
+static simple_ble_service_t unique_waveform_service = {
+    .uuid128 = {{0xDD, 0x26, 0x13, 0x39, 0xB5, 0x41, 0x15, 0x90,
+                 0xC3, 0x42, 0xB2, 0xDA, 0x9B, 0x3D, 0x88, 0x4E}}};
+
+    // characteristic to signal waveform data status
+    static simple_ble_char_t unique_waveform_char_status = {.uuid16 = 0x9B3E};
+    static uint8_t unique_waveform_status;
+
+    // characteristic to hold an advertisement payload and corresponding waveform to be read
+    static simple_ble_char_t unique_waveform_char_data = {.uuid16 = 0x9B3F};
+    static unique_waveform_t unique_waveform_values;
+    static unique_waveform_t* unique_waveform_data = &unique_waveform_values;
+
 
 // receiving data items
 static bool receiving_bytes = false;
@@ -233,7 +250,7 @@ void init_adv_data (void) {
     powerblade_adv_data[10] = 0x31; // V_RMS
 
     powerblade_adv_data[11] = 0x08;
-    powerblade_adv_data[12] = 0x02; // True Power
+    powerblade_adv_data[12] = 0x02; // Real Power
 
     powerblade_adv_data[13] = 0x0A;
     powerblade_adv_data[14] = 0x1A; // Apparent Power
@@ -290,113 +307,6 @@ void uart_rx_handler (void) {
     rx_data[rx_index] = nrf_uart_rxd_get(NRF_UART0);
     rx_index++;
     led_toggle(ERROR_LED);
-}
-
-void receive_bytes(void) {
-    // check if we have received the entire packet
-    //  This can't occur until we have length, adv length, and checksum
-    if (rx_index >= 4) {
-
-        // parse out expected packet length
-        if (received_len == 0) {
-            received_len = (rx_data[0] << 8 | rx_data[1]);
-
-            // we are receiving a packet, restart the sleep timer
-            app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
-
-            // if we are receiving a long packet, pause advertisements until it's done
-            if (received_len > LONG_PACKET_THRESHOLD) {
-                advertising_stop();
-                app_timer_stop(start_eddystone_timer);
-                app_timer_stop(start_manufdata_timer);
-                // no need to set a timer to restart them, process_rx_packet
-                //  will do so. Unless the CRC is bad, in which case the next
-                //  uart transmission will
-            }
-        }
-
-        if (nrf_uart_errorsrc_get_and_clear(NRF_UART0) == NRF_UART_ERROR_OVERRUN_MASK) {
-            // overrun. This data is invalid
-
-            if (received_len == 0) {
-                // if the timer wasn't already restarted, do so now
-                app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
-            }
-
-            // if there was an overrun, we'll fail the packet immediately
-            receiving_bytes = false;
-            process_rx_packet(rx_index, true);
-            received_len = 0;
-            rx_index = 0;
-        } else if (rx_index >= received_len || rx_index >= RX_DATA_MAX_LEN) {
-            // process packet if we have all of it
-            //NOTE: we aren't doing any kind of check here to ensure that we
-            //  aren't waiting forever for an eronously large packet. That'
-            //  okay though, because it will reset from zero at next timer
-            //  start if it goes longer than the bytes that were actually sent
-            //  in the packet. Also, since the current draw when UART is on is
-            //  unsustainable, the nRF will just reboot if this occurs and get
-            //  back to a good state in any case.
-            receiving_bytes = false;
-            process_rx_packet(received_len, false);
-            received_len = 0;
-            rx_index = 0;
-        }
-    }
-}
-
-void process_rx_packet(uint16_t packet_len, bool overrun) {
-    static uint8_t rx_count = 0;
-
-    // turn off UART until next window
-    uart_rx_disable();
-
-    // a new window for transmission to the MSP430 is available
-    already_transmitted = false;
-
-    // check CRC
-    if (!overrun && additive_checksum(rx_data, packet_len-1) == rx_data[packet_len-1]) {
-
-        // check validity of advertisement length
-        uint8_t adv_len = rx_data[2];
-        if (4+adv_len <= packet_len) {
-
-            // limit to valid advertisement length
-            if (adv_len > ADV_DATA_MAX_LEN) {
-                adv_len = ADV_DATA_MAX_LEN;
-            }
-
-            // update advertisement
-            //  first byte of adv_data is service_id, skip it
-            //NOTE: this is safe to call no matter where in the
-            //  Eddystone/Manuf Data we are. If called during Manuf Data,
-            //  nothing changes (second call to timer_start does nothing).
-            //  If called during Eddystone, timing is screwed up, but it'll fix
-            //  itself within one cycle
-            powerblade_adv_data_len = 1+adv_len;
-            memcpy(&(powerblade_adv_data[1]), &(rx_data[3]), adv_len);
-
-            //XXX: Hack to test waveform transmission
-            //if (packet_len > 4+adv_len) {
-            //    // I think this might add 100 to flags...?
-            //    powerblade_adv_data[1+adv_len-1] += 100;
-            //}
-            rx_count++;
-            powerblade_adv_data[1+adv_len-1] = rx_count;
-
-            start_manufdata_adv();
-
-            // handle additional UART data, if any
-            uint8_t* additional_data = &(rx_data[3+adv_len]);
-            uint16_t additional_data_length = packet_len - (4 + adv_len);
-            on_receive_message(additional_data, additional_data_length);
-        }
-    } else {
-        // need to send a nak
-        nak_state = NAK_CHECKSUM;
-        status_code = STATUS_BAD_CHECKSUM;
-        simple_ble_notify_char(&config_status_char);
-    }
 }
 
 void uart_tx_handler (void) {
@@ -549,22 +459,37 @@ void services_init (void) {
                 1, (uint8_t*)&rawSample_status,
                 &rawSample_service, &rawSample_char_status);
 
-
-    // Add waveform collection service
-    simple_ble_add_service(&waveform_service);
+    // Add continuous waveform collection service
+    simple_ble_add_service(&continuous_waveform_service);
 
         // Add the characteristic to signify if data is valid
-        waveform_status = false;
+        continuous_waveform_status = false;
         simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
-                1, (uint8_t*)&waveform_status,
-                &waveform_service, &waveform_char_status);
+                1, (uint8_t*)&continuous_waveform_status,
+                &continuous_waveform_service, &continuous_waveform_char_status);
 
         // Add the characteristic to provide waveforms
-        memset(waveform_data, 0x00, WAVEFORM_MAX_LEN);
+        memset(continuous_waveform_data, 0x00, WAVEFORM_MAX_LEN);
         simple_ble_add_auth_characteristic(1, 0, 0, 0, // read, write, notify, vlen
                 true, false, // read auth, write auth
-                WAVEFORM_MAX_LEN, (uint8_t*)waveform_data,
-                &waveform_service, &waveform_char_data);
+                WAVEFORM_MAX_LEN, (uint8_t*)continuous_waveform_data,
+                &continuous_waveform_service, &continuous_waveform_char_data);
+
+    // Add unique waveform collection service
+    simple_ble_add_service(&unique_waveform_service);
+
+        // Add the characteristic to signify if data is valid
+        unique_waveform_status = false;
+        simple_ble_add_characteristic(1, 1, 1, 0, // read, write, notify, vlen
+                1, (uint8_t*)&unique_waveform_status,
+                &unique_waveform_service, &unique_waveform_char_status);
+
+        // Add the characteristic to provide waveforms
+        memset(unique_waveform_data, 0x00, sizeof(unique_waveform_t));
+        simple_ble_add_auth_characteristic(1, 0, 0, 0, // read, write, notify, vlen
+                true, false, // read auth, write auth
+                sizeof(unique_waveform_t), (uint8_t*)unique_waveform_data,
+                &unique_waveform_service, &unique_waveform_char_data);
 }
 
 void ble_evt_connected (ble_evt_t* p_ble_evt) {
@@ -618,11 +543,20 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
             rawSample_state = RS_NEXT;
         }
 
-    } else if (simple_ble_is_char_event(p_ble_evt, &waveform_char_status)) {
+    } else if (simple_ble_is_char_event(p_ble_evt, &continuous_waveform_char_status)) {
         // clear value on write
-        waveform_status = 0;
+        continuous_waveform_status = 0;
 
-        //XXX: waveform has been downloaded. Do we need to do anything?
+    } else if (simple_ble_is_char_event(p_ble_evt, &unique_waveform_char_status)) {
+        // clear value on write
+        unique_waveform_status = 0;
+
+        // get the next waveform to transfer, if any
+        if (get_next_waveform(unique_waveform_data)) {
+            // notify that data is available
+            unique_waveform_status = 1;
+            simple_ble_notify_char(&unique_waveform_char_status);
+        }
 
     } else if (simple_ble_is_char_event(p_ble_evt, &config_voff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_ioff_char) ||
@@ -636,7 +570,10 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
 }
 
 void ble_evt_rw_auth (ble_evt_t* p_ble_evt) {
-    if (simple_ble_is_read_auth_event(p_ble_evt, &rawSample_char_data) || simple_ble_is_read_auth_event(p_ble_evt, &waveform_char_data)) {
+    if (simple_ble_is_read_auth_event(p_ble_evt, &rawSample_char_data) ||
+            simple_ble_is_read_auth_event(p_ble_evt, &continuous_waveform_char_data) ||
+            simple_ble_is_read_auth_event(p_ble_evt, &unique_waveform_char_data)) {
+
         // read request for a data characteristic, disable uart for a cycle and
         //  authorize the read
         skip_uart_cycle = true;
@@ -703,6 +640,10 @@ int main(void) {
         }
     }
 }
+
+/**************************************************
+ * Message Transmit State Machine
+ **************************************************/
 
 void transmit_message(void) {
     // select message to transmit at this interval
@@ -835,21 +776,147 @@ void transmit_message(void) {
     }
 }
 
-void on_receive_message(uint8_t* buf, uint16_t len) {
+/**************************************************
+ * Message Receive State Machine
+ **************************************************/
+
+void receive_bytes(void) {
+    // check if we have received the entire packet
+    //  This can't occur until we have length, adv length, and checksum
+    if (rx_index >= 4) {
+
+        // parse out expected packet length
+        if (received_len == 0) {
+            received_len = (rx_data[0] << 8 | rx_data[1]);
+
+            // we are receiving a packet, restart the sleep timer
+            app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
+
+            // if we are receiving a long packet, pause advertisements until it's done
+            if (received_len > LONG_PACKET_THRESHOLD) {
+                advertising_stop();
+                app_timer_stop(start_eddystone_timer);
+                app_timer_stop(start_manufdata_timer);
+                // no need to set a timer to restart them, process_rx_packet
+                //  will do so. Unless the CRC is bad, in which case the next
+                //  uart transmission will
+            }
+        }
+
+        if (nrf_uart_errorsrc_get_and_clear(NRF_UART0) == NRF_UART_ERROR_OVERRUN_MASK) {
+            // overrun. This data is invalid
+
+            if (received_len == 0) {
+                // if the timer wasn't already restarted, do so now
+                app_timer_start(enable_uart_timer, UART_SLEEP_DURATION, NULL);
+            }
+
+            // if there was an overrun, we'll fail the packet immediately
+            receiving_bytes = false;
+            process_rx_packet(rx_index, true);
+            received_len = 0;
+            rx_index = 0;
+        } else if (rx_index >= received_len || rx_index >= RX_DATA_MAX_LEN) {
+            // process packet if we have all of it
+            //NOTE: we aren't doing any kind of check here to ensure that we
+            //  aren't waiting forever for an eronously large packet. That'
+            //  okay though, because it will reset from zero at next timer
+            //  start if it goes longer than the bytes that were actually sent
+            //  in the packet. Also, since the current draw when UART is on is
+            //  unsustainable, the nRF will just reboot if this occurs and get
+            //  back to a good state in any case.
+            receiving_bytes = false;
+            process_rx_packet(received_len, false);
+            received_len = 0;
+            rx_index = 0;
+        }
+    }
+}
+
+void process_rx_packet(uint16_t packet_len, bool overrun) {
+    static bool first_packet = true;
+    static uint32_t first_seqno = 0;
+
+    // turn off UART until next window
+    uart_rx_disable();
+
+    // a new window for transmission to the MSP430 is available
+    already_transmitted = false;
+
+    // check CRC
+    if (!overrun && additive_checksum(rx_data, packet_len-1) == rx_data[packet_len-1]) {
+
+        // check validity of advertisement length
+        uint8_t adv_len = rx_data[2];
+        if (4+adv_len <= packet_len) {
+
+            // limit to valid advertisement length
+            if (adv_len > ADV_DATA_MAX_LEN) {
+                adv_len = ADV_DATA_MAX_LEN;
+            }
+
+            // update advertisement
+            //  first byte of adv_data is service_id, skip it
+            //NOTE: this is safe to call no matter where in the
+            //  Eddystone/Manuf Data we are. If called during Manuf Data,
+            //  nothing changes (second call to timer_start does nothing).
+            //  If called during Eddystone, timing is screwed up, but it'll fix
+            //  itself within one cycle
+            powerblade_adv_data_len = 1+adv_len;
+            memcpy(&(powerblade_adv_data[1]), &(rx_data[3]), adv_len);
+
+            // determine if powerblade restarted
+            uint32_t curr_seqno = parse_sequence_number(powerblade_adv_data, powerblade_adv_data_len);
+            if (first_packet) {
+                first_packet = false;
+                first_seqno = curr_seqno;
+            }
+            flag_nrf_restart(((curr_seqno-first_seqno) < 60), powerblade_adv_data, powerblade_adv_data_len);
+
+            // include available waveform
+            flag_waveform_available((unique_waveform_status == 1), powerblade_adv_data, powerblade_adv_data_len);
+
+            // actually copy over advertisement data and begin advertisement
+            start_manufdata_adv();
+
+            // handle additional UART data, if any
+            uint8_t* additional_data = &(rx_data[3+adv_len]);
+            uint16_t additional_data_length = packet_len - (4 + adv_len);
+            on_receive_message(additional_data, additional_data_length, &(rx_data[3]), adv_len);
+        }
+    } else {
+        // need to send a nak
+        nak_state = NAK_CHECKSUM;
+        status_code = STATUS_BAD_CHECKSUM;
+        simple_ble_notify_char(&config_status_char);
+    }
+}
+
+void on_receive_message(uint8_t* buf, uint16_t len, uint8_t* adv_data, uint8_t adv_len) {
     if (len > 0) {
         // switch on add data type
         uint8_t data_type = buf[0];
         switch (data_type) {
             case WAVEFORM:
-                // save waveform if space is available
-                if (waveform_status == 0) {
+                // save waveform to continuous waveform service if space is available
+                if (continuous_waveform_status == 0) {
                     if ((len-1) == WAVEFORM_MAX_LEN) {
-                        memcpy(waveform_data, &(buf[1]), len-1);
+                        memcpy(continuous_waveform_data, &(buf[1]), len-1);
                     }
 
                     // notify that data is available
-                    waveform_status = 1;
-                    simple_ble_notify_char(&waveform_char_status);
+                    continuous_waveform_status = 1;
+                    simple_ble_notify_char(&continuous_waveform_char_status);
+                }
+
+                // check if unique waveform service should save data and do so
+                check_and_store_new_waveform(&(buf[1]), len-1, adv_data, adv_len);
+
+                // update unique waveform service data if waveform available
+                if (unique_waveform_status == 0 && get_next_waveform(unique_waveform_data)) {
+                    // notify that data is available
+                    unique_waveform_status = 1;
+                    simple_ble_notify_char(&unique_waveform_char_status);
                 }
                 break;
 

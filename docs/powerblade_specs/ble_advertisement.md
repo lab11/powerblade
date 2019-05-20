@@ -37,7 +37,7 @@ Data fields are as follows:
  * **Real Power**: Real power measurement in Watts, unscaled
  * **Apparent Power**: Apparent power measurement in Volt Amps, unscaled
  * **Energy Use**: Energy use measurement in Watt Hours, unscaled
- * **Flags**: Additional flags set by the system (currently unused)
+ * **Flags**: Additional flags set by the system
 
 ### Scaling Values
 In order to simplify computation required on the MSP430, some scaling is pushed off to the receiver. `V_RMS`, `Real Power`, `Apparent Power`, and `Energy Use` must all be scaled.
@@ -79,6 +79,22 @@ To calculate `Power Factor`:
 
     `Power Factor Final` = `Real Power` / `Apparent Power`
 
+
+### Flags
+
+| **Bit Values** | 7                         | 6                  |
+|:--------------:|:-------------------------:|:------------------:|
+| **Field**      | Calibration sent from nRF | Locally calibrated |
+
+| 5                            | 4                                      |
+|:----------------------------:|:--------------------------------------:|
+| nRF restarted in last minute | Unique waveform available for download |
+
+| 3-0                  |
+|:--------------------:|
+| MSP software version |
+
+
 ### Example Packet
 | **Field** | Service ID | Version | Sequence   | P_scale | V_scale | WH_scale | V_RMS |
 |:---------:|:----------:|:-------:|:----------:|:-------:|:-------:|:--------:|:-----:|
@@ -86,7 +102,7 @@ To calculate `Power Factor`:
 
 | Real Power | Apparent Power | Energy Use | Flags |
 |:----------:|:--------------:|:----------:|:-----:|
-| 0x0802     | 0x0A1A         | 0x0000010D | 0x00  |
+| 0x0802     | 0x0A1A         | 0x0000010D | 0x44  |
 
 Protocol is version 1.
 
@@ -100,6 +116,7 @@ In this example:
  * `Apparent Power` is 2586 * 0.0586 = 151.540 Volt Amps
  * `Energy Use` is 269 * 0.008334 = 2.242 Watt Hours
  * `Power Factor` is 210.130 / 151.540 = 0.79
+ * `Flags` specifies MSP software version 4 and internal calibration occurred
 
 
 ## Eddystone Packet Format
@@ -113,4 +130,5 @@ PowerBlade utilizes the [Eddystone protocol](https://github.com/google/eddystone
 | Real Power | Apparent Power | Energy Use | Flags |
 |:----------:|:--------------:|:----------:|:-----:|
 | 10-11      | 12-13          | 14-17      | 18    |
+
 #XXX: HERE
