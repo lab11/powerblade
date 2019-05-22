@@ -7,7 +7,7 @@ var SSH = require('simple-ssh');
 
 // input from user
 var target_device = 'c0:98:e5:70:45:36';
-var wattage = 200;
+var wattage = 100;
 var voltage = 120;
 var read_config = false;
 var local = false;
@@ -93,14 +93,14 @@ if(server == false) {
 }
 
 // Start up BLE scanning
-function startScanningOnPowerOn(voltage, wattage, target_device) {
-    if (noble.state === 'poweredOn') {
-        noble.startScanning([], true);
-        console.log("Looking for " + target_device);
-		console.log("Calibrating at " + wattage + " W and " + voltage + " V");
-    } else {
-        noble.once('stateChange', startScanningOnPowerOn);
-    }
+function startScanningOnPowerOn() {
+  if (noble.state === 'poweredOn') {
+    noble.startScanning([], true);
+    console.log("Looking for " + target_device);
+    console.log("Calibrating at " + wattage + " W and " + voltage + " V");
+  } else {
+    noble.once('stateChange', startScanningOnPowerOn);
+  }
 };
 
 // function fn_calibrate(voltage, wattage, target_device) {
@@ -171,7 +171,7 @@ noble.on('discover', function (peripheral) {
 	        console.log('Found PowerBlade (' + peripheral.address +')\n');
 	        process.stdout.write('Connecting... ');
 	        powerblade_periph = peripheral;
-	        
+
 	        found_peripheral = peripheral;
 	        peripheral.connect(function (error) {
 	            console.log('done\n');
@@ -329,7 +329,7 @@ function start_calibration() {
     buf.writeInt16BE(wattage*10);
     calibration_wattage_char.write(buf, false, function(error) {
         if (error) throw error;
-        
+
         // write voltage value
         buf.writeInt16BE(voltage*10);
         calibration_voltage_char.write(buf, false, function(error) {
