@@ -30,6 +30,9 @@ const uint16_t voltage_setpoint = 120;
 #define NUM_CYCLES 60
 #define NUM_SAMPLES (NUM_CYCLES*SAMCOUNT)
 
+int16_t current_result[NUM_SAMPLES];
+int16_t voltage_result[NUM_SAMPLES];
+uint16_t count = 0;
 
 uint32_t SquareRoot64(uint64_t a_nInput) {
   uint64_t op = a_nInput;
@@ -106,18 +109,20 @@ void main() {
   int32_t agg_current = 0;
 
   while(1) {
-    int16_t i = dcurrent[sample_count * (measurement_count + 1)] - Ioff;
-    int16_t v = voltage [sample_count * (measurement_count + 1)] - Voff;
+    int16_t i = dcurrent[count] - Ioff;
+    int16_t v = voltage [count] - Voff;
 
     //printf("agg_current before: %d\n", agg_current);
     agg_current += (int16_t) (i + (i >> 1));
     agg_current -= agg_current >> 5;
     //printf("agg_current after: %d\n", agg_current);
 
-    coff += agg_current >> 3 - Curoff;
+    coff += (agg_current >> 3) - Curoff;
     coff_count ++;
 
     int32_t new_current = (agg_current >> 3) - Curoff;
+    current_result[count] = new_current;
+    voltage_result[count++] = v;
 
     acc_i_rms += (uint64_t)(new_current * new_current);
     acc_p_ave += ((int64_t)v * new_current);
@@ -173,4 +178,16 @@ void main() {
       }
     }
   }
+  FILE *f = fopen("recreate_data.txt", "w");
+  if (f == NULL)
+  {
+    printf("Error opening file\n");
+    exit(1);
+  }
+
+  for(uint16_t i = 0; i < NUM_SAMPLES; i++) {
+    fprintf(f, "%u, %d, %d, %d, %d\n", i, voltage[i], dcurrent[i], voltage_result[i], current_result[i]);
+  }
+
+  fclose(f);
 }
