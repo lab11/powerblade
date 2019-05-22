@@ -17,17 +17,17 @@ static msp_biquad_cascade_df1_q15_params df1Params;
 static msp_biquad_df1_q15_states current_states[FILTER_STAGES];
 static msp_biquad_df1_q15_states voltage_states[FILTER_STAGES];
 
-const int16_t Voff= -4;
+const int16_t Voff= -29;
 const int16_t Ioff= -15;
-const int16_t Curoff= 13;
-const int16_t PScale= 16429;
-const int16_t VScale= 171;
+const int16_t Curoff= 2;
+const int16_t PScale= 16913;
+const int16_t VScale= 126;
 const int16_t WHScale= 9;
 const uint16_t power_setpoint = 76 * 10;
 const uint16_t voltage_setpoint = 120;
 
 #define SAMCOUNT 42
-#define NUM_CYCLES 60
+#define NUM_CYCLES 30
 #define NUM_SAMPLES (NUM_CYCLES*SAMCOUNT)
 
 int16_t current_result[NUM_SAMPLES];
@@ -117,7 +117,7 @@ void main() {
     agg_current -= agg_current >> 5;
     //printf("agg_current after: %d\n", agg_current);
 
-    coff += (agg_current >> 3) - Curoff;
+    coff += (agg_current >> 3);
     coff_count ++;
 
     int32_t new_current = (agg_current >> 3) - Curoff;
