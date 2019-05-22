@@ -186,7 +186,7 @@ void main() {
   }
 
   for(uint16_t i = 0; i < NUM_SAMPLES; i++) {
-    fprintf(f, "%u, %d, %d, %d, %d\n", i, voltage[i], dcurrent[i], voltage_result[i], current_result[i]);
+    fprintf(f, "%u, %d, %d, %d, %d\n", i, voltage[i] - voff, dcurrent[i] - ioff, voltage_result[i], current_result[i]);
   }
 
   fclose(f);
