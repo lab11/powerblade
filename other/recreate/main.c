@@ -9,13 +9,22 @@
 #include "filter.h"
 #include "highpass.h"
 
+#define SAMCOUNT 42
+#define NUM_CYCLES 30
+#define NUM_SAMPLES (NUM_CYCLES*SAMCOUNT)
+
 #define FILTER_LENGTH SAMCOUNT
 #define FILTER_STAGES (sizeof(highpass)/sizeof(msp_biquad_df1_q15_coeffs))
+
 static msp_biquad_df1_q15_coeffs filterCoeffs[FILTER_STAGES];
 static msp_fill_q15_params fillParams;
 static msp_biquad_cascade_df1_q15_params df1Params;
 static msp_biquad_df1_q15_states current_states[FILTER_STAGES];
 static msp_biquad_df1_q15_states voltage_states[FILTER_STAGES];
+static _q15 filter_in_current[SAMCOUNT] = {0};
+static _q15 filter_in_voltage[SAMCOUNT] = {0};
+static _q15 filter_res_current[SAMCOUNT] = {0};
+static _q15 filter_res_voltage[SAMCOUNT] = {0};
 
 const int16_t Voff= -29;
 const int16_t Ioff= -15;
@@ -26,13 +35,8 @@ const int16_t WHScale= 9;
 const uint16_t power_setpoint = 76 * 10;
 const uint16_t voltage_setpoint = 120;
 
-#define SAMCOUNT 42
-#define NUM_CYCLES 30
-#define NUM_SAMPLES (NUM_CYCLES*SAMCOUNT)
-
 int16_t current_result[NUM_SAMPLES];
 int16_t voltage_result[NUM_SAMPLES];
-uint16_t count = 0;
 
 uint32_t SquareRoot64(uint64_t a_nInput) {
   uint64_t op = a_nInput;
@@ -82,6 +86,7 @@ void main() {
   // filter init
   // Initialize filter coefficients.
   memcpy(filterCoeffs, highpass, sizeof(filterCoeffs));
+  printf("highpass coefficient b2: %d\n", filterCoeffs[0].b2);
 
   // Initialize the parameter structure.
   df1Params.length = FILTER_LENGTH;
@@ -105,32 +110,50 @@ void main() {
   printf("ioff: %d\n", ioff);
 
   uint8_t sample_count = 0;
+  uint16_t raw_count = 0;
+  uint16_t integrate_count = 0;
   uint8_t measurement_count = 0;
   int32_t agg_current = 0;
 
   while(1) {
-    int16_t i = dcurrent[count] - Ioff;
-    int16_t v = voltage [count] - Voff;
+    int16_t i = dcurrent[raw_count] - Ioff;
+    int16_t v = voltage [raw_count++] - Voff;
 
     //printf("agg_current before: %d\n", agg_current);
     agg_current += (int16_t) (i + (i >> 1));
     agg_current -= agg_current >> 5;
     //printf("agg_current after: %d\n", agg_current);
 
-    coff += (agg_current >> 3);
-    coff_count ++;
-
-    int32_t new_current = (agg_current >> 3) - Curoff;
-    current_result[count] = new_current;
-    voltage_result[count++] = v;
-
-    acc_i_rms += (uint64_t)(new_current * new_current);
-    acc_p_ave += ((int64_t)v * new_current);
-    acc_v_rms += (uint64_t)((int32_t)v * (int32_t)v);
+    filter_in_voltage[sample_count] = (_q15)(v);
+    filter_in_current[sample_count] = (_q15)(agg_current);
 
     sample_count++;
     if (sample_count == SAMCOUNT) {
       sample_count = 0;
+
+      df1Params.states = voltage_states;
+      msp_biquad_cascade_df1_q15(&df1Params, filter_in_voltage, filter_res_voltage);
+
+      df1Params.states = current_states;
+      msp_biquad_cascade_df1_q15(&df1Params, filter_in_current, filter_res_current);
+
+      for(uint8_t i=0; i < SAMCOUNT; i++) {
+        int16_t _current = (int16_t)filter_res_current[i];
+        //printf("%d, %d\n", filter_in_current[i], _current);
+        int16_t _voltage = (int16_t)filter_res_voltage[i];
+        //printf("%d, %d\n", filter_in_voltage[i], _voltage);
+        current_result[integrate_count] = _current;
+        voltage_result[integrate_count++] = _voltage;
+
+        coff += (agg_current >> 3);
+        coff_count ++;
+        _current = (_current >> 3) - Curoff;
+
+        acc_i_rms += (uint64_t)(_current * _current);
+        acc_p_ave += (int64_t)(_voltage * _current);
+        acc_v_rms += (uint64_t)((int32_t)_voltage * (int32_t)_voltage);
+
+      }
 
       // Increment energy calc
       wattHoursToAverage += (int32_t)(acc_p_ave / SAMCOUNT);
@@ -140,11 +163,12 @@ void main() {
       uint16_t Irms = (uint16_t) SquareRoot64(acc_i_rms / SAMCOUNT);
       Vrms = (uint8_t) SquareRoot64(acc_v_rms / SAMCOUNT);
       voltAmpsToAverage += (uint32_t) (Irms * Vrms);
-      acc_i_rms = 0;
-      acc_v_rms = 0;
 
       //printf("Vrms: %d\n", (int32_t)(vscale*Vrms));
+      //printf("acc_i_rms: %d\n", acc_i_rms);
       //printf("Irms: %d\n", Irms);
+      acc_i_rms = 0;
+      acc_v_rms = 0;
 
       measurement_count++;
       if (measurement_count > NUM_CYCLES) {

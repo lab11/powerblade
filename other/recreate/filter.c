@@ -2,7 +2,8 @@
 
 int16_t __q15mpy(int16_t a, int16_t b) {
   int32_t store = (int32_t)a * (int32_t)b;
-  return (int16_t) (store >> 16);
+  int16_t result = store >> 15;
+  return result;
 }
 
 int msp_fill_q15(const msp_fill_q15_params *params, _q15 *dst)
