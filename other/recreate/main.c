@@ -14,29 +14,25 @@
 #define NUM_SAMPLES (NUM_CYCLES*SAMCOUNT)
 
 #define FILTER_LENGTH SAMCOUNT
-#define FILTER_STAGES (sizeof(highpass)/sizeof(msp_biquad_df1_q15_coeffs))
 
-static msp_biquad_df1_q15_coeffs filterCoeffs[FILTER_STAGES];
-static msp_fill_q15_params fillParams;
-static msp_biquad_cascade_df1_q15_params df1Params;
-static msp_biquad_df1_q15_states current_states[FILTER_STAGES];
-static msp_biquad_df1_q15_states voltage_states[FILTER_STAGES];
-static _q15 filter_in_current[SAMCOUNT] = {0};
-static _q15 filter_in_voltage[SAMCOUNT] = {0};
-static _q15 filter_res_current[SAMCOUNT] = {0};
-static _q15 filter_res_voltage[SAMCOUNT] = {0};
+static int16_t filter_in_current[SAMCOUNT] = {0};
+static int16_t filter_in_voltage[SAMCOUNT] = {0};
+static int16_t filter_res_current[SAMCOUNT] = {0};
+static int16_t filter_res_voltage[SAMCOUNT] = {0};
+static int16_t og_current[NUM_SAMPLES] = {0};
 
 const int16_t Voff= -29;
 const int16_t Ioff= -15;
-const int16_t Curoff= 2;
-const int16_t PScale= 16913;
-const int16_t VScale= 126;
+const int16_t Curoff= 0;
+const int16_t PScale= 17068;
+const int16_t VScale= 58;
 const int16_t WHScale= 9;
 const uint16_t power_setpoint = 76 * 10;
 const uint16_t voltage_setpoint = 120;
 
 int16_t current_result[NUM_SAMPLES];
 int16_t voltage_result[NUM_SAMPLES];
+float alpha = 0.07203844415598515;
 
 uint32_t SquareRoot64(uint64_t a_nInput) {
   uint64_t op = a_nInput;
@@ -57,6 +53,13 @@ uint32_t SquareRoot64(uint64_t a_nInput) {
     one >>= 2;
   }
   return res;
+}
+
+void ema_highpass(int16_t* input, int16_t* output, uint16_t len, float* s, float a) {
+  for(uint16_t i = 0; i < len; i++) {
+    *s = a * input[i] + (1 - a) * *s;
+    output[i] = (int16_t) ((float)input[i] - *s);
+  }
 }
 
 void main() {
@@ -85,19 +88,8 @@ void main() {
 
   // filter init
   // Initialize filter coefficients.
-  memcpy(filterCoeffs, highpass, sizeof(filterCoeffs));
-  printf("highpass coefficient b2: %d\n", filterCoeffs[0].b2);
-
-  // Initialize the parameter structure.
-  df1Params.length = FILTER_LENGTH;
-  df1Params.stages = FILTER_STAGES;
-  df1Params.coeffs = filterCoeffs;
-
-  // Zero initialize filter states.
-  fillParams.length = sizeof(current_states)/sizeof(_q15);
-  fillParams.value = 0;
-  int status = msp_fill_q15(&fillParams, (void *)current_states);
-  status = msp_fill_q15(&fillParams, (void *)voltage_states);
+  float s_current = 0;
+  float s_voltage = 0;
 
   for(uint16_t i = 0; i < NUM_SAMPLES; i++) {
     voff += voltage[i];
@@ -117,35 +109,29 @@ void main() {
 
   while(1) {
     int16_t i = dcurrent[raw_count] - Ioff;
-    int16_t v = voltage [raw_count++] - Voff;
+    int16_t v = voltage [raw_count] - Voff;
 
-    //printf("agg_current before: %d\n", agg_current);
     agg_current += (int16_t) (i + (i >> 1));
     agg_current -= agg_current >> 5;
-    //printf("agg_current after: %d\n", agg_current);
 
-    filter_in_voltage[sample_count] = (_q15)(v);
-    filter_in_current[sample_count] = (_q15)(agg_current);
+    filter_in_voltage[sample_count] = v;
+    filter_in_current[sample_count] = agg_current;
+    og_current[raw_count++] = (agg_current >> 3) - Curoff;
 
     sample_count++;
     if (sample_count == SAMCOUNT) {
       sample_count = 0;
 
-      df1Params.states = voltage_states;
-      msp_biquad_cascade_df1_q15(&df1Params, filter_in_voltage, filter_res_voltage);
-
-      df1Params.states = current_states;
-      msp_biquad_cascade_df1_q15(&df1Params, filter_in_current, filter_res_current);
+      ema_highpass(filter_in_voltage, filter_res_voltage, SAMCOUNT, &s_voltage, alpha);
+      ema_highpass(filter_in_current, filter_res_current, SAMCOUNT, &s_current, alpha);
 
       for(uint8_t i=0; i < SAMCOUNT; i++) {
         int16_t _current = (int16_t)filter_res_current[i];
-        //printf("%d, %d\n", filter_in_current[i], _current);
         int16_t _voltage = (int16_t)filter_res_voltage[i];
-        //printf("%d, %d\n", filter_in_voltage[i], _voltage);
         current_result[integrate_count] = _current;
         voltage_result[integrate_count++] = _voltage;
 
-        coff += (agg_current >> 3);
+        coff += (_current >> 3);
         coff_count ++;
         _current = (_current >> 3) - Curoff;
 
@@ -210,7 +196,7 @@ void main() {
   }
 
   for(uint16_t i = 0; i < NUM_SAMPLES; i++) {
-    fprintf(f, "%u, %d, %d, %d, %d\n", i, voltage[i] - voff, dcurrent[i] - ioff, voltage_result[i], current_result[i]);
+    fprintf(f, "%u, %d, %d, %d, %d, %d\n", i, voltage[i] - voff, dcurrent[i] - ioff, og_current[i], voltage_result[i], current_result[i]);
   }
 
   fclose(f);
