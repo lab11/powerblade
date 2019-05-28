@@ -23,16 +23,17 @@ static int16_t og_current[NUM_SAMPLES] = {0};
 
 const int16_t Voff= -29;
 const int16_t Ioff= -15;
-const int16_t Curoff= 0;
-const int16_t PScale= 17068;
-const int16_t VScale= 58;
+const int16_t Curoff= 2;
+const int16_t PScale= 17047;
+const int16_t VScale= 48;
 const int16_t WHScale= 9;
 const uint16_t power_setpoint = 76 * 10;
 const uint16_t voltage_setpoint = 120;
 
 int16_t current_result[NUM_SAMPLES];
 int16_t voltage_result[NUM_SAMPLES];
-float alpha = 0.07203844415598515;
+int16_t alpha = _Q15(0.07203844415598515);
+int16_t nalpha = _Q15(1 - 0.07203844415598515);
 
 uint32_t SquareRoot64(uint64_t a_nInput) {
   uint64_t op = a_nInput;
@@ -55,7 +56,14 @@ uint32_t SquareRoot64(uint64_t a_nInput) {
   return res;
 }
 
-void ema_highpass(int16_t* input, int16_t* output, uint16_t len, float* s, float a) {
+void ema_highpass_fixed(int16_t* input, int16_t* output, uint16_t len, int16_t* s) {
+  for(uint16_t i = 0; i < len; i++) {
+    *s = __saturate(__q15mpy(alpha, input[i]) + __q15mpy(nalpha, *s), -0x8000, 0x7FFF);
+    output[i] = __saturate(input[i] - *s, -0x8000, 0x7FFF);
+  }
+}
+
+void ema_highpass_float(int16_t* input, int16_t* output, uint16_t len, float* s, float a) {
   for(uint16_t i = 0; i < len; i++) {
     *s = a * input[i] + (1 - a) * *s;
     output[i] = (int16_t) ((float)input[i] - *s);
@@ -88,8 +96,8 @@ void main() {
 
   // filter init
   // Initialize filter coefficients.
-  float s_current = 0;
-  float s_voltage = 0;
+  int16_t s_current = 0;
+  int16_t s_voltage = 0;
 
   for(uint16_t i = 0; i < NUM_SAMPLES; i++) {
     voff += voltage[i];
@@ -122,8 +130,8 @@ void main() {
     if (sample_count == SAMCOUNT) {
       sample_count = 0;
 
-      ema_highpass(filter_in_voltage, filter_res_voltage, SAMCOUNT, &s_voltage, alpha);
-      ema_highpass(filter_in_current, filter_res_current, SAMCOUNT, &s_current, alpha);
+      ema_highpass_fixed(filter_in_voltage, filter_res_voltage, SAMCOUNT, &s_voltage);
+      ema_highpass_fixed(filter_in_current, filter_res_current, SAMCOUNT, &s_current);
 
       for(uint8_t i=0; i < SAMCOUNT; i++) {
         int16_t _current = (int16_t)filter_res_current[i];

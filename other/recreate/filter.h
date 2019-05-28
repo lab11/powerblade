@@ -92,6 +92,7 @@ typedef struct msp_biquad_cascade_df1_q15_params {
 } msp_biquad_cascade_df1_q15_params;
 
 
+int16_t __q15mpy(int16_t a, int16_t b);
 int msp_fill_q15(const msp_fill_q15_params *params, _q15 *dst);
 int msp_biquad_df1_q15(const msp_biquad_df1_q15_params *params, const _q15 *src, _q15 *dst);
 int msp_biquad_cascade_df1_q15(const msp_biquad_cascade_df1_q15_params *params, const _q15 *src, _q15 *dst);
