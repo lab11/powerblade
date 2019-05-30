@@ -24,11 +24,6 @@
 #include "checksum.h"
 #include "uart.h"
 #include "DSPLib.h"
-#include "highpass.h"
-
-#define FILTER_LENGTH SAMCOUNT
-#define FILTER_STAGES (sizeof(highpass)/sizeof(msp_biquad_df1_q15_coeffs))
-
 
 //#define NORDICDEBUG
 
@@ -57,22 +52,14 @@ int16_t voltage[BACKLOG_LEN];
 int16_t savedCurrent;
 int16_t savedVoltage;
 #endif
-msp_fill_q15_params fillParams;
-msp_biquad_cascade_df1_q15_params df1Params;
-DSPLIB_DATA(filterCoeffs,4)
-  msp_biquad_df1_q15_coeffs filterCoeffs[FILTER_STAGES];
-DSPLIB_DATA(current_states,4)
-  msp_biquad_df1_q15_states current_states[FILTER_STAGES];
-DSPLIB_DATA(voltage_states,4)
-  msp_biquad_df1_q15_states voltage_states[FILTER_STAGES];
-DSPLIB_DATA(filter_in_current,4)
-  _q15 filter_in_current[SAMCOUNT] = {0};
-DSPLIB_DATA(filter_res_current,4)
-  _q15 filter_res_current[SAMCOUNT] = {0};
-DSPLIB_DATA(filter_in_voltage,4)
-  _q15 filter_in_voltage[SAMCOUNT] = {0};
-DSPLIB_DATA(filter_res_voltage,4)
-  _q15 filter_res_voltage[SAMCOUNT] = {0};
+int32_t s_current = 0;
+int32_t s_voltage = 0;
+static const int16_t alpha = _Q15(0.07203844415598515);
+static const int16_t nalpha = _Q15(1 - 0.07203844415598515);
+static int16_t filter_in_current[SAMCOUNT] = {0};
+static int16_t filter_res_current[SAMCOUNT] = {0};
+static int16_t filter_in_voltage[SAMCOUNT] = {0};
+static int16_t filter_res_voltage[SAMCOUNT] = {0};
 uint8_t currentWriteCount;
 uint8_t currentReadCount;
 uint8_t voltageWriteCount;
@@ -127,7 +114,7 @@ uint8_t flags = 0x0F & msp_software_version;	// Lowest four bits of flags is sof
 #if defined (ADC8)
 PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -1, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x7B, .whscale = 0x09};
 #else
-PowerBladeConfig_t pb_config = { .voff = -1, .ioff = -16, .curoff = 0x0000, .pscale = 0x428A, .vscale = 0x79, .whscale = 0x09};
+PowerBladeConfig_t pb_config = { .voff = -6, .ioff = -14, .curoff = -7, .pscale = 0x411f, .vscale = 0x73, .whscale = 0x09};
 #endif
 
 // PowerBlade state (used for downloading data)
@@ -178,6 +165,24 @@ uint32_t SquareRoot64(uint64_t a_nInput) {
   }
   return res;
 }
+
+static int16_t q15mpy(int16_t a, int16_t b)
+{
+    MPYS = a;
+    OP2  = b;
+    return RESHI;
+    //int32_t store = (int32_t)a * (int32_t)b;
+    //return (int16_t)(store >> 15);
+}
+
+void ema_highpass_fixed(int16_t* input, int16_t* output, uint16_t len, int32_t* s) {
+  uint16_t i = 0;
+  for(i = 0; i < len; i++) {
+    *s = __saturated_add_q15(__q15mpy(alpha, input[i]), __q15mpy(nalpha, *s));
+    output[i] = __saturated_add_q15(input[i], -1 * *s);
+  }
+}
+
 
 // Variables and functions for keeping computation and transmission out of interrupts
 uint16_t tryCount;
@@ -275,23 +280,6 @@ int main(void) {
   // Wait timer for transmissions
   TA1CTL = TASSEL_1 + MC_2 + TACLR;			// ACLK, up mode
 
-  // Initialize filter coefficients.
-  memcpy(filterCoeffs, highpass, sizeof(filterCoeffs));
-
-  // Initialize the parameter structure.
-  df1Params.length = FILTER_LENGTH;
-  df1Params.stages = FILTER_STAGES;
-  df1Params.coeffs = filterCoeffs;
-
-  // Zero initialize filter states.
-  msp_status status;
-  fillParams.length = sizeof(current_states)/sizeof(_q15);
-  fillParams.value = 0;
-  status = msp_fill_q15(&fillParams, (void *)current_states);
-  msp_checkStatus(status);
-  status = msp_fill_q15(&fillParams, (void *)voltage_states);
-  msp_checkStatus(status);
-
   __bis_SR_register(LPM3_bits + GIE);        	// Enter LPM3 w/ interrupts
 
   while(1) {
@@ -386,34 +374,29 @@ void transmitTry(void) {
   agg_current += (int16_t) (savedCurrent + (savedCurrent >> 1));
   agg_current -= agg_current >> 5;
 
-  filter_in_voltage[sampleCount] = (_q15)savedVoltage;
-  filter_in_current[sampleCount] = (_q15)agg_current;
+  filter_in_voltage[sampleCount] = savedVoltage;
+  filter_in_current[sampleCount] = agg_current;
 
   sampleCount++;
   if (sampleCount == SAMCOUNT) { 				// Entire AC wave sampled (60 Hz)
 
     // Filter on current, 40Hz cut off high-pass
-    msp_status status;
-    df1Params.states = current_states;
-    status = msp_biquad_cascade_df1_q15(&df1Params, filter_in_current, filter_res_current);
-    msp_checkStatus(status);
-    df1Params.states = voltage_states;
-    status = msp_biquad_cascade_df1_q15(&df1Params, filter_in_voltage, filter_res_voltage);
-    msp_checkStatus(status);
+    ema_highpass_fixed(filter_in_voltage, filter_res_voltage, SAMCOUNT, &s_voltage);
+    ema_highpass_fixed(filter_in_current, filter_res_current, SAMCOUNT, &s_current);
 
     uint8_t i;
     // Perform calculations for I^2, V^2, and P
     for(i = 0; i < SAMCOUNT; i++) {
-      int16_t _current = (int16_t)filter_res_current[i];
-      int16_t _voltage = (int16_t)filter_res_voltage[i];
+      int16_t _current = filter_res_current[i];
+      int16_t _voltage = filter_res_voltage[i];
 
       // subtract offset
       if(pb_state == pb_local3) {
-        _current = (_current >> 3) - curoff_local;
+        _current = (_current>>3) - curoff_local;
       } else {
-        _current = (_current >> 3) - pb_config.curoff;
+        _current = (_current>>3) - pb_config.curoff;
         if(pb_state == pb_local2) {
-          curoff_local += _current >> 3;
+          curoff_local += (_current >> 3);
           curoff_count++;
         }
       }
