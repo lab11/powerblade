@@ -10,7 +10,8 @@ var mqtt = require('mqtt');
 
 var debug = false;
 var dedup = true;
-var pb_address = 0;
+var pb_address = [];
+var filenames = {};
 var pb_tag = "";
 var device = "";
 var count = 50;
@@ -27,10 +28,10 @@ for(var i = 0; i < process.argv.length; i++) {
         dedup = false;
     }
     else if(val == "-m") {
-        pb_address = "c0:98:e5:70:" + process.argv[++i];  // Additional increment of i
+        pb_address.push("c0:98:e5:70:" + process.argv[++i]);  // Additional increment of i
     }
     else if(val == "--mac") {
-        pb_address = process.argv[++i];   // Additional increment of i
+        pb_address.push(process.argv[++i]);   // Additional increment of i
     }
     else if(val == "-t" || val == "--tag") {
         pb_tag = "_" + process.argv[++i];          // Additional increment of i
@@ -52,7 +53,7 @@ for(var i = 0; i < process.argv.length; i++) {
 }
 
 // Check for the required parameter
-if(pb_address == 0) {
+if(pb_address.length == 0) {
     console.log("Error: Must run with a certain PowerBlade");
     console.log("Use \"-m xx:xx\" or \"--mac c0:98:e5:70:xx:xx\" to specify");
     process.exit();
@@ -64,40 +65,46 @@ if(device == "") {
     process.exit();
 }
 
-var addr_list = pb_address.split(":");
-if(!(addr_list.length == 6 && addr_list[0] == "c0" && addr_list[1] == "98" && addr_list[2] == "e5" && addr_list[3] == "70" && !isNaN(parseInt(addr_list[4], 16)) && !isNaN(parseInt(addr_list[5], 16)))) {
+pb_address.forEach(function(addr) {
+  var addr_list = addr.split(":");
+  console.log(addr)
+  console.log(addr_list)
+  if(!(addr_list.length == 6 && addr_list[0] == "c0" && addr_list[1] == "98" && addr_list[2] == "e5" && addr_list[3] == "70" && !isNaN(parseInt(addr_list[4], 16)) && !isNaN(parseInt(addr_list[5], 16)))) {
     console.log("Error: Invalid PowerBlade address");
     console.log("Use \"-m c0:98:e5:70:xx:xx\" or \"--mac c0:98:e5:70:xx:xx\" to specify");
     process.exit();
-}
+  }
+  console.log("Looking for PowerBlade " + addr);
+  //filename = dateFormat(g_time_start, "yyyy-mm-dd_h-MM-ss") + "_" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".txt";
+  filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
+  filenames[addr] = filename;
+  console.log(filename)
+  if(fs.existsSync(filename)) {
+    var replace = readlineSync.question("File exists: overwrite, rename, or exit? (o/r/e): ");
+    if(replace == 'r') {
+      var newfileNum = 0
+      var newfile = filename.split('.')[0] + '.bak'
+      while(fs.existsSync(newfile)) {
+        newfileNum += 1
+        newfile = filename.split('.')[0] + '_' + newfileNum + '.bak'
+      }
+      console.log("Copying existing log to " + newfile);
+      fs.renameSync(filename, newfile);
+    }
+    else if(replace != 'o') {
+      process.exit()
+    }
+  }
 
-console.log("Looking for PowerBlade " + pb_address);
+  fs.closeSync(fs.openSync(filename, 'w'));
+  fs.appendFileSync(filename, 'time,addr,seq,rms_v,power,apparent_power,energy,pf,flags\n', 'utf-8');
+
+  console.log("Logging to " + filename);
+});
+
 
 var g_time_start = new Date();
 
-//filename = dateFormat(g_time_start, "yyyy-mm-dd_h-MM-ss") + "_" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + pb_tag + ".txt";
-filename = process.env.PB_DATA + "/" + addr_list[0] + addr_list[1] + addr_list[2] + addr_list[3] + addr_list[4] + addr_list[5] + device + pb_tag + ".dat";
-
-if(fs.existsSync(filename)) {
-    var replace = readlineSync.question("File exists: overwrite, rename, or exit? (o/r/e): ");
-    if(replace == 'r') {
-        var newfileNum = 0
-        var newfile = filename.split('.')[0] + '.bak'
-        while(fs.existsSync(newfile)) {
-            newfileNum += 1
-            newfile = filename.split('.')[0] + '_' + newfileNum + '.bak'
-        }
-        console.log("Copying existing log to " + newfile);
-        fs.renameSync(filename, newfile);
-    } 
-    else if(replace != 'o') {
-        process.exit()
-    }
-}
-
-fs.closeSync(fs.openSync(filename, 'w'));
-
-console.log("Logging to " + filename);
 
 var UMICH_COMPANY_ID = 0x02E0;
 var POWERBLADE_SERVICE_ID = 0x11;
@@ -107,49 +114,6 @@ var OLD_COMPANY_ID = 0x4908;
 var powerblade_sequences = {};
 
 var total = 0;
-
-var mqtt_client = mqtt.connect(host);
-mqtt_client.on('connect', function () {
-    console.log("Connected to MQTT");
-    mqtt_client.subscribe('gateway-data');
-
-    mqtt_client.on('message', function (topic, message) {
-        var adv = JSON.parse(message.toString());
-
-        //console.log(adv);
-
-        if(adv['_meta'] && adv['_meta']['device_id'] == pb_address.replace(new RegExp(':', 'g'), '')) {
-
-            var writeObject = {
-                seq: adv['sequence_number'], 
-                vrms: parseFloat(adv['rms_voltage']).toFixed(2),
-                power: parseFloat(adv['power']).toFixed(2),
-                app: parseFloat(adv['apparent_power']).toFixed(2),
-                wh: parseFloat(adv['energy']).toFixed(2),
-                pf: parseFloat(adv['power_factor']).toFixed(2),
-                fg: adv['flags']
-            }
-
-            fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
-
-            rx_count = rx_count + 1;
-            process.stdout.write(rx_count + "/50 (" + adv['sequence_number'] + "): " + adv['power'] + "\n");
-            total = total + parseFloat(adv['power']);
-            if(rx_count == count) {
-                process.stdout.write("\n");
-                console.log("Average power: " + (total/count))
-
-                //runScript('./data_check.js', device.substr(1), function (err) {
-		//		    if (err) throw err;
-		//		    console.log('finished running data_check.js');
-		//		    process.exit();
-		//		});
-		process.exit();
-
-            }
-        }
-	});
-});
 
 function runScript(scriptPath, arg, callback) {
 
@@ -175,7 +139,7 @@ function runScript(scriptPath, arg, callback) {
     });
 }
 
-/*noble.on('stateChange', function(state) {
+noble.on('stateChange', function(state) {
     if (state === 'poweredOn') {
         console.log("Starting scan...");
         noble.startScanning([], true);
@@ -209,9 +173,10 @@ noble.on('discover', function (peripheral) {
         if (company_id == OLD_COMPANY_ID) {
             data = advertisement.manufacturerData.slice(2);
         }
-        var recv_time = (new Date).getTime()/1000;
+        var recv_time = new Date
+        recv_time = new Date(recv_time.getTime() - (recv_time.getTimezoneOffset() * 60000)).toISOString();
 
-        if(address != pb_address) {
+        if(!pb_address.includes(address)) {
             return;
         }
 
@@ -305,17 +270,18 @@ noble.on('discover', function (peripheral) {
             console.log('');
         }
 
-        var writeObject = {
-            seq: sequence_num, 
-            vrms: v_rms_disp.toFixed(2),
-            power: real_power_disp.toFixed(2),
-            app: app_power_disp.toFixed(2),
-            wh: watt_hours_disp.toFixed(2),
-            pf: pf_disp.toFixed(2),
-            fg: flags
-        }
+        console.log(recv_time)
+        var writeObject = recv_time + ',' +
+          address + ',' +
+          sequence_num + ',' +
+          v_rms_disp.toFixed(2) + ',' +
+          real_power_disp.toFixed(2) + ',' +
+          app_power_disp.toFixed(2) + ',' +
+          watt_hours_disp.toFixed(2) + ',' +
+          pf_disp.toFixed(2) + ',' +
+          flags;
 
-        fs.appendFileSync(filename, JSON.stringify(writeObject) + "\n", 'utf-8');
+        fs.appendFileSync(filenames[address], writeObject + "\n", 'utf-8');
 
         rx_count = rx_count + 1;
         process.stdout.write(rx_count + "/50: " + real_power_disp + "\n");
@@ -327,7 +293,7 @@ noble.on('discover', function (peripheral) {
         	process.exit();
         }
     }
-});*/
+});
 
 
 
