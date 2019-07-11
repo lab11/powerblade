@@ -2,12 +2,26 @@
 #define POWERBLADE_WAVEFORMS_H
 
 #include "uart_types.h"
+#include "string.h"
+
+#define UNIQUE_WAVEFORM_MAX 4
 
 // data struct
 typedef struct {
+    bool occupied;
+    uint16_t adv_len;
     uint8_t adv_payload[ADV_DATA_MAX_LEN];
-	uint8_t waveform_payload[WAVEFORM_MAX_LEN];
+    uint16_t waveform_len;
+    uint8_t waveform_payload[WAVEFORM_MAX_LEN];
 } unique_waveform_t;
+
+// store unique waveforms in circular buffer
+typedef struct {
+    unique_waveform_t data[UNIQUE_WAVEFORM_MAX];
+    size_t head;
+    size_t tail;
+    bool full;
+} unique_circle_buf;
 
 // function prototypes
 uint32_t parse_sequence_number(uint8_t* adv_data, uint16_t adv_len);
@@ -18,6 +32,7 @@ uint8_t parse_flags(uint8_t* adv_data, uint16_t adv_len);
 void flag_nrf_restart(bool restarted, uint8_t* adv_data, uint16_t adv_len);
 void flag_waveform_available(bool available, uint8_t* adv_data, uint16_t adv_len);
 
+void reset_waveforms(unique_circle_buf *);
 bool get_next_waveform(unique_waveform_t* data);
 void waveform_collected(unique_waveform_t* data);
 void check_and_store_new_waveform(uint8_t* waveform_data, uint16_t waveform_len, uint8_t* adv_data, uint16_t adv_len);
