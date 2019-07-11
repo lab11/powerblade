@@ -92,7 +92,7 @@ noble.on('discover', function (peripheral) {
 	        console.log('Found PowerBlade (' + peripheral.address +')');
 	        process.stdout.write('Connecting... ');
 	        powerblade_periph = peripheral;
-	        
+
 	        peripheral.connect(function (error) {
 	            console.log('done\n');
 
@@ -305,10 +305,11 @@ function read_data() {
 var output_file_no = 0;
 function waveform_data_receive(data) {
     console.log("\tComplete");
-    //console.log(data);
+    console.log(data.length);
 
     // send data to python
-    plotter.stdin.write(data.toString('hex') + '\n');
+    // slice off adv data + length info
+    plotter.stdin.write(data.slice(24 + 2 + 2).toString('hex') + '\n');
 
     // save data if desired
     if (store_data) {
@@ -328,7 +329,7 @@ function waveform_data_receive(data) {
 }
 
 function visualize_data(data) {
-    // 
+    //
     var voltageArr = [];
     var currentArr = [];
 }

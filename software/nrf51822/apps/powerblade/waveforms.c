@@ -91,7 +91,7 @@ void flag_waveform_available(bool available, uint8_t* adv_data, uint16_t adv_len
 
 
 unique_circle_buf unique_waveforms = {0};
-unique_waveform_t most_recent_waveform = {0};
+waveform_t most_recent_waveform = {0};
 
 void reset_waveforms(unique_circle_buf * buf) {
     buf->head = buf->tail = 0;
@@ -121,7 +121,7 @@ static void retreat_pointer(unique_circle_buf * buf)
 
 // find the next waveform to be transferred. Also marks the existing waveform
 // as collected (if one is in `data`). Returns false if there is none.
-bool get_next_waveform(unique_waveform_t* data) {
+bool get_next_waveform(waveform_t* data) {
     if (unique_waveforms_empty(&unique_waveforms)) {
         return false;
     }
@@ -133,7 +133,7 @@ bool get_next_waveform(unique_waveform_t* data) {
     }
 }
 
-static bool compare_waveforms(unique_waveform_t* new, unique_waveform_t* compare) {
+static bool compare_waveforms(waveform_t* new, waveform_t* compare) {
     uint16_t real_power = parse_real_power(new->adv_payload, new->adv_len);
     uint16_t apparent_power = parse_apparent_power(new->adv_payload, new->adv_len);
     uint16_t compare_real_power = parse_real_power(compare->adv_payload, compare->adv_len);
@@ -159,13 +159,8 @@ static bool compare_waveforms(unique_waveform_t* new, unique_waveform_t* compare
 }
 
 // determine if this waveform should be saved and do so.
-void check_and_store_new_waveform(uint8_t* waveform_data, uint16_t waveform_len, uint8_t* adv_data, uint16_t adv_len) {
+void check_and_store_new_waveform(waveform_t* waveform) {
     bool store = false;
-    static unique_waveform_t new_waveform;
-    new_waveform.adv_len = adv_len;
-    new_waveform.waveform_len= waveform_len;
-    memcpy(new_waveform.adv_payload,adv_data,adv_len);
-    memcpy(new_waveform.waveform_payload,waveform_data,waveform_len);
 
     // if full, ignore it
     if (unique_waveforms.full){
@@ -174,15 +169,14 @@ void check_and_store_new_waveform(uint8_t* waveform_data, uint16_t waveform_len,
     // check based on sequence number, real and apparent power, and maybe some similarity metric
     }
     size_t i = unique_waveforms.tail;
-    store = false;
-    store = compare_waveforms(&new_waveform, &most_recent_waveform);
+    store = compare_waveforms(waveform, &most_recent_waveform);
     while (i != unique_waveforms.head && store) {
-        store = compare_waveforms(&new_waveform, &unique_waveforms.data[i]);
+        store = compare_waveforms(waveform, &unique_waveforms.data[i]);
         i = (i + 1) % UNIQUE_WAVEFORM_MAX;
     }
     if (store) {
-        memcpy(&unique_waveforms.data[unique_waveforms.head], &new_waveform, sizeof(new_waveform));
-        memcpy(&most_recent_waveform, &new_waveform, sizeof(new_waveform));
+        memcpy(&unique_waveforms.data[unique_waveforms.head], waveform, sizeof(waveform_t));
+        memcpy(&most_recent_waveform, waveform, sizeof(waveform_t));
         advance_pointer(&unique_waveforms);
     }
 }

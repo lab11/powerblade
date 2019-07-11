@@ -171,7 +171,8 @@ static simple_ble_service_t continuous_waveform_service = {
 
     // characteristic to hold a waveform to be read
     static simple_ble_char_t continuous_waveform_char_data = {.uuid16 = 0xE3F3};
-    static uint8_t continuous_waveform_data[WAVEFORM_MAX_LEN];
+    static waveform_t continuous_waveform_values;
+    static waveform_t* continuous_waveform_data = &continuous_waveform_values;
 
 // service for unique waveform collection
 static simple_ble_service_t unique_waveform_service = {
@@ -184,8 +185,8 @@ static simple_ble_service_t unique_waveform_service = {
 
     // characteristic to hold an advertisement payload and corresponding waveform to be read
     static simple_ble_char_t unique_waveform_char_data = {.uuid16 = 0x9B3F};
-    static unique_waveform_t unique_waveform_values;
-    static unique_waveform_t* unique_waveform_data = &unique_waveform_values;
+    static waveform_t unique_waveform_values;
+    static waveform_t* unique_waveform_data = &unique_waveform_values;
 
 
 // receiving data items
@@ -234,7 +235,7 @@ void init_adv_data (void) {
     powerblade_adv_data[0] = POWERBLADE_SERVICE_IDENTIFIER; // Service ID
 
     powerblade_adv_data[1] = 0x01; // Version
-    
+
     powerblade_adv_data[2] = 0x01;
     powerblade_adv_data[3] = 0x01;
     powerblade_adv_data[4] = 0x01;
@@ -469,10 +470,10 @@ void services_init (void) {
                 &continuous_waveform_service, &continuous_waveform_char_status);
 
         // Add the characteristic to provide waveforms
-        memset(continuous_waveform_data, 0x00, WAVEFORM_MAX_LEN);
+        memset(continuous_waveform_data, 0x00, sizeof(waveform_t));
         simple_ble_add_auth_characteristic(1, 0, 0, 0, // read, write, notify, vlen
                 true, false, // read auth, write auth
-                WAVEFORM_MAX_LEN, (uint8_t*)continuous_waveform_data,
+                sizeof(waveform_t), (uint8_t*)continuous_waveform_data,
                 &continuous_waveform_service, &continuous_waveform_char_data);
 
     // Add unique waveform collection service
@@ -485,10 +486,10 @@ void services_init (void) {
                 &unique_waveform_service, &unique_waveform_char_status);
 
         // Add the characteristic to provide waveforms
-        memset(unique_waveform_data, 0x00, sizeof(unique_waveform_t));
+        memset(unique_waveform_data, 0x00, sizeof(waveform_t));
         simple_ble_add_auth_characteristic(1, 0, 0, 0, // read, write, notify, vlen
                 true, false, // read auth, write auth
-                sizeof(unique_waveform_t), (uint8_t*)unique_waveform_data,
+                sizeof(waveform_t), (uint8_t*)unique_waveform_data,
                 &unique_waveform_service, &unique_waveform_char_data);
 }
 
@@ -896,12 +897,18 @@ void on_receive_message(uint8_t* buf, uint16_t len, uint8_t* adv_data, uint8_t a
     if (len > 0) {
         // switch on add data type
         uint8_t data_type = buf[0];
+        static waveform_t new_waveform;
         switch (data_type) {
             case WAVEFORM:
+                new_waveform.adv_len = adv_len;
+                memcpy(new_waveform.adv_payload, adv_data, adv_len);
+                new_waveform.waveform_len = len-1;
+                memcpy(new_waveform.waveform_payload, &(buf[1]), len-1);
+
                 // save waveform to continuous waveform service if space is available
                 if (continuous_waveform_status == 0) {
                     if ((len-1) == WAVEFORM_MAX_LEN) {
-                        memcpy(continuous_waveform_data, &(buf[1]), len-1);
+                        memcpy(continuous_waveform_data, &new_waveform, sizeof(waveform_t));
                     }
 
                     // notify that data is available
@@ -910,7 +917,7 @@ void on_receive_message(uint8_t* buf, uint16_t len, uint8_t* adv_data, uint8_t a
                 }
 
                 // check if unique waveform service should save data and do so
-                check_and_store_new_waveform(&(buf[1]), len-1, adv_data, adv_len);
+                check_and_store_new_waveform(&new_waveform);
 
                 // update unique waveform service data if waveform available
                 if (unique_waveform_status == 0 && get_next_waveform(unique_waveform_data)) {

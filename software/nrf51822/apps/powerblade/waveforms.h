@@ -8,16 +8,15 @@
 
 // data struct
 typedef struct {
-    bool occupied;
     uint16_t adv_len;
     uint8_t adv_payload[ADV_DATA_MAX_LEN];
     uint16_t waveform_len;
     uint8_t waveform_payload[WAVEFORM_MAX_LEN];
-} unique_waveform_t;
+} waveform_t;
 
 // store unique waveforms in circular buffer
 typedef struct {
-    unique_waveform_t data[UNIQUE_WAVEFORM_MAX];
+    waveform_t data[UNIQUE_WAVEFORM_MAX];
     size_t head;
     size_t tail;
     bool full;
@@ -33,9 +32,9 @@ void flag_nrf_restart(bool restarted, uint8_t* adv_data, uint16_t adv_len);
 void flag_waveform_available(bool available, uint8_t* adv_data, uint16_t adv_len);
 
 void reset_waveforms(unique_circle_buf *);
-bool get_next_waveform(unique_waveform_t* data);
-void waveform_collected(unique_waveform_t* data);
-void check_and_store_new_waveform(uint8_t* waveform_data, uint16_t waveform_len, uint8_t* adv_data, uint16_t adv_len);
+bool get_next_waveform(waveform_t* data);
+void waveform_collected(waveform_t* data);
+void check_and_store_new_waveform(waveform_t* waveform);
 
 #endif //POWERBLADE_WAVEFORMS_H
 
