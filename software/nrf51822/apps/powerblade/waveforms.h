@@ -4,7 +4,7 @@
 #include "uart_types.h"
 #include "string.h"
 
-#define UNIQUE_WAVEFORM_MAX 4
+#define UNIQUE_WAVEFORM_MAX 8
 
 // data struct
 typedef struct {

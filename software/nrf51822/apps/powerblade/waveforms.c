@@ -91,7 +91,6 @@ void flag_waveform_available(bool available, uint8_t* adv_data, uint16_t adv_len
 
 
 unique_circle_buf unique_waveforms = {0};
-waveform_t most_recent_waveform = {0};
 
 void reset_waveforms(unique_circle_buf * buf) {
     buf->head = buf->tail = 0;
@@ -127,10 +126,22 @@ bool get_next_waveform(waveform_t* data) {
     }
     else {
         size_t tail = unique_waveforms.tail;
-        memcpy(data, unique_waveforms.data[tail].waveform_payload, unique_waveforms.data[tail].waveform_len);
+        memcpy(data, &unique_waveforms.data[tail], sizeof(waveform_t));
         retreat_pointer(&unique_waveforms);
         return true;
     }
+}
+
+static bool compare_power(uint16_t power, uint16_t compare_power, uint16_t minimum) {
+    uint32_t upper = compare_power << 1;
+    uint16_t lower = compare_power >> 1;
+
+    if (power < minimum) return false;
+
+    if (upper > 0xFFFF) {
+        upper = 0xFFFF;
+    }
+    return power > upper || power < lower;
 }
 
 static bool compare_waveforms(waveform_t* new, waveform_t* compare) {
@@ -138,24 +149,9 @@ static bool compare_waveforms(waveform_t* new, waveform_t* compare) {
     uint16_t apparent_power = parse_apparent_power(new->adv_payload, new->adv_len);
     uint16_t compare_real_power = parse_real_power(compare->adv_payload, compare->adv_len);
     uint16_t compare_app_power = parse_apparent_power(compare->adv_payload, compare->adv_len);
-    // approximate 10%
-    // is current waveform outside +/- 10% of other waveform?
-    uint16_t real_portion = compare_real_power >> 3;
-    uint16_t app_portion = compare_app_power >> 3;
-    if (real_power > compare_real_power + real_portion ||
-            real_power < compare_real_power - real_portion ||
-            apparent_power > compare_app_power + app_portion ||
-            apparent_power < compare_app_power - app_portion)
-    {
-        // great, this waveform's power is different!
-        // time to look at the next one
-        return true;
-    }
-    else {
-        // this waveform is pretty similar, let's not store this one
-        return false;
-    }
 
+    // is current waveform outside +/- 50% of other waveform?
+    return compare_power(real_power, compare_real_power, 40) || compare_power(apparent_power, compare_app_power, 800);
 }
 
 // determine if this waveform should be saved and do so.
@@ -165,18 +161,17 @@ void check_and_store_new_waveform(waveform_t* waveform) {
     // if full, ignore it
     if (unique_waveforms.full){
         return;
-    // else search and compare other existing waveforms
-    // check based on sequence number, real and apparent power, and maybe some similarity metric
     }
-    size_t i = unique_waveforms.tail;
-    store = compare_waveforms(waveform, &most_recent_waveform);
-    while (i != unique_waveforms.head && store) {
-        store = compare_waveforms(waveform, &unique_waveforms.data[i]);
-        i = (i + 1) % UNIQUE_WAVEFORM_MAX;
+    // else search and compare other seen waveforms
+    // check based on sequence number, real and apparent power, and maybe some similarity metric
+    size_t i = 0;
+    store = true;
+    while (i < UNIQUE_WAVEFORM_MAX && store) {
+        store &= compare_waveforms(waveform, &unique_waveforms.data[i]);
+        i++;
     }
     if (store) {
         memcpy(&unique_waveforms.data[unique_waveforms.head], waveform, sizeof(waveform_t));
-        memcpy(&most_recent_waveform, waveform, sizeof(waveform_t));
         advance_pointer(&unique_waveforms);
     }
 }
