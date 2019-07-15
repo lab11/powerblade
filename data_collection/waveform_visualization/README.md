@@ -43,3 +43,8 @@ likely work eventually after several attempts.
 Data is not typically saved by this script, but can be saved with the `--save`
 flag. Results are stored in the `data/` directory and are named sequentially.
 
+## Unique Waveforms
+
+Instead of collecting continuous waveforms, this script can be configured to
+only collect 'unique' waveforms with the `--unique` flag.
+

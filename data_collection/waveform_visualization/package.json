@@ -5,6 +5,7 @@
   "main": "visualize_waveforms.js",
   "author": "Branden Ghena",
   "dependencies": {
+    "command-line-args": "^5.1.1",
     "keypress": "^0.2.1",
     "matplotnode": "^0.3.2",
     "noble": "^1.9.1",

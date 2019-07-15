@@ -147,3 +147,66 @@ from `Raw Sample Values`. Write 0x01 to `Collection Status`. Repeat reading and
 writing until sent the notification value of 0x02 at which point all data has
 been collected and Sample Collection is complete.
 
+
+## Waveform Collection
+Continuous Waveform Collection Service
+
+    Full UUID: 6171e3f1-6cda-409b-931c-a83234603b33
+    Short UUID: 0xE3F1
+
+    Allows collection of representative voltage and current 1-cycle waveforms
+    every second. Used for visualizing waveforms.
+
+0xE3F2 - Continuous Waveform Status
+
+    uint8_t: Read, Write, Notify
+    Indicates if waveform available to be read. Write to clear.
+
+0xE3F2 - Continuous Waveform Data
+
+    uint8_t buffer: Read
+    Contains voltage and integrated current waveforms. Data is available if
+    status is 1. Data is in the format of a struct waveform_t:
+
+        typedef struct {
+            uint16_t adv_len;
+            uint8_t adv_payload[24];
+            uint16_t waveform_len;
+            uint8_t waveform_payload[168];
+        } waveform_t;
+
+    The waveform payload consists of 42 uint16_t samples (84 bytes) of current
+    waveform, followed by another 42 samples (84 bytes) of voltage waveform
+    (total 168 bytes).
+
+    The total size of the struct is 2 + 24 + 2 + 168 = 196 bytes.
+
+Unique Waveform Collection Service
+
+    Full UUID: 4e889b3d-dab2-42c3-9015-41b5391326dd
+    Short UUID: 0x9B3D
+
+    Allows collection of representative voltage and current 1-cycle waveforms
+    every second. Used for visualizing waveforms.
+
+0xE3F2 - Unique Waveform Status
+
+    uint8_t: Read, Write, Notify
+    Indicates if a unique waveform is available to be read. Write to clear.
+
+0xE3F2 - Unique Waveform Data
+
+    uint8_t buffer: Read
+    Contains voltage and integrated current waveforms. Data is available if
+    status is 1. Data is in the same format as the continuous waveform, a
+    struct waveform_t
+
+### Method of Operation:
+Enable notifications on `[Continuous/Unique] Waveform Status`.
+On notification value 0x01, read a waveform
+from `[Continuous/Unique] Waveform Data`. Repeat reading and
+writing until sent the notification value of 0 at which point all available
+waveforms have been collected and Waveform Collection is complete (in the case
+of Unique Waveform Collection). Continuous Waveform Collection will
+continue ad infinitum.
+

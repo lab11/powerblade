@@ -5,12 +5,21 @@ var noble = require('noble');
 var fs = require('fs');
 var keypress = require('keypress');
 var rimraf = require('rimraf');
+var args = require('command-line-args');
 const child_process = require('child_process');
+
+const optionsDef = [
+    { name: 'device', type: String, multiple: false, defaultOption: true },
+    { name: 'save', alias: 's', type: Boolean },
+    { name: 'unique', alias: 'u', type: Boolean }
+]
+
+const options = args(optionsDef);
 
 // input from user
 var target_device = 'c0:98:e5:70:02:6a';
-if (process.argv.length >= 3) {
-    target_device = process.argv[2];
+if ('device' in options) {
+    target_device = options['device'];
 } else {
     console.log("Need to specify a device address. For example:\n\tsudo ./visualize_waveforms.js c0:98:e5:70:02:6a");
     process.exit(1);
@@ -18,13 +27,11 @@ if (process.argv.length >= 3) {
 console.log("Looking for " + target_device);
 
 var store_data = false;
-if (process.argv.length >= 4) {
-    if (process.argv[3] == '--save') {
-        store_data = true;
+if ('store' in options) {
+    store_data = options['store'];
+    if (store_data) {
         console.log("Waveform data will be saved in `data\\`");
         rimraf.sync('./data/waveform_*.bin');
-    } else {
-        console.log("Unknown flag provided\n");
     }
 }
 
@@ -35,6 +42,11 @@ var powerblade_periph;
 var waveform_service_uuid = '6171e3f16cda409b931ca83234603b33';
 var waveform_status_uuid  = '6171e3f26cda409b931ca83234603b33';
 var waveform_data_uuid    = '6171e3f36cda409b931ca83234603b33';
+if ('unique' in options && options['unique']) {
+    waveform_service_uuid = '4e889b3ddab242c3901541b5391326dd';
+    waveform_status_uuid  = '4e889b3edab242c3901541b5391326dd';
+    waveform_data_uuid    = '4e889b3fdab242c3901541b5391326dd';
+}
 var waveform_status_char;
 var waveform_data_char;
 
