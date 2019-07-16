@@ -556,8 +556,8 @@ void ble_evt_write (ble_evt_t* p_ble_evt) {
         if (get_next_waveform(unique_waveform_data)) {
             // notify that data is available
             unique_waveform_status = 1;
-            simple_ble_notify_char(&unique_waveform_char_status);
         }
+        simple_ble_notify_char(&unique_waveform_char_status);
 
     } else if (simple_ble_is_char_event(p_ble_evt, &config_voff_char) ||
                simple_ble_is_char_event(p_ble_evt, &config_ioff_char) ||
