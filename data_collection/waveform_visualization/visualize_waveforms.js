@@ -299,12 +299,15 @@ function waveform_status_receive(data, isNotify) {
         console.log("  New data available");
         read_data();
     } else if (data[0] == 0) {
-        console.log("  All data has been read\nComplete\n");
+        console.log("  All data has been read\nPress any key to exit\n");
+        keypress(process.stdin)
+        process.stdin.on('keypress', function (ch, key) {
+            // finished
+            console.log("Complete");
+            powerblade_periph.disconnect();
+            process.exit(0);
 
-        // finished
-        console.log("Complete");
-        powerblade_periph.disconnect();
-        process.exit(0);
+        });
     }
 }
 
