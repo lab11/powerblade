@@ -1,3 +1,6 @@
 [submodule "software/nrf51822/nrf5x-base"]
 	path = software/nrf51822/nrf5x-base
 	url = https://github.com/lab11/nrf5x-base.git
+[submodule "software/nrf52840/nrf5x-base"]
+	path = software/nrf52840/nrf5x-base
+	url = https://github.com/lab11/nrf5x-base.git
