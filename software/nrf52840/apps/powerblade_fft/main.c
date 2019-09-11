@@ -53,44 +53,24 @@ NRF_SERIAL_CONFIG_DEF(serial_config, NRF_SERIAL_MODE_DMA,
 
 NRF_SERIAL_UART_DEF(serial_uart, 0);
 
-static int16_t filter_in_current[SAMCOUNT] = {0};
-static int16_t filter_in_voltage[SAMCOUNT] = {0};
-static int16_t filter_res_current[SAMCOUNT] = {0};
-static int16_t filter_res_voltage[SAMCOUNT] = {0};
-static int16_t og_current[NUM_SAMPLES] = {0};
+static float filter_in_current[SAMCOUNT] = {0};
+static float filter_in_voltage[SAMCOUNT] = {0};
+static float filter_res_current[1024] = {0};
+static float filter_res_voltage[1024] = {0};
 
 const int16_t Voff= -29;
 const int16_t Ioff= -15;
 const int16_t Curoff= 2;
-const int16_t PScale= 16915;
+const int16_t PScale= 16920;
 const int16_t VScale= 11;
 const int16_t WHScale= 9;
 const uint16_t power_setpoint = 76 * 10;
 const uint16_t voltage_setpoint = 120;
 
-int16_t current_result[NUM_SAMPLES];
-int16_t voltage_result[NUM_SAMPLES];
+float current_result[NUM_SAMPLES];
+float voltage_result[NUM_SAMPLES];
 
-uint32_t SquareRoot64(uint64_t a_nInput) {
-  uint64_t op = a_nInput;
-  uint64_t res = 0;
-  uint64_t one = (uint64_t)1 << 62; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
-
-  // "one" starts at the highest power of four <= than the argument.
-  while (one > op) {
-    one >>= 2;
-  }
-
-  while (one != 0) {
-    if (op >= res + one) {
-      op = op - (res + one);
-      res = res + 2 * one;
-    }
-    res >>= 1;
-    one >>= 2;
-  }
-  return res;
-}
+static arm_rfft_fast_instance_f32 fft_instance;
 
 int main() {
     // Initialize.
@@ -114,37 +94,34 @@ int main() {
     err_code = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(err_code);
     NRF_LOG_DEFAULT_BACKENDS_INIT();
-    NRF_LOG_INFO("Log initialized!\n");
+    printf("Log initialized!\n");
 
     err_code = nrf_serial_init(&serial_uart, &m_uart0_drv_config, &serial_config);
-    NRF_LOG_INFO("err_code = %x\n", err_code);
+    printf("err_code = %x\n", err_code);
+
+    arm_rfft_fast_init_f32(&fft_instance, 1024);
 
   // calculate voff, ioff
-  int32_t voff = 0;
-  int32_t ioff = 0;
-  int32_t coff = 0;
-  int32_t coff_count = 0;
-  uint32_t acc_i_rms = 0;
-  uint32_t acc_v_rms = 0;
-  uint32_t acc_p_ave = 0;
-  uint32_t Vrms = 0;
-  uint32_t wattHoursToAverage = 0;
-  uint16_t realPower = 0;
-  uint32_t voltAmpsToAverage = 0;
+  float voff = 0;
+  float ioff = 0;
+  float coff = 0;
+  float coff_count = 0;
+  float acc_i_rms = 0;
+  float acc_v_rms = 0;
+  float acc_p_ave = 0;
+  float Vrms = 0;
+  float wattHoursToAverage = 0;
+  float realPower = 0;
+  float voltAmpsToAverage = 0;
 
   float vscale = VScale / 20.0;
   float pscale = (PScale & 0xFFF) * powf(10.0,-1*((PScale & 0xF000) >> 12));
-  NRF_LOG_INFO("pscale: %f\n", pscale);
-  NRF_LOG_INFO("pscale mantissa: %u\n", PScale & 0xfff);
-  NRF_LOG_INFO("pscale exp: %u\n", (PScale & 0xF000) >> 12);
-  NRF_LOG_INFO("pscale actual: %u * %f\n", PScale & 0xfff, powf(10, -1*((PScale & 0xf000) >> 12)));
-  NRF_LOG_INFO("vscale: %f\n", vscale);
-  NRF_LOG_INFO("iscale: %f\n", pscale/vscale);
-
-  // filter init
-  // Initialize filter coefficients.
-  int16_t s_current = 0;
-  int16_t s_voltage = 0;
+  printf("pscale: %f\n", pscale);
+  printf("pscale mantissa: %u\n", PScale & 0xfff);
+  printf("pscale exp: %u\n", (PScale & 0xF000) >> 12);
+  printf("pscale actual: %u * %f\n", PScale & 0xfff, powf(10, -1*((PScale & 0xf000) >> 12)));
+  printf("vscale: %f\n", vscale);
+  printf("iscale: %f\n", pscale/vscale);
 
   for(uint16_t i = 0; i < NUM_SAMPLES; i++) {
     voff += voltage[i];
@@ -153,75 +130,67 @@ int main() {
   voff = voff / NUM_SAMPLES;
   ioff = ioff / NUM_SAMPLES;
 
-  NRF_LOG_INFO("voff: %ld\n", voff);
-  NRF_LOG_INFO("ioff: %ld\n", ioff);
+  printf("voff: %f\n", voff);
+  printf("ioff: %f\n", ioff);
 
   uint8_t sample_count = 0;
   uint16_t raw_count = 0;
   uint16_t integrate_count = 0;
   uint8_t measurement_count = 0;
-  int32_t agg_current = 0;
+  float agg_current = 0;
 
   while(1) {
-    nrf_delay_ms(10);
-    int16_t i = dcurrent[raw_count] - Ioff;
-    int16_t v = voltage [raw_count] - Voff;
+    float i = dcurrent[raw_count] - Ioff;
+    float v = voltage [raw_count++] - Voff;
 
-    agg_current += (int16_t) (i + (i >> 1));
-    agg_current -= agg_current >> 5;
+    agg_current += i*1.5;
+    agg_current -= agg_current / 32.0;
 
     filter_in_voltage[sample_count] = v;
     filter_in_current[sample_count] = agg_current;
-    og_current[raw_count++] = (agg_current >> 3) - Curoff;
 
     sample_count++;
-    //NRF_LOG_INFO("sc: %d\n", sample_count);
     if (sample_count >= SAMCOUNT) {
-      NRF_LOG_INFO("sc: %d\n", sample_count);
       sample_count = 0;
 
-      //ema_highpass_fixed(filter_in_voltage, filter_res_voltage, SAMCOUNT, &s_voltage);
-      //ema_highpass_fixed(filter_in_current, filter_res_current, SAMCOUNT, &s_current);
-
       for(uint8_t j=0; j < SAMCOUNT; j++) {
-        int16_t _current = (int16_t)filter_in_current[j];
-        int16_t _voltage = (int16_t)filter_in_voltage[j];
+        float _current = filter_in_current[j];
+        float _voltage = filter_in_voltage[j];
+
+        coff += _current/8.0;
+        coff_count ++;
+        _current = _current/8.0 - Curoff;
+
         current_result[integrate_count] = _current;
         voltage_result[integrate_count++] = _voltage;
 
-        coff += (_current >> 3);
-        coff_count ++;
-        _current = (_current >> 3) - Curoff;
-
-        acc_i_rms += (uint64_t)(_current * _current);
-        acc_p_ave += (int64_t)(_voltage * _current);
-        acc_v_rms += (uint64_t)((int32_t)_voltage * (int32_t)_voltage);
+        acc_i_rms += _current * _current;
+        acc_p_ave += _voltage * _current;
+        acc_v_rms += _voltage * _voltage;
 
       }
 
       // Increment energy calc
-      wattHoursToAverage += (int32_t)(acc_p_ave / SAMCOUNT);
+      wattHoursToAverage += acc_p_ave / SAMCOUNT;
       acc_p_ave = 0;
 
       // Calculate Irms, Vrms, and apparent power
-      uint16_t Irms = (uint16_t) SquareRoot64(acc_i_rms / SAMCOUNT);
-      Vrms = (uint8_t) SquareRoot64(acc_v_rms / SAMCOUNT);
-      voltAmpsToAverage += (uint32_t) (Irms * Vrms);
+      float Irms = sqrt(acc_i_rms / SAMCOUNT);
+      Vrms = sqrt(acc_v_rms / SAMCOUNT);
+      voltAmpsToAverage += (Irms * Vrms);
 
-      //NRF_LOG_INFO("Vrms: %d\n", (int32_t)(vscale*Vrms));
-      //NRF_LOG_INFO("acc_i_rms: %d\n", acc_i_rms);
-      //NRF_LOG_INFO("Irms: %d\n", Irms);
+      //printf("Vrms: %d\n", (int32_t)(vscale*Vrms));
+      //printf("acc_i_rms: %d\n", acc_i_rms);
+      //printf("Irms: %d\n", Irms);
       acc_i_rms = 0;
       acc_v_rms = 0;
 
       measurement_count++;
-      NRF_LOG_INFO("mc: %d\n", measurement_count);
       if (measurement_count >= NUM_CYCLES) {
         measurement_count = 0;
 
         coff = coff/coff_count;
-        NRF_LOG_INFO("coff: %d\n", coff);
-        nrf_delay_ms(10);
+        printf("coff: %f\n", coff);
 
         // True power cannot be less than zero
         if(wattHoursToAverage > 0) {
@@ -233,26 +202,49 @@ int main() {
         //wattHours += (uint64_t) realPower;
         //apparentPower = (uint16_t) ((voltAmpsToAverage / 60));
 
-        NRF_LOG_INFO("Vrms: %d\n", (int32_t)(vscale*Vrms));
-        nrf_delay_ms(10);
-        NRF_LOG_INFO("P: %d\n", (int32_t)(pscale*realPower));
-        nrf_delay_ms(10);
+        printf("Vrms: %f\n", (vscale*Vrms));
+        printf("P: %f\n", (pscale*realPower));
 
         wattHoursToAverage = 0;
         voltAmpsToAverage = 0;
 
         int32_t pscale_local = 0x4000 + ((uint16_t)((uint32_t)power_setpoint*1000/realPower) & 0x0FFF);
         int32_t vscale_local = 20 * voltage_setpoint / (uint16_t)Vrms;
-        NRF_LOG_INFO("new vscale: %d\n", vscale_local);
-        nrf_delay_ms(10);
-        NRF_LOG_INFO("new pscale: %d\n", pscale_local);
-        nrf_delay_ms(10);
+        printf("new vscale: %d\n", vscale_local);
+        printf("new pscale: %d\n", pscale_local);
 
         break;
       }
     }
     NRF_LOG_PROCESS();
   }
+
+  arm_rfft_fast_f32(&fft_instance, current_result, filter_res_current, 0);
+  for(size_t i = 0; i < 1024; i++) {
+    filter_res_current[i] = abs(filter_res_current[i]);
+  }
+  printf("original:\n");
+  for(size_t i = 0; i < 10; i++) {
+    printf("%2x", current_result[i]);
+  }
+  printf("\n");
+  printf("fft:\n");
+  for(size_t i = 0; i < 10; i++) {
+    printf("%2x", filter_res_current[i]);
+  }
+  printf("\n");
+
+  // Send over UART
+  uint32_t len = sizeof(float) * 1024;
+  uint8_t *buf = malloc(len+6);
+  //[sizeof(float)*TEST_LENGTH_SAMPLES/2] = {0};
+  buf[0] = 0xAA;
+  buf[1] = 0xBB;
+  memcpy(buf+2, &len, sizeof(len));
+  memcpy(buf+6, filter_res_current, len);
+  nrf_serial_write(&serial_uart, buf, len+6, NULL, NRF_SERIAL_MAX_TIMEOUT);
+  free(buf);
+
   while(1) {
     NRF_LOG_PROCESS();
   }
