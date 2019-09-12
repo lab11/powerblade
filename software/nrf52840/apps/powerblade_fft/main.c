@@ -28,8 +28,6 @@
 
 #define FILTER_LENGTH SAMCOUNT
 
-#define TEST_LENGTH_SAMPLES 8192
-
 NRF_SERIAL_DRV_UART_CONFIG_DEF(m_uart0_drv_config,
                       NRF_GPIO_PIN_MAP(0,6), NRF_GPIO_PIN_MAP(0,8),
                       0, 0,
@@ -53,10 +51,12 @@ NRF_SERIAL_CONFIG_DEF(serial_config, NRF_SERIAL_MODE_DMA,
 
 NRF_SERIAL_UART_DEF(serial_uart, 0);
 
+float current_result[NUM_SAMPLES];
+float voltage_result[NUM_SAMPLES];
 static float filter_in_current[SAMCOUNT] = {0};
 static float filter_in_voltage[SAMCOUNT] = {0};
-static float filter_res_current[1024] = {0};
-static float filter_res_voltage[1024] = {0};
+static float fft_current[1024*2] = {0};
+static float current_mag[1024] = {0};
 
 const int16_t Voff= -29;
 const int16_t Ioff= -15;
@@ -66,9 +66,6 @@ const int16_t VScale= 11;
 const int16_t WHScale= 9;
 const uint16_t power_setpoint = 76 * 10;
 const uint16_t voltage_setpoint = 120;
-
-float current_result[NUM_SAMPLES];
-float voltage_result[NUM_SAMPLES];
 
 static arm_rfft_fast_instance_f32 fft_instance;
 
@@ -135,7 +132,7 @@ int main() {
 
   uint8_t sample_count = 0;
   uint16_t raw_count = 0;
-  uint16_t integrate_count = 0;
+  size_t integrate_count = 0;
   uint8_t measurement_count = 0;
   float agg_current = 0;
 
@@ -145,6 +142,9 @@ int main() {
 
     agg_current += i*1.5;
     agg_current -= agg_current / 32.0;
+
+    //printf("agg_current: %f\n", agg_current);
+    //nrf_delay_ms(10);
 
     filter_in_voltage[sample_count] = v;
     filter_in_current[sample_count] = agg_current;
@@ -219,31 +219,38 @@ int main() {
     NRF_LOG_PROCESS();
   }
 
-  arm_rfft_fast_f32(&fft_instance, current_result, filter_res_current, 0);
-  for(size_t i = 0; i < 1024; i++) {
-    filter_res_current[i] = abs(filter_res_current[i]);
-  }
+  float tmp[NUM_SAMPLES];
+  memcpy(tmp, current_result, 4*NUM_SAMPLES);
+  arm_rfft_fast_f32(&fft_instance, current_result, fft_current, 0);
+  arm_cmplx_mag_f32(fft_current, current_mag, 1024);
+
   printf("original:\n");
   for(size_t i = 0; i < 10; i++) {
-    printf("%2x", current_result[i]);
+    printf("%f ", tmp[i]);
   }
   printf("\n");
   printf("fft:\n");
   for(size_t i = 0; i < 10; i++) {
-    printf("%2x", filter_res_current[i]);
+    printf("%2x", current_mag[i]);
   }
   printf("\n");
 
   // Send over UART
   uint32_t len = sizeof(float) * 1024;
-  uint8_t *buf = malloc(len+6);
-  //[sizeof(float)*TEST_LENGTH_SAMPLES/2] = {0};
+  uint8_t buf[4*4096] = {0};
   buf[0] = 0xAA;
   buf[1] = 0xBB;
   memcpy(buf+2, &len, sizeof(len));
-  memcpy(buf+6, filter_res_current, len);
+  memcpy(buf+6, current_mag, len);
   nrf_serial_write(&serial_uart, buf, len+6, NULL, NRF_SERIAL_MAX_TIMEOUT);
-  free(buf);
+
+  // Send integrated signal
+  len = sizeof(float) * NUM_SAMPLES;
+  buf[0] = 0xAA;
+  buf[1] = 0xCC;
+  memcpy(buf+2, &len, sizeof(len));
+  memcpy(buf+6, tmp, len);
+  nrf_serial_write(&serial_uart, buf, len+6, NULL, NRF_SERIAL_MAX_TIMEOUT);
 
   while(1) {
     NRF_LOG_PROCESS();
