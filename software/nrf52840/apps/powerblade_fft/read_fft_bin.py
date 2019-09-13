@@ -42,6 +42,10 @@ for length in sorted(r_fft, key=lambda x: int(x), reverse=True):
     a = np.asarray(r_fft[length])
     np.savetxt('magnitude_fft_'+length+'.csv', a)
     plt.plot([42*60 / float(length) * x for x in range(int(float(length)/2))], r_fft[length][:int(float(length)/2)], label=length)
+
+a = np.asarray(raw)
+np.savetxt('integrated_current.csv', a)
+
 plt.title('FFT Frequency Bins')
 plt.xticks(list(plt.xticks()[0]) + [60])
 plt.xlabel('Frequency (Hz)')
