@@ -2,16 +2,23 @@ import pyvisa
 import time
 import argparse
 import struct
+import enum
 import numpy as np
+from signal import signal, SIGINT
 from bluepy.btle import ScanEntry, Scanner, DefaultDelegate
 from chroma63800 import Chroma63800
 
 COMPANY_ID = 0x2e0
 
+num_measure = 0
+tot_measure = 3
 num_pf = 0
 num_power = 0
-power_factors = np.arange(0, 1.1, .1)
-powers = np.logspace(50, 1000, 20)
+last_seq_no = 0
+power_factors = np.arange(.3, 1.1, .1)
+actual_pfs = np.zeros(power_factors.shape)
+powers = np.array([10, 50, 100, 500, 1000, 1500])
+actual_powers = np.zeros(powers.shape)
 
 # Parse args and get Chroma device
 parser = argparse.ArgumentParser()
@@ -45,13 +52,21 @@ class ScanDelegate(DefaultDelegate):
     # when this python script discovers a BLE broadcast packet from a buckler
     # advertising light measurements, print out the data
     def handleDiscovery(self, dev, isNewDev, isNewData):
+        global num_pf
+        global num_power
+        global last_seq_no
+        global num_measure
+        global measurements
+        global scanner
+
         if dev.addr == addr:
-            print("Found advertisement from: ", str(dev.addr))
-            print("Name: " + str(dev.getValueText(ScanEntry.COMPLETE_LOCAL_NAME)))
+            #print()
+            #print("Found advertisement from: ", str(dev.addr))
+            #print("Name: " + str(dev.getValueText(ScanEntry.COMPLETE_LOCAL_NAME)))
             data = dev.getValue(ScanEntry.MANUFACTURER)
             if data is None: return
 
-            print("Data: " + str(data.hex()))
+            #print("Data: " + str(data.hex()))
             [company_id] = struct.unpack('<h', data[:2])
             if company_id != COMPANY_ID:
                 print('incorrect company id')
@@ -63,16 +78,10 @@ class ScanDelegate(DefaultDelegate):
             [version, seq_no, pscale, vscale, whscale, v_rms, real_power, \
                     apparent_power, watt_hours, flags] = \
             struct.unpack(">BIHBBBHHIB", data)
-            print(hex(version))
-            print(hex(seq_no))
-            print(hex(pscale))
-            print(hex(vscale))
-            print(hex(whscale))
-            print(hex(v_rms))
-            print(hex(real_power))
-            print(hex(apparent_power))
-            print(hex(watt_hours))
-            print(hex(flags))
+
+            if seq_no == last_seq_no:
+                seq_no = last_seq_no
+                return
 
             if (version == 1):
                 volt_scale = vscale / 50
@@ -88,23 +97,73 @@ class ScanDelegate(DefaultDelegate):
             else:
                 watt_hours_disp = watt_hours
 
-            print("voltage (rms):", v_rms_disp)
-            print("real power:", real_power_disp)
-            print("apparent power:", app_power_disp)
-            print("power factor:", real_power_disp/app_power_disp)
-            print("watt hours:", watt_hours_disp)
+            power_factor = real_power_disp/app_power_disp
 
+            #print("\tvoltage (rms):", v_rms_disp)
+            #print("\treal power:", real_power_disp)
+            #print("\tapparent power:", app_power_disp)
+            #print("\tpower factor:", real_power_disp/app_power_disp)
+            #print("watt hours:", watt_hours_disp)
+
+            measurements[num_pf, num_power] += np.array([real_power_disp,\
+                app_power_disp])/tot_measure
+
+            actual_powers[num_power] += chroma.measure_real_power()/tot_measure
+            actual_pfs[num_power] += chroma.measure_pf()/tot_measure
+
+            num_measure += 1
+
+            if num_measure >= tot_measure:
+                print(measurements[num_pf, num_power])
+                num_measure = 0
+                num_power += 1
+                if num_power >= measurements.shape[1]:
+                    num_power = 0
+                    num_pf += 1
+                    if num_pf >= measurements.shape[0]:
+                        chroma.load_off()
+                        np.save(addr + "_calibration_curve", measurements);
+                        exit(0)
+
+def handler(signal_received, frame):
+    chroma.load_off()
+    exit(-1)
 
 scanner = Scanner().withDelegate(ScanDelegate())
-scanner.start()
 
-measurements = np.zeros((len(power_factors), len(powers), 3))
+if __name__ == '__main__':
+    signal(SIGINT, handler)
+    scanner.start()
 
-chroma.set_power(1000)
-chroma.set_pf(1)
-chroma.load_on()
-chroma.load_off()
+    measurements = np.zeros((len(power_factors), len(powers), 2))
 
-while(1):
-    scanner.process()
+    previous_power = 0
+    previous_pf = 0
 
+    chroma.set_power(powers[num_power])
+    chroma.set_pf(power_factors[num_pf])
+    chroma.load_on()
+
+    while(1):
+        if previous_power != num_power:
+            print(measurements[previous_pf, previous_power])
+            print(powers[previous_power], power_factors[previous_pf])
+            print(actual_powers[previous_power], actual_pfs[previous_pf])
+
+            previous_power = num_power
+            print("\nSetting power to", powers[num_power])
+            chroma.set_power(powers[num_power])
+            scanner.stop()
+            scanner.clear()
+            time.sleep(2)
+            scanner.start()
+        if previous_pf != num_pf:
+            previous_pf = num_pf
+            print("\nSetting power factor to", power_factors[num_pf])
+            chroma.set_pf(power_factors[num_pf])
+            scanner.stop()
+            scanner.clear()
+            time.sleep(2)
+            scanner.start()
+
+        scanner.process()
