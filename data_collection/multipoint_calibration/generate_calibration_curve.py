@@ -16,9 +16,12 @@ num_pf = 0
 num_power = 0
 last_seq_no = 0
 power_factors = np.arange(.3, 1.1, .1)
-actual_pfs = np.zeros(power_factors.shape)
+actual_app_powers = np.zeros(power_factors.shape)
 powers = np.array([10, 50, 100, 500, 1000, 1500])
 actual_powers = np.zeros(powers.shape)
+
+measurements = np.zeros((len(power_factors), len(powers), 2, 2))
+measurement_list = []
 
 # Parse args and get Chroma device
 parser = argparse.ArgumentParser()
@@ -56,11 +59,12 @@ class ScanDelegate(DefaultDelegate):
         global num_power
         global last_seq_no
         global num_measure
+        global measurement_list
         global measurements
         global scanner
 
         if dev.addr == addr:
-            #print()
+            print()
             #print("Found advertisement from: ", str(dev.addr))
             #print("Name: " + str(dev.getValueText(ScanEntry.COMPLETE_LOCAL_NAME)))
             data = dev.getValue(ScanEntry.MANUFACTURER)
@@ -105,25 +109,15 @@ class ScanDelegate(DefaultDelegate):
             #print("\tpower factor:", real_power_disp/app_power_disp)
             #print("watt hours:", watt_hours_disp)
 
-            measurements[num_pf, num_power] += np.array([real_power_disp,\
-                app_power_disp])/tot_measure
+            real_measurements = [chroma.measure_real_power(), chroma.measure_apparent_power()]
+            pb_measurements = [real_power_disp, app_power_disp]
+            print(real_measurements)
+            print(pb_measurements)
 
-            actual_powers[num_power] += chroma.measure_real_power()/tot_measure
-            actual_pfs[num_power] += chroma.measure_pf()/tot_measure
+            if len(measurement_list) < tot_measure:
+                measurement_list.append([real_measurements, pb_measurements])
+                print(np.array(measurement_list))
 
-            num_measure += 1
-
-            if num_measure >= tot_measure:
-                print(measurements[num_pf, num_power])
-                num_measure = 0
-                num_power += 1
-                if num_power >= measurements.shape[1]:
-                    num_power = 0
-                    num_pf += 1
-                    if num_pf >= measurements.shape[0]:
-                        chroma.load_off()
-                        np.save(addr + "_calibration_curve", measurements);
-                        exit(0)
 
 def handler(signal_received, frame):
     chroma.load_off()
@@ -133,9 +127,6 @@ scanner = Scanner().withDelegate(ScanDelegate())
 
 if __name__ == '__main__':
     signal(SIGINT, handler)
-    scanner.start()
-
-    measurements = np.zeros((len(power_factors), len(powers), 2))
 
     previous_power = 0
     previous_pf = 0
@@ -144,26 +135,18 @@ if __name__ == '__main__':
     chroma.set_pf(power_factors[num_pf])
     chroma.load_on()
 
-    while(1):
-        if previous_power != num_power:
-            print(measurements[previous_pf, previous_power])
-            print(powers[previous_power], power_factors[previous_pf])
-            print(actual_powers[previous_power], actual_pfs[previous_pf])
+    time.sleep(4)
+    scanner.start()
 
-            previous_power = num_power
-            print("\nSetting power to", powers[num_power])
-            chroma.set_power(powers[num_power])
-            scanner.stop()
+    while(1):
+        if len(measurement_list) >= tot_measure:
+            #scanner.stop()
             scanner.clear()
-            time.sleep(2)
-            scanner.start()
-        if previous_pf != num_pf:
-            previous_pf = num_pf
-            print("\nSetting power factor to", power_factors[num_pf])
-            chroma.set_pf(power_factors[num_pf])
-            scanner.stop()
-            scanner.clear()
-            time.sleep(2)
-            scanner.start()
+
+            mean = np.mean(np.array(measurement_list), axis=0)
+            print('Mean:', mean)
+            measurements[num_pf, num_power] = mean
+            chroma.load_off()
+            exit()
 
         scanner.process()
