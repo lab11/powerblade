@@ -13,7 +13,7 @@ class Chroma63800:
         if mode == 'power':
             self.inst.write(':LOAD:MODE POW')
         elif mode == 'current':
-            self.inst.write(':LOAD:MODE POW')
+            self.inst.write(':LOAD:MODE CURR')
     def set_ipmax(self, ipmax):
         self.inst.write(':LOAD:CURR:PEAK:MAX ' + str(ipmax))
     def set_cfpf_mode(self, mode):
