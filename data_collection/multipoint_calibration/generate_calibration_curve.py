@@ -12,7 +12,7 @@ from chroma63800 import Chroma63800
 COMPANY_ID = 0x2e0
 
 num_measure = 0
-tot_measure = 3
+tot_measure = 5
 num_pf = 0
 num_power = 0
 last_seq_no = 0
@@ -82,8 +82,8 @@ class ScanDelegate(DefaultDelegate):
             struct.unpack(">BIHBBBHHIB", data)
 
             if seq_no == last_seq_no:
-                seq_no = last_seq_no
                 return
+            last_seq_no = seq_no
 
             if (version == 1):
                 volt_scale = vscale / 50
